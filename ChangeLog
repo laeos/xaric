@@ -1,7 +1,14 @@
-2001-Apr-21	Rex Feany	<laeos@laeos.net>
+2001-May-17	Rex Feany	<laeos@laeos.net>
+	* bump version to 0.11.6
+	* fixed problems in cmd_scan.c, funny.c where put_it was called
+	  directly on a user-inputed string. ... yes this is bad, because
+	  when you use UnrealIRCd and half-ops, nicks have %'s in them...
+	  whamo.
+	* Released 0.11.6
+
+2001-Apr-24	Rex Feany	<laeos@laeos.net>
 	* Added missing check to configure.in 
 	  (so we compile correctly now on some machines)
-
 	* Released 0.11.5
 
 2001-Feb-17	Rex Feany	<laeos@laeos.net>

@@ -1,4 +1,4 @@
-#ident "@(#)funny.c 1.7"
+#ident "@(#)funny.c 1.8"
 /*
  * funny.c: Well, I put some stuff here and called it funny.  So sue me. 
  *
@@ -233,7 +233,7 @@ print_funny_names (char *line)
 			malloc_strcat (&buffer, " ");
 			if (count++ == 4)
 			{
-				put_it (buffer);
+				put_it ("%s", buffer);
 				if (get_fset_var (FORMAT_NAMES_BANNER_FSET))
 					malloc_strcpy (&buffer, get_fset_var (FORMAT_NAMES_BANNER_FSET));
 				else
@@ -244,7 +244,7 @@ print_funny_names (char *line)
 		while ((t = next_arg (line, &line)));
 
 		if (buffer)
-			put_it (buffer);
+			put_it ("%s", buffer);
 		new_free (&buffer);
 	}
 }
@@ -298,12 +298,14 @@ funny_namreply (char *from, char **Args)
 		while ((nick = next_arg (lincopy, &lincopy)) != NULL)
 			switch (*nick)
 			{
+			case '%': /* unreal half-op */
 			case '@':
 				add_to_channel (channel, nick + 1, from_server, 1, 0, NULL, Args[3], Args[5]);
 				break;
 			case '+':
 				add_to_channel (channel, nick + 1, from_server, 0, 1, NULL, Args[3], Args[5]);
 				break;
+
 			default:
 				add_to_channel (channel, nick, from_server, 0, 0, NULL, Args[3], Args[5]);
 			}

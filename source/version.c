@@ -8,7 +8,7 @@
 #ifndef _VERSION_C_
 #define _VERSION_C_
 
-#define XVERSION 0x00B205
+#define XVERSION 0x00B206
 
 typedef struct {
     const int   v_hex;
@@ -32,13 +32,13 @@ extern xversion_t xversion;
 #undef  _VERSION_C_AS_HEADER_
 
 xversion_t xversion = {
-    0x00B205,
-    "0.11.5",
-    "0.11.5 (20-Apr-2001)",
-    "This is xaric, Version 0.11.5 (20-Apr-2001)",
-    "xaric 0.11.5 (20-Apr-2001)",
-    "xaric/0.11.5",
-    "@(#)xaric 0.11.5 (20-Apr-2001)",
+    0x00B206,
+    "0.11.6",
+    "0.11.6 (15-May-2001)",
+    "This is xaric, Version 0.11.6 (15-May-2001)",
+    "xaric 0.11.6 (15-May-2001)",
+    "xaric/0.11.6",
+    "@(#)xaric 0.11.6 (15-May-2001)",
     "$Id$"
 };
 

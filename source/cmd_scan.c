@@ -1,4 +1,4 @@
-#ident "@(#)cmd_scan.c 1.6"
+#ident "@(#)cmd_scan.c 1.7"
 /*
  * cmd_scan.c : the /scan command
  *
@@ -141,7 +141,7 @@ cmd_scan (struct command *cmd, char *args)
 				if (get_format (FORMAT_NAMES_BANNER_FSET))
 					put_it ("%s%s", convert_output_format (get_format (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
 				else
-					put_it (buffer);
+					put_it ("%s", buffer);
 				new_free (&buffer);
 				count = 0;
 			}
@@ -151,7 +151,7 @@ cmd_scan (struct command *cmd, char *args)
 			if (get_format (FORMAT_NAMES_BANNER_FSET))
 				put_it ("%s%s", convert_output_format (get_format (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
 			else
-				put_it (buffer);
+				put_it ("%s", buffer);
 		}
 		if (get_format (FORMAT_NAMES_FOOTER_FSET))
 			put_it ("%s", convert_output_format (get_format (FORMAT_NAMES_FOOTER_FSET), NULL, NULL));

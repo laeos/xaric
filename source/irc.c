@@ -1,4 +1,4 @@
-#ident "@(#)irc.c 1.21"
+#ident "@(#)irc.c 1.22"
 /*
  * Original from ircII: a new irc client.  I like it.  I hope you will too!
  * Written By Michael Sandrof
@@ -446,7 +446,7 @@ irc_exit (char *reason, char *formated)
 
 	do_hook (EXIT_LIST, "%s", reason);
 	close_server (-1, reason);
-	put_it (formated ? formated : reason);
+	put_it ("%s", formated ? formated : reason);
 	logger (curr_scr_win, NULL, 0);
 	if (get_int_var (MSGLOG_VAR))
 		log_toggle (0, NULL);

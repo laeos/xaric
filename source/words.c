@@ -9,6 +9,10 @@
  * beastieright file for beastie info.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "irc.h"
 #include "ircaux.h"
 

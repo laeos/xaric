@@ -1,6 +1,3 @@
-
-
-
 /*
  * notify.c: a few handy routines to notify you when people enter and leave irc 
  *
@@ -12,6 +9,9 @@
  * Rewritten Rex Feany '98
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 

@@ -23,6 +23,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include "irc.h"
 
@@ -2094,6 +2098,20 @@ cmd_whowas (struct command *cmd, char *args)
 	new_free (&stuff);
 }
 
+#ifdef HAVE_PERL_INTERP
+void perl_eval(char *);
+
+void
+cmd_eval (struct command *cmd, char *args)
+{
+	if (args && *args)
+		perl_eval(args);
+	else
+		userage (cmd->name, cmd->qhelp);
+}
+#endif
+
+
 
 /* 
  * Commands in other files
@@ -2140,6 +2158,7 @@ void cmd_ban (struct command *cmd, char *args);		/* in cmd_modes.c */
 void cmd_tban (struct command *cmd, char *args);	/* in cmd_modes.c */
 void cmd_banstat (struct command *cmd, char *args);	/* in cmd_modes.c */
 void cmd_bantype (struct command *cmd, char *args);	/* in cmd_modes.c */
+void cmd_orig_nick (struct command *cmd, char *args);	/* in cmd_orignick.c */
 
 
 struct command xaric_cmds[] =
@@ -2182,6 +2201,9 @@ struct command xaric_cmds[] =
 	{"DNS", NULL, NULL, cmd_nslookup, "%Y<%nnick|hostname%y>%n\n- Attempts to nslookup on nick or hostname"},
 	{"DOP", NULL, NULL, cmd_deop, "- See deop"},
 	{"ECHO", NULL, NULL, cmd_echo, NULL},
+#ifdef HAVE_PERL_INTERP
+	{"EVAL", NULL, NULL, cmd_eval, "- Run some perl code"},
+#endif
 	{"EXEC", NULL, NULL, cmd_exec, "%Y<%ncommand%Y>%n\n- Executes %Y<%ncommand%Y>%n with the shell set from %PSHELL%n"},
 	{"EXIT", NULL, NULL, cmd_quit, "- Quits IRC"},
 	{"FLUSH", NULL, NULL, cmd_flush, "- Flush ALL server output"},
@@ -2233,6 +2255,7 @@ struct command xaric_cmds[] =
 	{"NWHOWAS", NULL, NULL, cmd_nwhowas, "- Displays internal whowas info for all channels. This information expires after 20 minutes for users on internal list, 10 minutes for others"},
 	{"OP", NULL, NULL, cmd_op, "%Y<%Cnick%Y>%n\n- Gives %Y<%Cnick%Y>%n +o"},
 	{"OPER", NULL, NULL, cmd_oper, "%Y*%n Requires irc operator status\n%Y<%Cnick%Y>%n %R[%npassword%R]%n"},
+	{"ORIGNICK", NULL, NULL, cmd_orig_nick, "- Trys to regain old nick"},
 	{"PART", NULL, NULL, cmd_part, "- Leaves %Y<%nchannel%Y>%n"},
 	{"PARTALL", NULL, NULL, cmd_part, "- Leaves all channels"},
 	{"PING", "PING", NULL, cmd_ping, "- send a ping to some dumbass"},

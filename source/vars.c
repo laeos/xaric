@@ -9,6 +9,9 @@
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 
@@ -176,6 +179,7 @@ static IrcVariable irc_variable[] =
 	{"NUM_OF_WHOWAS", INT_TYPE_VAR, 4, NULL, NULL, 0, 0},
 	{"NUM_OPMODES", INT_TYPE_VAR, 3, NULL, NULL, 0, 0},
 	{"OPER_MODES", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
+	{"ORIGNICK_TIME", INT_TYPE_VAR, 10, NULL, NULL, 0, 0},
 	{"PAD_CHAR", CHAR_TYPE_VAR, DEFAULT_PAD_CHAR, NULL, NULL, 0, 0},
 	{"PUBFLOOD", BOOL_TYPE_VAR, DEFAULT_PUBFLOOD, NULL, NULL, 0, 0},
 	{"PUBFLOOD_TIME", INT_TYPE_VAR, DEFAULT_PUBFLOOD_TIME, NULL, NULL, 0, 0},

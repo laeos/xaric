@@ -13,6 +13,9 @@
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 #include "ircaux.h"

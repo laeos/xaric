@@ -11,6 +11,9 @@
  * Thanks to Tomi Ollila <f36664r@puukko.hut.fi> for this one. 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 

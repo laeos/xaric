@@ -13,8 +13,6 @@
 #ifndef __irc_std_h
 #define __irc_std_h
 
-#include "defs.h"
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif

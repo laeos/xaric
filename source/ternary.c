@@ -22,6 +22,9 @@
  *      * make insert more robust. (i.e. no insert-over-already-there)
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

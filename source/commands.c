@@ -10,6 +10,9 @@
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 
@@ -78,20 +81,6 @@ int load_depth = 0;
 /* Used to prevent global messaging */
 extern int doing_who;
 
-typedef struct WaitCmdstru
-{
-	char *stuff;
-	struct WaitCmdstru *next;
-}
-WaitCmd;
-
-static WaitCmd *start_wait_list = NULL, *end_wait_list = NULL;
-
-char lame_wait_nick[] = "#LW#";
-char wait_nick[] = "#W#";
-
-
-
 
 /*
  * irc_command: all the availble irc commands:  Note that the first entry has
@@ -107,130 +96,9 @@ static IrcCommand irc_command[] =
 	{"LOAD", "LOAD", load, 0, "filename\n- Loads filename as a irc script"},
 	{"ON", NULL, oncmd, 0, scripting_command},
 	{"SHOOK", "Shook", shook, 0, NULL},
-	{"WAIT", NULL, waitcmd, 0, scripting_command},
-	{"WHICH", "WHICH", load, 0, "- Shows which script would be loaded without loading it"},
 };
 #endif
 
-/*
-   This isnt a command, its used by the wait command.  Since its extern,
-   and it doesnt use anything static in this file, im sure it doesnt
-   belong here.
- */
-void 
-oh_my_wait (void)
-{
-	int w_server;
-
-	if ((w_server = from_server) == -1)
-		w_server = primary_server;
-
-	if (is_server_connected (w_server))
-	{
-		int old_in_on_who = in_on_who;
-		int old_doing_privmsg = doing_privmsg;
-		int old_doing_notice = doing_notice;
-		int old_in_ctcp_flag = in_ctcp_flag;
-		int old_from_server = from_server;
-
-		waiting_out++;
-		send_to_server ("%s", lame_wait_nick);
-		while (waiting_in < waiting_out)
-			io ("oh_my_wait");
-
-		in_on_who = old_in_on_who;
-		doing_privmsg = old_doing_privmsg;
-		doing_notice = old_doing_notice;
-		in_ctcp_flag = old_in_ctcp_flag;
-		from_server = old_from_server;
-	}
-}
-
-BUILT_IN_COMMAND (waitcmd)
-{
-	char *ctl_arg = next_arg (args, &args);
-
-	if (ctl_arg && !my_strnicmp (ctl_arg, "-c", 2))
-	{
-		WaitCmd *new;
-
-		new = (WaitCmd *) new_malloc (sizeof (WaitCmd));
-		new->stuff = m_strdup (args);
-		new->next = NULL;
-
-		if (end_wait_list)
-			end_wait_list->next = new;
-		end_wait_list = new;
-		if (!start_wait_list)
-			start_wait_list = new;
-		send_to_server ("%s", wait_nick);
-	}
-
-	else if (ctl_arg && !my_strnicmp (ctl_arg, "for", 3))
-	{
-		server_list[from_server].sent = 0;
-		parse_line (NULL, args, subargs, 0, 0);
-		if (server_list[from_server].sent)
-			oh_my_wait ();
-		server_list[from_server].sent = 0;	/* reset it again */
-	}
-
-	else if (ctl_arg && *ctl_arg == '%')
-	{
-		int w_index = get_process_index (&ctl_arg);
-
-		if (w_index != -1 && is_process_running (w_index))
-		{
-			if (args)
-			{
-				if (!my_strnicmp (args, "-cmd", 4))
-					next_arg (args, &args);
-				add_process_wait (w_index, args ? args : empty_string);
-			}
-			else
-			{
-				set_input (empty_string);
-				while (is_process_running (w_index))
-					io ("wait %proc");
-			}
-		}
-		else
-			say ("Not a valid process!");
-	}
-	else if (ctl_arg)
-		yell ("Unknown argument to /WAIT");
-	else
-	{
-		oh_my_wait ();
-		server_list[from_server].sent = 0;
-	}
-}
-
-int 
-check_wait_command (char *nick)
-{
-	if (waiting_out > waiting_in && !strcmp (nick, lame_wait_nick))
-	{
-		waiting_in++;
-		return 1;
-	}
-	if (start_wait_list && !strcmp (nick, wait_nick))
-	{
-		WaitCmd *old = start_wait_list;
-
-		start_wait_list = old->next;
-		if (old->stuff)
-		{
-			parse_line ("WAIT", old->stuff, empty_string, 0, 0);
-			new_free (&old->stuff);
-		}
-		if (end_wait_list == old)
-			end_wait_list = NULL;
-		new_free ((char **) &old);
-		return 1;
-	}
-	return 0;
-}
 
 struct target_type
 {
@@ -737,17 +605,7 @@ BUILT_IN_COMMAND (load)
 				new_free (&expanded);
 				return;
 			}
-			if (command && *command == 'W')
-			{
-				bitchsay ("%s", expanded);
-				if (fp)
-					fclose (fp);
-				status_update (1);
-				load_depth--;
-				new_free (&expanded);
-				return;
-			}
-/* Reformatted by jfn */
+		/* Reformatted by jfn */
 /* *_NOT_* attached, so dont "fix" it */
 			{
 				int in_comment = 0;

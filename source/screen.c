@@ -9,6 +9,9 @@
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 #include "commands.h"
@@ -82,7 +85,6 @@ static char display_bold (int flag);
 static char display_underline (int flag);
 static void display_color (long color1, long color2);
 
-
 /*
  * add_to_screen: This adds the given null terminated buffer to the screen.
  * That is, it determines which window the information should go to, which
@@ -93,6 +95,7 @@ void
 add_to_screen (unsigned char *buffer)
 {
 	Window *tmp = NULL;
+	int i = 0;
 
 	if (!get_int_var (DISPLAY_ANSI_VAR))
 		strcpy (buffer, stripansicodes (buffer));
@@ -108,7 +111,6 @@ add_to_screen (unsigned char *buffer)
 
 	if ((who_level == LOG_CURRENT) && (curr_scr_win->server == from_server))
 	{
-
 		add_to_window (curr_scr_win, buffer);
 		return;
 	}
@@ -144,6 +146,7 @@ add_to_screen (unsigned char *buffer)
 			   (*tmp->query_nick == '=' || *tmp->query_nick == '-') &&
 			   !my_stricmp (who_from, tmp->query_nick + 1))))
 			{
+
 				add_to_window (tmp, buffer);
 				return;
 			}
@@ -171,6 +174,7 @@ add_to_screen (unsigned char *buffer)
 		}
 	}
 	tmp = NULL;
+
 	while (traverse_all_windows (&tmp))
 	{
 		if (((from_server == tmp->server) || (from_server == -1)) &&
@@ -180,7 +184,7 @@ add_to_screen (unsigned char *buffer)
 			return;
 		}
 	}
-	if (from_server == curr_scr_win->server)
+	if (from_server == curr_scr_win->server || from_server == -1)
 		tmp = curr_scr_win;
 	else
 	{

@@ -11,6 +11,9 @@
  * see the copyright file, or do a help ircii copyright 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 #include "dcc.h"
@@ -699,10 +702,6 @@ numbered_command (char *from, int comm, char **ArgList)
 		break;
 
 	case 421:		/* #define ERR_UNKNOWNCOMMAND   421 */
-		if (check_wait_command (ArgList[0]))
-			break;
-		if (!strcmp (ArgList[0], "WAITFORNOTIFY"))
-			break;
 		PasteArgs (ArgList, 0);
 
 		if ((flag = do_hook (current_numeric, "%s %s", from, *ArgList)))

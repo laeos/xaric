@@ -1,7 +1,3 @@
-
-
-
-
 /*
  * network.c -- handles stuff dealing with connecting and name resolving
  *
@@ -9,6 +5,10 @@
  * See the COPYRIGHT file or do /help ircii copyright
  */
 #define SET_SOURCE_SOCKET
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 #include "ircaux.h"

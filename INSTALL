@@ -1,7 +1,9 @@
                       Xaric Installation Readme File
 
 
-Xaric is known to compile on the following systems (maybe others as well):
+Platforms
+---------
+
     * Linux
 
 
@@ -21,8 +23,8 @@ so I can not be sure it will compile on anything else.
 	Xaric is based on BitchX code, which is itself based on ircII. The goal
 of the Xaric writers is to clean out all the silly features, and fix all the
 annoying little problems. BitchX is a large client. Many of the features such as
-the userlists were removed because none of use ever used them. If you want your 
-irc client to do *everything* Xaric is not for you. 
+the userlists were removed because none of us ever used them. If you want your 
+irc client to do everything then Xaric is not for you. 
 
 Compiling Xaric
 ---------------
@@ -44,7 +46,7 @@ In order to compile this distribution you need to do the following:
      change it to (without the quotes): "LIBS= -lcrypt". Also see Machine
      Specific Instructions below.
 
-* 4) include/config.h may need tweeking if you intend to change the
+* 4) include/defaults.h may need tweeking if you intend to change the
      default server. To change, locate DEFAULT_SERVER and remove the
      original default servers and add as many as you please (These will
      be appended to the /usr/local/share/xaric/irc.servers and ~/.ircservers
@@ -61,16 +63,18 @@ In order to compile this distribution you need to do the following:
      'make install' to install xaric binary, it is required to change the
      installation path defined in step 4.
 
-   7) Xaric comes with no scripts right now. In the spirit of BitchX, I want
-      the most commen features people use scripts for to be compiled in.  
+  7) Xaric comes with no scripts right now. In the spirit of BitchX, I want
+     the most commen features people use scripts for to be compiled in.  
      
 
 Machine Specific Instructions:
+------------------------------
+(note, this was stolen from bitchx, so it may or may not still work.)
 
 	On some SunOS 4.1.4 systems, strtoul (an ANSI C function) is not
-properly detected as being missing. Editing include/defs.h by hand. This
+properly detected as being missing. Editing include/config.h by hand. This
 file is automatically created by configure each time configure is run so
-if you re-run configure you must edit include/defs.h again.
+if you re-run configure you must edit include/config.h again.
 
 Offending error:
 ld: Undefined symbol

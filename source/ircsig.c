@@ -7,6 +7,9 @@
  * in the unix environment' -mrg
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 #include "irc_std.h"

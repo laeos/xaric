@@ -7,6 +7,11 @@
  * See the COPYRIGHT file for more info
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 /* Function decls */
 static void TruncateAndQuote (char **, char *, int, char *, char);
 char *alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *args_flag);

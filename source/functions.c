@@ -8,6 +8,11 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 #include "irc.h"
 #include "alias.h"
 #include "dcc.h"

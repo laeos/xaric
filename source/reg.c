@@ -1,4 +1,3 @@
-
 /*
  * The original was spagetti. I have replaced Michael's code with some of
  * my own which is a thousand times more readable and can also handle '%',
@@ -15,6 +14,11 @@
  *
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 
 #include "irc.h"
 #include "ircaux.h"

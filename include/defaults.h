@@ -126,7 +126,7 @@
  * proper compilation.
  */
 
-#define DEFAULT_SIGNOFF_REASON "\002Xaric\002 -- Segmentation fault (core dumped)"
+#define DEFAULT_SIGNOFF_REASON "xaric... mmm perl..."
 #define DEFAULT_BANTYPE 2
 #define DEFAULT_SHOW_CTCP_IDLE 1
 #define DEFAULT_PING_TYPE 1
@@ -261,12 +261,6 @@
    in debugging Xaric problems */
 #define K_DEBUG 1
  
-
-#define HACKED_DCC_WARNING     /*
-				* gives a better warning for those weird 
-				* people who like to give us useful files
-				* like /dev/zero
-				*/
 
 #define EXEC_COMMAND
 

@@ -1,6 +1,9 @@
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "irc.h"
-#include "defs.h"
 #include "irc_std.h"
 #ifndef HAVE_SETENV
 /*

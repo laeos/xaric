@@ -1,6 +1,11 @@
 /* 
  *  Copyright Colten Edwards (c) 1996
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 #include <ctype.h>
 

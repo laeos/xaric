@@ -24,6 +24,9 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
 
@@ -46,9 +49,6 @@ cmd_who (struct command *cmd, char *args)
 {
 	char *arg, *channel = NULL;
 	int no_args = 1, len;
-
-	if (doing_who)
-		oh_my_wait ();
 
 	doing_who = 1;
 

@@ -1,3 +1,17 @@
+Fri Aug 06 12:59:04 1999 Rex Feany <laeos@ptw.com>
+
+	* Added /orignick, should work like the bitchx version
+	* added the beginings of a perl interpreter.
+	  right now, ./configure --enable-perlinterp turns it on.
+	  the /eval command works, and I got it to stop crashing
+	  all the time.
+
+Mon Jul 26 09:00:03 1999 Rex Feany <laeos@ptw.com>
+
+	* Redid the build process, fixed autoconf, automake, etc
+	* removed happy_crappy_hack, the novilty wore off about 10 min
+	  after it got added.. :)
+	
 Sat Oct 17 01:16:57 1998 Rex Feany <laeos@ptw.com>
 
 	* 0.9c released to the world.	

@@ -13,6 +13,10 @@
 
 #undef MONITOR_Q		/* this one is for monitoring of the 'whois queue' (debug) */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "irc.h"
 
 #include "whois.h"

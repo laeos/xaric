@@ -1,7 +1,7 @@
 #ifndef __irc_h__
 #define __irc_h__
 
-#include "config.h"
+#include "defaults.h"
 
 #define XARIC_COMMENT   "\002is there no end in sight?\002"
 
@@ -35,8 +35,7 @@ extern int	cx_line;
 
 #define is_channel(x)  ( (x) && ((*(x) == MULTI_CHANNEL) || (*(x) == LOCAL_CHANNEL)))
 
-#include "defs.h"
-#include "config.h"
+#include "defaults.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>

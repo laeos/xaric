@@ -1,12 +1,40 @@
-Todo list for Xaric
+TODO list for Xaric
 -------------------
 
+There are many features and problems in Xaric that need to be fix.
+Enough to make it attractive to rewrite it from scratch. But what
+fun would that be? 
 
-- Add scripting layer interface
-- Revamp windowing code
-- Redo notify code
-- fix the /info command? :)
-- redo everything else :)
+This file lists the things that need to be done, with some codes
+describing status, and who is working on it. 
 
 
+To report bugs you want fixed or features you want added please
+send an email message to laeos@ptw.com with your requests.
 
+
+Codes
+-----
+	someone should come up with some?
+	
+Who
+---
+	RGF	Rex Feany <laeos@ptw.com>
+
+Pri
+---
+	1 - 10  Where 1 is highest, 10 is lowest
+
+
+Code  Who  Pri  Description 
+----  ---  ---  ----------------------------------------------------------- 
+                Integrate perl interpreter for scripting
+                Rewrite notify code
+                Modulerize windowing code
+                Add /orignick
+                More then one server per window
+                Detachable like screen
+		Pop up X windows?
+		General cleanup, there is a lot of cruft that isnt used/broken
+		Fix DCC, its got problems accepting when both people
+		    sent dcc chat requests at the same time.

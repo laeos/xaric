@@ -1,4 +1,3 @@
-
 /*
  * timer.c -- handles timers in ircII
  * Copyright 1993, 1996 Matthew Green
@@ -10,6 +9,10 @@
  * any function to be called, so i pulled it all together into
  * this file and called it timer.c
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 #include "ircaux.h"

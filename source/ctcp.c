@@ -9,6 +9,9 @@
  * Serious cleanup by jfn (August 1996)
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "irc.h"
 
@@ -352,15 +355,6 @@ CTCP_HANDLER (do_userinfo)
 /* Yeah, this is now kind of mean. but. *smile* */
 CTCP_HANDLER (do_null)
 {
-#ifdef happy_crappy_hack
-	const char biteme[] = " Automatic Moron Ejection System(tm): Please, none of those lame CTCP's";
-	char frib[100+NICKNAME_LEN];
-	
-	strcpy(frib, from);
-	strcat(frib, biteme);
-
-	t_parse_command("KB", frib);
-#endif
 	return NULL;
 }
 

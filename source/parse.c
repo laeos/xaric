@@ -8,6 +8,10 @@
  * Modified Colten Edwards 1997
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "irc.h"
 
 #include "server.h"
@@ -596,7 +600,6 @@ p_quit (char *from, char **ArgList)
 	{
 		Reason = ArgList[0];
 		netsplit = check_split (from, Reason, chan);
-
 	}
 	else
 		Reason = "?";
@@ -609,6 +612,7 @@ p_quit (char *from, char **ArgList)
 			message_from (chan, LOG_CRAP);
 			if (do_hook (CHANNEL_SIGNOFF_LIST, "%s %s %s", chan, from, Reason))
 				one_prints = 1;
+			message_from(NULL, LOG_CURRENT);
 		}
 	}
 	if (one_prints)
@@ -617,11 +621,13 @@ p_quit (char *from, char **ArgList)
 
 		ignore = check_ignore (from, FromUserHost, chan, (netsplit ? IGNORE_SPLITS : IGNORE_QUITS) | IGNORE_ALL, NULL);
 
-/*              message_from(chan, LOG_CRAP); */
-
+		message_from(chan, LOG_CRAP); 
 		if ((ignore != IGNORED) && do_hook (SIGNOFF_LIST, "%s %s", from, Reason) && !netsplit)
 			put_it ("%s", convert_output_format (get_fset_var (FORMAT_CHANNEL_SIGNOFF_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, chan, Reason));
+		message_from(NULL, LOG_CURRENT);
 	}
+	if ( !netsplit )
+		check_orig_nick(from);
 	notify_mark (from, NULL, NULL, 0);
 	remove_from_channel (NULL, from, from_server, netsplit, Reason);
 	message_from (NULL, LOG_CRAP);

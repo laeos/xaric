@@ -2,6 +2,10 @@
  * Copyright Colten Edwards 1996
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "irc.h"
 #include <sys/stat.h>
 

@@ -8,6 +8,11 @@
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 #undef VERBOSE_KILL_MSG
 
 #define IN_EXEC_C
@@ -65,7 +70,6 @@ typedef struct
 	int termsig;		/* The signal that terminated
 				 * the process */
 	int retcode;		/* return code of process */
-	List *waitcmds;		/* commands queued by WAIT -CMD */
 }
 Process;
 
@@ -96,17 +100,6 @@ exec_close (int des)
 	if (FD_ISSET (des, &readables))
 		FD_CLR (des, &readables);
 	return (-1);
-}
-
-/*
- * set_wait_process: Sets the given index number so that it will be checked
- * for upon process exit.  This is used by waitcmd() in edit.c.  An index of
- * -1 disables this.
- */
-void 
-set_wait_process (int proccess)
-{
-	wait_index = proccess;
 }
 
 /*
@@ -420,19 +413,6 @@ list_processes (void)
 		say ("No processes are running");
 }
 
-void 
-add_process_wait (int proc_index, char *cmd)
-{
-	List *new, **posn;
-
-	for (posn = &process_list[proc_index]->waitcmds; *posn != NULL; posn = &(*posn)->next)
-		;
-	new = (List *) new_malloc (sizeof (List));
-	memset (new, 0, sizeof (List));
-	*posn = new;
-	malloc_strcpy (&new->name, cmd);
-}
-
 /*
  * delete_process: Removes the process specifed by index from the process
  * list.  The does not kill the process, close the descriptors, or any such
@@ -476,18 +456,6 @@ delete_process (int process)
 					process_list = NULL;
 				}
 			}
-			for (next = dead->waitcmds; next;)
-			{
-				cmd = next;
-				next = next->next;
-				parse_line (NULL, cmd->name, empty_string, 0, 0);
-				new_free (&cmd->name);
-				new_free (&dead->logical);
-				new_free (&dead->who);
-				new_free (&dead->redirect);
-				new_free ((char **) &cmd);
-			}
-			dead->waitcmds = NULL;
 			if (dead->logical)
 				flag = do_hook (EXEC_EXIT_LIST, "%s %d %d",
 						dead->logical, dead->termsig,
@@ -578,7 +546,6 @@ add_process (char *name, char *logical, int pid, int p_stdin, int p_stdout, int 
 	proc->termsig = 0;
 	proc->retcode = 0;
 	proc->who = NULL;
-	proc->waitcmds = NULL;
 	if (who)
 		malloc_strcpy (&(proc->who), who);
 	FD_SET (proc->p_stdout, &readables);

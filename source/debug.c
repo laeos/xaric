@@ -7,6 +7,10 @@
  * See the COPYRIGHT file for more information
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "irc.h"
 #include "ircaux.h"
 #include "output.h"

@@ -1,3 +1,5 @@
+/* include/config.h.in.  Generated automatically from configure.in by autoheader.  */
+
 /* Define if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
@@ -5,30 +7,14 @@
 #undef _ALL_SOURCE
 #endif
 
-/* Define if using alloca.c.  */
-#undef C_ALLOCA
-
-/* Define to one of _getb67, GETB67, getb67 for Cray-2 and Cray-YMP systems.
-   This function is required for alloca.c support on those systems.  */
-#undef CRAY_STACKSEG_END
-
 /* Define if the `getpgrp' function takes no argument.  */
 #undef GETPGRP_VOID
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef gid_t
 
-/* Define if you have alloca, as a function or macro.  */
-#undef HAVE_ALLOCA
-
-/* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
-#undef HAVE_ALLOCA_H
-
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef mode_t
-
-/* Define if your C compiler doesn't accept -c and -o together.  */
-#undef NO_MINUS_C_MINUS_O
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
@@ -42,15 +28,6 @@
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 #undef size_t
 
-/* If using the C implementation of alloca, define if you know the
-   direction of stack growth for your system; otherwise it will be
-   automatically deduced at run-time.
- STACK_DIRECTION > 0 => grows toward higher addresses
- STACK_DIRECTION < 0 => grows toward lower addresses
- STACK_DIRECTION = 0 => direction of growth unknown
- */
-#undef STACK_DIRECTION
-
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
@@ -63,85 +40,29 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
 
+#undef HAVE_FPATHCONF
+#undef HAVE_GETPASS
+#undef HAVE_GETPGID
+#undef HAVE_GETTIMEOFDAY
+#undef HAVE_KILLPG
+#undef HAVE_PTHREADS
+#undef HAVE_SETENV
+#undef HAVE_SNPRINTF
+#undef HAVE_STRERROR
+#undef HAVE_SUN_LEN
+#undef HAVE_SYSCONF
+#undef HAVE_UNAME
+#undef HAVE_VSNPRINTF
+#undef NEED_STRTOUL
+#undef NO_STRUCT_LINGER
+#undef SYS_ERRLIST_DECLARED
+#undef UNKNOWN_32INT
+#undef UNSIGNED_INT32
+#undef UNSIGNED_LONG32
+#undef USING_CURSES
 #undef PACKAGE
 #undef VERSION
-
-/* define if allow sys/time.h with time.h */
-#undef TIME_WITH_SYS_TIME
-
-/* Define this if you have fpathconf() */
-#undef HAVE_FPATHCONF
-
-/* Define this if you have SUN_LEN in <sys/un.h> */
-#undef HAVE_SUN_LEN
-
-/* Define this if your getpgrp is broken posix */
-#undef GETPGRP_VOID
-
-/* Define this if you have killpg() */
-#undef HAVE_KILLPG
-
-/* define this if you are using -lcurses */
-#undef USING_CURSES
-
-/* define this if you have setenv() */
-#undef HAVE_SETENV
-
-/* define this if you have getpgid() */
-#undef HAVE_GETPGID
-
-/* define this if you have snprintf() */
-#undef HAVE_SNPRINTF
-
-/* define this if you have vsnprintf() */
-#undef HAVE_VSNPRINTF
-
-/* define this if an unsigned long is 32 bits */
-#undef UNSIGNED_LONG32
-
-/* define this if an unsigned int is 32 bits */
-#undef UNSIGNED_INT32
-
-/* define this if you are unsure what is is 32 bits */
-#undef UNKNOWN_32INT
-
-/* define this if you don't have struct linger */
-#undef NO_STRUCT_LINGER
-
-/* define this if your header files declare sys_errlist */
-#undef SYS_ERRLIST_DECLARED
-
-/* define this if you have uname(2) */
-#undef HAVE_UNAME
-
-/* define this if you have strerror(3) */
-#undef HAVE_STRERROR
-
-/* define this if you have getpass */
-#undef HAVE_GETPASS
-
-/* define this if you have gettimeofday */
-#undef HAVE_GETTIMEOFDAY
-
-/* define this if you have sysconf */
-#undef HAVE_SYSCONF
-
-/* define this if you dont have strtoul */
-#undef NEED_STRTOUL
-
-/* define this if you have pthreads */
-#undef HAVE_PTHREADS
-
-/* Define this if compiling with SOCKS (the firewall traversal library).
-   Also, you must define connect, getsockname, bind, accept, listen, and
-   select to their R-versions. */
-#undef SOCKS
-#undef connect
-#undef getsockname
-#undef bind
-#undef accept
-#undef listen
-#undef select
+#undef HAVE_PERL_INTERP
 
 /* The number of bytes in a unsigned int.  */
 #undef SIZEOF_UNSIGNED_INT
@@ -199,4 +120,3 @@
 
 /* Define if you have the <termcap.h> header file.  */
 #undef HAVE_TERMCAP_H
-

@@ -8,6 +8,10 @@
  * see the copyright file, or do a help ircii copyright 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 
 #include "irc.h"
 

@@ -16,6 +16,13 @@
  */
 const char internal_version[] = "19971106";
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+const char irc_version[] = VERSION;
+char irc_lib[] = "/usr/local/share/xaric";
+
 #include "irc.h"
 
 #include <sys/types.h>
@@ -54,6 +61,10 @@ const char internal_version[] = "19971106";
 #include "whowas.h"
 #include "misc.h"
 #include "tcommand.h"
+
+#ifdef HAVE_PERL_INTERP
+void perl_init(void);
+#endif
 
 int irc_port = IRC_PORT,	/* port of ircd */
   strip_ansi_in_echo, current_on_hook = -1,	/* used in the send_text()
@@ -1089,6 +1100,10 @@ main (int argc, char *argv[], char *envp[])
 	display_name (-1);
 	if (bflag)
 		load_scripts ();
+
+#ifdef HAVE_PERL_INTERP
+	perl_init();
+#endif
 
 	get_connected (0);
 

@@ -9,6 +9,11 @@
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 #include "irc.h"
 #include "alias.h"
 #include "alist.h"
@@ -92,69 +97,6 @@ static AliasSet var_alias =
 static Alias *find_var_alias (char *name);
 
 
-/************************ LOW LEVEL INTERFACE *************************/
-
-/*
- * 'name' is expected to already be in canonical form (uppercase, dot notation)
- */
-static
-Alias *
-find_var_alias (char *name)
-{
-	Alias *item = NULL;
-	int cache;
-	int loc;
-	int cnt = 0;
-	int i;
-
-	if (!strcmp (name, "::"))
-		name += 2;
-
-	for (cache = 0; cache < ALIAS_CACHE_SIZE; cache++)
-	{
-		if (var_alias.cache[cache] &&
-		    var_alias.cache[cache]->name &&
-		    !strcmp (name, var_alias.cache[cache]->name))
-		{
-			item = var_alias.cache[cache];
-			cnt = -1;
-			break;
-		}
-	}
-
-	if (!item)
-	{
-		cache = ALIAS_CACHE_SIZE - 1;
-		item = (Alias *) find_array_item ((array *) & var_alias, name, &cnt, &loc);
-	}
-
-	if (cnt < 0)
-	{
-		for (i = cache; i > 0; i--)
-			var_alias.cache[i] = var_alias.cache[i - 1];
-		var_alias.cache[0] = item;
-		return item;
-	}
-
-	return NULL;
-}
-
-
-/************************* DIRECT VARIABLE EXPANSION ************************/
-/*
- * get_variable: This simply looks up the given str.  It first checks to see
- * if its a user variable and returns it if so.  If not, it checks to see if
- * it's an IRC variable and returns it if so.  If not, it checks to see if
- * its and environment variable and returns it if so.  If not, it returns
- * null.  It mallocs the returned string 
- */
-char *
-get_variable (char *str)
-{
-	int af = 0;
-	return get_variable_with_args (str, NULL, &af);
-}
-
 
 static char *
 get_variable_with_args (char *str, char *args, int *args_flag)
@@ -165,9 +107,7 @@ get_variable_with_args (char *str, char *args, int *args_flag)
 
 	name = remove_brackets (str, args, args_flag);
 
-	if ((alias = find_var_alias (name)) != NULL)
-		ret = alias->stuff;
-	else if ((strlen (str) == 1) && (ret = built_in_alias (*str)))
+	if ((strlen (str) == 1) && (ret = built_in_alias (*str)))
 	{
 		new_free (&name);
 		return ret;

@@ -9,11 +9,14 @@
  * Heavily modified Colten Edwards 1996-97
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "irc.h"
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <dirent.h>
 
 
 #include "ctcp.h"
@@ -900,68 +903,6 @@ dcc_filesend (char *command, char *args)
 		}
 	}
 
-	if (!strchr (FileBuf, '*') && access (FileBuf, R_OK))
-	{
-		put_it ("%s", convert_output_format ("$G %RDCC%n Cannot access: $0", "%s", FileBuf));
-		return;
-	}
-	else if (strchr (FileBuf, '*'))
-	{
-		char *path = NULL;
-		char *thefile;
-		DIR *dp;
-		struct dirent *dir;
-		struct stat stbuf;
-		char *filebuf = NULL;
-		char *expand = NULL;
-		int count = 0;
-		malloc_strcpy (&path, FileBuf);
-
-		if ((thefile = strrchr (path, '/')) != NULL)
-			*thefile++ = '\0';
-		else
-		{
-			malloc_strcpy (&path, "~");
-			thefile = FileBuf;
-		}
-		expand = expand_twiddle (path);
-
-		if ((dp = opendir (expand)) == NULL)
-		{
-			put_it ("%s", convert_output_format ("$G %RDCC%n Cannot access directory: $0", "%s", expand));
-			new_free (&expand);
-			new_free (&path);
-			return;
-		}
-
-		while (1)
-		{
-			dir = readdir (dp);
-			if (!dir)
-				break;
-			if (dir->d_ino == 0)
-				continue;
-			if (!match (thefile, dir->d_name))
-				continue;
-			malloc_sprintf (&filebuf, "%s/%s", expand, dir->d_name);
-			stat (filebuf, &stbuf);
-			if (S_ISDIR (stbuf.st_mode))
-				continue;
-			count++;
-			real_dcc_filesend (filebuf, dir->d_name, user, DCC_FILEOFFER, 0);
-		}
-		new_free (&filebuf);
-		if (!dcc_quiet)
-		{
-			if (count)
-				put_it ("%s", convert_output_format ("$G %RDCC%n Sent DCC SEND request to $0 for files $1", "%s %s", user, FileBuf));
-			else
-				put_it ("%s", convert_output_format ("$G %RDCC%n No Files found matching $0", "%s", FileBuf));
-		}
-		new_free (&path);
-		new_free (&expand);
-		return;
-	}
 	real_dcc_filesend (FileBuf, filename, user, DCC_FILEOFFER, portnum);
 }
 
@@ -1076,7 +1017,7 @@ dcc_regetfile (char *command, char *args)
 
 	if (0 == (user = next_arg (args, &args)))
 	{
-		put_it ("%s", convert_output_format ("$G %RDCC%n You must supply a nickname for DCC get", NULL, NULL));
+		put_it ("%s", convert_output_format ("$G %RDCC%n You must supply a nickname for DCC reget", NULL, NULL));
 		return;
 	}
 	filename = next_arg (args, &args);
@@ -1212,7 +1153,7 @@ register_dcc_offer (char *user, char *type, char *description, char *address, ch
 	}
 	if (userhost)
 		Client->userhost = m_strdup (userhost);
-#ifdef HACKED_DCC_WARNING
+
 	/* This right here compares the hostname from the userhost stamped
 	 * on the incoming privmsg to the address stamped in the handshake.
 	 * We do not automatically reject any discrepencies, but warn the
@@ -1259,7 +1200,7 @@ register_dcc_offer (char *user, char *type, char *description, char *address, ch
 			}
 		}
 	}
-#endif
+
 	if ((u_long) 0 == TempLong || 0 == Client->remport)
 	{
 		yell ("DCC handshake from %s ignored becuase it had an null port or address", user);
@@ -1384,6 +1325,7 @@ process_incoming_chat (DCC_list * Client)
 
 			Client->bytes_read += bytesread;
 			message_from (Client->user, LOG_DCC);
+			say("process, message from %s", Client->user);
 			malloc_strcpy (&buf, tmp);
 
 			{
@@ -1748,6 +1690,7 @@ dcc_message_transmit (char *user, char *text, char *text_display, int type, int 
 	}
 	lastlog_level = set_lastlog_msg_level (LOG_DCC);
 	message_from (Client->user, LOG_DCC);
+	say("user is %s", Client->user);
 #if 0
 	/*
 	 * Check for CTCPs... whee.

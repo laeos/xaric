@@ -1,4 +1,4 @@
-#ident "@(#)flood.c 1.5"
+#ident "@(#)flood.c 1.6"
 /*
  * flood.c: handle channel flooding. 
  *
@@ -17,7 +17,6 @@
 
 #include "irc.h"
 
-#include "alias.h"
 #include "hook.h"
 #include "ircaux.h"
 #include "ignore.h"

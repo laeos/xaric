@@ -96,8 +96,15 @@ extern	int	errno;
    
 #include <limits.h>
    
+
+
+/* signal handler stuff */
 typedef RETSIGTYPE sigfunc(int);
-sigfunc *my_signal(int, sigfunc *, int);
+sigfunc *my_signal(int, sigfunc *);
+
+extern volatile int cntl_c_hit;   /* ctl-c was pressed */
+extern volatile int got_sigchild; /* .. duh. got sigchild */
+
 
 #include <string.h>
 #include <stdlib.h>

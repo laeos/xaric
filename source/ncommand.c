@@ -53,7 +53,7 @@
 #include "keys.h"
 #include "alist.h"
 #include "names.h"
-#include "alias.h"
+#include "expr.h"
 #include "history.h"
 #include "funny.h"
 #include "ctcp.h"
@@ -1743,12 +1743,9 @@ cmd_ison (struct command *cmd, char *args)
 	add_ison_to_whois (args, ison_now);
 }
 
-extern void display_name (int);
-
 void
 cmd_info (struct command *cmd, char *args)
 {
-	display_name (0);
 	say ("We should say something really nice here. But i dont know what.");
 	send_to_server ("%s %s", cmd->name, args);
 }

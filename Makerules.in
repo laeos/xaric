@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)Makerules.in 1.8
+# @(#)Makerules.in 1.9
 #
 
 .DELETE_ON_ERROR:
@@ -60,13 +60,14 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_HELP = $(pkgdatadir)/help
 
 # Programs
-SHELL	:= @SHELL@
-CC 	:= @CC@
-CFLAGS 	:= @CFLAGS@ @DEFS@ -Iinclude 
-CPP 	:= @CPP@
-LDFLAGS := @LDFLAGS@
-LIBS	:= @LIBS@
-SED	:= sed
+SHELL	 := @SHELL@
+CC 	 := @CC@
+CFLAGS 	 := @CFLAGS@ @REP_CFLAGS@ @DEFS@ -Iinclude 
+CPP 	 := @CPP@
+LDFLAGS  := @LDFLAGS@
+LIBS	 := @LIBS@
+REP_LIBS := @REP_LIBS@
+SED	 := sed
 
 # Extra stuff we need to compile (referse to source files under extra/)
 EXTRA   := @EXTRA_SRC@ @ALLOCA@
@@ -95,7 +96,7 @@ O_OBJ += $(O_SRC:.c=.o)
 
 # Build xaric!
 xaric: Makerules $(AUTOHDR) $(O_OBJ)
-	$(CC) -o xaric $(CFLAGS) $(O_OBJ) $(LIBS)
+	$(CC) -o xaric $(CFLAGS) $(O_OBJ) $(LIBS) $(REP_LIBS)
 
 dep: $(O_SRC)
 	@touch $(AUTOHDR) # so it works ...

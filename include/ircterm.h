@@ -33,7 +33,7 @@ extern int putchar_x(int);
 #define	term_bold_on()			(tputs_x(MD))
 #define	term_bold_off()			(tputs_x(ME))
 
-extern	RETSIGTYPE term_cont 	(int);
+extern	void	term_continue 	(void);
 extern 	void 	term_beep 	(void);
 extern	int	term_echo 	(int);
 extern	int	term_init 	(void);
@@ -54,6 +54,7 @@ extern	void	term_reset 	(void);
 extern  void    copy_window_size (int *, int *);
 extern	int	term_eight_bit 	(void);
 extern	void	set_term_eight_bit (int);
+extern	void	set_flow_control (int);
 
 #endif /* _TERM_H_ */
 

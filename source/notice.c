@@ -257,10 +257,10 @@ load_scripts (void)
 extern void
 got_initial_version (char **ArgList)
 {
-	char *server, *sversion;
+	char *server, *version;
 
 	server = ArgList[0];
-	sversion = ArgList[1];
+	version = ArgList[1];
 
 	if (!strncmp (version, "2.8", 3))
 	{
@@ -278,7 +278,7 @@ got_initial_version (char **ArgList)
 	else
 		set_server_version (from_server, Server2_8);
 
-	malloc_strcpy (&server_list[from_server].version_string, sversion);
+	malloc_strcpy (&server_list[from_server].version_string, version);
 	set_server_itsname (from_server, server);
 	reconnect_all_channels (from_server);
 	message_from (NULL, LOG_CRAP);

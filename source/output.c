@@ -1,4 +1,4 @@
-#ident "@(#)output.c 1.6"
+#ident "@(#)output.c 1.8"
 /*
  * output.c: handles a variety of tasks dealing with the output from the irc
  * program 
@@ -170,7 +170,7 @@ bitchsay (const char *format,...)
 	if (window_display && format) {
 		va_list args;
 
-		len = snprintf (putbuf, LARGE_BIG_BUFFER_SIZE, "%s \002%s\002: ", line_thing, version);
+		len = snprintf (putbuf, LARGE_BIG_BUFFER_SIZE, "%s \002Xaric\002: ", line_thing);
 
 		va_start (args, format);
 		vsnprintf (&(putbuf[len]), LARGE_BIG_BUFFER_SIZE-len, format, args);
@@ -211,6 +211,32 @@ log_put_it (const char *topic, const char *format, ...)
 			put_echo (putbuf);
 		message_from (NULL, LOG_CRAP);
 	}
+}
+
+/**
+ * put_fmt_str - print a formatted string
+ * @fmtstr: format string to use
+ * @arg: printf-like format for arguments
+ *
+ * This should only be used for init.c stuff.
+ * Most formats should be in the format table.
+ **/
+void
+put_fmt_str (const char *fmtstr, const char *arg, ...)
+{
+	char str[BIG_BUFFER_SIZE];
+	va_list ma;
+
+	assert(fmtstr);
+
+	str[0] = '\0';
+	if (arg) {
+		va_start(ma, arg);
+		vsnprintf(str, BIG_BUFFER_SIZE, arg, ma);
+		va_end(ma);
+		str[BIG_BUFFER_SIZE-1] = '\0';
+	}
+	put_it("%s", convert_output_format(fmtstr, "%s", str));
 }
 
 /** 

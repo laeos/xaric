@@ -1,3 +1,47 @@
+
+2000-Dec-5 	Rex Feany	<laeos@laeos.net>
+
+	* Added lister.[ch]. Format and display arrays
+	  of things in a smart way. We calculate
+	  widths and display as many as we can on a page.
+	  Used sofar by the scandir stuff. Would be nice
+	  if it could page through data (if the user
+	  wanted).
+	* Added xscandir.c wrapper over scandir, we 
+	  print list of matching files if there is more
+	  then one. This is used by the help system.
+	  This also needed a few new formats to be added.
+	* Many cleanups in irc.c. Format fixes, removal of
+	  cruft. Usage has been changed but command line
+	  parser hasn't been redone yet.
+	* Rewrote cmd_help.c, now it behaves like
+	  the ircII help system (wow, full circle).
+	  The next step is.. help files!
+	* Replaced use_flow_control global with
+	  set_flow_control() in term.c
+
+2000-Nov-24 	Rex Feany	<laeos@laeos.net>
+
+	* configure now checks for librep, a lisp interpreter
+	  library. 
+	* Pulled out signal handlers from irc.c and moved
+	  them into signals.c. Also moved ircsig.c into
+	  signals.c. Also added bits of code to call
+	  the librep signal handlers when needed.
+	* Removed a bit of dead code from irc.c
+
+2000-Nov-13 	Rex Feany	<laeos@laeos.net>
+	
+	* Fix compile warnings
+
+2000-Nov-13 	Rex Feany	<laeos@laeos.net>
+
+	* Incremented version to 0.11.2
+	* Added warrenty and copying files to help/
+	* Integrated alias.c into expr.c. alias.c
+	  was #include'ing expr.c. This included
+	  creating an expr.h and getting rid of alias.h.
+
 2000-Nov-12 	Rex Feany	<laeos@laeos.net>
 
 	* Released Xaric 0.11.1

@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)whois.c 1.6"
 /*
  * whois.c: Some tricky routines for querying the server for information
  * about a nickname using WHOIS.... all the time hiding this from the user.  

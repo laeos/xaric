@@ -1,8 +1,9 @@
-#ifndef fset_h__
-#define fset_h__
+#ifndef expr_h__
+#define expr_h__
 /*
- * fset.h - mmm format set def'ns and stuff.
- *
+ * expr.h - header file for expr.c, expression handling
+ * Copyright (C) 2000 Rex Feany <laeos@laeos.net>
+ * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,28 +22,10 @@
  *
  */
 
-#include "tcommand.h"
+char *expand_alias(char *string, char *args, int *args_flag, char **more_text);
+char *alias_special_char(char **buffer, char *ptr, char *args, char *quote_em, int *args_flag);
+char *my_next_expr(char **args, char type, int whine);
+char *next_expr_failok(char **args, char type);
+char *next_expr(char **args, char type);
 
-/*
- * All of the formats. Index into array in xformats.c so be careful!
- */
-
-typedef enum
-{
-
-/* these are automagicly generated from fset.c by the Makefile. */
-#include "fset_gen.h" 
-
-	NUMBER_OF_FSET
-} xformat;
-
-#define get_fset_var	get_format
-
-const char *get_format(xformat which);
-unsigned int get_format_len(xformat which);
-int save_formats(FILE *outfile);
-char *get_format_byname(const char *name);
-void cmd_freset(struct command *cmd, char *args);
-void cmd_fset(struct command *cmd, char *args);
-
-#endif /* fset_h__ */
+#endif /* expr_h__ */

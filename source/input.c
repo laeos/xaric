@@ -16,7 +16,7 @@
 
 #include "irc.h"
 
-#include "alias.h"
+#include "expr.h"
 #include "commands.h"
 #include "exec.h"
 #include "history.h"

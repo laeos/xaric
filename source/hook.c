@@ -17,7 +17,7 @@
 #include "hook.h"
 #include "vars.h"
 #include "ircaux.h"
-#include "alias.h"
+#include "expr.h"
 #include "list.h"
 #include "window.h"
 #include "server.h"

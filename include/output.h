@@ -30,6 +30,8 @@
 	void	put_file(char *);
 
 	void	put_fmt (xformat, const char *, ...);
+	void	put_fmt_str (const char *fmtstr, const char *arg, ...);
+
 	void	log_put_it (const char *topic, const char *format, ...);
 	void	charset_ibmpc(void);
 	void	charset_lat1(void);

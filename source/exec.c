@@ -1,4 +1,4 @@
-#ident "@(#)exec.c 1.5"
+#ident "@(#)exec.c 1.7"
 /*
  * exec.c: handles exec'd process for IRCII 
  *
@@ -76,7 +76,6 @@ Process;
 
 static Process **process_list = NULL;
 static int process_list_size = 0;
-static int wait_index = -1;
 
 /*
  * A nice array of the possible signals.  Used by the coredump trapping
@@ -424,7 +423,6 @@ static int
 delete_process (int process)
 {
 	int flag;
-	List *cmd, *next;
 
 	if (process_list)
 	{
@@ -660,10 +658,10 @@ start_process (char *name, char *logical, char *redirect, char *who, unsigned in
 			close_all_dcc ();
 			close_all_exec ();
 			close_all_screen ();
-			my_signal (SIGINT, (sigfunc *) SIG_IGN, 0);
-			my_signal (SIGQUIT, (sigfunc *) SIG_DFL, 0);
-			my_signal (SIGSEGV, (sigfunc *) SIG_DFL, 0);
-			my_signal (SIGBUS, (sigfunc *) SIG_DFL, 0);
+			my_signal (SIGINT, (sigfunc *) SIG_IGN);
+			my_signal (SIGQUIT, (sigfunc *) SIG_DFL);
+			my_signal (SIGSEGV, (sigfunc *) SIG_DFL);
+			my_signal (SIGBUS, (sigfunc *) SIG_DFL);
 			dup2 (p0[0], 0);	/* stdin */
 			dup2 (p1[1], 1);	/* stdout */
 			dup2 (p2[1], 2);	/* stderr */

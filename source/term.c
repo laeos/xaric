@@ -67,6 +67,10 @@ int CO = 79, LI = 24, SG;
  * the calling program work out what to do 
  */
 int need_redraw = 0;
+
+/* true: ^Q/^S used for flow control */
+static int use_flow_control = USE_FLOW_CONTROL; 
+
 static int term_echo_flag = 1;
 static int li;
 static int co;
@@ -186,11 +190,11 @@ term_reset (void)
 }
 
 /*
- * term_cont: sets the terminal back to IRCII stuff when it is restarted
- * after a SIGSTOP.  Somewhere, this must be used in a signal() call 
+ * term_continue: sets the terminal back to IRCII stuff when it is restarted
+ * after a SIGSTOP.
  */
-RETSIGTYPE 
-term_cont (int unused)
+void
+term_continue (void)
 {
 	need_redraw = 1;
 	tcsetattr (tty_des, TCSADRAIN, &newb);
@@ -578,6 +582,28 @@ term_beep (void)
 		tputs_x (BL);
 		fflush (current_screen ? current_screen->fpout : stdout);
 	}
+}
+
+/**
+ * set_flow_control - turn on, off, or toggle flow control
+ * @value: ON, OFF, TOGGLE.
+ *
+ * Tell the terminal driver to use or not use flow control.
+ **/
+extern void
+set_flow_control (int value)
+{
+	if (value == TOGGLE)
+		value = !use_flow_control;
+
+	if (value == ON) {
+		use_flow_control = 1;
+		newb.c_iflag |= IXON;
+	} else {
+		use_flow_control = 0;
+		newb.c_iflag &= ~IXON;
+	}
+	tcsetattr(tty_des, TCSADRAIN, &newb);
 }
 
 extern void 

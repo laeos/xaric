@@ -1524,6 +1524,35 @@ charcount (char *string, char what)
 	return x;
 }
 
+/* Given a string, remove stuff at the end */
+/**
+ * str_terminate_at - terminate string at chars
+ * @string: string to terminate
+ * @chars: what characters we terminate at
+ *
+ * Terminate the string at the last occurence of any
+ * of the characters in chars.
+ *
+ * For example, terminating on "\r\n" will remove 
+ * those characters from the end of the string.
+ **/
+char *
+str_terminate_at (char *string, const char *chars) 
+{
+	char *ptr;
+
+	assert(string);
+	assert(chars);
+
+	while (*chars) {
+		if ((ptr = strrchr(string, *chars)) != NULL)
+			*ptr = '\0';
+		chars++;
+	}
+	return string;
+}
+
+
 #ifdef HAVE_PTHREADS
 #include <pthread.h>
 /*------------------

@@ -1,4 +1,4 @@
-#ident "@(#)functions.c 1.9"
+#ident "@(#)functions.c 1.12"
 /*
  * functions.c -- Built-in functions for ircII
  *
@@ -14,7 +14,6 @@
 
 
 #include "irc.h"
-#include "alias.h"
 #include "dcc.h"
 #include "commands.h"
 #include "history.h"
@@ -41,7 +40,6 @@
 
 #include <sys/stat.h>
 
-static char *alias_detected (void);
 static char *alias_sent_nick (void);
 static char *alias_recv_nick (void);
 static char *alias_msg_body (void);
@@ -69,7 +67,6 @@ static char *alias_show_realname (void);
 static char *alias_online (void);
 static char *alias_idle (void);
 static char *alias_version_str (void);
-static char *alias_version_str1 (void);
 static char *alias_line_thing (void);
 static char *alias_uptime (void);
 
@@ -91,7 +88,6 @@ static BuiltIns built_in[] =
 	{'A', alias_away},
 	{'B', alias_msg_body},
 	{'C', alias_channel},
-	{'D', alias_detected},
 	{'E', alias_idle},
 	{'F', alias_online},
 	{'G', alias_line_thing},
@@ -112,7 +108,6 @@ static BuiltIns built_in[] =
 	{'X', alias_show_userhost},
 	{'Y', alias_show_realname},
 	{'Z', alias_time},
-	{'a', alias_version_str1},
 	{0, NULL}
 };
 
@@ -137,11 +132,6 @@ built_in_alias (char c)
 
 /* built in expando functions */
 static char *
-alias_version_str1 (void)
-{
-	return m_strdup (version);
-}
-static char *
 alias_line (void)
 {
 	return m_strdup (get_input ());
@@ -160,11 +150,6 @@ static char *
 alias_dollar (void)
 {
 	return m_strdup ("$");
-}
-static char *
-alias_detected (void)
-{
-	return m_strdup (last_notify_nick);
 }
 static char *
 alias_nick (void)

@@ -1,26 +1,118 @@
+#ident "%W%"
 /*
+ * alias.c Handles command aliases for irc.c 
  * expr.c -- The expression mode parser and the textual mode parser
- * #included by alias.c -- DO NOT DELETE
  *
- * Copyright 1990 Michael Sandrof
+ * Copyright(c) 1990, 1995 Michael Sandroff and others 
  * Copyright 1997 EPIC Software Labs
- * See the COPYRIGHT file for more info
+ *
+ * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
+
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#include <stdio.h>
+#include <assert.h>
 
+
+#include "irc.h"
+#include "ircaux.h"
+#include "output.h"
+#include "fset.h"
+#include "vars.h"
+#include "expr.h"
+#include "history.h"
+#include "input.h"
 #include "debug.h"
+
+
+#define LEFT_BRACE '{'
+#define RIGHT_BRACE '}'
+#define LEFT_BRACKET '['
+#define RIGHT_BRACKET ']'
+#define LEFT_PAREN '('
+#define RIGHT_PAREN ')'
+#define DOUBLE_QUOTE '"'
+
+/* ick XXX */
+char *built_in_alias (char c);
+
+/* alias_illegals: characters that are illegal in alias names */
+static char alias_illegals[] = " #+-*/\\()={}[]<>!@$%^~`,?;:|'\"";
+
+/* ??? */
+static char *alias_string = NULL;
 
 /* Function decls */
 static void TruncateAndQuote (char **, char *, int, char *, char);
-char *alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *args_flag);
 static void do_alias_string (char, char *);
 
-char *alias_string = NULL;
 
+/* given a variable name, try to figure out its value */
+static char *
+get_variable_with_args (char *str, char *args, int *args_flag)
+{
+	char *ret = NULL;
+	char *name = NULL;
+
+	assert(str);
+
+	name = remove_brackets (str, args, args_flag);
+
+	if ((strlen (str) == 1) && (ret = built_in_alias (*str))) {
+		new_free (&name);
+		return ret;
+	}
+	else if ((ret = make_string_var (str)))
+		;
+	else if ((ret = get_format_byname (str)))
+		;
+	else
+		ret = getenv (str);
+
+	new_free (&name);
+	return m_strdup (ret);
+}
+
+/**
+ * TruncateAndQuote - String width formatting and quoting for irc variables.
+ * @buff:
+ * @add:
+ * @length:
+ * @quote_em:
+ * @pad_char:
+ * Description:
+ *   Handle formatting and quoting when [] or ^x is specified.
+ *   If length is nonzero, then "add" will be truncated to "length" characters.
+ *   If length is zero, nothing is done to "add". If quote_em is not NULL,
+ *   then the resulting string will be quoted and appended to "buff".
+ *   If quote_em is NULL, then the value of "add" is appended to "buff"
+ **/
+static void 
+TruncateAndQuote (char **buff, char *add, int length, char *quote_em, char pad_char)
+{
+	if (length) {
+		char *buffer = alloca (abs (length) + 1);
+		strformat (buffer, add, length, pad_char);
+		add = buffer;
+	}
+	if (quote_em) {
+		char *ptr = alloca (strlen (add) * 2 + 2);
+		add = double_quote (add, quote_em, ptr);
+	}
+
+	if (buff)
+		malloc_strcat (buff, add);
+}
+
+static void 
+do_alias_string (char unused, char *not_used)
+{
+	malloc_strcpy (&alias_string, get_input ());
+}
 
 /**************************** TEXT MODE PARSER *****************************/
 /*
@@ -55,15 +147,9 @@ expand_alias (char *string, char *args, int *args_flag, char **more_text)
 	}
 	quote_temp[1] = 0;
 
-#ifdef __GNUC__
-	stuff = alloca (strlen (string) + 1);
+	ptr = free_stuff = stuff = alloca (strlen (string) + 1);
 	strcpy (stuff, string);
-#else
-	malloc_strcpy (&stuff, string);
-#endif
-	free_stuff = stuff;
 
-	ptr = stuff;
 	if (more_text)
 		*more_text = NULL;
 
@@ -160,9 +246,6 @@ expand_alias (char *string, char *args, int *args_flag, char **more_text)
 	if (stuff)
 		m_strcat_ues (&buffer, stuff, unescape);
 
-#ifndef __GNUC__
-	new_free (&free_stuff);
-#endif
 	DEBUG(XD_EXPR, 5, "Expanded [%s] to [%s]", string, buffer);
 
 	return buffer;
@@ -186,9 +269,9 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 {
 	char *tmp, *tmp2, c, pad_char = 0;
 
-	int upper, lower, length;
+	int uppr, lowr, len;
 
-	length = 0;
+	len = 0;
 	if ((c = *ptr) == LEFT_BRACKET)
 	{
 		ptr++;
@@ -197,7 +280,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 			if (!isdigit (*(tmp - 1)))
 				pad_char = *(tmp - 1);
 			*(tmp++) = (char) 0;
-			length = my_atol (ptr);
+			len = my_atol (ptr);
 			ptr = tmp;
 			c = *ptr;
 		}
@@ -219,7 +302,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				*(ptr++) = (char) 0;
 			tmp = expand_alias (tmp, args, args_flag, NULL);
 			alias_special_char (&sub_buffer, tmp, args, quote_em, args_flag);
-			TruncateAndQuote (buffer, sub_buffer, length, quote_em, pad_char);
+			TruncateAndQuote (buffer, sub_buffer, len, quote_em, pad_char);
 			new_free (&sub_buffer);
 			new_free (&tmp);
 			*args_flag = 1;
@@ -231,7 +314,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				*(ptr++) = (char) 0;
 			if ((tmp = do_history (tmp, empty_string)) != NULL)
 			{
-				TruncateAndQuote (buffer, tmp, length, quote_em, pad_char);
+				TruncateAndQuote (buffer, tmp, len, quote_em, pad_char);
 				new_free (&tmp);
 			}
 			return (ptr);
@@ -242,13 +325,13 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				*(ptr++) = (char) 0;
 			alias_string = (char *) 0;
 			get_line (tmp, 0, do_alias_string);
-			TruncateAndQuote (buffer, alias_string, length, quote_em, pad_char);
+			TruncateAndQuote (buffer, alias_string, len, quote_em, pad_char);
 			new_free (&alias_string);
 			return (ptr);
 		}
 	case '*':
 		{
-			TruncateAndQuote (buffer, args, length, quote_em, pad_char);
+			TruncateAndQuote (buffer, args, len, quote_em, pad_char);
 			*args_flag = 1;
 			return (ptr + 1);
 		}
@@ -276,7 +359,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 			else
 				val = m_strdup (ltoa (strlen (sub_buffer)));
 
-			TruncateAndQuote (buffer, val, length, quote_em, pad_char);
+			TruncateAndQuote (buffer, val, len, quote_em, pad_char);
 			new_free (&val);
 			new_free (&sub_buffer);
 
@@ -296,7 +379,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				if (c == '~')
 				{
 					/* double check to make sure $~ still works */
-					lower = upper = EOS;
+					lowr = uppr = EOS;
 					ptr++;
 				}
 				else if (c == '-')
@@ -307,24 +390,24 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 					 * stripped spaces on $-0, which is
 					 * not correct.
 					 */
-					lower = SOS;
+					lowr = SOS;
 					ptr++;
-					upper = parse_number (&ptr);
-					if (upper == -1)
+					uppr = parse_number (&ptr);
+					if (uppr == -1)
 						return empty_string;	/* error */
 				}
 				else
 				{
-					lower = parse_number (&ptr);
+					lowr = parse_number (&ptr);
 					if (*ptr == '-')
 					{
 						ptr++;
-						upper = parse_number (&ptr);
-						if (upper == -1)
-							upper = EOS;
+						uppr = parse_number (&ptr);
+						if (uppr == -1)
+							uppr = EOS;
 					}
 					else
-						upper = lower;
+						uppr = lowr;
 				}
 
 				/*
@@ -339,15 +422,15 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				if (!args)
 					tmp2 = m_strdup (empty_string);
 				else
-					tmp2 = extract2 (args, lower, upper);
+					tmp2 = extract2 (args, lowr, uppr);
 
-				TruncateAndQuote (buffer, tmp2, length, quote_em, pad_char);
+				TruncateAndQuote (buffer, tmp2, len, quote_em, pad_char);
 				new_free (&tmp2);
 				return (ptr ? ptr : empty_string);
 			}
 			else
 			{
-				char *rest, c = (char) 0;
+				char *rest, lch = (char) 0;
 				int function_call = 0;
 
 				/*
@@ -363,7 +446,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				if (*ptr == '$')
 				{
 					rest = ptr + 1;
-					c = *rest;
+					lch = *rest;
 					*rest = (char) 0;
 				}
 
@@ -401,7 +484,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 							tmp = saver;
 						}
 					}
-					c = *rest;
+					lch = *rest;
 					*rest = (char) 0;
 				}
 
@@ -409,12 +492,12 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 
 				if (tmp)
 				{
-					TruncateAndQuote (buffer, tmp, length, quote_em, pad_char);
+					TruncateAndQuote (buffer, tmp, len, quote_em, pad_char);
 					new_free (&tmp);
 				}
 
 				if (rest)
-					*rest = c;
+					*rest = lch;
 				return (rest);
 			}
 		}
@@ -422,52 +505,15 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 	return NULL;
 }
 
-/*
- * TruncateAndQuote: This handles string width formatting and quoting for irc 
- * variables when [] or ^x is specified.  
- */
-static void 
-TruncateAndQuote (char **buff, char *add, int length, char *quote_em, char pad_char)
-{
-	/* 
-	 * Semantics:
-	 *      If length is nonzero, then "add" will be truncated
-	 *      to "length" characters
-	 *      If length is zero, nothing is done to "add"
-	 *      If quote_em is not NULL, then the resulting string
-	 *      will be quoted and appended to "buff"
-	 *      If quote_em is NULL, then the value of "add" is
-	 *      appended to "buff"
-	 */
-	if (length)
-	{
-		char *buffer = NULL;
-		buffer = alloca (abs (length) + 1);
-		strformat (buffer, add, length, pad_char);
-		add = buffer;
-	}
-	if (quote_em)
-	{
-		char *ptr = alloca (strlen (add) * 2 + 2);
-		add = double_quote (add, quote_em, ptr);
-	}
-
-	if (buff)
-		malloc_strcat (buff, add);
-
-	return;
-}
-
-static void 
-do_alias_string (char unused, char *not_used)
-{
-	malloc_strcpy (&alias_string, get_input ());
-}
-
-/*
- * next_expr finds the next expression delimited by brackets. The type
- * of bracket expected is passed as a parameter. Returns NULL on error.
- */
+/**
+ * my_next_expr  - Find the next expression delimited by brackets.
+ * @args: String to find expression in.
+ * @type: Bracket type to use.
+ * @whine: If true, yell when there is an error.
+ *
+ * The type of bracket expected is passed as a parameter. 
+ * Returns NULL on error.
+ **/
 char *
 my_next_expr (char **args, char type, int whine)
 {

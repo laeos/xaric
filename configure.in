@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)configure.in 1.4
+# @(#)configure.in 1.6
 #
 
 dnl ---------------------------------------------------------------
@@ -287,6 +287,11 @@ AC_CHECK_LIB(dgc, inet_addr, LIBS="$LIBS -ldgc",)
 AC_CHECK_LIB(resolv, gethostbyname, LIBS="$LIBS -lresolv",)
 AC_CHECK_LIB(gnumalloc, malloc, LIBS="$LIBS -lgnumalloc",
 AC_CHECK_LIB(bsdmalloc, malloc, LIBS="$LIBS -lbsdmalloc",))
+
+dnl not yet!
+dnl AC_PATH_REP(0.13)
+AC_SUBST(REP_CFLAGS)
+AC_SUBST(REP_LIBS)
 
 dnl ----------------------------------------------------------
 dnl termcap or curses

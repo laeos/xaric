@@ -118,7 +118,7 @@
 
 
 /* The default help file to use */ 
-#define DEFAULT_HELP_FILE XARIC_DATA_PATH "/xaric.help"
+#define DEFAULT_HELP_PATH XARIC_DATA_PATH "/help"
 
 /*
  * Below are the IRCII variable defaults.  For boolean variables, use 1 for
@@ -259,6 +259,9 @@
 
 /* File in home directory to contain specific stuff */
 #define IRCRC_NAME ".ircrc"
+
+/* File in home directory that has your list of servers */
+#define IRCSERVERS_NAME ".ircservers"
 
 #define EXEC_COMMAND
 

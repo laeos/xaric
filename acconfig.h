@@ -82,3 +82,6 @@
 /* define if you have getnameinfo() */
 #undef HAVE_GETNAMEINFO
 
+/* define if you have the rep lisp library */
+#undef HAVE_REP
+

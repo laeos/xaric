@@ -202,7 +202,7 @@ static int
 trace_oper (char *from, char **ArgList)
 {
 	char *rest = PasteArgs (ArgList, 0);
-	put_it ("%s", convert_output_format (get_fset_var (FORMAT_TRACE_OPER_FSET), "%s %s", from, rest));
+	put_it ("%s", convert_output_format (get_format (FORMAT_TRACE_OPER_FSET), "%s %s", from, rest));
 	return 0;
 }
 
@@ -210,7 +210,7 @@ static int
 trace_server (char *from, char **ArgList)
 {
 	char *rest = PasteArgs (ArgList, 0);
-	put_it ("%s", convert_output_format (get_fset_var (FORMAT_TRACE_SERVER_FSET), "%s %s", from, rest));
+	put_it ("%s", convert_output_format (get_format (FORMAT_TRACE_SERVER_FSET), "%s %s", from, rest));
 	return 0;
 }
 
@@ -218,7 +218,7 @@ static int
 trace_user (char *from, char **ArgList)
 {
 	char *rest = PasteArgs (ArgList, 0);
-	put_it ("%s", convert_output_format (get_fset_var (FORMAT_TRACE_USER_FSET), "%s %s", from, rest));
+	put_it ("%s", convert_output_format (get_format (FORMAT_TRACE_USER_FSET), "%s %s", from, rest));
 	return 0;
 }
 
@@ -233,7 +233,7 @@ check_server_sync (char *from, char **ArgList)
 		{
 			malloc_strcpy (&desync, from);
 			if (do_hook (DESYNC_MESSAGE_LIST, "%s %s", from, ArgList[0]))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DESYNC_FSET), "%s %s %s", update_clock (GET_TIME), ArgList[0], from));
+				put_it ("%s", convert_output_format (get_format (FORMAT_DESYNC_FSET), "%s %s %s", update_clock (GET_TIME), ArgList[0], from));
 			return 1;
 		}
 	}
@@ -284,12 +284,12 @@ channel_topic (char *from, char **ArgList, int what)
 		topic = ArgList[1];
 		message_from (channel, LOG_CRAP);
 		if (what == 333 && ArgList[2])
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_TOPIC_SETBY_FSET), "%s %s %s %l", update_clock (GET_TIME), channel, topic, strtoul (ArgList[2], NULL, 10)));
+			put_it ("%s", convert_output_format (get_format (FORMAT_TOPIC_SETBY_FSET), "%s %s %s %l", update_clock (GET_TIME), channel, topic, strtoul (ArgList[2], NULL, 10)));
 		else if (what != 333)
 		{
 			if ((chan = lookup_channel (channel, from_server, 0)))
 				malloc_strcpy (&chan->topic, topic);
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_TOPIC_FSET), "%s %s %s", update_clock (GET_TIME), channel, topic));
+			put_it ("%s", convert_output_format (get_format (FORMAT_TOPIC_FSET), "%s %s %s", update_clock (GET_TIME), channel, topic));
 
 		}
 	}
@@ -297,7 +297,7 @@ channel_topic (char *from, char **ArgList, int what)
 	{
 		PasteArgs (ArgList, 0);
 		message_from (NULL, LOG_CURRENT);
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_TOPIC_FSET), "%s %s", update_clock (GET_TIME), ArgList[0]));
+		put_it ("%s", convert_output_format (get_format (FORMAT_TOPIC_FSET), "%s %s", update_clock (GET_TIME), ArgList[0]));
 	}
 }
 
@@ -314,7 +314,7 @@ not_valid_channel (char *from, char **ArgList)
 	if (0 == my_strnicmp (s, from, strlen (s)))
 	{
 		remove_channel (channel, from_server);
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_SERVER_MSG2_FSET), "%s %s %s", update_clock (GET_TIME), channel, ArgList[1]));
+		put_it ("%s", convert_output_format (get_format (FORMAT_SERVER_MSG2_FSET), "%s %s %s", update_clock (GET_TIME), channel, ArgList[1]));
 	}
 }
 
@@ -330,7 +330,7 @@ static void
 cannot_join_channel (char *from, char **ArgList)
 {
 	char buffer[BIG_BUFFER_SIZE + 1];
-	char *f = NULL;
+	const char *f = NULL;
 	char *chan;
 
 	if (ArgList[0])
@@ -354,23 +354,23 @@ cannot_join_channel (char *from, char **ArgList)
 		break;
 	case 471:
 		strcat (buffer, " (Channel is full)");
-		f = get_fset_var (FORMAT_471_FSET);
+		f = get_format (FORMAT_471_FSET);
 		break;
 	case 473:
 		strcat (buffer, " (You must be invited)");
-		f = get_fset_var (FORMAT_473_FSET);
+		f = get_format (FORMAT_473_FSET);
 		break;
 	case 474:
 		strcat (buffer, " (You are banned)");
-		f = get_fset_var (FORMAT_474_FSET);
+		f = get_format (FORMAT_474_FSET);
 		break;
 	case 475:
 		strcat (buffer, " (Bad channel key)");
-		f = get_fset_var (FORMAT_475_FSET);
+		f = get_format (FORMAT_475_FSET);
 		break;
 	case 476:
 		strcat (buffer, " (Bad channel mask)");
-		f = get_fset_var (FORMAT_476_FSET);
+		f = get_format (FORMAT_476_FSET);
 		break;
 	default:
 		return;
@@ -381,7 +381,7 @@ cannot_join_channel (char *from, char **ArgList)
 		put_it ("%s %s", numeric_banner (), buffer);
 }
 
-int 
+static int 
 handle_server_ping (int comm, char *from, char **ArgList)
 {
 #ifdef HAVE_GETTIMEOFDAY
@@ -421,7 +421,7 @@ handle_server_ping (int comm, char *from, char **ArgList)
 	return 1;
 }
 
-int 
+static int 
 handle_server_stats (char *from, char **ArgList, int comm)
 {
 	static int norm = 0, invisible = 0, servers = 0, ircops = 0, unknown = 0,
@@ -503,7 +503,7 @@ handle_server_stats (char *from, char **ArgList, int comm)
 	return ret;
 }
 
-void 
+static void 
 whohas_nick (WhoisStuff * stuff, char *nick, char *args)
 {
 	if (!stuff || !stuff->nick || !nick || !strcmp (stuff->user, "<UNKNOWN>"))
@@ -656,7 +656,7 @@ numbered_command (char *from, int comm, char **ArgList)
 		{
 			message_from (ArgList[1], LOG_CRAP);
 			if (do_hook (current_numeric, "%s %s %s", from, ArgList[0], ArgList[1]))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_INVITE_USER_FSET), "%s %s %s", update_clock (GET_TIME), ArgList[0], ArgList[1]));
+				put_it ("%s", convert_output_format (get_format (FORMAT_INVITE_USER_FSET), "%s %s %s", update_clock (GET_TIME), ArgList[0], ArgList[1]));
 		}
 		break;
 
@@ -670,12 +670,12 @@ numbered_command (char *from, int comm, char **ArgList)
 
 	case 366:		/* #define RPL_ENDOFNAMES       366 */
 		{
-			int flag = 1;
+			int need_display = 1;
 			char *tmp = NULL, *chan;
 			PasteArgs (ArgList, 1);
 			message_from (ArgList[0], LOG_CURRENT);
 			if (get_int_var (SHOW_END_OF_MSGS_VAR))
-				flag = do_hook (current_numeric, "%s %s %s", from, ArgList[0], ArgList[1]);
+				need_display = do_hook (current_numeric, "%s %s %s", from, ArgList[0], ArgList[1]);
 			message_from (NULL, LOG_CRAP);
 			malloc_strcpy (&tmp, ArgList[0]);
 			chan = strtok (tmp, " ");
@@ -684,7 +684,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			if (!in_join_list (chan, from_server))
 			{
 				PasteArgs (ArgList, 0);
-				if (get_int_var (SHOW_END_OF_MSGS_VAR) && flag)
+				if (get_int_var (SHOW_END_OF_MSGS_VAR) && need_display)
 					display_msg (from, ArgList);
 			}
 			else
@@ -699,10 +699,10 @@ numbered_command (char *from, int comm, char **ArgList)
 			say ("Odd Server stuff from %s: %s", from, ArgList[0]);
 		else if (do_hook (current_numeric, "%s %s", from, *ArgList))
 		{
-			if (get_fset_var (FORMAT_381_FSET))
+			if (get_format (FORMAT_381_FSET))
 				put_it ("%s",
 					convert_output_format (
-					     get_fset_var (FORMAT_381_FSET),
+					     get_format (FORMAT_381_FSET),
 								 "%s %s %s",
 				  update_clock (GET_TIME), from, *ArgList));
 			else
@@ -845,10 +845,10 @@ numbered_command (char *from, int comm, char **ArgList)
 			time_t tme = (time_t) strtoul (ArgList[3], NULL, 10);
 			if (do_hook (current_numeric, "%s %s %s %s %s",
 				     from, ArgList[0], ArgList[1], ArgList[2], ArgList[3]))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_BANS_FSET), "%d %s %s %s %l", number_of_bans, ArgList[0], ArgList[1], ArgList[2], tme));
+				put_it ("%s", convert_output_format (get_format (FORMAT_BANS_FSET), "%d %s %s %s %l", number_of_bans, ArgList[0], ArgList[1], ArgList[2], tme));
 		}
 		else if (do_hook (current_numeric, "%s %s %s", from, ArgList[0], ArgList[1]))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_BANS_FSET), "%d %s %s %s %l", number_of_bans, ArgList[0], ArgList[1], "unknown", time (NULL)));
+			put_it ("%s", convert_output_format (get_format (FORMAT_BANS_FSET), "%d %s %s %s %l", number_of_bans, ArgList[0], ArgList[1], "unknown", time (NULL)));
 		break;
 	case 368:		/* #define RPL_ENDOFBANLIST     368 */
 		{
@@ -889,9 +889,9 @@ numbered_command (char *from, int comm, char **ArgList)
 			}
 			if ((do_hook (current_numeric, "%s %s %s", ArgList[0], ArgList[1], ArgList[2])))
 			{
-				if (get_fset_var (FORMAT_LINKS_FSET))
+				if (get_format (FORMAT_LINKS_FSET))
 				{
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_LINKS_FSET), "%s %s %s", ArgList[0], ArgList[1], ArgList[2] ? ArgList[2] : "0"));
+					put_it ("%s", convert_output_format (get_format (FORMAT_LINKS_FSET), "%s %s %s", ArgList[0], ArgList[1], ArgList[2] ? ArgList[2] : "0"));
 					break;
 				}
 			}
@@ -1060,7 +1060,7 @@ numbered_command (char *from, int comm, char **ArgList)
 
 		case 272:	/* ENDOFSILENCE */
 			PasteArgs (ArgList, 0);
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SILENCE_FSET), update_clock (GET_TIME), ArgList[0]));
+			put_it ("%s", convert_output_format (get_format (FORMAT_SILENCE_FSET), update_clock (GET_TIME), ArgList[0]));
 			break;
 
 		case 329:	/* #define CREATION_TIME        329 */
@@ -1094,7 +1094,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			if (!handle_server_ping (comm, from, ArgList))
 			{
 				PasteArgs (ArgList, 2);
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_SERVER_FSET), "Server %s %s %s", ArgList[0], ArgList[1], ArgList[2]));
+				put_it ("%s", convert_output_format (get_format (FORMAT_SERVER_FSET), "Server %s %s %s", ArgList[0], ArgList[1], ArgList[2]));
 			}
 			break;
 

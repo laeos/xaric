@@ -13,7 +13,7 @@
 #endif
 
 #include "irc.h"
-#include "alias.h"
+#include "expr.h"
 #include "log.h"
 #include "misc.h"
 #include "vars.h"
@@ -37,7 +37,7 @@
  */
 /*#include <dmalloc.h> */
 
-#define alloc_start(ptr) ((ptr) - sizeof(void *) - sizeof(void *))
+#define alloc_start(ptr) (((char *)(ptr)) - sizeof(void *) - sizeof(void *))
 #define alloc_size(ptr) (*(int *)( alloc_start((ptr)) + sizeof(void *)))
 #define alloc_magic(ptr) (*(int *)( alloc_start((ptr)) ))
 

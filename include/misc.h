@@ -118,6 +118,8 @@ ChannelList *	prepare_command(int *, char *, int);
 	int	timer_unban(void *);
 	void	check_server_connect(int);
 	char	*country(char *);
+	char 	*str_terminate_at (char *string, const char *chars);
+
 
 	/* in cmd_modes.h */
 	void flush_mode_all (ChannelList * chan);

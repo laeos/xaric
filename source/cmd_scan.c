@@ -1,4 +1,4 @@
-#ident "@(#)cmd_scan.c 1.5"
+#ident "@(#)cmd_scan.c 1.6"
 /*
  * cmd_scan.c : the /scan command
  *
@@ -47,6 +47,7 @@
 void
 cmd_scan (struct command *cmd, char *args)
 {
+	const char *fmt;
 	int voice = 0, ops = 0, nops = 0, ircops = 0, all = 0;
 	char *channel = NULL;
 	ChannelList *chan;
@@ -104,41 +105,41 @@ cmd_scan (struct command *cmd, char *args)
 
 	snick = sorted_nicklist (chan);
 	if (voice)
-		s = get_fset_var (FORMAT_NAMES_VOICE_FSET);
+		fmt = get_format (FORMAT_NAMES_VOICE_FSET);
 	else if (ops)
-		s = get_fset_var (FORMAT_NAMES_OP_FSET);
+		fmt = get_format (FORMAT_NAMES_OP_FSET);
 	else if (ircops)
-		s = get_fset_var (FORMAT_NAMES_IRCOP_FSET);
+		fmt = get_format (FORMAT_NAMES_IRCOP_FSET);
 	else if (nops)
-		s = get_fset_var (FORMAT_NAMES_NONOP_FSET);
+		fmt = get_format (FORMAT_NAMES_NONOP_FSET);
 	else
-		s = get_fset_var (FORMAT_NAMES_FSET);
+		fmt = get_format (FORMAT_NAMES_FSET);
 
-	put_it ("%s", convert_output_format (s, "%s %s %d %s", update_clock (GET_TIME), chan->channel, count, space));
+	put_it ("%s", convert_output_format (fmt, "%s %s %d %s", update_clock (GET_TIME), chan->channel, count, space));
 	if (count)
 	{
 		count = 0;
 		for (nick = snick; nick; nick = nick->next)
 		{
 			if (all && (nick->chanop || nick->voice))
-				malloc_strcat (&buffer, convert_output_format (get_fset_var (nick->chanop ? FORMAT_NAMES_OPCOLOR_FSET : FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", nick->chanop ? '@' : '+', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_format (nick->chanop ? FORMAT_NAMES_OPCOLOR_FSET : FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", nick->chanop ? '@' : '+', nick->nick));
 			else if (all)
-				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_NICKCOLOR_FSET), "%c %s", '$', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_NICKCOLOR_FSET), "%c %s", '$', nick->nick));
 			else if (voice && nick->voice)
-				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", '+', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", '+', nick->nick));
 			else if (ops && nick->chanop)
-				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '@', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '@', nick->nick));
 			else if (nops && !nick->chanop)
-				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_NICKCOLOR_FSET), "%c %s", '$', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_NICKCOLOR_FSET), "%c %s", '$', nick->nick));
 			else if (ircops && nick->ircop)
-				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '*', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '*', nick->nick));
 			else
 				continue;
 			malloc_strcat (&buffer, space);
 			if (count++ == 4)
 			{
-				if (get_fset_var (FORMAT_NAMES_BANNER_FSET))
-					put_it ("%s%s", convert_output_format (get_fset_var (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
+				if (get_format (FORMAT_NAMES_BANNER_FSET))
+					put_it ("%s%s", convert_output_format (get_format (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
 				else
 					put_it (buffer);
 				new_free (&buffer);
@@ -147,13 +148,13 @@ cmd_scan (struct command *cmd, char *args)
 		}
 		if (count && buffer)
 		{
-			if (get_fset_var (FORMAT_NAMES_BANNER_FSET))
-				put_it ("%s%s", convert_output_format (get_fset_var (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
+			if (get_format (FORMAT_NAMES_BANNER_FSET))
+				put_it ("%s%s", convert_output_format (get_format (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
 			else
 				put_it (buffer);
 		}
-		if (get_fset_var (FORMAT_NAMES_FOOTER_FSET))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_NAMES_FOOTER_FSET), NULL, NULL));
+		if (get_format (FORMAT_NAMES_FOOTER_FSET))
+			put_it ("%s", convert_output_format (get_format (FORMAT_NAMES_FOOTER_FSET), NULL, NULL));
 		new_free (&buffer);
 	}
 	clear_sorted_nicklist (&snick);

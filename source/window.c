@@ -1482,23 +1482,22 @@ set_query_nick (char *nick, char *host, char *cmd)
 	}
 	if (curr_scr_win->query_nick)
 	{
-		char *nick;
-
-		nick = curr_scr_win->query_nick;
-/* next_in_comma_list() */
-		while (nick)
+		char *lnik = curr_scr_win->query_nick;
+		
+		/* next_in_comma_list() */
+		while (lnik)
 		{
 			if (!curr_scr_win->nicks)
 				continue;
-			if ((ptr = (char *) strchr (nick, ',')) != NULL)
+			if ((ptr = (char *) strchr (lnik, ',')) != NULL)
 				*(ptr++) = 0;
-			if ((tmp = (NickList *) remove_from_list ((List **) & (curr_scr_win->nicks), nick)) != NULL)
+			if ((tmp = (NickList *) remove_from_list ((List **) & (curr_scr_win->nicks), lnik)) != NULL)
 			{
 				new_free (&tmp->nick);
 				new_free (&tmp->host);	/* CDE why was this not done */
 				new_free ((char **) &tmp);
 			}
-			nick = ptr;
+			lnik = ptr;
 		}
 		new_free (&curr_scr_win->query_nick);
 		new_free (&curr_scr_win->query_host);

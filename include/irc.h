@@ -133,7 +133,6 @@ extern	char	*cut_buffer;
 extern	char	oper_command;
 extern	int	irc_port;
 extern	int	current_on_hook;
-extern	int	use_flow_control;
 extern	char	*joined_nick;
 extern	char	*public_nick;
 extern	char	empty_string[];
@@ -152,11 +151,9 @@ extern	char	hostname[];
 extern	char	realname[];
 extern	char	username[];
 extern	char	*send_umode;
-extern	char	*last_notify_nick;
 extern	int	away_set;
 extern	int	background;
 extern	char	*my_path;
-extern	char	*irc_path;
 extern	char	*args_str;
 extern	char	*invite_channel;
 extern	int	who_mask;
@@ -166,8 +163,6 @@ extern	char	*who_server;
 extern	char	*who_file;
 extern	char	*who_nick;
 extern	char	*who_real;
-extern	char	*cannot_open;
-extern	char	global_all_off[];
 extern	int	use_input;
 extern	time_t	idle_time;
 extern	int	waiting_out;
@@ -178,7 +173,6 @@ extern	char	lame_wait_nick[];
 extern	char	**environ;
 extern	int	current_numeric;
 extern	int	quick_startup;
-extern	const char	version[];
 extern 	fd_set	readables, writables;
 extern	int	strip_ansi_in_echo;
 
@@ -201,6 +195,9 @@ void free_formats(Window *);
 void load_scripts(void);
 void display_name(int j);
 
+/* signals.c */
+void signals_init (void);
+
 
 /* irc.c */
 void get_line_return(char unused, char *not_used);
@@ -210,6 +207,10 @@ void io(const char *what);
 void irc_exit(char *reason, char *formatted);
 
 char	*getenv(const char *);
+
+/* xscandir.c */
+int xscandir(char *dir, char *prefix, char **ret);
+
 
 
 #endif /* __irc_h__ */

@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)configure.in 1.7
+# @(#)configure.in 1.8
 #
 
 dnl ---------------------------------------------------------------
@@ -104,6 +104,8 @@ AC_HAVE_HEADERS(dnl
 	ctype.h errno.h sys/types.h sys/time.h sys/wait.h sys/socket.h dnl
 	dirent.h pwd.h sys/stat.h assert.h getopt.h netinet/in.h net/if.h dnl
 	netdb.h sys/ioctl.h)
+
+AC_HEADER_TIME
 
 AC_CHECK_FUNC(select, ,
   AC_CHECK_LIB(socket, select, LIBS="$LIBS -lsocket",

@@ -38,9 +38,6 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
 
-/* Define if you need to in order for stat and other things to work.  */
-#undef _POSIX_SOURCE
-
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
@@ -61,6 +58,9 @@
 
 /* Define if `sys_siglist' is declared by <signal.h>.  */
 #undef SYS_SIGLIST_DECLARED
+
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+#undef TIME_WITH_SYS_TIME
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t

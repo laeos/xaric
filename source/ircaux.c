@@ -1789,9 +1789,7 @@ vsnprintf (char *str, size_t size, const char *format, va_list ap)
 	int ret = vsprintf (str, format, ap);
 
 	/* If the string ended up overflowing, just give up. */
-	if (ret == str && strlen (str) > size)
-		ircpanic ("Buffer overflow in vsnprintf");
-	if (ret != str && ret > size)
+	if (strlen (str) > size)
 		ircpanic ("Buffer overflow in vsnprintf");
 
 	return ret;

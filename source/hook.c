@@ -327,7 +327,7 @@ add_hook (int which, char *nick, char *stuff, int noisy, int not, int server, in
 extern void 
 show_hook (Hook * list, char *name)
 {
-	char *hooks = get_fset_var (FORMAT_HOOK_FSET);
+	const char *hooks = get_fset_var (FORMAT_HOOK_FSET);
 	char *text = NULL;
 	if (list->stuff)
 		text = stripansi (list->stuff);

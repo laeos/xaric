@@ -1,4 +1,4 @@
-#ident "@(#)ctcp.c 1.10"
+#ident "@(#)ctcp.c 1.11"
 /*
  * ctcp.c:handles the client-to-client protocol(ctcp). 
  *
@@ -229,7 +229,7 @@ CTCP_HANDLER (do_atmosphere)
 	else
 	{
 		message_from (from, LOG_ACTION);
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_ACTION_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr1));
+		put_it ("%s", convert_output_format (get_fset_var (FORMAT_ACTION_PRIV_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr1));
 	}
 
 	message_from (NULL, LOG_CRAP);

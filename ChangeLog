@@ -1,3 +1,16 @@
+2001-Nov-24	Rex Feany	<laeos@laeos.net>
+
+	* Fixed some compile warnings
+	* Bumped version number
+	* Removed silly checks in dcc.c
+	* Released 0.12.1
+
+2001-Oct-11 		
+
+	* Added patch from Geoff <geoff@hawky.net> 
+		- Changes public and private ctcp action formats
+		  so you can differentiate between the two.
+
 2001-Oct-08 	Rex Feany	<laeos@laeos.net>
 	
 	* Released 0.12.0

@@ -1,4 +1,4 @@
-#ident "@(#)fset.c 1.9"
+#ident "@(#)fset.c 1.10"
 /*
  * fset.c - keep track of all our format strings
  * Modified by Rex Feany (laeos@laeos.net) for Xaric
@@ -60,6 +60,7 @@ static struct format_set
 {"FORMAT_476",			DEF_FORMAT_476,			NULL, 0, 0 },
 {"FORMAT_ACTION",		DEF_FORMAT_ACTION,		NULL, 0, 0 },
 {"FORMAT_ACTION_OTHER",		DEF_FORMAT_ACTION_OTHER,	NULL, 0, 0 },
+{"FORMAT_ACTION_PRIV",		DEF_FORMAT_ACTION_PRIV,		NULL, 0, 0 },
 {"FORMAT_ALIAS",		DEF_FORMAT_ALIAS,		NULL, 0, 0 },
 {"FORMAT_ASSIGN",		DEF_FORMAT_ASSIGN,		NULL, 0, 0 },
 {"FORMAT_AWAY",			DEF_FORMAT_AWAY,		NULL, 0, 0 },

@@ -1,4 +1,4 @@
-#ident "@(#)dcc.c 1.7"
+#ident "@(#)dcc.c 1.8"
 /*
  * dcc.c: Things dealing client to client connections. 
  *
@@ -782,11 +782,6 @@ real_dcc_filesend (char *filename, char *real_file, char *user, int type, int po
 		return;
 	}
 #endif
-	if (!strncmp (filename, "/etc/", 5))
-	{
-		put_it ("%s", convert_output_format ("$G %RDCC%n Send request for /etc rejected", NULL, NULL));
-		return;
-	}
 	filesize = stat_buf.st_size;
 	while ((nick = next_in_comma_list (user, &user)))
 	{

@@ -478,7 +478,7 @@ KeyMapNames key_names[] =
 	{"SELF_INSERT", input_add_character},
 	{"SEND_LINE", get_line_return},
 	{"SHOVE_TO_HISTORY", shove_to_history},
-	{"STOP_IRC", term_pause},
+	{"STOP_IRC", (void (*)(char, char*))term_pause},
 	{"SWAP_LAST_WINDOW", swap_last_window},
 	{"SWAP_NEXT_WINDOW", swap_next_window},
 	{"SWAP_PREVIOUS_WINDOW", swap_previous_window},

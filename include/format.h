@@ -22,7 +22,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * @(#)format.h 1.7
+ * @(#)format.h 1.8
  *
  */
 
@@ -44,6 +44,7 @@
 
 #define DEF_FORMAT_ACTION "%K.%n.%W. %W$1 %n$4-"
 #define DEF_FORMAT_ACTION_OTHER "%K.%n.%W. %n>%c$1 %n$3-"
+#define DEF_FORMAT_ACTION_PRIV "%K.%n.%W. %n-> %c$3%n/%W$1 %n$4-"
 
 #define DEF_FORMAT_ALIAS "Alias $[20.]0 $1-"
 #define DEF_FORMAT_ASSIGN "Assign $[20.]0 $1-"

@@ -124,7 +124,7 @@ cmd_about (struct command *cmd, char *args)
 
 	charset_ibmpc ();
 	put_it (empty_string);
-	put_it ("\t[36m %s", XARIC_Hello);
+	put_it ("\t[36m %s", xversion.v_tex);
 	put_it ("\t[35mbrought to you by Laeos, Korndawg, and Hawky");
 	put_it ("\t[35m<http://www.laeos.net/projects/xaric>");
 	put_it (empty_string);
@@ -1122,7 +1122,7 @@ cmd_quit (struct command *cmd, char *args)
 	else
 		Reason = get_signoffreason (get_server_nickname (from_server));
 	if (!Reason || !*Reason)
-		Reason = (char *) XARIC_WebID;
+		Reason = (char *) xversion.v_web;
 
 	for (Client = ClientList; Client; Client = Client->next)
 	{
@@ -1774,7 +1774,7 @@ cmd_ircii_version (struct command *cmd, char *args)
 		send_to_server ("%s %s", cmd->name, host);
 	else
 	{
-		bitchsay ("Client: %s", XARIC_WebID);
+		bitchsay ("Client: %s", xversion.v_web);
 		send_to_server ("%s", cmd->name);
 	}
 }

@@ -1,4 +1,4 @@
-#ident "@(#)status.c 1.12"
+#ident "%W%"
 /*
  * status.c: handles the status line updating, etc for IRCII 
  *
@@ -964,7 +964,7 @@ status_version (Window * window)
 	if ((connected_to_server) && !get_int_var (SHOW_STATUS_ALL_VAR)
 	    && (window->screen->current_window != window))
 		return (empty_string);
-	return ((char *) XARIC_PlainID);
+	return ((char *) xversion.v_short);
 }
 
 static char *

@@ -1,4 +1,4 @@
-#ident "@(#)functions.c 1.15"
+#ident "%W%"
 /*
  * functions.c -- Built-in functions for ircII
  *
@@ -210,7 +210,7 @@ alias_show_realname (void)
 static char *
 alias_version_str (void)
 {
-	return m_strdup (XARIC_VersionStr);
+	return m_strdup (xversion.v_long);
 }
 static char *
 alias_invite (void)

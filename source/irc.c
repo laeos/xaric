@@ -1,4 +1,4 @@
-#ident "@(#)irc.c 1.19"
+#ident "%W%"
 /*
  * irc.c - where it all starts!
  *
@@ -279,7 +279,7 @@ coredump (int sig)
 	printf ("\n\r\n\rXaric has been terminated by signal %i\n\r", sig);
 	printf ("Please inform Laeos <laeos@ptw.com> of this\n\r");
 	printf ("with as much detail as possible about what you were doing when it happened.\n\r");
-	printf ("Please include the version of Xaric (%s) and type of system in the report.\n\r", XARIC_VersionStr);
+	printf ("Please include the version of Xaric (%s) and type of system in the report.\n\r", xversion.v_short);
 	fflush (stdout);
 	irc_exit ("Wow! A bug?", NULL);
 }
@@ -356,7 +356,7 @@ parse_args (char *argv[], int argc)
 
 			case 'v':	/* Output ircII version */
 				{
-					puts(XARIC_GNUVersion);
+					puts(xversion.v_gnu);
 					putc('\n', stdout);
 					exit (0);
 				}

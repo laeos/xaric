@@ -1,4 +1,4 @@
-#ident "@(#)ircaux.c 1.15"
+#ident "%W%"
 /*
  * ircaux.c: some extra routines... not specific to irc... that I needed 
  *
@@ -921,7 +921,7 @@ ircpanic (char *format,...)
 	printf ("Please email laeos@ptw.com with the following message\n");
 
 	printf ("\n");
-	printf ("Panic: [%s] %s\n", XARIC_VersionStr, buffer);
+	printf ("Panic: [%s] %s\n", xversion.v_long, buffer);
 
 	exit(0);
 

@@ -814,6 +814,7 @@ tarball )
     #   expand source paths
     exclude=''
     for pat in `echo $opt_e | sed 's/,/ /g'`; do
+    	echo "got pat $pat"
         exclude="$exclude | grep -v '$pat'"
     done
     if [ ".$opt_t" = .yes ]; then

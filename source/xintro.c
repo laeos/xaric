@@ -1,4 +1,4 @@
-#ident "@(#)xintro.c 1.2"
+#ident "%W%"
 /*
  * xintro.c - first things that are displayed when the client is started.
  * Copyright (C) 1998, 1999, 2000 Rex Feany <laeos@laeos.net>
@@ -41,7 +41,7 @@ display_intro (void)
 	put_it (empty_string);
 
 	put_it(convert_output_format("%g***%n", NULL));
-	put_it(convert_output_format("%g***%C $0-", "%s", XARIC_Hello));
+	put_it(convert_output_format("%g***%C $0-", "%s", xversion.v_tex));
 	put_it(convert_output_format("%g***%n", NULL));
 	put_it(convert_output_format("%g***%n Copyright (C) 1998, 1999, 2000 Rex G. Feany <laeos@laeos.ne>", NULL));
 	put_it(convert_output_format("%g***%n", NULL));

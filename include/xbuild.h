@@ -1,1 +1,1 @@
-#define XARIC_DATA_PATH "/home/rfeany/SPORK/share/xaric"
+#define XARIC_DATA_PATH "/usr/local/share/xaric"

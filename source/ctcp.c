@@ -1,4 +1,4 @@
-#ident "@(#)ctcp.c 1.14"
+#ident "%W%"
 /*
  * ctcp.c:handles the client-to-client protocol(ctcp). 
  *
@@ -335,7 +335,7 @@ CTCP_HANDLER (do_version)
 		the_unix = un.sysname;
 	}
 #endif
-	malloc_strcpy (&version_reply, stripansicodes (convert_output_format (get_fset_var (FORMAT_VERSION_FSET), "%s %s %s", XARIC_PlainID, the_unix, the_version)));
+	malloc_strcpy (&version_reply, stripansicodes (convert_output_format (get_fset_var (FORMAT_VERSION_FSET), "%s %s %s", xversion.v_short, the_unix, the_version)));
 	send_ctcp (CTCP_NOTICE, from, CTCP_VERSION, "%s (%s)", version_reply, get_string_var (CLIENTINFO_VAR));
 	xfree (&version_reply);
 	return NULL;

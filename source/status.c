@@ -1,4 +1,4 @@
-#ident "%W%"
+#ident "@(#)status.c 1.15"
 /*
  * status.c: handles the status line updating, etc for IRCII 
  *
@@ -30,9 +30,11 @@
 #include "ircaux.h"
 #include "misc.h"
 #include "hash2.h"
-#include "fset.h"
 #include "util.h"
-#include "xaric_version.h"
+
+
+#include "xformats.h"
+#include "xversion.h"
 #include "xmalloc.h"
 
 #define MY_BUFFER 150
@@ -68,7 +70,7 @@ static char *status_voice (Window *);
 static char *status_dcccount (Window *);
 static char *status_position (Window *);
 
-#define cparse(format, str) convert_output_format(get_fset_var(format), "%s", str)
+#define cparse(format, str) convert_output_format(get_format(format), "%s", str)
 
 char *time_format = NULL;	/* XXX Bogus XXX */
 char *strftime_24hour = "%R";

@@ -1,4 +1,4 @@
-#ident "@(#)parse.c 1.10"
+#ident "@(#)parse.c 1.11"
 /*
  * parse.c: handles messages from the server.   Believe it or not.  I
  * certainly wouldn't if I were you. 
@@ -43,9 +43,10 @@
 #include "whowas.h"
 #include "timer.h"
 #include "hash2.h"
-#include "fset.h"
 #include "util.h"
 #include "tcommand.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 
@@ -253,12 +254,12 @@ p_topic (char *from, char **ArgList)
 		{
 			if (ArgList[1] && *ArgList[1])
 			{
-				if (get_fset_var (FORMAT_TOPIC_CHANGE_HEADER_FSET))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_TOPIC_CHANGE_HEADER_FSET), "%s %s %s %s", update_clock (GET_TIME), from, ArgList[0], ArgList[1]));
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_TOPIC_CHANGE_FSET), "%s %s %s %s", update_clock (GET_TIME), from, ArgList[0], ArgList[1]));
+				if (get_format (FORMAT_TOPIC_CHANGE_HEADER_FSET))
+					put_it ("%s", convert_output_format (get_format (FORMAT_TOPIC_CHANGE_HEADER_FSET), "%s %s %s %s", update_clock (GET_TIME), from, ArgList[0], ArgList[1]));
+				put_it ("%s", convert_output_format (get_format (FORMAT_TOPIC_CHANGE_FSET), "%s %s %s %s", update_clock (GET_TIME), from, ArgList[0], ArgList[1]));
 			}
 			else
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_TOPIC_UNSET_FSET), "%s %s %s", update_clock (GET_TIME), from, ArgList[0]));
+				put_it ("%s", convert_output_format (get_format (FORMAT_TOPIC_UNSET_FSET), "%s %s %s", update_clock (GET_TIME), from, ArgList[0]));
 		}
 
 		message_from (NULL, LOG_CRAP);
@@ -299,7 +300,7 @@ p_wallops (char *from, char **ArgList)
 		level = set_lastlog_msg_level (LOG_WALLOP);
 		autorep = check_auto_reply (line);
 		if (do_hook (WALLOP_LIST, "%s %c %s", from, from_server ? 'S' : '*', line))
-			put_it ("%s", convert_output_format (get_fset_var (from_server ? FORMAT_WALLOP_FSET : (autorep ? FORMAT_WALL_AR_FSET : FORMAT_WALL_FSET)),
+			put_it ("%s", convert_output_format (get_format (from_server ? FORMAT_WALLOP_FSET : (autorep ? FORMAT_WALL_AR_FSET : FORMAT_WALL_FSET)),
 				     "%s %s %s %s", update_clock (GET_TIME),
 				      from, from_server ? "!" : "*", line));
 		if (beep_on_level & LOG_WALLOP)
@@ -354,7 +355,7 @@ whoreply (char *from, char **ArgList)
 		snprintf (buffer, BIG_BUFFER_SIZE, "%s %s %s %s %s %s %s", channel,
 			  nick, stat, user, host, server, name);
 		if (do_hook (WHO_LIST, "%s", buffer))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHO_FSET), "%s %s %s %s %s %s %s", channel, nick, stat, user, host, server, name));
+			put_it ("%s", convert_output_format (get_format (FORMAT_WHO_FSET), "%s %s %s %s %s %s %s", channel, nick, stat, user, host, server, name));
 		message_from (NULL, LOG_CRAP);
 		return;
 	}
@@ -394,7 +395,7 @@ whoreply (char *from, char **ArgList)
 		{
 			if (!get_int_var (SHOW_WHO_HOPCOUNT_VAR))
 				next_arg (name, &name);
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHO_FSET), "%s %s %s %s %s %s %s", channel, nick, stat, user, host, server, name));
+			put_it ("%s", convert_output_format (get_format (FORMAT_WHO_FSET), "%s %s %s %s %s %s %s", channel, nick, stat, user, host, server, name));
 		}
 	}
 /*      
@@ -512,7 +513,7 @@ p_privmsg (char *from, char **Args)
 	if (sed == 1)
 	{
 		if (do_hook (ENCRYPTED_PRIVMSG_LIST, "%s %s %s", from, to, ptr))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_ENCRYPTED_PRIVMSG_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr));
+			put_it ("%s", convert_output_format (get_format (FORMAT_ENCRYPTED_PRIVMSG_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr));
 		sed = 0;
 	}
 	else
@@ -531,12 +532,12 @@ p_privmsg (char *from, char **Args)
 		case PUBLIC_MSG_LIST:
 			logmsg (LOG_PUBLIC, from, ptr, 0);
 			if (no_flood && do_hook (list_type, "%s %s %s", from, to, ptr))
-				put_it ("%s", convert_output_format (get_fset_var (ar_true ? FORMAT_PUBLIC_MSG_AR_FSET : FORMAT_PUBLIC_MSG_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
+				put_it ("%s", convert_output_format (get_format (ar_true ? FORMAT_PUBLIC_MSG_AR_FSET : FORMAT_PUBLIC_MSG_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
 			break;
 		case MSG_GROUP_LIST:
 			logmsg (LOG_PUBLIC, from, ptr, 0);
 			if (no_flood && do_hook (list_type, "%s %s %s", from, to, ptr))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_MSG_GROUP_FSET), "%s %s %s %s", update_clock (GET_TIME), from, to, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
+				put_it ("%s", convert_output_format (get_format (FORMAT_MSG_GROUP_FSET), "%s %s %s %s", update_clock (GET_TIME), from, to, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
 			break;
 		case MSG_LIST:
 			{
@@ -553,11 +554,11 @@ p_privmsg (char *from, char **Args)
 				addtabkey (from, "msg");
 
 				if (do_hook (list_type, "%s %s", from, ptr))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_MSG_FSET), "%s %s %s %s", update_clock (GET_TIME), from, FromUserHost, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
+					put_it ("%s", convert_output_format (get_format (FORMAT_MSG_FSET), "%s %s %s %s", update_clock (GET_TIME), from, FromUserHost, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
 
 				if (from_server > -1 && get_server_away (from_server) && get_int_var (SEND_AWAY_MSG_VAR))
 				{
-					my_send_to_server (from_server, "NOTICE %s :%s", from, stripansicodes (convert_output_format (get_fset_var (FORMAT_SEND_AWAY_FSET), "%l %l %s", time (NULL), server_list[from_server].awaytime, get_int_var (MSGLOG_VAR) ? "On" : "Off")));
+					my_send_to_server (from_server, "NOTICE %s :%s", from, stripansicodes (convert_output_format (get_format (FORMAT_SEND_AWAY_FSET), "%l %l %s", time (NULL), server_list[from_server].awaytime, get_int_var (MSGLOG_VAR) ? "On" : "Off")));
 				}
 				break;
 			}
@@ -567,7 +568,7 @@ p_privmsg (char *from, char **Args)
 					list_type = AR_PUBLIC_LIST;
 				logmsg (LOG_PUBLIC, from, ptr, 0);
 				if (no_flood && do_hook (list_type, "%s %s %s", from, to, ptr))
-					put_it ("%s", convert_output_format (get_fset_var ((list_type == AR_PUBLIC_LIST) ? FORMAT_PUBLIC_AR_FSET : FORMAT_PUBLIC_FSET), "%s %s %s %s", update_clock (GET_TIME), from, to, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
+					put_it ("%s", convert_output_format (get_format ((list_type == AR_PUBLIC_LIST) ? FORMAT_PUBLIC_AR_FSET : FORMAT_PUBLIC_FSET), "%s %s %s %s", update_clock (GET_TIME), from, to, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
 				break;
 			}
 		case PUBLIC_OTHER_LIST:
@@ -577,7 +578,7 @@ p_privmsg (char *from, char **Args)
 					list_type = AR_PUBLIC_OTHER_LIST;
 
 				if (no_flood && do_hook (list_type, "%s %s %s", from, to, ptr))
-					put_it ("%s", convert_output_format (get_fset_var (list_type == AR_PUBLIC_OTHER_LIST ? FORMAT_PUBLIC_OTHER_AR_FSET : FORMAT_PUBLIC_OTHER_FSET), "%s %s %s %s", update_clock (GET_TIME), from, to, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
+					put_it ("%s", convert_output_format (get_format (list_type == AR_PUBLIC_OTHER_LIST ? FORMAT_PUBLIC_OTHER_AR_FSET : FORMAT_PUBLIC_OTHER_FSET), "%s %s %s %s", update_clock (GET_TIME), from, to, get_int_var (MIRCS_VAR) ? mircansi (ptr) : ptr));
 				break;
 			}	/* case */
 		}		/* switch */
@@ -627,7 +628,7 @@ p_quit (char *from, char **ArgList)
 
 		message_from(chan, LOG_CRAP); 
 		if ((ignore != IGNORED) && do_hook (SIGNOFF_LIST, "%s %s", from, Reason) && !netsplit)
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_CHANNEL_SIGNOFF_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, chan, Reason));
+			put_it ("%s", convert_output_format (get_format (FORMAT_CHANNEL_SIGNOFF_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, chan, Reason));
 		message_from(NULL, LOG_CURRENT);
 	}
 	if ( !netsplit )
@@ -782,12 +783,12 @@ p_channel (char *from, char **ArgList)
 		if ((whowas = check_whosplitin_buffer (from, FromUserHost, channel, 0)) && (irc_serv = check_split_server (whowas->server1)))
 		{
 			if (do_hook (LLOOK_JOIN_LIST, "%s %s", irc_serv->name, irc_serv->link))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETJOIN_FSET), "%s %s %s %d", update_clock (GET_TIME), irc_serv->name, irc_serv->link, 0));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NETJOIN_FSET), "%s %s %s %d", update_clock (GET_TIME), irc_serv->name, irc_serv->link, 0));
 			remove_split_server (whowas->server1);
 		}
 		if (do_hook (JOIN_LIST, "%s %s %s", from, channel, tmp2 ? tmp2 : FromUserHost ? FromUserHost : "UnKnown"))
 		{
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_JOIN_FSET), "%s %s %s %s", update_clock (GET_TIME), from, tmp2 ? tmp2 : FromUserHost ? FromUserHost : "UnKnown", channel));
+			put_it ("%s", convert_output_format (get_format (FORMAT_JOIN_FSET), "%s %s %s %s", update_clock (GET_TIME), from, tmp2 ? tmp2 : FromUserHost ? FromUserHost : "UnKnown", channel));
 		}
 		message_from (NULL, LOG_CRAP);
 	}
@@ -826,7 +827,7 @@ p_invite (char *from, char **ArgList)
 		if (check_flooding (from, INVITE_FLOOD, ArgList[1], NULL) &&
 		    do_hook (INVITE_LIST, "%s %s", from, ArgList[1]))
 		{
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_INVITE_FSET), "%s %s %s", update_clock (GET_TIME), from, ArgList[1]));
+			put_it ("%s", convert_output_format (get_format (FORMAT_INVITE_FSET), "%s %s %s", update_clock (GET_TIME), from, ArgList[1]));
 			bitchsay ("Press Ctrl-K to join %s", invite_channel);
 		}
 		if (!(chan = lookup_channel (invite_channel, from_server, 0)))
@@ -849,7 +850,7 @@ p_silence (char *from, char **ArgList)
 	char *mag = target++;
 
 	if (do_hook (SILENCE_LIST, "%c %s", *mag, target))
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_SILENCE_FSET), "%s %c %s", update_clock (GET_TIME), *mag, target));
+		put_it ("%s", convert_output_format (get_format (FORMAT_SILENCE_FSET), "%s %c %s", update_clock (GET_TIME), *mag, target));
 }
 
 
@@ -889,7 +890,7 @@ p_kill (char *from, char **ArgList)
 		}
 		if (do_hook (DISCONNECT_LIST, "Killed by %s (%s)", from,
 			     ArgList[1] ? ArgList[1] : "(No Reason Given)"))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_KILL_FSET), "%s %s", update_clock (GET_TIME), ArgList[1] ? ArgList[1] : "You have been Killed"));
+			put_it ("%s", convert_output_format (get_format (FORMAT_KILL_FSET), "%s %s", update_clock (GET_TIME), ArgList[1] ? ArgList[1] : "You have been Killed"));
 		if (get_int_var (AUTO_RECONNECT_VAR))
 			t_parse_command ("SERVER", NULL);
 	}
@@ -935,7 +936,7 @@ p_nick (char *from, char **ArgList)
 		else
 			message_from (what_channel (from, from_server), LOG_CRAP);
 		if (ign != IGNORED && do_hook (NICKNAME_LIST, "%s %s", from, line))
-			put_it ("%s", convert_output_format (get_fset_var (its_me ? FORMAT_NICKNAME_USER_FSET : im_on_channel (what_channel (from, from_server)) ? FORMAT_NICKNAME_FSET : FORMAT_NICKNAME_OTHER_FSET), "%s %s %s %s", update_clock (GET_TIME), from, "-", line));
+			put_it ("%s", convert_output_format (get_format (its_me ? FORMAT_NICKNAME_USER_FSET : im_on_channel (what_channel (from, from_server)) ? FORMAT_NICKNAME_FSET : FORMAT_NICKNAME_OTHER_FSET), "%s %s %s %s", update_clock (GET_TIME), from, "-", line));
 	}
 	rename_nick (from, line, from_server);
 	if (!its_me)
@@ -995,7 +996,7 @@ p_mode (char *from, char **ArgList)
 			update_channel_mode (from, channel, from_server, buffer, chan);
 
 			if (flag != IGNORED && do_hook (MODE_LIST, "%s %s %s", from, channel, line))
-				put_it ("%s", convert_output_format (get_fset_var (smode ? FORMAT_SMODE_FSET : FORMAT_MODE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, smode ? "*" : FromUserHost, channel, line));
+				put_it ("%s", convert_output_format (get_format (smode ? FORMAT_SMODE_FSET : FORMAT_MODE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, smode ? "*" : FromUserHost, channel, line));
 		}
 		else
 		{
@@ -1004,12 +1005,12 @@ p_mode (char *from, char **ArgList)
 				if (!my_stricmp (from, channel))
 				{
 					if (!my_stricmp (from, get_server_nickname (from_server)))
-						put_it ("%s", convert_output_format (get_fset_var (FORMAT_USERMODE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, "*", channel, line));
+						put_it ("%s", convert_output_format (get_format (FORMAT_USERMODE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, "*", channel, line));
 					else
-						put_it ("%s", convert_output_format (get_fset_var (FORMAT_USERMODE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, smode ? "*" : FromUserHost, channel, line));
+						put_it ("%s", convert_output_format (get_format (FORMAT_USERMODE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, smode ? "*" : FromUserHost, channel, line));
 				}
 				else
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_MODE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, smode ? "*" : FromUserHost, channel, line));
+					put_it ("%s", convert_output_format (get_format (FORMAT_MODE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, smode ? "*" : FromUserHost, channel, line));
 			}
 			update_user_mode (line);
 		}
@@ -1135,7 +1136,7 @@ p_kick (char *from, char **ArgList)
 			update_all_status (curr_scr_win, NULL, 0);
 			update_input (UPDATE_ALL);
 			if (do_hook (KICK_LIST, "%s %s %s %s", who, from, channel, comment ? comment : empty_string))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_KICK_USER_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, channel, who, comment));
+				put_it ("%s", convert_output_format (get_format (FORMAT_KICK_USER_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, channel, who, comment));
 		}
 		else
 		{
@@ -1144,7 +1145,7 @@ p_kick (char *from, char **ArgList)
 
 			if ((check_ignore (from, FromUserHost, channel, IGNORE_KICKS | IGNORE_CRAP, NULL) != IGNORED) &&
 			    do_hook (KICK_LIST, "%s %s %s %s", who, from, channel, comment))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_KICK_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, channel, who, comment));
+				put_it ("%s", convert_output_format (get_format (FORMAT_KICK_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, channel, who, comment));
 			if (!itsme)
 			{
 				NickList *f_nick = NULL;
@@ -1180,7 +1181,7 @@ p_part (char *from, char **ArgList)
 
 	if ((check_ignore (from, FromUserHost, channel, IGNORE_PARTS | IGNORE_CRAP, NULL) != IGNORED) &&
 	    do_hook (LEAVE_LIST, "%s %s %s %s", from, channel, FromUserHost, ArgList[1] ? ArgList[1] : empty_string))
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_LEAVE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, channel, ArgList[1] ? ArgList[1] : empty_string));
+		put_it ("%s", convert_output_format (get_format (FORMAT_LEAVE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, channel, ArgList[1] ? ArgList[1] : empty_string));
 	if (!my_stricmp (from, get_server_nickname (from_server)))
 	{
 		remove_channel (channel, from_server);

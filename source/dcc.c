@@ -1,4 +1,4 @@
-#ident "@(#)dcc.c 1.10"
+#ident "@(#)dcc.c 1.11"
 /*
  * dcc.c: Things dealing client to client connections. 
  *
@@ -42,12 +42,11 @@
 #include "misc.h"
 #include "screen.h"
 #include "hash2.h"
-
-
 #include "output.h"
-#include "fset.h"
 #include "tcommand.h"
 #include "util.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 
@@ -399,7 +398,7 @@ dcc_got_connected (DCC_list * client)
 					     ntohs (remaddr.sin_port)))
 				{
 					if (!dcc_quiet)
-						put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_CONNECT_FSET),
+						put_it ("%s", convert_output_format (get_format (FORMAT_DCC_CONNECT_FSET),
 										     "%s %s %s %s %s %d", update_clock (GET_TIME),
 										     dcc_types[client->flags & DCC_TYPES], client->user,
 										     client->userhost ? client->userhost : "u@h", inet_ntoa (remaddr.sin_addr), (int) ntohs (remaddr.sin_port)));
@@ -605,7 +604,7 @@ dcc_open (DCC_list * Client)
 					   (u_short) portnum);
 			message_from (NULL, LOG_DCC);
 			if (!doing_multi && !dcc_quiet)
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_DCC_CHAT_FSET),
+				put_it ("%s", convert_output_format (get_format (FORMAT_SEND_DCC_CHAT_FSET),
 								     "%s %s %s", update_clock (GET_TIME), Type, user));
 			message_from (NULL, LOG_CRAP);
 		}
@@ -766,7 +765,7 @@ dcc_raw_connect (char *host, u_short port)
 	Client->user = m_strdup (PortName);
 	if (do_hook (DCC_RAW_LIST, "%s %s E %d", PortName, host, port))
 		if (do_hook (DCC_CONNECT_LIST, "%s RAW %s %d", PortName, host, port))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_CONNECT_FSET),
+			put_it ("%s", convert_output_format (get_format (FORMAT_DCC_CONNECT_FSET),
 							     "%s %s %s %s %s %d", update_clock (GET_TIME), "RAW", host,
 							     Client->userhost ? Client->userhost : "u@h", PortName, port));
 	(void) set_lastlog_msg_level (lastlog_level);
@@ -1226,13 +1225,13 @@ register_dcc_offer (char *user, char *type, char *description, char *address, ch
 			char buf[40];
 			sprintf (buf, "%2.4g", _GMKv (Client->filesize));
 			if (Client->filesize)
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_REQUEST_FSET),
+				put_it ("%s", convert_output_format (get_format (FORMAT_DCC_REQUEST_FSET),
 					       "%s %s %s %s %s %s %d %s %s",
 								     update_clock (GET_TIME), type, description, user, FromUserHost,
 								     inet_ntoa (Client->remote), ntohs (Client->remport),
 					    _GMKs (Client->filesize), buf));
 			else
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_REQUEST_FSET),
+				put_it ("%s", convert_output_format (get_format (FORMAT_DCC_REQUEST_FSET),
 								     "%s %s %s %s %s %s %d", update_clock (GET_TIME), type, description,
 								     user, FromUserHost, inet_ntoa (Client->remote), ntohs (Client->remport)));
 
@@ -1279,7 +1278,7 @@ process_incoming_chat (DCC_list * Client)
 		Client->flags |= DCC_ACTIVE;
 		if (do_hook (DCC_CONNECT_LIST, "%s CHAT %s %d", Client->user,
 		    inet_ntoa (remaddr.sin_addr)), ntohs (remaddr.sin_port))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_CONNECT_FSET),
+			put_it ("%s", convert_output_format (get_format (FORMAT_DCC_CONNECT_FSET),
 			       "%s %s %s %s %s %d", update_clock (GET_TIME),
 							     "CHAT",
 							     Client->user, Client->userhost ? Client->userhost : "u@h",
@@ -1315,7 +1314,7 @@ process_incoming_chat (DCC_list * Client)
 		{
 			char *real_tmp = ((dgets_errno == -1) ? "Remote End Closed Connection" : strerror (dgets_errno));
 			if (do_hook (DCC_LOST_LIST, "%s CHAT %s", Client->user, real_tmp))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET),
+				put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET),
 				     "%s %s %s %s", update_clock (GET_TIME),
 								     "CHAT",
 						   Client->user, real_tmp));
@@ -1360,7 +1359,7 @@ process_incoming_chat (DCC_list * Client)
 					else if (do_hook (DCC_CHAT_LIST, "%s %s", Client->user, tmp))
 					{
 						addtabkey (equal_nickname, "msg");
-						put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_CHAT_FSET),
+						put_it ("%s", convert_output_format (get_format (FORMAT_DCC_CHAT_FSET),
 										     "%s %s %s %s", update_clock (GET_TIME), Client->user, Client->userhost ? Client->userhost : "u@h", tmp));
 					}
 					FromUserHost = empty_string;
@@ -1414,7 +1413,7 @@ process_incoming_listen (DCC_list * Client)
 		if (do_hook (DCC_CONNECT_LIST, "%s RAW %s %d", NewClient->user,
 			     NewClient->description,
 			     Client->write))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_CONNECT_FSET),
+			put_it ("%s", convert_output_format (get_format (FORMAT_DCC_CONNECT_FSET),
 			       "%s %s %s %s %s %d", update_clock (GET_TIME),
 						     "RAW", NewClient->user,
 				Client->userhost ? Client->userhost : "u@h",
@@ -1458,7 +1457,7 @@ process_incoming_raw (DCC_list * Client)
 		{
 			if (do_hook (DCC_RAW_LIST, "%s %s C", Client->user, Client->description))
 				if (do_hook (DCC_LOST_LIST, "%s RAW %s", Client->user, Client->description))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), "RAW", Client->user, Client->description));
+					put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), "RAW", Client->user, Client->description));
 			Client->flags |= DCC_DELETE;
 			(void) dgets_timeout (old_timeout);
 			return;
@@ -1570,7 +1569,7 @@ process_outgoing_file (DCC_list * Client, int readwaiting)
 			if (do_hook (DCC_CONNECT_LIST, "%s %s %s %d", Client->user, "SEND",
 				     inet_ntoa (remaddr.sin_addr), ntohs (remaddr.sin_port)))
 				if (!dcc_quiet)
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_CONNECT_FSET),
+					put_it ("%s", convert_output_format (get_format (FORMAT_DCC_CONNECT_FSET),
 									     "%s %s %s %s %s %d %d", update_clock (GET_TIME), "RESEND",
 									     Client->user, Client->userhost ? Client->userhost : "u@h", inet_ntoa (remaddr.sin_addr),
 									     ntohs (remaddr.sin_port), Client->transfer_orders.byteoffset));
@@ -1580,7 +1579,7 @@ process_outgoing_file (DCC_list * Client, int readwaiting)
 			if (do_hook (DCC_CONNECT_LIST, "%s %s %s %d %s %d", Client->user, "SEND",
 				     inet_ntoa (remaddr.sin_addr), ntohs (remaddr.sin_port), Client->description, Client->filesize))
 				if (!dcc_quiet)
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_CONNECT_FSET),
+					put_it ("%s", convert_output_format (get_format (FORMAT_DCC_CONNECT_FSET),
 									     "%s %s %s %s %s %d %d", update_clock (GET_TIME), "SEND",
 									     Client->user, Client->userhost ? Client->userhost : "u@h", inet_ntoa (remaddr.sin_addr),
 									     ntohs (remaddr.sin_port), Client->transfer_orders.byteoffset));
@@ -1594,7 +1593,7 @@ process_outgoing_file (DCC_list * Client, int readwaiting)
 		{
 			if (do_hook (DCC_LOST_LIST, "%s SEND %s CONNECTION LOST",
 				     Client->user, Client->description))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), "SEND", Client->user, Client->description));
+				put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), "SEND", Client->user, Client->description));
 			if (get_to_from (Type) != -1 && dcc_active_count)
 				dcc_active_count--;
 			Client->flags |= DCC_DELETE;
@@ -1728,7 +1727,7 @@ dcc_message_transmit (char *user, char *text, char *text_display, int type, int 
 		if (!my_strnicmp (tmp, ".chat", strlen (tmp)))
 			Client->in_dcc_chat = 1;
 		if (do_hook (SEND_DCC_CHAT_LIST, "%s %s", Client->user, text_display ? text_display : text))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_DCC_CHAT_FSET), "%c %s %s", thing, Client->user, text_display ? text_display : text));
+			put_it ("%s", convert_output_format (get_format (FORMAT_SEND_DCC_CHAT_FSET), "%c %s %s", thing, Client->user, text_display ? text_display : text));
 	}
 	set_lastlog_msg_level (lastlog_level);
 	message_from (NULL, LOG_CRAP);
@@ -2123,7 +2122,7 @@ dcc_close_client_num (unsigned int closenum)
 
 			if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, Type,
 			Client->description ? Client->description : "<any>"))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
+				put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
 			dcc_reject_notify (Client->description, Client->user, Type);
 			dcc_erase (Client);
 			update_transfer_buffer ("");
@@ -2162,7 +2161,7 @@ dcc_close_all (void)
 
 		if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, Type,
 		       Client->description ? Client->description : "<any>"))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
+			put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
 		dcc_reject_notify (Client->description, Client->user, Type);
 		dcc_erase (Client);
 		update_transfer_buffer ("");
@@ -2204,7 +2203,7 @@ dcc_close_type_all (char *typestr)
 			}
 			if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, Type,
 			Client->description ? Client->description : "<any>"))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
+				put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
 			dcc_reject_notify (Client->description, Client->user, Type);
 			dcc_erase (Client);
 			update_transfer_buffer ("");
@@ -2246,7 +2245,7 @@ dcc_close_nick_all (char *nickstr)
 
 			if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, Type,
 			Client->description ? Client->description : "<any>"))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
+				put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
 			dcc_reject_notify (Client->description, Client->user, Type);
 			dcc_erase (Client);
 			update_transfer_buffer ("");
@@ -2289,7 +2288,7 @@ dcc_close_type_nick_all (char *typestr, char *nickstr)
 			}
 			if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, Type,
 			Client->description ? Client->description : "<any>"))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
+				put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
 			dcc_reject_notify (Client->description, Client->user, Type);
 			dcc_erase (Client);
 			update_transfer_buffer ("");
@@ -2320,7 +2319,7 @@ dcc_close_filename (char *filename, char *user, char *Type, int CType)
 
 		if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, Type,
 		       Client->description ? Client->description : "<any>"))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
+			put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
 		dcc_reject_notify (Client->description, Client->user, Type);
 		dcc_erase (Client);
 		update_transfer_buffer ("");
@@ -2466,7 +2465,7 @@ dcc_reject (char *from, char *type, char *args)
 		if (Client->flags & DCC_DELETE)
 			return;
 		if (do_hook (DCC_LOST_LIST, "%s %s %s REJECTED", from, type, description ? description : "<any>"))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), type, Client->user, Client->description));
+			put_it ("%s", convert_output_format (get_format (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), type, Client->user, Client->description));
 		update_transfer_buffer ("");
 		Client->flags |= DCC_DELETE;
 		update_all_status (curr_scr_win, NULL, 0);
@@ -2636,7 +2635,7 @@ DCC_close_filesend (DCC_list * Client, char *type)
 		break;
 	}
 	if (do_hook (DCC_LOST_LIST, buffer, Client->user, check_paths (Client->description), lame_ultrix))
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_LOST_FSET),
+		put_it ("%s", convert_output_format (get_format (FORMAT_DCC_LOST_FSET),
 		"%s %s %s %s %s %s %s %s %s", update_clock (GET_TIME), type,
 						     check_paths (Client->description), lame_ultrix2, tofrom, Client->user,
 					  lame_ultrix3, lame_ultrix, "Kb"));
@@ -2698,9 +2697,9 @@ update_transfer_buffer (char *format,...)
 	if (count)
 	{
 		chop (transfer_buffer, 1);
-		if (get_fset_var (FORMAT_DCC_FSET))
+		if (get_format (FORMAT_DCC_FSET))
 		{
-			sprintf (DCC_current_transfer_buffer, convert_output_format (get_fset_var (FORMAT_DCC_FSET), "%s", transfer_buffer));
+			sprintf (DCC_current_transfer_buffer, convert_output_format (get_format (FORMAT_DCC_FSET), "%s", transfer_buffer));
 			chop (DCC_current_transfer_buffer, 4);
 		}
 		else

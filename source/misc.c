@@ -55,7 +55,8 @@
 #include "whowas.h"
 #include "hash2.h"
 #include "util.h"
-#include "fset.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 
@@ -427,7 +428,7 @@ userage (char *command, char *use)
 {
 
 	if (do_hook (USAGE_LIST, "%s %s", command, use ? use : "No Help Available for this command"))
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_USAGE_FSET), "%s %s", command, convert_output_format (use ? use : "%WNo Help available for this command", NULL, NULL)));
+		put_it ("%s", convert_output_format (get_format (FORMAT_USAGE_FSET), "%s %s", command, convert_output_format (use ? use : "%WNo Help available for this command", NULL, NULL)));
 }
 
 char *
@@ -578,7 +579,7 @@ parse_365 (char *channel, char *args, char *subargs)
 				continue;
 			serv1->time = m_strdup (update_clock (GET_TIME));
 			if (do_hook (LLOOK_SPLIT_LIST, "%s %s %d %s", serv1->name, serv1->link, serv1->hopcount, serv1->time))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETSPLIT_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NETSPLIT_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
 			serv1->count++;
 		}
 		else
@@ -587,7 +588,7 @@ parse_365 (char *channel, char *args, char *subargs)
 			{
 				serv1->status = ~SPLIT;
 				if (do_hook (LLOOK_JOIN_LIST, "%s %s %d %s", serv1->name, serv1->link, serv1->hopcount, serv1->time))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETJOIN_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
+					put_it ("%s", convert_output_format (get_format (FORMAT_NETJOIN_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
 				serv1->count = 0;
 			}
 		}
@@ -599,7 +600,7 @@ parse_365 (char *channel, char *args, char *subargs)
 			if (first_time == 1)
 			{
 				if (do_hook (LLOOK_ADDED_LIST, "%s %s %d", serv1->name, serv1->link, serv1->hopcount))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETADD_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
+					put_it ("%s", convert_output_format (get_format (FORMAT_NETADD_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
 				serv1->count = 0;
 			}
 			add_server (&server_last, serv1->name, serv1->link, serv1->hopcount, update_clock (GET_TIME));

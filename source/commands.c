@@ -1,4 +1,4 @@
-#ident "@(#)commands.c 1.11"
+#ident "@(#)commands.c 1.12"
 /*
  * commands.c: This is really a mishmash of function and such that deal with IRCII
  * commands (both normal and keybinding commands) 
@@ -51,11 +51,12 @@
 #include "list.h"
 #include "misc.h"
 #include "hash2.h"
-#include "fset.h"
 #include "notice.h"
 #include "tcommand.h"
 #include "util.h"
 #include "expr.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 #include "xdebug.h"
 
@@ -110,10 +111,10 @@ struct target_type
 	char *message;
 	int hook_type;
 	char *command;
-	char *format;
+	const char *format;
 	int level;
-	char *output;
-	char *other_output;
+	const char *output;
+	const char *other_output;
 };
 
 
@@ -156,12 +157,12 @@ send_text (char *nick_list, char *text, char *command, int hook, int log)
 	};
 
 
-	target[0].output = get_fset_var (FORMAT_SEND_MSG_FSET);
-	target[1].output = get_fset_var (FORMAT_SEND_PUBLIC_FSET);
-	target[1].other_output = get_fset_var (FORMAT_SEND_PUBLIC_OTHER_FSET);
-	target[2].output = get_fset_var (FORMAT_SEND_NOTICE_FSET);
-	target[3].output = get_fset_var (FORMAT_SEND_NOTICE_FSET);
-	target[3].other_output = get_fset_var (FORMAT_SEND_NOTICE_FSET);
+	target[0].output = get_format (FORMAT_SEND_MSG_FSET);
+	target[1].output = get_format (FORMAT_SEND_PUBLIC_FSET);
+	target[1].other_output = get_format (FORMAT_SEND_PUBLIC_OTHER_FSET);
+	target[2].output = get_format (FORMAT_SEND_NOTICE_FSET);
+	target[3].output = get_format (FORMAT_SEND_NOTICE_FSET);
+	target[3].other_output = get_format (FORMAT_SEND_NOTICE_FSET);
 
 	if (recursion)
 		hook = 0;

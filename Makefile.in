@@ -66,7 +66,7 @@ RM	:= rm -f
 SED	:= sed
 SHELL	:= @SHELL@
 CC 	:= @CC@
-CFLAGS 	:= @CFLAGS@ @DEFS@ -Iinclude 
+CFLAGS 	:= @CFLAGS@ @DEFS@ -Iinclude -Ixpcommon/include
 CPP 	:= @CPP@
 LDFLAGS := @LDFLAGS@
 LIBS	:= @LIBS@
@@ -76,18 +76,15 @@ ALLOCA  := @ALLOCA@
 STRTOUL := @STRTOUL@
 SETENV  := @SETENV@
 
-# Find out our version from the xaric version file.
-VERSION=`$(SHTOOL) version -d short source/xversion.c`
-
 # yes, we're including makefiles not asking them to run.
 # this is so makefiles in directories work. 
 REALLY_INCLUDE := 1
 
-# things that we should ignore when building the distribution tar
-TARIGNORE=config.log,config.h$$,xaric,Makefile$$,config.cache,config.status,SCCS,.depend,BitKeeper,CVS,Changeet,.cvsignore,.[oa]$$
-
 # Header files that get generated automagicly
 AUTOHDR= include/xbuild.h include/xformats_gen.h
+
+# XPCommon library
+XPCOMM=${srcdir}/xpcommon/libxpcommon.a
 
 # Sections
 SECTIONS = source extra
@@ -119,8 +116,8 @@ O_EXTRA = $(sort $(foreach i, $(patsubst %,%-obj, $(SECTIONS)), $($(i))))
 O_OBJ = $(O_SRC:.c=.o) $(O_EXTRA)
 
 # Build xaric!
-xaric: Makefile $(AUTOHDR) $(O_OBJ)
-	$(CC) -o xaric $(CFLAGS) $(O_OBJ) $(LIBS)
+xaric: Makefile $(AUTOHDR) $(O_OBJ) $(XPCOMM)
+	$(CC) -o xaric $(CFLAGS) $(O_OBJ) $(LIBS) $(XPCOMM)
 
 dep: $(O_SRC)
 	@touch $(AUTOHDR) # so it works ...
@@ -165,10 +162,12 @@ Makefile: Makefile.in config.status
 config.status: configure
 	./config.status --recheck
 
+$(XPCOMM):
+	$(MAKE) -C ${srcdir}/xpcommon
 
 # generate array indexes automagicly
-include/xformats_gen.h: source/fset.c
-	cat $< | $(SED) -n -e "/\*--start--\*/,/\*--end--\*/ { s/.*\"\([^\"]\+\)\".*/\1_FSET,/; s/\/\*[^*]*\*\///; p; }" > $@
+include/xformats_gen.h: source/xformats.c
+	cat $< | $(SED) -n -e "/\*--start--\*/,/\*--end--\*/ { s/^[^\"]*\"\([^\"]*\).*$$/\1_FSET,/; s/\/\*[^*]*\*\///; p; }" > $@
 
 # Supply some more information to the build
 include/xbuild.h: Makefile
@@ -181,20 +180,17 @@ include/xbuild.h: Makefile
 
 clean:
 	$(RM) $(O_OBJ)
+	$(MAKE) -C xpcommon clean
 
 distclean: clean
 	$(RM) Makefile config.status config.log include/config.h .depend include/stamp-h
 	$(RM) config.cache $(AUTOHDR)
 	$(RM) xaric
+	$(MAKE) -C xpcommon distclean
 
 mtclean: distclean
 	$(RM) aclocal.m4 configure include/config.h.in
-
-dist:
-	@echo "Building distribution for Xaric v$(VERSION)"
-	@$(SHTOOL) tarball -v -o xaric-$(VERSION).tar.gz -c 'gzip -9' -e '$(TARIGNORE)' .
-	@/usr/bin/md5sum xaric-$(VERSION).tar.gz > xaric-$(VERSION).tar.gz.md5
-	@echo "Done."
+	$(MAKE) -C xpcommon mtclean
 
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
@@ -202,20 +198,3 @@ dist:
 .o.so:
 	$(LD) -shared -o $@ $<
 
-update-tools:
-	@if [ ! -w shtool ]; then echo "Maybe you should check tools out first?"; exit 1; fi
-	@$(RM) shtool
-	$(MAKE) shtool
-
-shtool:
-	shtoolize -o shtool echo version mkdir install tarball
-
-
-# Targets to update xaric version file. This is so goddamn lame but shtool 
-# uses the filename for things.
-release:
-	@(cd source && ../shtool version -lc -n xaric -p x  -iv xversion.c)
-revision:
-	@(cd source && ../shtool version -lc -n xaric -p x  -ir xversion.c)
-patch:
-	@(cd source && ../shtool version -lc -n xaric -p x  -il xversion.c)

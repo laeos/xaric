@@ -1,7 +1,12 @@
-#ident "@(#)tst_init.c 1.2"
+#ifndef xversion_h__
+#define xversion_h__
+
 /*
- * tst_init.c - handle creating ternary search trees
- * (c) 2000  Rex Feany <laeos@laeos.net> 
+ * xversion.h - include version information
+ * Copyright (c) 2000 Rex Feany (laeos@xaric.org)
+ *
+ * This file is a part of Xaric, a silly IRC client.
+ * You can find Xaric at http://www.xaric.org/.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +22,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
+ * @(#)xversion.h 1.9
+ *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#define _XVERSION_C_AS_HEADER_
+#include "../source/xversion.c"
+#undef _XVERSION_C_AS_HEADER_
 
-#ifdef HAVE_ASSERT_H
-# include <assert.h>
-#endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif
+/* In xintro.h, this has the copyright info in it */
+void display_intro (void);
 
-#include "tst.h"
-
-void
-tst_init(struct tst_head *th)
-{
-	assert(th);
-
-	memset(th, 0, sizeof(struct tst_head));
-}
+#endif /* xversion_h__ */

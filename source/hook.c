@@ -1,4 +1,4 @@
-#ident "@(#)hook.c 1.9"
+#ident "@(#)hook.c 1.10"
 /*
  * hook.c: Does those naughty hook functions. 
  *
@@ -34,10 +34,10 @@
 #include "output.h"
 #include "commands.h"
 #include "parse.h"
-#include "fset.h"
 #include "misc.h"
 #include "util.h"
 #include "expr.h"
+
 #include "xmalloc.h"
 
 

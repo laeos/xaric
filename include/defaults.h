@@ -26,7 +26,7 @@
  */
 
 #ifndef DEFAULT_SERVER
-#define DEFAULT_SERVER	    "irc.core.com:6667"
+#define DEFAULT_SERVER	    "ircd.grateful.org:6667"
 #endif
 
 
@@ -261,6 +261,7 @@
 #define DEFAULT_CONNECT_TIMEOUT 30
 #define DEFAULT_STATUS_NO_REPEAT 0
 #define DEFAULT_DISPATCH_UNKNOWN_COMMANDS 0
+#define DEFAULT_SHOW_NUMERICS_STR "%g***%n"
 
 #define DEFAULT_USERMODE "+i"  /* change this to the default usermode */
 #define DEFAULT_OPERMODE "swfck"

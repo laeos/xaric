@@ -65,14 +65,15 @@
 #include "list.h"
 #include "misc.h"
 #include "hash2.h"
-#include "fset.h"
 #include "notice.h"
-#include "xaric_version.h"
 #include "util.h"
-
-#include "xmalloc.h"
 #include "tcommand.h"
+
+
+#include "xformats.h"
+#include "xmalloc.h"
 #include "xdebug.h"
+#include "xversion.h"
 
 
 
@@ -240,7 +241,7 @@ cmd_back (struct command *cmd, char *args)
 		seconds = current_t % 60;
 
 
-		if (get_fset_var (FORMAT_BACK_FSET) && get_int_var (SEND_AWAY_MSG_VAR))
+		if (get_format (FORMAT_BACK_FSET) && get_int_var (SEND_AWAY_MSG_VAR))
 		{
 			bitchsay ("You were /away for %i hours %i minutes and %i seconds.",
 				  hours, minutes, seconds);
@@ -249,7 +250,7 @@ cmd_back (struct command *cmd, char *args)
 			for (chan = server_list[curr_scr_win->server].chan_list; chan; chan = chan->next)
 			{
 				send_to_server ("PRIVMSG %s :ACTION %s", chan->channel,
-						stripansicodes (convert_output_format (get_fset_var (FORMAT_BACK_FSET), "%s %d %d %d %d %s",
+						stripansicodes (convert_output_format (get_format (FORMAT_BACK_FSET), "%s %d %d %d %d %s",
 						    update_clock (GET_TIME),
 						    hours, minutes, seconds,
 										       get_int_var (MSGCOUNT_VAR), args ? args : get_server_away (curr_scr_win->server))));
@@ -262,7 +263,7 @@ cmd_back (struct command *cmd, char *args)
 		set_server_away (curr_scr_win->server, NULL);
 
 	server_list[curr_scr_win->server].awaytime = (time_t) 0;
-	if (get_fset_var (FORMAT_BACK_FSET) && get_int_var (MSGLOG_VAR))
+	if (get_format (FORMAT_BACK_FSET) && get_int_var (MSGLOG_VAR))
 	{
 		malloc_sprintf (&tmp, " read /away msgs (%d msg%s) log [Y/n]? ", get_int_var (MSGCOUNT_VAR), plural (get_int_var (MSGCOUNT_VAR)));
 		add_wait_prompt (tmp, read_away_log, empty_string, WAIT_PROMPT_LINE);
@@ -345,7 +346,7 @@ cmd_chwall (struct command *cmd, char *args)
 			send_to_server ("%s %s :%s", "NOTICE", chops, buffer);
 		if (i)
 		{
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_BWALL_FSET), "%s %s %s %s %s", update_clock (GET_TIME), channel, "*", "*", args));
+			put_it ("%s", convert_output_format (get_format (FORMAT_BWALL_FSET), "%s %s %s %s %s", update_clock (GET_TIME), channel, "*", "*", args));
 			if (exclude)
 			{
 				exclude[strlen (exclude) - 1] = '\0';
@@ -391,7 +392,7 @@ cmd_ctcp_version (struct command *cmd, char *args)
 	else
 	{
 		send_ctcp (type, person, CTCP_VERSION, NULL);
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_CTCP_FSET),
+		put_it ("%s", convert_output_format (get_format (FORMAT_SEND_CTCP_FSET),
 		   "%s %s %s", update_clock (GET_TIME), person, "VERSION"));
 	}
 }
@@ -423,7 +424,7 @@ cmd_ctcp (struct command *cmd, char *args)
 				send_ctcp (type, to, tag, "%s", args);
 			else
 				send_ctcp (type, to, tag, NULL);
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_CTCP_FSET),
+			put_it ("%s", convert_output_format (get_format (FORMAT_SEND_CTCP_FSET),
 			     "%s %s %s %s", update_clock (GET_TIME), to, stag ? stag : "VERSION", args ? args : empty_string));
 		}
 	}
@@ -532,7 +533,7 @@ cmd_describe (struct command *cmd, char *args)
 		old = set_lastlog_msg_level (LOG_ACTION);
 		from_level = message_from_level (LOG_ACTION);
 		if (do_hook (SEND_ACTION_LIST, "%s %s", target, message))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_ACTION_OTHER_FSET),
+			put_it ("%s", convert_output_format (get_format (FORMAT_SEND_ACTION_OTHER_FSET),
 							     "%s %s %s %s", update_clock (GET_TIME), get_server_nickname (from_server), target, message));
 		set_lastlog_msg_level (old);
 		message_from_level (from_level);
@@ -590,7 +591,7 @@ cmd_disconnect (struct command *cmd, char *args)
 		return;
 	}
 	if (do_hook (DISCONNECT_LIST, "Connection Closed."))
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s %s", update_clock (GET_TIME), "Disconnecting from server", server_list[i].itsname));
+		put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s %s", update_clock (GET_TIME), "Disconnecting from server", server_list[i].itsname));
 	clear_channel_list (i);
 	close_server (i, message);
 	server_list[i].eof = 1;
@@ -598,7 +599,7 @@ cmd_disconnect (struct command *cmd, char *args)
 	clean_whois_queue ();
 	window_check_servers ();
 	if (!connected_to_server)
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
+		put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
 }
 
 static void
@@ -810,9 +811,9 @@ cmd_linklook (struct command *cmd, char *args)
 		if (serv->status & SPLIT)
 		{
 			if (!count)
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETSPLIT_HEADER_FSET), "%s %s %s %s", "time", "server", "uplink", "hops"));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NETSPLIT_HEADER_FSET), "%s %s %s %s", "time", "server", "uplink", "hops"));
 			if (do_hook (LLOOK_SPLIT_LIST, "%s %s %d", serv->name, serv->link, serv->hopcount))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETSPLIT_FSET), "%s %s %s %d", serv->time, serv->name, serv->link, serv->hopcount));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NETSPLIT_FSET), "%s %s %s %d", serv->time, serv->name, serv->link, serv->hopcount));
 			count++;
 		}
 		serv = serv->next;
@@ -858,10 +859,10 @@ cmd_me (struct command *cmd, char *args)
 			if (do_hook (SEND_ACTION_LIST, "%s %s", target, message))
 			{
 				if (strchr ("&#", *target))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_ACTION_FSET),
+					put_it ("%s", convert_output_format (get_format (FORMAT_SEND_ACTION_FSET),
 									     "%s %s %s %s", update_clock (GET_TIME), get_server_nickname (from_server), target, message));
 				else
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_ACTION_OTHER_FSET),
+					put_it ("%s", convert_output_format (get_format (FORMAT_SEND_ACTION_OTHER_FSET),
 									     "%s %s %s %s", update_clock (GET_TIME), get_server_nickname (from_server), target, message));
 			}
 			set_lastlog_msg_level (old);
@@ -998,7 +999,7 @@ cmd_ping (struct command *cmd, char *args)
 	else
 	{
 		send_ctcp (0, to, CTCP_PING, "%ld %ld", (long) tp.tv_sec, (long) tp.tv_usec);
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_CTCP_FSET),
+		put_it ("%s", convert_output_format (get_format (FORMAT_SEND_CTCP_FSET),
 		   "%s %s %s", update_clock (GET_TIME), to, "PING"));
 	}
 
@@ -1039,7 +1040,7 @@ static void
 real_quit (char *dummy, char *ptr)
 {
 	if (ptr && *ptr && (*ptr == 'Y' || *ptr == 'y'))
-		irc_exit (dummy, convert_output_format (get_fset_var (FORMAT_SIGNOFF_FSET), "%s %s %s %s", update_clock (GET_TIME), get_server_nickname (get_window_server (0)), m_sprintf ("%s@%s", username, hostname), dummy));
+		irc_exit (dummy, convert_output_format (get_format (FORMAT_SIGNOFF_FSET), "%s %s %s %s", update_clock (GET_TIME), get_server_nickname (get_window_server (0)), m_sprintf ("%s@%s", username, hostname), dummy));
 	bitchsay ("Excelllaaant!!");
 }
 
@@ -1137,7 +1138,7 @@ cmd_quit (struct command *cmd, char *args)
 	else
 	{
 		from_server = old_server;
-		irc_exit (Reason, convert_output_format (get_fset_var (FORMAT_SIGNOFF_FSET), "%s %s %s %s", update_clock (GET_TIME), get_server_nickname (get_window_server (0)), m_sprintf ("%s@%s", username, hostname), Reason));
+		irc_exit (Reason, convert_output_format (get_format (FORMAT_SIGNOFF_FSET), "%s %s %s %s", update_clock (GET_TIME), get_server_nickname (get_window_server (0)), m_sprintf ("%s@%s", username, hostname), Reason));
 	}
 }
 
@@ -1974,7 +1975,7 @@ cmd_users (struct command *cmd, char *args)
 			else
 			{
 				if (!count && do_hook (USERS_HEADER_LIST, "%s %s %s %s %s %s %s", "Level", "aop", "prot", "Channel", "Nick", "+o", "UserHost"))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_USERS_HEADER_FSET), "%s", chan->channel));
+					put_it ("%s", convert_output_format (get_format (FORMAT_USERS_HEADER_FSET), "%s", chan->channel));
 
 				if ((hook = do_hook (USERS_LIST, "%d %d %d %s %s %s %c",
 						     0,
@@ -1984,7 +1985,7 @@ cmd_users (struct command *cmd, char *args)
 						     nicks->host,
 						nicks->chanop ? '@' : ' ')))
 				{
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_USERS_FSET), "%d %d %d %s %s %s %s",
+					put_it ("%s", convert_output_format (get_format (FORMAT_USERS_FSET), "%d %d %d %s %s %s %s",
 									  0,
 									  0,
 									  0,
@@ -2008,7 +2009,7 @@ cmd_users (struct command *cmd, char *args)
 
 	if (msg && (msg != 3) && (msg != 4) && (msg != 5) && (msg != 6) /*&& (msg != 7) */  && count)
 	{
-		put_it ("%s", convert_output_format (get_fset_var ((msg == 1) ? FORMAT_SEND_MSG_FSET : FORMAT_SEND_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), msgbuf, args));
+		put_it ("%s", convert_output_format (get_format ((msg == 1) ? FORMAT_SEND_MSG_FSET : FORMAT_SEND_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), msgbuf, args));
 		my_send_to_server (server, "%s %s :%s", (msg == 1) ? "PRIVMSG" : "NOTICE", msgbuf, args);
 	}
 	message_from (NULL, LOG_CRAP);
@@ -2185,6 +2186,7 @@ struct command xaric_cmds[] =
 	{"EXEC", NULL, NULL, cmd_exec, "%Y<%ncommand%Y>%n\n- Executes %Y<%ncommand%Y>%n with the shell set from %PSHELL%n"},
 	{"EXIT", NULL, NULL, cmd_quit, "- Quits IRC"},
 	{"FLUSH", NULL, NULL, cmd_flush, "- Flush ALL server output"},
+	{"FRESET", NULL, NULL, cmd_freset, "- Reset all formats to default values"},
 	{"FSET", NULL, NULL, cmd_fset, NULL},
 	{"GLOBOPS", NULL, empty_string, cmd_oper_stuff1, "\n%Y<%Cmessage%Y>%n Requires irc operator status. Sends a message to global operators.%n"},
 	{"HASH", NULL, NULL, cmd_generic, "- Shows some stats about ircd's internal hashes."},

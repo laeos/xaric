@@ -1,13 +1,8 @@
-#ident "@(#)cmd_hostname.c 1.9"
+#ident "@(#)cmd_hostname.c 1.11"
 /*
  * cmd_hostname.c : virtual host support 
- *
- * Written By Michael Sandrof
- * Portions are based on EPIC.
- * Modified by panasync (Colten Edwards) 1995-97
- * Copyright(c) 1990
- * Modified for Xaric by Rex Feany <laeos@ptw.com> 1998
- *
+ * Copyright (C) 2000 Rex Feany <laeos@laeos.net>
+ * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -28,6 +23,11 @@
 #include "config.h"
 #endif
 
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 
 #include "irc.h"
@@ -36,140 +36,49 @@
 #include "list.h"
 #include "misc.h"
 #include "tcommand.h"
-#include "xmalloc.h"
 
-typedef struct _virtuals_struc
+#include "xp_ifinfo.h"
+
+
+static void
+set_hostname(char *host)
 {
-	struct _virtuals_struc *next;
-	char *hostname;
+	struct hostent *hp;
+	int reconn = 0;
+
+	if (LocalHostName == NULL || strcmp (LocalHostName, host))
+		reconn = 1;
+
+	malloc_strcpy (&LocalHostName, host);
+	if ((hp = gethostbyname (LocalHostName)))
+		memcpy ((void *) &LocalHostAddr, hp->h_addr, sizeof (LocalHostAddr));
+
+	bitchsay ("Local host name is now %s", LocalHostName);
+	if (reconn)
+		t_parse_command ("RECONNECT", NULL);
 }
-Virtuals;
 
 
 void
 cmd_hostname (struct command *cmd, char *args)
 {
-	struct hostent *hp;
-	Virtuals *virtuals = NULL;
-
-	if (args && *args && *args != '#')
-	{
-		int reconn = 0;
-		if (LocalHostName == NULL || strcmp (LocalHostName, args))
-			reconn = 1;
-		malloc_strcpy (&LocalHostName, args);
-		if ((hp = gethostbyname (LocalHostName)))
-			memcpy ((void *) &LocalHostAddr, hp->h_addr, sizeof (LocalHostAddr));
-
-		bitchsay ("Local host name is now %s", LocalHostName);
-		if (reconn)
-			t_parse_command ("RECONNECT", NULL);
-	}
-	else
-	{
-#if !defined(__linux__) && !defined(BSD)
-		bitchsay ("Local Host Name is [%s]", (LocalHostName) ? LocalHostName : hostname);
-#else
-		char filename[81];
-		char comm[200];
-		FILE *fptr;
-		char *p, *q;
-		unsigned long ip;
-		Virtuals *new = NULL;
-		struct hostent *host;
+	if (args && *args && *args != '#') {
+		set_hostname(args);
+	} else {
+		struct xp_iflist * l = xp_get_iflist();
+		struct xp_iflist * c;
 		int i;
-		char *newhost = NULL;
-#if defined(BSD)
-		char device[80];
-#endif
 
-		tmpnam (filename);
-#if defined(BSD)
-		if (!(p = path_search ("netstat", "/sbin:/usr/sbin:/bin:/usr/bin")))
-		{
-			yell ("No Netstat to be found");
+		if ( l == NULL ) {
+			put_it("%s", convert_output_format("%G Unable to find anything!", NULL, NULL));
 			return;
 		}
-		sprintf (comm, "%s -in >%s", p, filename);
-#else
-		sprintf (comm, "/sbin/ifconfig -a >%s", filename);
-#endif
-		system (comm);
 
-		if ((fptr = fopen (filename, "r")) == NULL)
-		{
-			unlink (filename);
-			return;
+		for(c = l, i = 1; c; c = c->ifi_next, i++) {
+			put_it("%s", convert_output_format("%K[%W$[3]0%K] %B$1 %g[%c$2%g]", "%d %s %s", i, c->ifi_host, c->ifi_name));
 		}
-#if defined(BSD)
-		fgets (comm, 200, fptr);
-		fgets (comm, 200, fptr);
-		p = next_arg (comm, &q);
-		strncpy (device, p, 79);
-		bitchsay ("Looking for hostnames on device %s", device);
-#endif
-		while ((fgets (comm, 200, fptr)))
-		{
-#if defined(__linux__)
-			if ((p = strstr (comm, "inet addr")))
-			{
-				p += 10;
-				q = strchr (p, ' ');
-				*q = 0;
-				if ((p && !*p) || (p && !strcmp (p, "127.0.0.1")))
-					continue;
-#else /*(BSD) */
-			if (!strncmp (comm, device, strlen (device)))
-			{
-				p = comm;
-				p += 24;
-				while (*p && *p == ' ')
-					p++;
-				q = strchr (p, ' ');
-				*q = 0;
-				if ((p && !*p) || (p && !strcmp (p, "127.0.0.1")))
-					continue;
-#endif
-				ip = inet_addr (p);
-				if ((host = gethostbyaddr ((char *) &ip, sizeof (ip), AF_INET)))
-				{
-					new = (Virtuals *) xmalloc (sizeof (Virtuals));
-					new->hostname = m_strdup (host->h_name);
-					add_to_list ((List **) & virtuals, (List *) new);
-				}
-
-			}
-		}
-		fclose (fptr);
-		unlink (filename);
-		for (new = virtuals, i = 1; virtuals; i++)
-		{
-			new = virtuals;
-			virtuals = virtuals->next;
-			if (i == 1)
-				put_it ("%s", convert_output_format ("$G Current hostnames available", NULL, NULL));
-			put_it ("%s", convert_output_format ("%K[%W$[3]0%K] %B$1", "%d %s", i, new->hostname));
-			if (args && *args)
-			{
-				if (*args == '#')
-					args++;
-				if (args && *args && (i == my_atol (args)))
-					malloc_strcpy (&newhost, new->hostname);
-
-			}
-			xfree (&new->hostname);
-			xfree (&new);
-		}
-		if (newhost)
-		{
-			malloc_strcpy (&LocalHostName, newhost);
-			if ((hp = gethostbyname (LocalHostName)))
-				memcpy ((void *) &LocalHostAddr, hp->h_addr, sizeof (LocalHostAddr));
-
-			bitchsay ("Local host name is now [%s]", LocalHostName);
-			xfree (&newhost);
-			t_parse_command ("RECONNECT", NULL);
-		}
-#endif
+		xp_free_iflist(l);
 	}
+	return;
 }
+

@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)configure.in 1.12
+# @(#)configure.in 1.13
 #
 
 dnl ---------------------------------------------------------------
@@ -349,6 +349,7 @@ dnl ----------------------------------------------------------
 
 AC_MSG_PART(Finished)
 
+AC_CONFIG_SUBDIRS(xpcommon)
 AC_OUTPUT(Makefile, echo timestamp > include/stamp-h)
 
 echo ""

@@ -1,4 +1,4 @@
-#ident "%W%"
+#ident "@(#)irc.c 1.22"
 /*
  * irc.c - where it all starts!
  *
@@ -70,10 +70,10 @@
 #include "whowas.h"
 #include "misc.h"
 #include "tcommand.h"
-#include "xaric_version.h"
-#include "xmalloc.h"
 #include "util.h"
 
+#include "xversion.h"
+#include "xmalloc.h"
 
 
 
@@ -109,7 +109,6 @@ char *LocalHostName = NULL;
 extern char *last_away_nick;
 
 extern int split_watch;
-char three_stars[] = "***";
 
 char *invite_channel = NULL,	/* last channel of an INVITE */
  *ircrc_file = NULL,		/* full path .ircrc file */

@@ -1,4 +1,4 @@
-#ident "@(#)expr.c 1.3"
+#ident "@(#)expr.c 1.4"
 /*
  * This file is a combination of what was left of alias.c and expr.c
  *
@@ -47,9 +47,10 @@
 #include "ircaux.h"
 #include "output.h"
 #include "vars.h"
-#include "fset.h"
 #include "input.h"
 #include "util.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 #include "xdebug.h"
 

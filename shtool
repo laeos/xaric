@@ -6,7 +6,7 @@
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version:  1.5.0 (01-Jul-2000)
+##  Version:  1.5.1 (29-Jul-2000)
 ##  Contents: 5/17 available modules
 ##
 
@@ -65,7 +65,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 1.5.0 (01-Jul-2000)"
+    echo "This is GNU shtool, version 1.5.1 (29-Jul-2000)"
     echo "Copyright (c) 1994-2000 Ralf S. Engelschall <rse@engelschall.com>"
     echo "Report bugs to <bug-shtool@gnu.org>"
     echo ''
@@ -105,7 +105,7 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     exit 0
 fi
 if [ ".$1" = ".-v" -o ".$1" = ."--version" ]; then
-    echo "GNU shtool 1.5.0 (01-Jul-2000)"
+    echo "GNU shtool 1.5.1 (29-Jul-2000)"
     exit 0
 fi
 if [ ".$1" = ".-r" -o ".$1" = ."--recreate" ]; then
@@ -814,7 +814,6 @@ tarball )
     #   expand source paths
     exclude=''
     for pat in `echo $opt_e | sed 's/,/ /g'`; do
-    	echo "got pat $pat"
         exclude="$exclude | grep -v '$pat'"
     done
     if [ ".$opt_t" = .yes ]; then
@@ -824,9 +823,9 @@ tarball )
     for src in $srcs; do
         if [ -d $src ]; then
             if [ ".$opt_t" = .yes ]; then
-                echo "(cd $src && $prg_find . -type f -depth -print) | sed -e 's:^\\.\$::' -e 's:^\\./::' | cat $exclude >>$tmpfile.lst" 1>&2
+                echo "(cd $src && $prg_find . -type f -follow -depth -print) | sed -e 's:^\\.\$::' -e 's:^\\./::' | cat $exclude >>$tmpfile.lst" 1>&2
             fi
-            (cd $src && find . -type f -depth -print) |\
+            (cd $src && find . -type f -follow -depth -print) |\
             sed -e 's:^\.$::' -e 's:^\./::' | eval cat $exclude >>$tmpfile.lst
         else
             if [ ".$opt_t" = .yes ]; then
@@ -913,9 +912,9 @@ tarball )
             echo "$msgprefix:Warning: cannot set group name \`$opt_g' (would require root priviledges)"
         fi
         if [ ".$opt_t" = .yes ]; then
-            echo "(cd $tmpdir && $prg_find $tarname -type f -depth -print | sort | xargs $prg_tar cf -) | cat $compress >$tmpfile.out" 1>&2
+            echo "(cd $tmpdir && $prg_find $tarname -type f -follow -depth -print | sort | xargs $prg_tar cf -) | cat $compress >$tmpfile.out" 1>&2
         fi
-        (cd $tmpdir && $prg_find $tarname -type f -depth -print | sort | xargs $prg_tar cf -) |\
+        (cd $tmpdir && $prg_find $tarname -type f -follow -depth -print | sort | xargs $prg_tar cf -) |\
         eval cat $compress >$tmpfile.out
         if [ ".$opt_t" = .yes ]; then
             echo "cp $tmpfile.out $tarfile" 1>&2
@@ -1021,7 +1020,8 @@ version )
         s     ) typnum=15; levnum=255  ;; # snapshots are special
     esac
     hex=`echo "$ver:$rev:$typnum:$levnum" |\
-         awk -F: '{ printf("0x%X%02X%1X%02X", $1, $2, $3, $4); }'`
+         awk -F: '{ printf("0x%x%02x%1x%02x", $1, $2, $3, $4); }' |\
+         tr 'abcdef' 'ABCDEF'`
     ltv=`echo "$ver:$rev:$typnum:$levnum" |\
          awk -F: '{ printf("%d:%d", $1*10 + $2, $3*10 + $4); }'`
     
@@ -1185,6 +1185,23 @@ version )
                 echo >>$file "};"
                 echo >>$file ""
                 echo >>$file "1;"
+                echo >>$file ""
+                ;;
+            python )
+                echo >>$file "##"
+                echo >>$file "##  ${file} -- Version Information for ${name} (syntax: Python)"
+                echo >>$file "##  [automatically generated and maintained by GNU shtool]"
+                echo >>$file "##"
+                echo >>$file ""
+                echo >>$file "class ${prefix}version:"
+                echo >>$file "    v_hex       = ${vHex}"
+                echo >>$file "    v_short     = \"${vShort}\""
+                echo >>$file "    v_long      = \"${vLong}\""
+                echo >>$file "    v_tex       = \"${vTeX}\""
+                echo >>$file "    v_gnu       = \"${vGNU}\""
+                echo >>$file "    v_web       = \"${vWeb}\""
+                echo >>$file "    v_sccs      = \"${vSCCS}\""
+                echo >>$file "    v_rcs       = \"${vRCS}\""
                 echo >>$file ""
                 ;;
             * ) echo "$msgprefix:Error: invalid argument to option \`-l': \`$opt_l'" 1>&2

@@ -1,4 +1,4 @@
-#ident "@(#)funny.c 1.10"
+#ident "@(#)funny.c 1.11"
 /*
  * funny.c: Well, I put some stuff here and called it funny.  So sue me. 
  *
@@ -30,7 +30,8 @@
 #include "status.h"
 #include "misc.h"
 #include "screen.h"
-#include "fset.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 static char *match_str = NULL;
@@ -122,7 +123,7 @@ funny_print_widelist (void)
 		if (strlen (buffer1) + strlen (buffer2) > CO - 5)
 		{
 			if (do_hook (WIDELIST_LIST, "%s", buffer1))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_WIDELIST_FSET), "%s %s", update_clock (GET_TIME), buffer1));
+				put_it ("%s", convert_output_format (get_format (FORMAT_WIDELIST_FSET), "%s %s", update_clock (GET_TIME), buffer1));
 			*buffer1 = 0;
 			strcat (buffer1, buffer2);
 		}
@@ -130,7 +131,7 @@ funny_print_widelist (void)
 			strcpy (ptr, buffer2);
 	}
 	if (*buffer1 && do_hook (WIDELIST_LIST, "%s", buffer1))
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_WIDELIST_FSET), "%s %s", update_clock (GET_TIME), buffer1));
+		put_it ("%s", convert_output_format (get_format (FORMAT_WIDELIST_FSET), "%s %s", update_clock (GET_TIME), buffer1));
 	for (i = 0; i < wl_elements; i++)
 	{
 		xfree (&wide_list[i]->channel);
@@ -203,7 +204,7 @@ funny_list (char *from, char **ArgList)
 	  line) && do_hook (LIST_LIST, "%s %s %s", channel, user_cnt, line))
 	{
 		if (channel && user_cnt)
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_LIST_FSET), "%s %s %s %s", update_clock (GET_TIME), *channel == '*' ? "Prv" : channel, user_cnt, line));
+			put_it ("%s", convert_output_format (get_format (FORMAT_LIST_FSET), "%s %s %s %s", update_clock (GET_TIME), *channel == '*' ? "Prv" : channel, user_cnt, line));
 	}
 }
 
@@ -217,26 +218,26 @@ print_funny_names (char *line)
 	if (*line)
 	{
 		t = next_arg (line, &line);
-		if (get_fset_var (FORMAT_NAMES_BANNER_FSET))
-			malloc_strcpy (&buffer, get_fset_var (FORMAT_NAMES_BANNER_FSET));
+		if (get_format (FORMAT_NAMES_BANNER_FSET))
+			malloc_strcpy (&buffer, get_format (FORMAT_NAMES_BANNER_FSET));
 		do
 		{
 			if (*t == '@' || *t == '+' || *t == '~' || *t == '-')
 			{
 				special = *t;
 				if (special == '+')
-					malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", special, ++t));
+					malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", special, ++t));
 				else
-					malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", special, ++t));
+					malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", special, ++t));
 			}
 			else
-				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_NICKCOLOR_FSET), "$ %s", t));
+				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_NICKCOLOR_FSET), "$ %s", t));
 			malloc_strcat (&buffer, " ");
 			if (count++ == 4)
 			{
 				put_it (buffer);
-				if (get_fset_var (FORMAT_NAMES_BANNER_FSET))
-					malloc_strcpy (&buffer, get_fset_var (FORMAT_NAMES_BANNER_FSET));
+				if (get_format (FORMAT_NAMES_BANNER_FSET))
+					malloc_strcpy (&buffer, get_format (FORMAT_NAMES_BANNER_FSET));
 				else
 					xfree (&buffer);
 				count = 0;
@@ -289,7 +290,7 @@ funny_namreply (char *from, char **Args)
 		    && do_hook (NAMES_LIST, "%s %s", channel, line)
 		    && get_int_var (SHOW_CHANNEL_NAMES_VAR))
 		{
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_NAMES_FSET), "%s %s %d", update_clock (GET_TIME), channel, user_count));
+			put_it ("%s", convert_output_format (get_format (FORMAT_NAMES_FSET), "%s %s %d", update_clock (GET_TIME), channel, user_count));
 			print_funny_names (line);
 		}
 
@@ -342,9 +343,9 @@ funny_namreply (char *from, char **Args)
 		if (do_hook (current_numeric, "%s %s %s %s", from, type, channel, line) && do_hook (NAMES_LIST, "%s %s", channel, line))
 		{
 			message_from (channel, LOG_CRAP);
-			if (get_fset_var (FORMAT_NAMES_FSET))
+			if (get_format (FORMAT_NAMES_FSET))
 			{
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NAMES_FSET), "%s %s %d", update_clock (GET_TIME), channel, cnt));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NAMES_FSET), "%s %s %d", update_clock (GET_TIME), channel, cnt));
 				print_funny_names (line);
 			}
 			else
@@ -397,12 +398,12 @@ funny_mode (char *from, char **ArgList)
 		{
 			message_from (channel, LOG_CRAP);
 			if (do_hook (current_numeric, "%s %s %s", from, channel, mode))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_MODE_CHANNEL_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, *FromUserHost ? FromUserHost : "ÿ", channel, mode));
+				put_it ("%s", convert_output_format (get_format (FORMAT_MODE_CHANNEL_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, *FromUserHost ? FromUserHost : "ÿ", channel, mode));
 		}
 		else
 		{
 			if (do_hook (current_numeric, "%s %s", from, mode))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_MODE_CHANNEL_FSET), "%s %s %s %s", update_clock (GET_TIME), from, *FromUserHost ? FromUserHost : "ÿ", mode));
+				put_it ("%s", convert_output_format (get_format (FORMAT_MODE_CHANNEL_FSET), "%s %s %s %s", update_clock (GET_TIME), from, *FromUserHost ? FromUserHost : "ÿ", mode));
 		}
 	}
 }

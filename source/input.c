@@ -1,4 +1,4 @@
-#ident "@(#)input.c 1.10"
+#ident "@(#)input.c 1.11"
 /*
  * input.c: does the actual input line stuff... keeps the appropriate stuff
  * on the input line, handles insert/delete of characters/words... the whole
@@ -37,10 +37,11 @@
 #include "window.h"
 #include "status.h"
 #include "hash2.h"
-#include "fset.h"
 #include "tcommand.h"
 #include "expr.h"
 #include "util.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 
@@ -890,8 +891,8 @@ input_msgreply (char dumb, char *dumber)
 		{
 			char *tmp = NULL;
 			input_clear_line ('\0', NULL);
-			if (get_fset_var (FORMAT_NICK_MSG_FSET))
-				malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_MSG_FSET), "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_string)));
+			if (get_format (FORMAT_NICK_MSG_FSET))
+				malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_format (FORMAT_NICK_MSG_FSET), "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_string)));
 			else
 				malloc_sprintf (&tmp, "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_string);
 			set_input (tmp);
@@ -914,8 +915,8 @@ add_autonick_input (char *nick, char *line)
 	input_clear_line ('\0', NULL);
 	if ((do_hook (AR_REPLY_LIST, "%s", nick)))
 	{
-		if (get_fset_var (FORMAT_NICK_AUTO_FSET))
-			malloc_strcpy (&tmp1, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_AUTO_FSET), "%s %s", nick, line ? line : empty_string)));
+		if (get_format (FORMAT_NICK_AUTO_FSET))
+			malloc_strcpy (&tmp1, stripansicodes (convert_output_format (get_format (FORMAT_NICK_AUTO_FSET), "%s %s", nick, line ? line : empty_string)));
 		else
 			malloc_sprintf (&tmp1, "%s: %s", nick, line);
 		set_input (tmp1);
@@ -974,8 +975,8 @@ send_line (char dumb, char *dumber)
 							break;
 					if (nick)
 					{
-						if (get_fset_var (FORMAT_NICK_COMP_FSET))
-							malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_COMP_FSET), "%s %s", nick->nick, p)));
+						if (get_format (FORMAT_NICK_COMP_FSET))
+							malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_format (FORMAT_NICK_COMP_FSET), "%s %s", nick->nick, p)));
 						else
 							malloc_sprintf (&tmp, "%s%c %s", nick->nick, auto_comp_char, p);
 					}

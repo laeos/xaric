@@ -1,4 +1,4 @@
-#ident "@(#)cmd_modes.c 1.10"
+#ident "@(#)cmd_modes.c 1.11"
 /*
  * cmd_modes.c : commands that have to do with modes?!
  *
@@ -48,11 +48,10 @@
 #include "vars.h"
 #include "misc.h"
 #include "hash2.h"
-#include "fset.h"
-
-
-#include "xmalloc.h"
 #include "util.h"
+
+#include "xformats.h"
+#include "xmalloc.h"
 
 
 static char *mode_buf = NULL;
@@ -605,13 +604,13 @@ cmd_banstat (struct command *cmd, char *args)
 			return;
 		}
 		if ((do_hook (BANS_HEADER_LIST, "%s %s %s %s %s", "#", "Channel", "Ban", "SetBy", "Seconds")))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_BANS_HEADER_FSET), NULL));
+			put_it ("%s", convert_output_format (get_format (FORMAT_BANS_HEADER_FSET), NULL));
 		for (tmpc = chan->bans; tmpc; tmpc = tmpc->next, count++)
 		{
 			if (check && (!match (check, tmpc->ban) || !match (tmpc->ban, check)))
 				continue;
 			if (do_hook (BANS_LIST, "%d %s %s %s %lu", count, chan->channel, tmpc->ban, tmpc->setby ? tmpc->setby : get_server_name (from_server), (unsigned long) tmpc->time))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_BANS_FSET), "%d %s %s %s %l", count, chan->channel, tmpc->ban, tmpc->setby ? tmpc->setby : get_server_name (from_server), tmpc->time));
+				put_it ("%s", convert_output_format (get_format (FORMAT_BANS_FSET), "%d %s %s %s %l", count, chan->channel, tmpc->ban, tmpc->setby ? tmpc->setby : get_server_name (from_server), tmpc->time));
 		}
 		xfree (&check);
 		xfree (&channel);
@@ -690,10 +689,10 @@ cmd_tban (struct command *cmd, char *args)
 			return;
 		}
 		if ((do_hook (BANS_HEADER_LIST, "%s %s %s %s %s", "#", "Channel", "Ban", "SetBy", "Seconds")))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_BANS_HEADER_FSET), NULL));
+			put_it ("%s", convert_output_format (get_format (FORMAT_BANS_HEADER_FSET), NULL));
 		for (tmpc = chan->bans; tmpc; tmpc = tmpc->next, count++)
 			if (do_hook (BANS_LIST, "%d %s %s %s %lu", count, chan->channel, tmpc->ban, tmpc->setby ? tmpc->setby : get_server_name (from_server), (unsigned long) tmpc->time))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_BANS_FSET), "%d %s %s %s %l", count, chan->channel, tmpc->ban, tmpc->setby ? tmpc->setby : get_server_name (from_server), tmpc->time));
+				put_it ("%s", convert_output_format (get_format (FORMAT_BANS_FSET), "%d %s %s %s %l", count, chan->channel, tmpc->ban, tmpc->setby ? tmpc->setby : get_server_name (from_server), tmpc->time));
 		add_wait_prompt ("Which ban to delete (-2, 2-5, ...) ? ", remove_bans, chan->channel, WAIT_PROMPT_LINE);
 	}
 }

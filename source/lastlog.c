@@ -1,4 +1,4 @@
-#ident "@(#)lastlog.c 1.10"
+#ident "@(#)lastlog.c 1.11"
 /*
  * lastlog.c: handles the lastlog features of irc. 
  *
@@ -25,8 +25,9 @@
 #include "hook.h"
 #include "util.h"
 #include "status.h"
-#include "fset.h"
 #include "tcommand.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 /*
@@ -500,7 +501,7 @@ logmsg (unsigned long log_type, char *from, char *string, int flag)
 			return 0;
 		if (msglog_level & log_type)
 		{
-			lines = split_up_line (stripansicodes (convert_output_format (get_fset_var (FORMAT_MSGLOG_FSET) ? get_fset_var (FORMAT_MSGLOG_FSET) : "[$[10]0] [$1] - $2-", "%s %s %s %s", type, timestr, from, string)));
+			lines = split_up_line (stripansicodes (convert_output_format (get_format (FORMAT_MSGLOG_FSET) ? get_format (FORMAT_MSGLOG_FSET) : "[$[10]0] [$1] - $2-", "%s %s %s %s", type, timestr, from, string)));
 			for (; *lines; lines++)
 				fprintf (logptr, "%s\n", *lines);
 			fflush (logptr);

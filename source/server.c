@@ -1,4 +1,4 @@
-#ident "@(#)server.c 1.12"
+#ident "@(#)server.c 1.13"
 /*
  * server.c: Things dealing with server connections, etc. 
  *
@@ -34,8 +34,9 @@
 #include "notify.h"
 #include "misc.h"
 #include "status.h"
-#include "fset.h"
 #include "util.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 #include "xdebug.h"
 
@@ -280,7 +281,7 @@ do_server (fd_set * rd, fd_set * wr)
 					{
 						if (server_list[i].eof)
 						{
-							put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "Unable to connect to a server"));
+							put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "Unable to connect to a server"));
 							if (++i >= number_of_servers)
 							{
 								clean_whois_queue ();
@@ -297,7 +298,7 @@ do_server (fd_set * rd, fd_set * wr)
 							{
 								clean_whois_queue ();
 								if (do_hook (DISCONNECT_LIST, "No Connection"))
-									put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "No connection"));
+									put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "No connection"));
 								times = 0;
 							}
 							get_connected (i);
@@ -872,7 +873,7 @@ get_connected (int server)
 	{
 		clean_whois_queue ();
 		if (do_hook (DISCONNECT_LIST, "No Server List"))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
+			put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
 	}
 }
 
@@ -1129,24 +1130,24 @@ set_server_away (int ssa_index, char *message)
 			from_server = old_from_server;
 			return;
 		}
-		if (get_fset_var (FORMAT_AWAY_FSET) && get_int_var (SEND_AWAY_MSG_VAR))
+		if (get_format (FORMAT_AWAY_FSET) && get_int_var (SEND_AWAY_MSG_VAR))
 		{
 			ChannelList *chan;
 			for (chan = server_list[ssa_index].chan_list; chan; chan = chan->next)
 			{
 				send_to_server ("PRIVMSG %s :ACTION %s", chan->channel,
 
-						stripansicodes (convert_output_format (get_fset_var (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message)));
+						stripansicodes (convert_output_format (get_format (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message)));
 			}
 		}
-		if (get_fset_var (FORMAT_AWAY_FSET))
+		if (get_format (FORMAT_AWAY_FSET))
 		{
 			char buffer[BIG_BUFFER_SIZE + 1];
 			send_to_server ("%s :%s", "AWAY",
-					stripansicodes (convert_output_format (get_fset_var (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message)));
+					stripansicodes (convert_output_format (get_format (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message)));
 			strncpy (buffer, convert_output_format ("%Kð %W$N%n is away: ", NULL, NULL), BIG_BUFFER_SIZE);
 			strncat (buffer,
-				 convert_output_format (get_fset_var (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message), BIG_BUFFER_SIZE);
+				 convert_output_format (get_format (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message), BIG_BUFFER_SIZE);
 			put_it ("%s", buffer);
 		}
 		else
@@ -1539,7 +1540,7 @@ send_to_server (const char *format,...)
 		/*if (from_server == -1) */
 	{
 		if (do_hook (DISCONNECT_LIST, "No Connection"))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
+			put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
 	}
 }
 
@@ -1578,7 +1579,7 @@ my_send_to_server (int server, const char *format,...)
 	else
 	{
 		if (do_hook (DISCONNECT_LIST, "No Connection"))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
+			put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
 	}
 }
 

@@ -1,4 +1,4 @@
-#ident "%W%"
+#ident "@(#)xintro.c 1.5"
 /*
  * xintro.c - first things that are displayed when the client is started.
  * Copyright (C) 1998, 1999, 2000 Rex Feany <laeos@laeos.net>
@@ -30,7 +30,8 @@
 #include "output.h"
 #include "misc.h"
 #include "util.h"
-#include "xaric_version.h"
+
+#include "xversion.h"
 
 void
 display_intro (void)
@@ -43,7 +44,7 @@ display_intro (void)
 	put_it(convert_output_format("%g***%n", NULL));
 	put_it(convert_output_format("%g***%C $0-", "%s", xversion.v_tex));
 	put_it(convert_output_format("%g***%n", NULL));
-	put_it(convert_output_format("%g***%n Copyright (C) 1998, 1999, 2000 Rex G. Feany <laeos@laeos.ne>", NULL));
+	put_it(convert_output_format("%g***%n Copyright (C) 1998, 1999, 2000 Rex G. Feany <laeos@laeos.net>", NULL));
 	put_it(convert_output_format("%g***%n", NULL));
 	put_it(convert_output_format("%g***%n Xaric is free software, covered by the GNU General Public License,", NULL));
 	put_it(convert_output_format("%g***%n and you are welcome to change it and/or distribute copies of it", NULL));

@@ -1,4 +1,4 @@
-#ident "@(#)notify.c 1.9"
+#ident "@(#)notify.c 1.10"
 /*
  * notify.c: a few handy routines to notify you when people enter and leave irc 
  *
@@ -27,8 +27,9 @@
 #include "timer.h"
 #include "misc.h"
 #include "status.h"
-#include "fset.h"
 #include "tcommand.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 /* NotifyList: the structure for the notify stuff */
@@ -270,14 +271,14 @@ notify_mark (char *nick, char *user, char *host, int flag)
 				tmp->lastseen = 0;
 				tmp->times++;
 
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_SIGNON_UH_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, tmp->user, tmp->host));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_SIGNON_UH_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, tmp->user, tmp->host));
 			}
 		}
 		else
 		{
 			if (tmp->flag)
 			{
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_SIGNOFF_UH_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, tmp->user, tmp->host));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_SIGNOFF_UH_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, tmp->user, tmp->host));
 				tmp->offline += now - tmp->added;
 				tmp->lastseen = now - tmp->added;
 				xfree (&tmp->host);
@@ -305,8 +306,8 @@ show_notify_list (void)
 		if (tmp->flag)
 		{
 			if (count == 0)
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_ON_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times", "Period", "Last seen"));
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_ON_FSET), "%s %s@%s %d %l %l", tmp->nick, tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times, tmp->offline, tmp->lastseen));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_ON_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times", "Period", "Last seen"));
+			put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_ON_FSET), "%s %s@%s %d %l %l", tmp->nick, tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times, tmp->offline, tmp->lastseen));
 			count++;
 		}
 	}
@@ -317,8 +318,8 @@ show_notify_list (void)
 		if (!(tmp->flag))
 		{
 			if (count == 0)
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_OFF_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times", "Period", "Last seen"));
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_OFF_FSET), "%s %s@%s %d %l %l", tmp->nick, tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times, tmp->offline, tmp->lastseen));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_OFF_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times", "Period", "Last seen"));
+			put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_OFF_FSET), "%s %s@%s %d %l %l", tmp->nick, tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times, tmp->offline, tmp->lastseen));
 			count++;
 		}
 	}

@@ -1,4 +1,4 @@
-#ident "@(#)names.c 1.12"
+#ident "@(#)names.c 1.13"
 /*
  * names.c: This here is used to maintain a list of all the people currently
  * on your channel.  Seems to work 
@@ -37,8 +37,9 @@
 #include "vars.h"
 #include "status.h"
 #include "hash2.h"
-#include "fset.h"
 #include "util.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 extern int in_on_who;
@@ -1205,7 +1206,7 @@ remove_from_channel (char *channel, char *nick, int server, int netsplit, char *
 			malloc_strcpy (&last_split_from, server2);
 			if (do_hook (LLOOK_SPLIT_LIST, "%s %s", server2, server1))
 			{
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETSPLIT_FSET), "%s %s %s", update_clock (GET_TIME), server1, server2));
+				put_it ("%s", convert_output_format (get_format (FORMAT_NETSPLIT_FSET), "%s %s %s", update_clock (GET_TIME), server1, server2));
 				bitchsay ("\002Ctrl-F\002 to see who left \002Ctrl-E\002 to change to [%s]", server1);
 			}
 			message_from (NULL, LOG_CRAP);

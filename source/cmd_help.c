@@ -1,4 +1,4 @@
-#ident "@(#)cmd_help.c 1.12"
+#ident "@(#)cmd_help.c 1.14"
 /*
  * xhelp.c -- Xaric help system
  * Copyright (c) 2000 Rex Feany (laeos@laeos.net) 
@@ -48,9 +48,8 @@
 #include "screen.h"
 #include "tcommand.h"
 #include "util.h"
-#include "fset.h"
-#include "xmalloc.h"
 #include "vars.h"
+#include "xmalloc.h"
 
 #define HELP_LINE_LEN		81	/* how long of a line do we read? */
 

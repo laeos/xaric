@@ -1,4 +1,4 @@
-#ident "@(#)xscandir.c 1.4"
+#ident "@(#)xscandir.c 1.7"
 /*
  * xscandir.c - wrapper for scandir 
  * Copyright (C) 1999, 2000 Rex Feany <laeos@laeos.net>
@@ -23,6 +23,20 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_CTYPE_H
+# include <ctype.h>
+#endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+
+
 /* Small parts shamelessly stolen from ircII help.c */
 #if defined(HAVE_DIRENT_H) || defined(_POSIX_SOURCE)
 # include <dirent.h>
@@ -41,16 +55,6 @@
 # endif /* HAVE_NDIR_H */
 #endif /* HAVE_DIRENT_H || _POSIX_VERSION */
 
-#ifdef HAVE_CTYPE_H
-# include <ctype.h>
-#endif
-#ifdef HAVE_STDIO_H
-# include <stdio.h>
-#endif
-#ifdef HAVE_ASSERT_H
-# include <assert.h>
-#endif
-
 #include "irc.h"
 #include "ircaux.h"
 #include "output.h"
@@ -59,9 +63,10 @@
 #include "window.h"
 #include "tcommand.h"
 #include "util.h"
-#include "xmalloc.h"
 #include "ircterm.h"
-#include "fset.h"
+
+#include "xformats.h"
+#include "xmalloc.h"
 
 /* sneeky */
 typedef int (*scan_cmp_func)(const void *, const void *);
@@ -164,9 +169,9 @@ xscandir(char *dir, char *prefix, char **ret)
 				break;
 			}
 
-			put_it("%s", convert_output_format(get_fset_var(FORMAT_SCANDIR_LIST_HEADER_FSET), NULL, NULL));
-			display_list_cl((TST_ARRAY *) list, d_name, FORMAT_SCANDIR_LIST_LINE_FSET, retval, the_longest);
-			put_it("%s", convert_output_format(get_fset_var(FORMAT_SCANDIR_LIST_FOOTER_FSET), NULL, NULL));
+			put_it("%s", convert_output_format(get_format(FORMAT_SCANDIR_LIST_HEADER_FSET), NULL, NULL));
+			display_list_cl((XP_TST_ARRAY *) list, d_name, FORMAT_SCANDIR_LIST_LINE_FSET, retval, the_longest);
+			put_it("%s", convert_output_format(get_format(FORMAT_SCANDIR_LIST_FOOTER_FSET), NULL, NULL));
 			break;
 	}
 

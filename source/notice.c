@@ -37,8 +37,9 @@
 #include "notice.h"
 #include "hash2.h"
 #include "input.h"
-#include "fset.h"
 #include "util.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 
@@ -83,13 +84,13 @@ parse_server_notice (char *from, char *line)
 			{
 				char *for_;
 				for_ = next_arg (line, &line);
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_SERVER_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), from, stripansicodes (line)));
+				put_it ("%s", convert_output_format (get_format (FORMAT_SERVER_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), from, stripansicodes (line)));
 			}
 		}
 		else
 		{
 			if (do_hook (SERVER_NOTICE_LIST, flag ? "%s *** %s" : "%s %s", from, line))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_SERVER_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), from, stripansicodes (line)));
+				put_it ("%s", convert_output_format (get_format (FORMAT_SERVER_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), from, stripansicodes (line)));
 		}
 	}
 	if (up_status)
@@ -176,7 +177,7 @@ parse_notice (char *from, char **Args)
 			if (sed == 1)
 			{
 				if (do_hook (ENCRYPTED_NOTICE_LIST, "%s %s %s", from, to, line))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_ENCRYPTED_NOTICE_FSET), "%s %s %s %s", update_clock (GET_TIME), from, FromUserHost, line));
+					put_it ("%s", convert_output_format (get_format (FORMAT_ENCRYPTED_NOTICE_FSET), "%s %s %s %s", update_clock (GET_TIME), from, FromUserHost, line));
 				sed = 0;
 			}
 			else
@@ -200,7 +201,7 @@ parse_notice (char *from, char **Args)
 									*p++ = 0;
 								q = channel;
 							}
-							put_it ("%s", convert_output_format (get_fset_var (FORMAT_BWALL_FSET), "%s %s %s %s %s", update_clock (GET_TIME), q, from, FromUserHost, newline));
+							put_it ("%s", convert_output_format (get_format (FORMAT_BWALL_FSET), "%s %s %s %s %s", update_clock (GET_TIME), q, from, FromUserHost, newline));
 						}
 						logmsg (LOG_WALL, from, line, 0);
 						xfree (&channel);
@@ -209,12 +210,12 @@ parse_notice (char *from, char **Args)
 					{
 						logmsg (LOG_NOTICE, from, line, 0);
 						if (do_hook (type, "%s %s", from, line))
-							put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTICE_FSET), "%s %s %s %s", update_clock (GET_TIME), from, FromUserHost, newline));
+							put_it ("%s", convert_output_format (get_format (FORMAT_NOTICE_FSET), "%s %s %s %s", update_clock (GET_TIME), from, FromUserHost, newline));
 					}
 					else
 					{
 						if (do_hook (type, "%s %s %s", from, to, line))
-							put_it ("%s", convert_output_format (get_fset_var (not_reply ? FORMAT_PUBLIC_NOTICE_AR_FSET : FORMAT_PUBLIC_NOTICE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, newline));
+							put_it ("%s", convert_output_format (get_format (not_reply ? FORMAT_PUBLIC_NOTICE_AR_FSET : FORMAT_PUBLIC_NOTICE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, newline));
 						if (beep_on_level & LOG_NOTICE)
 							beep_em (1);
 						logmsg (LOG_NOTICE, from, line, 0);
@@ -230,7 +231,7 @@ parse_notice (char *from, char **Args)
 			parse_server_notice (from, line);
 	}
 	else
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_SERVER_MSG2_FSET), "%s %s %s", update_clock (GET_TIME), from, line + 1));
+		put_it ("%s", convert_output_format (get_format (FORMAT_SERVER_MSG2_FSET), "%s %s %s", update_clock (GET_TIME), from, line + 1));
 	doing_notice = 0;
 	message_from (NULL, LOG_CRAP);
 }

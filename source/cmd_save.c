@@ -1,4 +1,4 @@
-#ident "@(#)cmd_save.c 1.10"
+#ident "@(#)cmd_save.c 1.11"
 /*
  * cmd_save.c : save Xaric settings 
  *
@@ -37,7 +37,6 @@
 #include "screen.h"
 #include "hook.h"
 #include "vars.h"
-#include "fset.h"
 #include "notify.h"
 #include "keys.h"
 #include "tcommand.h"
@@ -49,6 +48,7 @@
 #define SFLAG_SET       0x0004
 #define SFLAG_NOTIFY    0x0008
 #define SFLAG_DIGRAPH   0x0010
+#define SFLAG_FORMATS	0x0020
 #define SFLAG_ALL	0xffff
 
 static int save_which;
@@ -71,6 +71,8 @@ really_save (char *file, char *line)
 			save_notify (fp);
 		if (save_which & SFLAG_SET)
 			save_variables (fp, save_do_all);
+		if (save_which & SFLAG_FORMATS )
+			save_formats(fp);
 		fclose (fp);
 		bitchsay ("Xaric settings saved to %s", file);
 	}
@@ -109,6 +111,8 @@ cmd_save (struct command *cmd, char *args)
 				save_which |= SFLAG_SET;
 			else if (0 == my_strnicmp ("N", arg, 1))
 				save_which |= SFLAG_NOTIFY;
+			else if (0 == my_strnicmp("F", arg, 1))
+				save_which |= SFLAG_FORMATS;
 			else if (0 == my_strnicmp ("ALL", arg, 3))
 				save_which = SFLAG_ALL;
 			else

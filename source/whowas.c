@@ -1,4 +1,4 @@
-#ident "@(#)whowas.c 1.10"
+#ident "@(#)whowas.c 1.11"
 /*
  * whowas.c   a linked list buffer of people who have left your channel 
  * mainly used for ban prot and stats stuff.
@@ -37,7 +37,8 @@
 #include "hash.h"
 #include "hash2.h"
 #include "whowas.h"
-#include "fset.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 WhowasWrapList whowas_userlist_list =
@@ -286,6 +287,6 @@ show_wholeft (char *channel)
 #endif
 	hook = show_wholeft_hashtable (&whowas_userlist_list, ltime, &count, &hook, "Splitin");
 	hook = show_wholeft_hashtable (&whowas_reg_list, ltime, &count, &hook, "Splitin");
-	if (count && hook && get_fset_var (FORMAT_WHOLEFT_FOOTER_FSET))
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOLEFT_FOOTER_FSET), NULL));
+	if (count && hook && get_format (FORMAT_WHOLEFT_FOOTER_FSET))
+		put_it ("%s", convert_output_format (get_format (FORMAT_WHOLEFT_FOOTER_FSET), NULL));
 }

@@ -1,4 +1,4 @@
-#ident "%W%"
+#ident "@(#)ircaux.c 1.17"
 /*
  * ircaux.c: some extra routines... not specific to irc... that I needed 
  *
@@ -28,7 +28,8 @@
 #include "output.h"
 #include "ircterm.h"
 #include "expr.h"
-#include "xaric_version.h"
+
+#include "xversion.h"
 #include "xmalloc.h"
 
 

@@ -1,12 +1,9 @@
-#ifndef fset_h__
-#define fset_h__
+#ifndef xformats_h__
+#define xformats_h__
 
 /*
- * fset.h - mmm format set def'ns and stuff.
- * Copyright (C) 1998, 1999, 2000 Rex Feany <laeos@laeos.net>
- * 
- * This file is a part of <foo>, a <desc>
- * You can find <foo> at <url>
+ * xformats.h - mmm format set def'ns and stuff.
+ * Copyright (C) 2000 Rex Feany <laeos@laeos.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,23 +26,25 @@
 #include "tcommand.h"
 
 /*
- * All of the formats. Index into array in fset.c so be careful!
+ * All of the formats. Index into array in xformats.c so be careful!
  */
 
-enum FSET_TYPES
+typedef enum
 {
 
-/* these are automagicly generated from fset.c by the Makefile. */
+/* these are automagicly generated from xformats.c by the Makefile. */
 #include "xformats_gen.h" 
 
 	NUMBER_OF_FSET
-};
+} xformat;
 
 
-char *get_fset_var(enum FSET_TYPES var);
-void cmd_fset(struct command *cmd, char *args);
+const char *get_format(xformat which);
 char *make_fstring_var(char *var_name);
 int save_formats (FILE * outfile);
 
+void cmd_fset(struct command *cmd, char *args);
+void cmd_freset(struct command *cmd, char *args);
 
-#endif /* fset_h__ */
+
+#endif /* xformats_h__ */

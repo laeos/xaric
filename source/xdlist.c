@@ -1,4 +1,4 @@
-#ident "@(#)xdlist.c 1.2"
+#ident "@(#)xdlist.c 1.4"
 /*
  * xdlist.c - display a list of things
  * Copyright (C) 1999, 2000 Rex Feany <laeos@laeos.net>
@@ -34,10 +34,10 @@
 #endif
 
 #include "xmalloc.h"	/* for alloca */
+#include "xformats.h"
 
 #include "ircterm.h"
-#include "tst.h"
-#include "fset.h"
+#include "xp_tst.h"
 #include "output.h"
 #include "util.h"
 
@@ -50,7 +50,7 @@
 
 /* find the longest element */
 static int
-find_longest (TST_ARRAY *list, const char * (*fcn)(void *), int cnt)
+find_longest (XP_TST_ARRAY *list, const char * (*fcn)(void *), int cnt)
 {
 	int lng = 0;
 
@@ -72,7 +72,7 @@ find_longest (TST_ARRAY *list, const char * (*fcn)(void *), int cnt)
 /* count the number of elements, and find the longest one. we expect a NULL
  * somewhere at the end of the list */
 static int
-find_count (TST_ARRAY *list, const char * (*fcn)(void *))
+find_count (XP_TST_ARRAY *list, const char * (*fcn)(void *))
 {
 	int cnt = 0;
 
@@ -90,14 +90,14 @@ find_count (TST_ARRAY *list, const char * (*fcn)(void *))
 
 /* Pretty-print a "list" or array of things */
 int 
-display_list_cl(TST_ARRAY *list, const char * (*fcn)(void *), 
-			enum FSET_TYPES fmt, int count, int longest)
+display_list_cl(XP_TST_ARRAY *list, const char * (*fcn)(void *), 
+			xformat fmt, int count, int longest)
 {
 	int cols = CO - 10;	/* extra space for the begin/end of the line */
 	int epr;
 	char *buf, *sv;
 	int cnt = count;
-	char *fmat = get_fset_var(fmt);
+	const char *fmat = get_format(fmt);
 
 #ifndef NDEBUG	/* some extra stuff if asserts are defined */
 	char *en;
@@ -152,7 +152,7 @@ display_list_cl(TST_ARRAY *list, const char * (*fcn)(void *),
 
 /* Various combos depending on what data we have */
 int
-display_list(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt)
+display_list(XP_TST_ARRAY *list, const char * (*fcn)(void *), xformat fmt)
 {
 	int count = find_count(list, fcn);
 	int longest = find_longest(list, fcn, count);
@@ -161,7 +161,7 @@ display_list(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt)
 }
 
 int
-display_list_c(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt, int count)
+display_list_c(XP_TST_ARRAY *list, const char * (*fcn)(void *), xformat fmt, int count)
 {
 	int longest = find_longest(list, fcn, count);
 
@@ -169,7 +169,7 @@ display_list_c(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt
 }
 
 int
-display_list_l(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt, int longest)
+display_list_l(XP_TST_ARRAY *list, const char * (*fcn)(void *), xformat fmt, int longest)
 {
 	int count = find_count(list, fcn);
 

@@ -1,4 +1,4 @@
-#ident "@(#)hash.c 1.9"
+#ident "@(#)hash.c 1.10"
 /************
  *  hash.c  *
  ************
@@ -35,10 +35,11 @@
 #include "server.h"
 #include "list.h"
 #include "window.h"
-#include "fset.h"
 #include "hash.h"
 #include "hash2.h"
 #include "tcommand.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 
@@ -664,9 +665,9 @@ show_wholeft_hashtable (WhowasWrapList * cptr, time_t ltime, int *total, int *ho
 			if (ptr->server1 && ptr->server2)
 			{
 				if (!(*total)++ && (*hook = do_hook (WHOLEFT_HEADER_LIST, "%s %s %s %s %s %s", "Nick", "Host", "Channel", "Time", "Server", "Server")))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOLEFT_HEADER_FSET), NULL));
+					put_it ("%s", convert_output_format (get_format (FORMAT_WHOLEFT_HEADER_FSET), NULL));
 				if (do_hook (WHOLEFT_LIST, "%s %s %s %ld %s %s", ptr->nicklist->nick, ptr->nicklist->host, ptr->channel, ltime - ptr->time, ptr->server1 ? ptr->server1 : "Unknown", ptr->server2 ? ptr->server2 : "Unknown"))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOLEFT_USER_FSET), "%s %s %s %l %s", ptr->nicklist->nick, ptr->nicklist->host, ptr->channel, (long) ltime - ptr->time, ptr->server1 ? ptr->server1 : ""));
+					put_it ("%s", convert_output_format (get_format (FORMAT_WHOLEFT_USER_FSET), "%s %s %s %l %s", ptr->nicklist->nick, ptr->nicklist->host, ptr->channel, (long) ltime - ptr->time, ptr->server1 ? ptr->server1 : ""));
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-#ident "%W%"
+#ident "@(#)functions.c 1.17"
 /*
  * functions.c -- Built-in functions for ircII
  *
@@ -12,6 +12,7 @@
 #include "config.h"
 #endif
 
+#include <sys/stat.h>
 
 #include "irc.h"
 #include "dcc.h"
@@ -37,10 +38,10 @@
 #include "hash2.h"
 #include "expr.h"
 #include "util.h"
-#include "xaric_version.h"
+
+#include "xversion.h"
 #include "xmalloc.h"
 
-#include <sys/stat.h>
 
 static char *alias_detected (void);
 static char *alias_sent_nick (void);

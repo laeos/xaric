@@ -1,4 +1,4 @@
-#ident "@(#)vars.c 1.16"
+#ident "@(#)vars.c 1.18"
 /*
  * vars.c: All the dealing of the irc variables are handled here. 
  *
@@ -35,10 +35,11 @@
 #include "window.h"
 #include "misc.h"
 #include "hash2.h"
-#include "fset.h"
 #include "format.h"
 #include "tcommand.h"
 #include "util.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 
@@ -50,7 +51,6 @@ extern Screen *screen_list, *current_screen;
 int loading_global = 0;
 
 extern ChannelList default_statchan;
-extern char three_stars[];
 
 
 enum VAR_TYPES find_variable (char *, int *);
@@ -299,7 +299,7 @@ init_variables ()
 #endif
 
 	window_display = 0;
-	line_thing = m_strdup(three_stars);
+	set_numeric_string (NULL, DEFAULT_SHOW_NUMERICS_STR, 0);
 
 	set_string_var (HELP_VAR, DEFAULT_HELP);
 
@@ -310,7 +310,7 @@ init_variables ()
 
 	set_string_var (DEFAULT_REASON_VAR, DEFAULT_KICK_REASON);
 	set_string_var (DCC_DLDIR_VAR, DEFAULT_DCC_DLDIR);
-	set_string_var (SHOW_NUMERICS_STR_VAR, three_stars);
+	set_string_var (SHOW_NUMERICS_STR_VAR, DEFAULT_SHOW_NUMERICS_STR);
 
 	set_string_var (CMDCHARS_VAR, DEFAULT_CMDCHARS);
 	set_string_var (LOGFILE_VAR, DEFAULT_LOGFILE);
@@ -420,7 +420,7 @@ set_var_value (int var_index, char *value)
 			     : var_settings[OFF]);
 		}
 		else
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SET_FSET), "%s %s", var->name, var->integer ? var_settings[ON] : var_settings[OFF]));
+			put_it ("%s", convert_output_format (get_format (FORMAT_SET_FSET), "%s %s", var->name, var->integer ? var_settings[ON] : var_settings[OFF]));
 		break;
 	case CHAR_TYPE_VAR:
 		if (!value)
@@ -456,7 +456,7 @@ set_var_value (int var_index, char *value)
 			}
 		}
 		else
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SET_FSET), "%s %c", var->name, var->integer));
+			put_it ("%s", convert_output_format (get_format (FORMAT_SET_FSET), "%s %c", var->name, var->integer));
 		break;
 	case INT_TYPE_VAR:
 		if (value && *value && (value = next_arg (value, &rest)))
@@ -484,7 +484,7 @@ set_var_value (int var_index, char *value)
 			say ("Value of %s set to %d", var->name, var->integer);
 		}
 		else
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SET_FSET), "%s %d", var->name, var->integer));
+			put_it ("%s", convert_output_format (get_format (FORMAT_SET_FSET), "%s %d", var->name, var->integer));
 		break;
 	case STR_TYPE_VAR:
 		if (value)
@@ -514,7 +514,7 @@ set_var_value (int var_index, char *value)
 			}
 			else
 			{
-				put_it ("%s", convert_output_format (get_fset_var (var->string ? FORMAT_SET_FSET : FORMAT_SET_NOVALUE_FSET), "%s %s", var->name, var->string));
+				put_it ("%s", convert_output_format (get_format (var->string ? FORMAT_SET_FSET : FORMAT_SET_NOVALUE_FSET), "%s %s", var->name, var->string));
 				return;
 			}
 		}
@@ -726,7 +726,8 @@ set_realname (Window * win, char *value, int unused)
 static void 
 set_numeric_string (Window * win, char *value, int unused)
 {
-	malloc_strcpy (&line_thing, value ? value : three_stars);
+
+	malloc_strcpy(&line_thing, convert_output_format(value ? value : DEFAULT_SHOW_NUMERICS_STR, NULL, NULL));
 }
 
 static void 

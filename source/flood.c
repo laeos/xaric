@@ -1,4 +1,4 @@
-#ident "@(#)flood.c 1.10"
+#ident "@(#)flood.c 1.11"
 /*
  * flood.c: handle channel flooding. 
  *
@@ -30,8 +30,9 @@
 #include "ignore.h"
 #include "status.h"
 #include "hash2.h"
-#include "fset.h"
 #include "tcommand.h"
+
+#include "xformats.h"
 #include "xmalloc.h"
 
 
@@ -434,7 +435,7 @@ check_flooding (char *nick, int type, char *line, char *channel)
 					break;
 				}
 				if (get_int_var (FLOOD_WARNING_VAR))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_FLOOD_FSET), "%s %s %s %s %s", update_clock (GET_TIME), get_ignore_types (type), nick, FromUserHost, channel ? channel : "unknown"));
+					put_it ("%s", convert_output_format (get_format (FORMAT_FLOOD_FSET), "%s %s %s %s %s", update_clock (GET_TIME), get_ignore_types (type), nick, FromUserHost, channel ? channel : "unknown"));
 			}
 			return 1;
 		}

@@ -23,8 +23,8 @@
  *
  */
 
-#include "tst.h"
-#include "fset.h"
+#include "xp_tst.h"
+#include "xformats.h"
 
 /* Some random IRC limits */
 #define CHANNEL_MAX	200
@@ -93,10 +93,10 @@ void *bsearch_array (void *list, size_t size, int howmany, const char *name, int
 int xscandir(char *dir, char *prefix, char **ret);
 
 /* in xdlist.c */
-int display_list(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt);
-int display_list_l(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt, int longest);
-int display_list_c(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt, int count);
-int display_list_cl(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt, int count, int longest);
+int display_list(XP_TST_ARRAY *list, const char * (*fcn)(void *), xformat fmt);
+int display_list_l(XP_TST_ARRAY *list, const char * (*fcn)(void *), xformat fmt, int longest);
+int display_list_c(XP_TST_ARRAY *list, const char * (*fcn)(void *), xformat fmt, int count);
+int display_list_cl(XP_TST_ARRAY *list, const char * (*fcn)(void *), xformat fmt, int count, int longest);
 
 
 

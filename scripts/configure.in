@@ -1,0 +1,322 @@
+dnl ------------------------------------------------------------
+dnl Configure.in for Xaric. Copyright (C) Rex G. Feany 1998
+dnl except for those bits attributed otherwize
+dnl
+dnl @(#)$Id$
+dnl -------------------------------------------------------------
+
+
+AC_REVISION($Revision$)dnl
+AC_INIT(source/ctcp.c)
+AC_CONFIG_AUX_DIR(scripts)
+AC_CONFIG_HEADER(include/defs.h)
+
+dnl ---------------------------------------------------------------
+dnl Heading
+dnl ---------------------------------------------------------------
+
+echo ""
+echo "This is Xaric's GNU autoconf script."
+echo "It is going to run a bunch of strange tests"
+echo "and hopefully make xaric compile on your machine."
+echo ""
+
+dnl ----------------------------------------------------------------
+dnl Initial stuff
+dnl ----------------------------------------------------------------
+
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_ISC_POSIX
+AC_AIX
+
+dnl ----------------------------------------------------------
+dnl System specific checks
+dnl ----------------------------------------------------------
+
+unamer=`uname -r 2> /dev/null`
+unames=`uname -s 2> /dev/null`
+
+
+dnl ----------------------------------------------------------
+dnl Checking for qnx
+dnl ----------------------------------------------------------
+
+AC_MSG_CHECKING(for qnx)
+case "$unames" in
+  QNX*)
+    AC_MSG_RESULT(yes)
+    LDFLAGS=-N64k                  dnl 64k of stack
+    CFLAGS="-w4 -O -g -fi=unix.h"  dnl better compile options
+  ;;
+  *)
+    AC_MSG_RESULT(no)
+esac
+
+dnl -----------------------------------------------------------
+dnl Checking for svr4's /usr/ccs/lib
+dnl -----------------------------------------------------------
+
+AC_MSG_CHECKING(for svr4's /usr/ccs/lib)
+if test -d /usr/ccs/lib; then
+	LIBS="-L/usr/ccs/lib $LIBS"
+	AC_MSG_RESULT(found it!)
+else
+	AC_MSG_RESULT(no)
+fi
+
+dnl ----------------------------------------------------------
+dnl Checking for headers, functions, and a type declarations
+dnl ----------------------------------------------------------
+
+AC_CHECK_HEADERS(fcntl.h netdb.h)
+AC_CHECK_HEADERS(sys/fcntl.h sys/file.h sys/ptem.h sys/select.h)
+AC_CHECK_HEADERS(sys/syslimits.h sys/time.h sys/twg_config.h sys/un.h)
+AC_CHECK_HEADERS(sys/termios.h sys/ttycom.h termcap.h)
+
+AC_CHECK_FUNC(getpass, AC_DEFINE(HAVE_GETPASS),)
+AC_CHECK_FUNC(fpathconf, AC_DEFINE(HAVE_FPATHCONF),)
+AC_CHECK_FUNC(gettimeofday, AC_DEFINE(HAVE_GETTIMEOFDAY),)
+AC_CHECK_FUNC(strtoul,, AC_DEFINE(NEED_STRTOUL))
+AC_CHECK_FUNC(sysconf, AC_DEFINE(HAVE_SYSCONF),)
+AC_CHECK_FUNC(uname, AC_DEFINE(HAVE_UNAME),)
+AC_CHECK_FUNC(snprintf, AC_DEFINE(HAVE_SNPRINTF),)
+AC_CHECK_FUNC(vsnprintf, AC_DEFINE(HAVE_VSNPRINTF),)
+AC_CHECK_FUNC(killpg, AC_DEFINE(HAVE_KILLPG),)
+AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV),)
+
+AC_HEADER_STDC
+AC_HEADER_TIME
+AC_HEADER_DIRENT
+AC_TYPE_SIGNAL
+AC_TYPE_MODE_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_TYPE_UID_T
+
+dnl ----------------------------------------------------------
+dnl check for struct linger
+dnl ----------------------------------------------------------
+
+AC_MSG_CHECKING(for struct linger)
+AC_EGREP_HEADER([struct( |	)*linger], sys/socket.h, AC_MSG_RESULT(yes), AC_DEFINE(NO_STRUCT_LINGER) AC_MSG_RESULT(no, ugh.))
+
+dnl ----------------------------------------------------------
+dnl sun_len in <sys/un.h>?
+dnl ----------------------------------------------------------
+
+AC_MSG_CHECKING(for sun_len in <sys/un.h>)
+AC_EGREP_CPP([sun_len], 
+[
+#include <sys/un.h>
+], AC_DEFINE(HAVE_SUN_LEN) AC_MSG_RESULT(yes), AC_MSG_RESULT(no))
+
+
+dnl ----------------------------------------------------------
+dnl
+dnl svr3's getpgrp() didnt take arguments.  BSD's did.
+dnl POSIX said that there wasnt any usefulness to giving arguments
+dnl to getpgrp(), so that was forbidden.  So svr4 made a new syscall
+dnl getpgid() to fill in this functionality gap (grrrr).  BSD still
+dnl doesnt have any way to do it, even though they were the ones that
+dnl originally wanted to have it around, but svr3 insisted not so. (grrr)
+dnl
+
+AC_CHECK_FUNC(getpgid, AC_DEFINE(HAVE_GETPGID),)
+AC_CHECK_FUNC(getpgrp, AC_FUNC_GETPGRP,)
+
+dnl ----------------------------------------------------------
+dnl
+dnl checking for select()
+dnl
+
+AC_CHECK_FUNC(select, ,
+  AC_CHECK_LIB(socket, select, LIBS="$LIBS -lsocket",
+    AC_CHECK_LIB(nsl, select, LIBS="$LIBS -lnsl",
+      AC_CHECK_LIB(inet, select, LIBS="$LIBS -linet",
+        AC_CHECK_LIB(cposix, select, LIBS="$LIBS -lcposix",
+          AC_CHECK_LIB(net, select, LIBS="$LIBS -lnet",
+            AC_MSG_WARN(i can not find select.  you might need to help me)))))))
+
+
+
+dnl ----------------------------------------------------------
+dnl termcap or curses
+dnl ----------------------------------------------------------
+
+if test x$hpux = x1 -o x$aix = x1
+then
+	LIBS="-lcurses $LIBS"
+	AC_DEFINE(USING_CURSES)
+else
+  olibs="$LIBS"
+  AC_CHECK_LIB(termcap, tgetent, LIBS="-ltermcap $olibs",
+    AC_CHECK_LIB(termlib, tgetent, LIBS="-ltermlib $olibs",
+      AC_CHECK_LIB(curses, tgetent, LIBS="-lcurses $olibs",
+        AC_CHECK_LIB(xtermcap, tgetent, LIBS="-lxtermcap $olibs",
+          AC_MSG_WARN(i can not find tgetent.  you might need to help me)))))
+fi
+
+dnl ----------------------------------------------------------
+dnl Check for sys_siglist declaration
+dnl ----------------------------------------------------------
+
+AC_MSG_CHECKING(for sys_siglist declaration)
+AC_TRY_RUN([
+#include <sys/types.h>
+#include <signal.h>
+main()
+{
+	char *s = sys_siglist[0];
+	exit(0);
+}
+],
+  AC_MSG_RESULT(yes) 
+  sys_siglist="1"
+  AC_DEFINE(SYS_SIGLIST_DECLARED), 
+  AC_MSG_RESULT(no), :)
+
+dnl ----------------------------------------------------------
+dnl Generate signal list
+dnl This is all stolen from perl-4.036's Configure.  larry is god.
+dnl ----------------------------------------------------------
+
+if test x$sys_siglist != x1
+then
+echo "generating a list of signal names..."
+set X `cat /usr/include/signal.h /usr/include/sys/signal.h /usr/include/linux/signal.h 2>&1 | sed 's/^#[	]*/#/' | awk '
+$1 ~ /^#define$/ && $2 ~ /^SIG[A-Z0-9]*$/ && $3 ~ /^[1-9][0-9]*$/ {
+  [sig[$3] = substr($2,4,20)]
+  if (max < $3 && $3 < 60) {
+	max = $3
+  }
+}
+
+END {
+  for (i=1; i<=max; i++) {
+    [if (sig[i] == "")]
+      printf "%d", i
+    else
+      [printf "%s", sig[i]]
+    if (i < max)
+      printf " "
+  }
+  printf "\n"
+}
+'`
+shift
+case $# in
+0)
+  if test -f /bin/csh; then
+     set X `/bin/csh -cf 'kill -l'`
+     shift
+     case $* in
+     0) 
+       set HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM
+       ;;
+    esac
+  fi
+  ;;
+esac
+
+sig_name="ZERO $*"
+if test -f source/sig.inc; then
+  /bin/rm -f source/sig.inc
+fi
+[echo $sig_name | sed -e 's/$/"};/' -e 's/ /", "/g' -e 's/^/char *sys_siglist[] = { "/' >> source/sig.inc]
+fi
+
+dnl ----------------------------------------------------------
+dnl check for sys_errlist declaration
+dnl ----------------------------------------------------------
+
+AC_CHECK_FUNC(strerror, AC_DEFINE(HAVE_STRERROR),
+AC_MSG_CHECKING(for sys_errlist declaration)
+AC_TRY_RUN([
+#include <sys/types.h>
+#include <stdio.h>
+#include <errno.h>
+main()
+{
+  char *s = sys_errlist[0];
+  exit(0);
+}
+],
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(SYS_ERRLIST_DECLARED),
+  AC_MSG_RESULT(no), :))
+
+
+
+dnl ----------------------------------------------------------
+dnl need this for dcc stuff
+dnl ----------------------------------------------------------
+
+AC_CHECK_SIZEOF(unsigned int, 4)
+if test "$ac_cv_sizeof_unsigned_int" = 4; then
+	AC_DEFINE(UNSIGNED_INT32)
+else
+	AC_CHECK_SIZEOF(unsigned long, 4)
+	if test "$ac_cv_sizeof_unsigned_long" = 4; then
+		AC_DEFINE(UNSIGNED_LONG32)
+	else
+		AC_DEFINE(UNKNOWN_32INT)
+	fi
+fi
+
+dnl ----------------------------------------------------------
+dnl libraries
+dnl ----------------------------------------------------------
+
+if test -z "$libsocket"; then
+	AC_CHECK_LIB(socket, socket, LIBS="$LIBS -lsocket",)
+fi
+
+dnl this is for isc.  need the nsl_s library as well.
+if test -z "$libinet"; then
+	AC_CHECK_LIB(inet, socket, libnsl=1; LIBS="$LIBS -linet -lnsl_s",)
+fi
+
+if test -z "$libnsl"; then
+	AC_CHECK_LIB(nsl, gethostname, LIBS="$LIBS -lnsl",)
+fi
+
+AC_CHECK_LIB(sun, getpwnam, LIBS="$LIBS -lsun",)
+AC_CHECK_LIB(dgc, inet_addr, LIBS="$LIBS -ldgc",)
+AC_CHECK_LIB(resolv, gethostbyname, LIBS="$LIBS -lresolv",)
+AC_CHECK_LIB(gnumalloc, malloc, LIBS="$LIBS -lgnumalloc",
+AC_CHECK_LIB(bsdmalloc, malloc, LIBS="$LIBS -lbsdmalloc",))
+
+dnl ------------------------------------------------------------ 
+dnl Check for pthreads
+dnl ------------------------------------------------------------
+
+AC_CHECK_LIB(pthread, pthread_create, 
+		LIBS="$LIBS -lpthread" ; 
+		AC_DEFINE(HAVE_PTHREADS), 
+		AC_MSG_WARN(Could not find the pthread library.. nifty features disabled.))
+
+dnl ----------------------------------------------------------
+dnl set some last minute sanity defaults
+dnl ----------------------------------------------------------
+
+if test -z "$CFLAGS"; then CFLAGS=-g -O; fi
+
+AC_SUBST(CFLAGS)
+AC_SUBST(LDFLAGS)
+AC_OUTPUT(scripts/Makeconfig)
+
+
+dnl ----------------------------------------------------------
+dnl Commencement
+dnl ----------------------------------------------------------
+
+echo ""
+echo "There we go! That didn't hurt, did it? You might want to"
+echo "look in include/config.h and see if there is anything"
+echo "you want to change, else you can just run make here..."
+echo "Good luck..."
+echo ""
+
+

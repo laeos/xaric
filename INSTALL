@@ -1,0 +1,112 @@
+                      Xaric Installation Readme File
+
+
+Xaric is known to compile on the following systems (maybe others as well):
+    * Linux
+
+
+Introduction
+------------
+
+	Problems may occur in the compilation process of Xaric. If you
+do have a problem please gather as much information about the error 
+(output from make) and join the Xaric support channel on UnderNet, #shane,
+or mail laeos@ptw.com Bug reports can be sent in exactly the
+same way as well.
+
+	Patches to make Xaric compile on other machines are most certainly
+welcome, as are success stories. Currently I only have access to linux boxen,
+so I can not be sure it will compile on anything else. 
+
+	Xaric is based on BitchX code, which is itself based on ircII. The goal
+of the Xaric writers is to clean out all the silly features, and fix all the
+annoying little problems. BitchX is a large client. Many of the features such as
+the userlists were removed because none of use ever used them. If you want your 
+irc client to do *everything* Xaric is not for you. 
+
+Compiling Xaric
+---------------
+
+In order to compile this distribution you need to do the following:
+(Optional steps are marked with an asterisk, '*')
+
+  1) Enter the xaric directory tree, this is the most important step.
+     Executing configure outside the tree will incur problems.
+
+  2) Run the GNU configuration script, ./configure. It should find
+     whatever it needs for the compilation of xaric, such as system
+     includes and locations of important files.
+      
+* 3) On some systems you may need to edit Makefile and enforce changes if
+     compiling causes a problem. For instance, SystemV compliant boxes may
+     require the crypt() library (libcrypt.a) for a routine in alias.c, 
+     which produces a crypt-style password. Find the LIBS line, and 
+     change it to (without the quotes): "LIBS= -lcrypt". Also see Machine
+     Specific Instructions below.
+
+* 4) include/config.h may need tweeking if you intend to change the
+     default server. To change, locate DEFAULT_SERVER and remove the
+     original default servers and add as many as you please (These will
+     be appended to the /usr/local/share/xaric/irc.servers and ~/.ircservers
+     list). 
+
+  5) Execute 'make' inside the xaric archive directory. If no error
+     messages are shown (error not warning messages) see below in this
+     file for Machine Specific Instrctions on how to resolve common
+     problems which users face when compiling.
+
+  6) Execute 'make install'. This should install the xaric binary to
+     /usr/local/bin. Commonly, users may not have superuser access, thus a
+     refusal (permission denied message) will occur. If you insist to use
+     'make install' to install xaric binary, it is required to change the
+     installation path defined in step 4.
+
+   7) Xaric comes with no scripts right now. In the spirit of BitchX, I want
+      the most commen features people use scripts for to be compiled in.  
+     
+
+Machine Specific Instructions:
+
+	On some SunOS 4.1.4 systems, strtoul (an ANSI C function) is not
+properly detected as being missing. Editing include/defs.h by hand. This
+file is automatically created by configure each time configure is run so
+if you re-run configure you must edit include/defs.h again.
+
+Offending error:
+ld: Undefined symbol
+    _strtoul
+    _globfree
+    _glob
+
+Solution:
+ edit include/config.h
+ remove /* */ from the #define NEED_GLOB
+ edit include/defs.h
+ add #define NEED_STRTOUL
+
+	Linux kernel version 1.3.80 made changes to the system include
+files. A small definition was removed which will cause a lot of screen
+orientated programs to fail on compiling. Both ircii-2.8 and BitchX
+will fail when compiling on the file alias.c with an error message about
+speed_t or ospeed being undefined. Instead of hacking around this
+behaviour within BitchX, edit include/defs.h and supply at the start 
+of the file either one of the following for the offending error:
+
+Solution: (ospeed)
+add "extern short ospeed;"
+
+Solution: (speed_t)
+add "#define speed_t unsigned short"
+
+
+
+End of File, INSTALLATION
+Completely re-written by the BarK0de, original author, BlackJac.
+
+-BarK0de (01.27.97)
+
+Changed by Laeos for Xaric (10.30.97)
+
+
+
+

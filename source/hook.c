@@ -340,7 +340,7 @@ show_hook (Hook * list, char *name)
 					     (list->not ? "nothing" : text),
 				     noise_level[list->noisy], list->sernum,
 					       list->server & ~HS_NOGENERIC,
-							     (list->server & HS_NOGENERIC) ? " Exclusive" : empty_string));
+							     (list->server & HS_NOGENERIC) ? " Exclusive" : empty_str));
 		else
 			say ("On %s from %c%s%c do %s [%s] <%d> (Server %d)%s",
 			     name, (list->flexible ? '\'' : '"'), list->nick,
@@ -348,7 +348,7 @@ show_hook (Hook * list, char *name)
 			     (list->not ? "nothing" : text),
 			     noise_level[list->noisy], list->sernum,
 			     list->server & ~HS_NOGENERIC,
-			     (list->server & HS_NOGENERIC) ? " Exclusive" : empty_string);
+			     (list->server & HS_NOGENERIC) ? " Exclusive" : empty_str);
 	}
 	else
 	{
@@ -522,7 +522,7 @@ do_hook (int which, char *format,...)
 			}
 
 			if (tmp->flexible)
-				tmpnick = expand_alias (tmp->nick, empty_string, &sa, NULL);
+				tmpnick = expand_alias (tmp->nick, empty_str, &sa, NULL);
 			else
 				tmpnick = tmp->nick;
 
@@ -755,7 +755,7 @@ write_hook (FILE * fp, Hook * hook, char *name)
 		stuff = "-";
 		break;
 	case NORMAL:
-		stuff = empty_string;
+		stuff = empty_str;
 		break;
 	case NOISY:
 		stuff = "+";
@@ -994,7 +994,7 @@ BUILT_IN_COMMAND (oncmd)
 
 			{
 				if (not)
-					args = empty_string;
+					args = empty_str;
 
 				if (*nick)
 				{

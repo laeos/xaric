@@ -121,11 +121,7 @@ extern char *next_in_comma_list (char *, char **);
 /* From words.c */
 #define SOS -32767
 #define EOS 32767
-extern	char	*search(char *, char **, char *, int);
-extern	char	*move_to_abs_word(char *, char **, int);
-extern	char	*move_word_rel(char *, char **, int);
-extern	char	*extract(char *, int, int);
-extern	char	*extract2(char *, int, int);
+extern	char	*extract_words(char *, int, int);
 extern	int	match (char *, char *);
 /* Used for connect_by_number */
 #define SERVICE_SERVER 0

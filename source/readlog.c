@@ -135,7 +135,7 @@ show_log (Window * window, char *name)
 		old_window = NULL;
 		window = curr_scr_win;
 	}
-	rows = window->display_size - (window->double_status + 2);
+	rows = window->display_size - (window->w_status_size + 1);
 	while (--rows)
 	{
 		if ((*read_log_func) (line, 299, msg_fp))

@@ -1,3 +1,40 @@
+2001-Oct-08 	Rex Feany	<laeos@laeos.net>
+	
+	* Released 0.12.0
+
+2001-Sep-03 	Rex Feany	<laeos@laeos.net>
+
+	* Fixed /win show_all - if there wasn't enough room
+	  to show all the windows, bad things would happen.
+	* fixed window resize bugs
+
+2001-Aug-30 	Rex Feany	<laeos@laeos.net>
+
+	* Added new man page from Alan <alanp@unixpower.org>	
+
+2001-Jul-4	Rex Feany	<laeos@laeos.net>
+
+	* Got rid of commands.c by moving all the stuff into 
+	  ncommands.c -- this is so I can test the "new"
+	  commands.c :)
+
+2001-Jun-20 	Rex Feany	<laeos@laeos.net>
+
+	* renamed a bunch of global vars, stupid names suck.
+	  and it fixes a lot of compile time warnings.
+	* fixed /ban, in some cases would try to ban with
+	  bogus host/user name.
+
+2001-Jun-16 	Rex Feany	<laeos@laeos.net>
+
+	* Removed unused code from words.c
+	* removed window stack 
+	* update configure.in to autoconf 2.50
+	* fix makefiles, you can now 
+	   compile in different directories 
+	   (ie, mkdir obj && cd obj && ../configure && make)
+	* bump version to 0.12.0
+
 2001-May-17	Rex Feany	<laeos@laeos.net>
 	* bump version to 0.11.6
 	* fixed problems in cmd_scan.c, funny.c where put_it was called

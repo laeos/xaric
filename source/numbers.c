@@ -262,13 +262,13 @@ display_msg (char *from, char **ArgList)
 
 	put_it ("%s %s%s%s%s%s%s",
 		numeric_banner (),
-		strlen (rest) ? rest : empty_string,
-/*                strlen(rest) && ptr ? ":"      : empty_string, */
-		strlen (rest) ? space : empty_string,
-		ptr ? ptr : empty_string,
-		drem ? "(from " : empty_string,
-		drem ? from : empty_string,
-		drem ? ")" : empty_string
+		strlen (rest) ? rest : empty_str,
+/*                strlen(rest) && ptr ? ":"      : empty_str, */
+		strlen (rest) ? space_str : empty_str,
+		ptr ? ptr : empty_str,
+		drem ? "(from " : empty_str,
+		drem ? from : empty_str,
+		drem ? ")" : empty_str
 		);
 }
 
@@ -400,13 +400,13 @@ handle_server_ping (int comm, char *from, char **ArgList)
 		return 0;
 	if (comm == 351)
 	{
-		sprintf (buf, "%2.4f second%s", time_diff (in_sping, diff), (int) time_diff (in_sping, diff) ? "s" : empty_string);
+		sprintf (buf, "%2.4f second%s", time_diff (in_sping, diff), (int) time_diff (in_sping, diff) ? "s" : empty_str);
 #else
 	if (!in_sping)
 		return 0;
 	if (comm == 351)
 	{
-		sprintf (buf, "%d second%s", diff - in_sping, diff - in_sping ? "s" : empty_string);
+		sprintf (buf, "%d second%s", diff - in_sping, diff - in_sping ? "s" : empty_str);
 #endif
 
 		put_it ("%s", convert_output_format ("$G Server PONG from %W$0%n $1-", "%s %s", from, buf));
@@ -766,7 +766,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			PasteArgs (ArgList, 0);
 			if (do_hook (current_numeric, "%s %s", from, *ArgList))
 				display_msg (from, ArgList);
-			close_server (from_server, empty_string);
+			close_server (from_server, empty_str);
 			window_check_servers ();
 			if (from_server == primary_server)
 				get_connected (from_server + 1);
@@ -797,7 +797,7 @@ numbered_command (char *from, int comm, char **ArgList)
 
 			say ("Password required for connection to server %s",
 			     get_server_name (from_server));
-			close_server (from_server, empty_string);
+			close_server (from_server, empty_str);
 			strcpy (server_num, ltoa (from_server));
 			add_wait_prompt ("Server Password:", password_sendline,
 					 server_num, WAIT_PROMPT_LINE);
@@ -819,7 +819,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			if (do_hook (current_numeric, "%s %s", from, ArgList[0]))
 				display_msg (from, ArgList);
 
-			close_server (from_server, empty_string);
+			close_server (from_server, empty_str);
 			window_check_servers ();
 			if (server_list_size () > 1)
 				remove_from_server_list (klined);

@@ -1,4 +1,4 @@
-#ident "@(#)ircterm.c 1.9"
+#ident "@(#)ircterm.c 1.10"
 /*
  * ircterm.c - terminal-related functions for xaric
  *
@@ -326,16 +326,16 @@ term_init (void)
 		tc_LE = "\010";
 
 	if (!tc_SO || !tc_SE) {
-		tc_SO = empty_string;
-		tc_SE = empty_string;
+		tc_SO = empty_str;
+		tc_SE = empty_str;
 	}
 	if (!tc_US || !tc_UE) {
-		tc_US = empty_string;
-		tc_UE = empty_string;
+		tc_US = empty_str;
+		tc_UE = empty_str;
 	}
 	if (!tc_MD || !tc_ME) {
-		tc_MD = empty_string;
-		tc_ME = empty_string;
+		tc_MD = empty_str;
+		tc_ME = empty_str;
 	}
 
 	if (! (tc_CM && tc_CL && tc_CE && tc_ND && (tc_LE || tc_BS) && (tc_CS || (tc_AL && tc_DL)))) {

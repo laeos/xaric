@@ -1,4 +1,4 @@
-#ident "@(#)whois.c 1.6"
+#ident "@(#)whois.c 1.7"
 /*
  * whois.c: Some tricky routines for querying the server for information
  * about a nickname using WHOIS.... all the time hiding this from the user.  
@@ -139,13 +139,13 @@ ison_returned (char *from, char **ArgList)
 	if (whois_type_head (from_server) == WHOIS_ISON)
 	{
 		thing = remove_from_whois_queue (from_server);
-		thing->func (thing->nick, ArgList[0] ? ArgList[0] : empty_string);
+		thing->func (thing->nick, ArgList[0] ? ArgList[0] : empty_str);
 		new_free (&thing->nick);
 		new_free (&thing->text);
 		new_free ((char **) &thing);
 	}
 	else
-		ison_now (NULL, ArgList[0] ? ArgList[0] : empty_string);
+		ison_now (NULL, ArgList[0] ? ArgList[0] : empty_str);
 }
 
 /* userhost_returned: this is called when numeric 302 is received in
@@ -282,7 +282,7 @@ userhost_returned (char *from, char **ArgList)
 			whois_stuff->oper = isoper;
 			whois_stuff->not_on = noton;
 			if (!ishere)
-				malloc_strcpy (&whois_stuff->away, empty_string);
+				malloc_strcpy (&whois_stuff->away, empty_str);
 			else
 				new_free (&whois_stuff->away);
 			thing->func (whois_stuff, tnick, thing->text);
@@ -299,8 +299,8 @@ userhost_returned (char *from, char **ArgList)
 			{
 				put_it ("%s %s is %s@%s%s%s", line_thing,
 				      nick, user, nsl ? nsl : host, isoper ?
-				     " (Is an IRC operator)" : empty_string,
-					ishere ? empty_string : " (away)");
+				     " (Is an IRC operator)" : empty_str,
+					ishere ? empty_str : " (away)");
 			}
 		}
 	}
@@ -553,7 +553,7 @@ whois_lastcom (char *from, char **ArgList)
 			hours = secs / 3600;
 			minutes = (secs - (hours * 3600)) / 60;
 			seconds = secs % 60;
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_IDLE_FSET), "%d %d %d %s", hours, minutes, seconds, ArgList[2] ? ArgList[2] : empty_string));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_IDLE_FSET), "%d %d %d %s", hours, minutes, seconds, ArgList[2] ? ArgList[2] : empty_str));
 		}
 	}
 }
@@ -854,7 +854,7 @@ whois_ignore_invites (WhoisStuff * stuff, char *nick, char *text)
 					chan = w_chan->channellist;
 			}
 			if (chan && get_int_var (AUTO_REJOIN_VAR))
-				send_to_server ("JOIN %s%s%s", invite_channel, chan->key ? " " : empty_string, chan->key ? chan->key : empty_string);
+				send_to_server ("JOIN %s%s%s", invite_channel, chan->key ? " " : empty_str, chan->key ? chan->key : empty_str);
 		}
 		else if (get_int_var (SEND_IGNORE_MSG_VAR))
 			send_to_server ("NOTICE %s :%s is ignoring you.",
@@ -1015,11 +1015,11 @@ userhost_cmd_returned (WhoisStuff * stuff, char *nick, char *text)
 {
 	char args[BIG_BUFFER_SIZE + 1];
 
-	strcpy (args, stuff->nick ? stuff->nick : empty_string);
+	strcpy (args, stuff->nick ? stuff->nick : empty_str);
 	strcat (args, stuff->oper ? " + " : " - ");
 	strcat (args, stuff->away ? "+ " : "- ");
-	strcat (args, stuff->user ? stuff->user : empty_string);
-	strcat (args, space);
-	strcat (args, stuff->host ? stuff->host : empty_string);
+	strcat (args, stuff->user ? stuff->user : empty_str);
+	strcat (args, space_str);
+	strcat (args, stuff->host ? stuff->host : empty_str);
 	parse_line ("USERHOST", text, args, 0, 0);
 }

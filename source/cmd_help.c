@@ -1,4 +1,4 @@
-#ident "@(#)cmd_help.c 1.7"
+#ident "@(#)cmd_help.c 1.8"
 /*
  * cmd_help.c -- Xaric help system
  * Copyright (c) 2000 Rex Feany (laeos@laeos.net) 
@@ -164,7 +164,7 @@ dir_prompt_callback (char *data, char *line)
 	if ( *line == '\0' ) {
 		move_down(data);
 	} else if ( *line == '?' ) {
-		end_callback(data, empty_string);
+		end_callback(data, empty_str);
 	} else if ( *line != 'Q' && *line != 'q' ) {
 		char *f = alloca( strlen(data) + strlen(line) + 2 );
 		sprintf(f, "%s %s", data, line);
@@ -240,7 +240,7 @@ end_callback (char *data, char *line)
 		snprintf(buf, MAXPATHLEN, "%s/%s", help_me, data);
 		switch_space(buf);
 
-		retval = xscandir(buf, empty_string, &name);
+		retval = xscandir(buf, empty_str, &name);
 
 		switch(retval) {
 	
@@ -309,7 +309,7 @@ display_topic (char *topic)
 	next = next_arg(topic, &topic);
 
 	if ( next == NULL )
-		next = empty_string;
+		next = empty_str;
 	
 	/* walk down the arguments, finding each file/directory */
 	do {
@@ -340,7 +340,7 @@ display_topic (char *topic)
 					current_fp = fopen(path, "r");
 	
 					if ( current_fp ) {
-						pager_callback (dir, empty_string);
+						pager_callback (dir, empty_str);
 					} else {
 						bitchsay("help: unable to open '%s'", path);
 						add_dir_callback(dir);
@@ -367,7 +367,7 @@ display_topic (char *topic)
 
 	if ( current_fp ) {
 		dir_list = 1;
-		pager_callback (dir, empty_string);
+		pager_callback (dir, empty_str);
 	} else {
 		bitchsay("help: unable to open '%s'", path);
 		add_dir_callback(dir);

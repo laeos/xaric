@@ -1,4 +1,4 @@
-#ident "@(#)status.c 1.9"
+#ident "@(#)status.c 1.11"
 /*
  * status.c: handles the status line updating, etc for IRCII 
  *
@@ -434,7 +434,7 @@ fix_status_buffer (char *buffer, int ansi)
 		 */
 		if (pr_lhs + pr_rhs < term_cols)
 			sprintf (buffer + start_rhs, "%*s%s",
-				 term_cols - 1 - pr_lhs - pr_rhs, empty_string,
+				 term_cols - 1 - pr_lhs - pr_rhs, empty_str,
 				 rhs_buffer);
 		else
 			strcpy (buffer + start_rhs, rhs_buffer);
@@ -505,7 +505,7 @@ make_status (Window * win)
 	 * and should always be displayed, no matter what SHOW_STATUS_ALL
 	 * is set to - krys
 	 */
-	for (status_line = 0; status_line < 1 + win->double_status; status_line++)
+	for (status_line = 0; status_line < win->w_status_size; status_line++)
 	{
 		int position = 0;
 		int line = status_line, i;
@@ -577,7 +577,7 @@ status_nickname (Window * window)
 	if ((connected_to_server) && !get_int_var (SHOW_STATUS_ALL_VAR)
 	    && (!window->current_channel) &&
 	    (window->screen->current_window != window))
-		return empty_string;
+		return empty_str;
 	else
 		return (get_server_nickname (window->server));
 }
@@ -618,7 +618,7 @@ status_query_nick (Window * window)
 		return my_buffer;
 	}
 	else
-		return (empty_string);
+		return (empty_str);
 }
 
 static char *
@@ -694,7 +694,7 @@ status_notify_windows (Window * window)
 #endif
 		return (my_buffer);
 	}
-	return empty_string;
+	return empty_str;
 }
 
 static char *
@@ -762,7 +762,7 @@ status_chanop (Window * window)
 	    (text = get_string_var (STATUS_CHANOP_VAR)))
 		return (text);
 	else
-		return (empty_string);
+		return (empty_str);
 }
 
 
@@ -778,7 +778,7 @@ status_hold_lines (Window * window)
 		return (my_buffer);
 	}
 	else
-		return (empty_string);
+		return (empty_str);
 }
 
 static char *
@@ -792,7 +792,7 @@ status_msgcount (Window * window)
 		return (my_buffer);
 	}
 	else
-		return (empty_string);
+		return (empty_str);
 }
 
 static char *
@@ -818,7 +818,7 @@ status_channel (Window * window)
 		snprintf (my_buffer, IRCD_BUFFER_SIZE, channel_format, channel);
 		return (my_buffer);
 	}
-	return (empty_string);
+	return (empty_str);
 }
 
 
@@ -831,7 +831,7 @@ status_insert_mode (Window * window)
 			     || (window->screen->current_window == window)))
 		if ((text = get_string_var (STATUS_INSERT_VAR)))
 			return text;
-	return (empty_string);
+	return (empty_str);
 }
 
 static char *
@@ -845,7 +845,7 @@ status_overwrite_mode (Window * window)
 		if ((text = get_string_var (STATUS_OVERWRITE_VAR)))
 			return text;
 	}
-	return (empty_string);
+	return (empty_str);
 }
 
 static char *
@@ -855,16 +855,16 @@ status_away (Window * window)
 
 	if (window && connected_to_server && !get_int_var (SHOW_STATUS_ALL_VAR)
 	    && (window->screen->current_window != window))
-		return empty_string;
+		return empty_str;
 	else if (window)
 	{
 		if (window->server != -1 && server_list[window->server].away &&
 		    (text = get_string_var (STATUS_AWAY_VAR)))
 			return text;
 		else
-			return empty_string;
+			return empty_str;
 	}
-	return empty_string;
+	return empty_str;
 }
 
 static char *
@@ -874,7 +874,7 @@ status_hold (Window * window)
 
 	if (window->holding_something && (text = get_string_var (STATUS_HOLD_VAR)))
 		return (text);
-	return (empty_string);
+	return (empty_str);
 }
 
 static char *
@@ -894,7 +894,7 @@ status_lag (Window * window)
 			snprintf (my_buffer, MY_BUFFER, status_lag_format, "??");
 		return (my_buffer);
 	}
-	return empty_string;
+	return empty_str;
 }
 
 static char *
@@ -912,7 +912,7 @@ status_topic (Window * window)
 			return (my_buffer);
 		}
 	}
-	return empty_string;
+	return empty_str;
 }
 
 static char *
@@ -926,7 +926,7 @@ status_oper (Window * window)
 	     connected_to_server ||
 	     (window->screen->current_window == window)))
 		return (text);
-	return (empty_string);
+	return (empty_str);
 }
 
 static char *
@@ -938,7 +938,7 @@ status_voice (Window * window)
 	    !get_channel_oper (window->current_channel, window->server) &&
 	    (text = get_string_var (STATUS_VOICE_VAR)))
 		return text;
-	return empty_string;
+	return empty_str;
 }
 
 static char *
@@ -949,7 +949,7 @@ status_window (Window * window)
 	if ((text = get_string_var (STATUS_WINDOW_VAR)) &&
 	    (number_of_windows () > 1) && (window->screen->current_window == window))
 		return (text);
-	return (empty_string);
+	return (empty_str);
 }
 
 static char *
@@ -965,7 +965,7 @@ status_version (Window * window)
 {
 	if ((connected_to_server) && !get_int_var (SHOW_STATUS_ALL_VAR)
 	    && (window->screen->current_window != window))
-		return (empty_string);
+		return (empty_str);
 	return ((char *) xversion.v_short);
 }
 
@@ -981,13 +981,13 @@ status_dcccount (Window * window)
 		snprintf (my_buffer, MY_BUFFER, dcccount_format, ltoa (get_count_stat), tmp);
 		return my_buffer;
 	}
-	return empty_string;
+	return empty_str;
 }
 
 static char *
 status_null_function (Window * window)
 {
-	return empty_string;
+	return empty_str;
 }
 
 

@@ -1,3 +1,6 @@
+#ifndef __window_h_
+#define __window_h_
+
 /*
  * window.h: header file for window.c 
  *
@@ -10,9 +13,6 @@
  * @(#)$Id$
  */
 
-#ifndef __window_h_
-#define __window_h_
-
 #include "irc_std.h"
 #include "lastlog.h"
 
@@ -21,6 +21,12 @@
 #define REDRAW_DISPLAY_FAST 2
 #define UPDATE_STATUS 4
 #define REDRAW_STATUS 8
+
+/* minimum number of display lines (not counting status) a window can be */
+#define MIN_WINDOW_SIZE	5
+
+/* Maximum number of status lines */
+#define MAX_STATUS_LINES 3
 
 #define	LT_UNLOGGED	0
 #define	LT_LOGHEAD	1
@@ -109,7 +115,7 @@
 	void	resize_window			(int, Window *, int);
 	Window *window_list			(Window *, char **, char *);
 	void	move_window			(Window *, int);
-	void	show_window			(Window *);
+	int	show_window			(Window *);
 			
 	BUILT_IN_COMMAND(windowcmd);
 

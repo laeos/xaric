@@ -248,7 +248,7 @@ do_server (fd_set * rd, fd_set * wr)
 				{
 					int old_serv = server_list[i].close_serv;
 
-					close_server (i, empty_string);
+					close_server (i, empty_str);
 					last_timeout = 0;
 					say ("Connection closed from %s: %s", server_list[i].name,
 					     (dgets_errno == -1) ? "Remote end closed connection" : strerror (dgets_errno));
@@ -303,14 +303,14 @@ do_server (fd_set * rd, fd_set * wr)
 					else if (server_list[i].eof)
 					{
 						say ("Connection to server %s lost.", server_list[i].name);
-						close_server (i, empty_string);
+						close_server (i, empty_str);
 						clean_whois_queue ();
 						window_check_servers ();
 					}
 					else if (connect_to_server_by_refnum (i, -1))
 					{
 						say ("Connection to server %s lost.", server_list[i].name);
-						close_server (i, empty_string);
+						close_server (i, empty_str);
 						clean_whois_queue ();
 						window_check_servers ();
 					}
@@ -338,7 +338,7 @@ do_server (fd_set * rd, fd_set * wr)
 				last_timeout = time (NULL);
 			else if (time (NULL) - last_timeout > 600)
 			{
-				close_server (i, empty_string);
+				close_server (i, empty_str);
 				get_connected (i);
 			}
 		}
@@ -1080,7 +1080,7 @@ get_umode (int gu_index)
 	if (gu_index == -1)
 		gu_index = primary_server;
 	else if (gu_index >= number_of_servers)
-		return empty_string;
+		return empty_str;
 
 	return server_list[gu_index].umode;
 }
@@ -1228,7 +1228,7 @@ get_server_name (int gsn_index)
 	if (gsn_index == -1)
 		gsn_index = primary_server;
 	if (gsn_index == -1 || gsn_index >= number_of_servers)
-		return empty_string;
+		return empty_str;
 
 	return (server_list[gsn_index].name);
 }
@@ -1240,11 +1240,11 @@ get_server_itsname (int gsi_index)
 	if (gsi_index == -1)
 		gsi_index = primary_server;
 	else if (gsi_index >= number_of_servers)
-		return empty_string;
+		return empty_str;
 
 	/* better check gsi_index for -1 here CDE */
 	if (gsi_index == -1)
-		return empty_string;
+		return empty_str;
 
 	if (server_list[gsi_index].itsname)
 		return server_list[gsi_index].itsname;
@@ -1308,7 +1308,7 @@ char *
 get_server_nickname (int gsn_index)
 {
 	if (gsn_index >= number_of_servers)
-		return empty_string;
+		return empty_str;
 	else if (gsn_index != -1 && server_list[gsn_index].nickname)
 		return (server_list[gsn_index].nickname);
 	else
@@ -1451,7 +1451,7 @@ register_server (int ssn_index, char *nick)
 	send_to_server ("USER %s %s %s :%s", username,
 			(send_umode && *send_umode) ? send_umode :
 			(LocalHostName ? LocalHostName : hostname),
-			username, *realname ? realname : space);
+			username, *realname ? realname : space_str);
 	change_server_nickname (ssn_index, nick);
 	from_server = old_from_server;
 }
@@ -1602,7 +1602,7 @@ create_server_list (void)
 			if (server_list[i].itsname)
 			{
 				strcat (buffer, server_list[i].itsname);
-				strcat (buffer, space);
+				strcat (buffer, space_str);
 			}
 			else
 				yell ("Warning: server_list[%d].itsname is null and it shouldnt be", i);

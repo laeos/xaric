@@ -341,8 +341,8 @@ get_channel_key (char *channel, int server)
 	ChannelList *tmp;
 
 	if ((tmp = lookup_channel (channel, server, 0)) != NULL)
-		return (tmp->key ? tmp->key : empty_string);
-	return empty_string;
+		return (tmp->key ? tmp->key : empty_str);
+	return empty_str;
 }
 
 
@@ -945,8 +945,8 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 			{
 				limit_set = 1;
 				if (!(limit = next_arg (rest, &rest)))
-					limit = empty_string;
-				else if (!strncmp (limit, zero, 1))
+					limit = empty_str;
+				else if (!strncmp (limit, zero_str, 1))
 					limit_reset = 1, limit_set = 0, add = 0;
 			}
 			else
@@ -1079,7 +1079,7 @@ get_channel_mode (char *channel, int server)
 	ChannelList *tmp;
 	if ((tmp = lookup_channel (channel, server, CHAN_NOUNLINK)))
 		return recreate_mode (tmp);
-	return empty_string;
+	return empty_str;
 }
 
 /*
@@ -1507,7 +1507,7 @@ reconnect_all_channels (int server)
 		clear_bans (tmp);
 	}
 	if (channels)
-		send_to_server ("JOIN %s %s", channels, keys ? keys : empty_string);
+		send_to_server ("JOIN %s %s", channels, keys ? keys : empty_str);
 
 	new_free (&channels);
 	new_free (&keys);

@@ -316,7 +316,7 @@ do_history (char *com, char *rest)
 		if (last_com)
 			com = last_com;
 		else
-			com = empty_string;
+			com = empty_str;
 	}
 	else
 		malloc_strcpy (&last_com, com);

@@ -13,7 +13,6 @@
 #define QUOTE_CHAR '\\'
 
 extern char	*line_thing;
-extern char	space[];
 
 #define STRING_CHANNEL '+'
 #define MULTI_CHANNEL '#'
@@ -135,12 +134,12 @@ extern	int	irc_port;
 extern	int	current_on_hook;
 extern	char	*joined_nick;
 extern	char	*public_nick;
-extern	char	empty_string[];
-extern	char	zero[];
-extern	char	one[];
-extern	char	on[];
-extern	char	off[];
-extern	char	space[];
+extern	char	empty_str[];
+extern	char	zero_str[];
+extern	char	one_str[];
+extern	char	on_str[];
+extern	char	off_str[];
+extern	char	space_str[];
 
 extern  char	*convertstring;
 extern	char	nickname[];

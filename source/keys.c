@@ -138,7 +138,7 @@ show_binding (unsigned char c, int meta)
 	if (keys[meta][c])
 		say ("%s%s is bound to %s %s", meta_str, display_key (c),
 		     key_names[keys[meta][c]->key_index].name, (keys[meta][c]->stuff &&
-								(*(keys[meta][c]->stuff))) ? keys[meta][c]->stuff : empty_string);
+								(*(keys[meta][c]->stuff))) ? keys[meta][c]->stuff : empty_str);
 	else
 		say ("%s%s is bound to NOTHING", meta_str, display_key (c));
 }

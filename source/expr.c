@@ -138,7 +138,7 @@ expand_alias (char *string, char *args, int *args_flag, char **more_text)
 	int unescape = 1;
 
 	if (!string || !*string)
-		return m_strdup (empty_string);
+		return m_strdup (empty_str);
 
 	if (*string == '@' && more_text)
 	{
@@ -312,7 +312,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 		{
 			if ((ptr = (char *) strchr (tmp, '!')) != NULL)
 				*(ptr++) = (char) 0;
-			if ((tmp = do_history (tmp, empty_string)) != NULL)
+			if ((tmp = do_history (tmp, empty_str)) != NULL)
 			{
 				TruncateAndQuote (buffer, tmp, len, quote_em, pad_char);
 				new_free (&tmp);
@@ -394,7 +394,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 					ptr++;
 					uppr = parse_number (&ptr);
 					if (uppr == -1)
-						return empty_string;	/* error */
+						return empty_str;	/* error */
 				}
 				else
 				{
@@ -420,13 +420,13 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				 * chewing the expando.
 				 */
 				if (!args)
-					tmp2 = m_strdup (empty_string);
+					tmp2 = m_strdup (empty_str);
 				else
-					tmp2 = extract2 (args, lowr, uppr);
+					tmp2 = extract_words (args, lowr, uppr);
 
 				TruncateAndQuote (buffer, tmp2, len, quote_em, pad_char);
 				new_free (&tmp2);
-				return (ptr ? ptr : empty_string);
+				return (ptr ? ptr : empty_str);
 			}
 			else
 			{

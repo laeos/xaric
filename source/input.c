@@ -182,9 +182,9 @@ update_input (int update)
 				free_it = 0;
 			}
 			else if (!get_int_var (DISPLAY_ANSI_VAR))
-				ptr = expand_alias (stripansicodes (prompt), empty_string, &args_used, NULL);
+				ptr = expand_alias (stripansicodes (prompt), empty_str, &args_used, NULL);
 			else
-				ptr = expand_alias (prompt, empty_string, &args_used, NULL);
+				ptr = expand_alias (prompt, empty_str, &args_used, NULL);
 			if (*ptr && ((my_strnicmp (ptr, "Password:", 9) == 0) || (my_strnicmp (ptr, "Operator Password:", 18) == 0) ||
 			  (my_strnicmp (ptr, "Server Password:", 16) == 0)))
 				term_echo (0);
@@ -408,7 +408,7 @@ set_input_prompt (Window * win, char *prompt, int unused)
 	{
 		if (!input_prompt)
 			return;
-		malloc_strcpy (&input_prompt, empty_string);
+		malloc_strcpy (&input_prompt, empty_str);
 	}
 	update_input (UPDATE_ALL);
 }
@@ -887,9 +887,9 @@ input_msgreply (char dumb, char *dumber)
 			char *tmp = NULL;
 			input_clear_line ('\0', NULL);
 			if (get_fset_var (FORMAT_NICK_MSG_FSET))
-				malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_MSG_FSET), "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_string)));
+				malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_MSG_FSET), "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_str)));
 			else
-				malloc_sprintf (&tmp, "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_string);
+				malloc_sprintf (&tmp, "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_str);
 			set_input (tmp);
 			new_free (&tmp);
 		}
@@ -911,7 +911,7 @@ add_autonick_input (char *nick, char *line)
 	if ((do_hook (AR_REPLY_LIST, "%s", nick)))
 	{
 		if (get_fset_var (FORMAT_NICK_AUTO_FSET))
-			malloc_strcpy (&tmp1, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_AUTO_FSET), "%s %s", nick, line ? line : empty_string)));
+			malloc_strcpy (&tmp1, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_AUTO_FSET), "%s %s", nick, line ? line : empty_str)));
 		else
 			malloc_sprintf (&tmp1, "%s: %s", nick, line);
 		set_input (tmp1);
@@ -933,7 +933,7 @@ send_line (char dumb, char *dumber)
 	{
 		OldPrompt = current_screen->promptlist;
 		(*OldPrompt->func) (OldPrompt->data, get_input ());
-		set_input (empty_string);
+		set_input (empty_str);
 		current_screen->promptlist = OldPrompt->next;
 		new_free (&OldPrompt->data);
 		new_free (&OldPrompt->prompt);
@@ -988,7 +988,7 @@ send_line (char dumb, char *dumber)
 		if (do_hook (INPUT_LIST, "%s", tmp))
 		{
 			if (get_int_var (INPUT_ALIASES_VAR))
-				parse_line (NULL, tmp, empty_string, 1, 0);
+				parse_line (NULL, tmp, empty_str, 1, 0);
 			else
 				parse_line (NULL, tmp, NULL, 1, 0);
 		}
@@ -1099,7 +1099,7 @@ type_text (char c, char *str)
 	if (!str)
 		return;
 	for (; *str; str++)
-		input_add_character (*str, empty_string);
+		input_add_character (*str, empty_str);
 }
 
 /*
@@ -1117,7 +1117,7 @@ clear_screen (char c, char *str)
 extern void 
 parse_text (char c, char *str)
 {
-	parse_line (NULL, str, empty_string, 0, 0);
+	parse_line (NULL, str, empty_str, 0, 0);
 }
 
 
@@ -1145,7 +1145,7 @@ edit_char (u_char key)
 
 		(*oldprompt->func) (oldprompt->data, key_);
 
-		set_input (empty_string);
+		set_input (empty_str);
 		current_screen->promptlist = oldprompt->next;
 		new_free (&oldprompt->data);
 		new_free (&oldprompt->prompt);
@@ -1199,12 +1199,12 @@ edit_char (u_char key)
 		if (current_screen->quote_hit)
 		{
 			current_screen->quote_hit = 0;
-			input_add_character (extended_key, empty_string);
+			input_add_character (extended_key, empty_str);
 		}
 
 		/* nope. none of these.  just a regular character */
 		else if (func)
-			func (extended_key, ptr ? ptr : empty_string);
+			func (extended_key, ptr ? ptr : empty_str);
 	}
 	else
 		term_beep ();	/* two metas in a row gets a beep */
@@ -1430,7 +1430,7 @@ ignore_last_nick (char dumb, char *dumber)
 	char *tmp1;
 	if ((nick = gettabkey (1, NULL)))
 	{
-		set_input (empty_string);
+		set_input (empty_str);
 		tmp1 = m_sprintf ("%sig %s", get_string_var (CMDCHARS_VAR), nick->nick);
 		set_input (tmp1);
 		new_free (&tmp1);
@@ -1449,7 +1449,7 @@ nick_completion (char dumb, char *dumber)
 	if (in_completion == STATE_NORMAL)
 	{
 		i = word_count (line);
-		nick = extract (line, i - 1, i);
+		nick = extract_words (line, i - 1, i);
 	}
 	if (nick)
 		line[strlen (line) - strlen (nick)] = 0;

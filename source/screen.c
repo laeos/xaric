@@ -1,4 +1,4 @@
-#ident "@(#)screen.c 1.7"
+#ident "@(#)screen.c 1.9"
 /*
  * screen.c
  *
@@ -311,7 +311,7 @@ split_up_line (const unsigned char *str)
 	static int output_size = 0;
 	unsigned char buffer[BIG_BUFFER_SIZE + 1];
 	const unsigned char *ptr;
-	unsigned char *cont_ptr, *cont = empty_string, c;
+	unsigned char *cont_ptr, *cont = empty_str, c;
 	int pos = 0,		/* Current pos in "buffer" */
 	  col = 0,		/* Current col on display */
 	  word_break = 0,	/* Last end of word */
@@ -350,7 +350,7 @@ split_up_line (const unsigned char *str)
 	do_indent = get_int_var (INDENT_VAR);
 
 	if (!(cont_ptr = get_string_var (CONTINUED_LINE_VAR)))
-		cont_ptr = empty_string;
+		cont_ptr = empty_str;
 
 
 	/*
@@ -1159,7 +1159,6 @@ create_new_screen (void)
 	new->cursor_window = NULL;
 	new->current_window = NULL;
 	new->visible_windows = 0;
-	new->window_stack = NULL;
 	for (i = 0; i <= 9; i++)
 		new->meta_hit[i] = 0;
 

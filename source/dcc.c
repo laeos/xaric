@@ -1,4 +1,4 @@
-#ident "@(#)dcc.c 1.6"
+#ident "@(#)dcc.c 1.7"
 /*
  * dcc.c: Things dealing client to client connections. 
  *
@@ -739,7 +739,7 @@ dcc_raw_connect (char *host, u_short port)
 		{
 			put_it ("%s", convert_output_format ("$G %RDCC%n Unknown host: $0-", "%s", host));
 			set_lastlog_msg_level (lastlog_level);
-			return m_strdup (empty_string);
+			return m_strdup (empty_str);
 		}
 		memcpy (&address, hp->h_addr, sizeof (address));
 	}
@@ -748,14 +748,14 @@ dcc_raw_connect (char *host, u_short port)
 	{
 		put_it ("%s", convert_output_format ("$G %RDCC%n A previous DCC raw to $0 on $1 exists", "%s %d", host, port));
 		set_lastlog_msg_level (lastlog_level);
-		return m_strdup (empty_string);
+		return m_strdup (empty_str);
 	}
 	/* Sorry. The missing 'htons' call here broke $connect() */
 	Client->remport = htons (port);
 	memcpy ((char *) &Client->remote, (char *) &address, sizeof (address));
 	Client->flags = DCC_OFFER | DCC_RAW;
 	if (!dcc_open (Client))
-		return m_strdup (empty_string);
+		return m_strdup (empty_str);
 	PortName = ltoa (Client->read);
 	Client->user = m_strdup (PortName);
 	if (do_hook (DCC_RAW_LIST, "%s %s E %d", PortName, host, port))
@@ -1358,7 +1358,7 @@ process_incoming_chat (DCC_list * Client)
 						put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_CHAT_FSET),
 										     "%s %s %s %s", update_clock (GET_TIME), Client->user, Client->userhost ? Client->userhost : "u@h", tmp));
 					}
-					FromUserHost = empty_string;
+					FromUserHost = empty_str;
 				}
 			}
 		}
@@ -1838,7 +1838,7 @@ dcc_list (char *command, char *args)
 		else
 		{
 			sprintf (completed, "%ldK", (unsigned long) (Client->bytes_sent ? Client->bytes_sent : Client->bytes_read) / 1024);
-			strcpy (size, empty_string);
+			strcpy (size, empty_str);
 		}
 		stime = Client->starttime.tv_sec ? dcc_time (Client->starttime.tv_sec) : "";
 		flags = Client->flags;
@@ -2086,8 +2086,8 @@ output_reject_ctcp (char *notused, char *nicklist)
 	if (nicklist && *nicklist && *DCC_reject_description)
 		send_ctcp (CTCP_NOTICE, nicklist, CTCP_DCC,
 		   "REJECT %s %s", DCC_reject_type, DCC_reject_description);
-	strcpy (DCC_reject_description, empty_string);
-	strcpy (DCC_reject_type, empty_string);
+	strcpy (DCC_reject_description, empty_str);
+	strcpy (DCC_reject_type, empty_str);
 }
 
 /* added by Patch */

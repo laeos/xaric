@@ -220,7 +220,7 @@ m_strdup (const char *str)
 	char *ptr;
 
 	if (!str)
-		str = empty_string;
+		str = empty_str;
 	ptr = (char *) new_malloc (strlen (str) + 1);
 	return strcpy (ptr, str);
 }
@@ -403,10 +403,10 @@ next_arg (char *str, char **new_ptr)
 		if ((str = sindex (ptr, " ")) != NULL)
 			*str++ = (char) 0;
 		else
-			str = empty_string;
+			str = empty_str;
 	}
 	else
-		str = empty_string;
+		str = empty_str;
 	if (new_ptr)
 		*new_ptr = str;
 	return ptr;
@@ -473,7 +473,7 @@ last_arg (char **src)
 	if (ptr == *src)
 	{
 		ptr = *src;
-		*src = empty_string;
+		*src = empty_str;
 	}
 	else
 	{
@@ -514,18 +514,18 @@ new_next_arg (char *str, char **new_ptr)
 					ptr = str + 1;
 				}
 			}
-			str = empty_string;
+			str = empty_str;
 		}
 		else
 		{
 			if ((str = sindex (ptr, " \t")) != NULL)
 				*str++ = '\0';
 			else
-				str = empty_string;
+				str = empty_str;
 		}
 	}
 	else
-		str = empty_string;
+		str = empty_str;
 	if (new_ptr)
 		*new_ptr = str;
 	return ptr;
@@ -569,7 +569,7 @@ new_new_next_arg (char *str, char **new_ptr, char *type)
 					ptr = str + 1;
 				}
 			}
-			str = empty_string;
+			str = empty_str;
 		}
 		else
 		{
@@ -577,11 +577,11 @@ new_new_next_arg (char *str, char **new_ptr, char *type)
 			if ((str = sindex (ptr, " \t")) != NULL)
 				*str++ = '\0';
 			else
-				str = empty_string;
+				str = empty_str;
 		}
 	}
 	else
-		str = empty_string;
+		str = empty_str;
 	if (new_ptr)
 		*new_ptr = str;
 	return ptr;
@@ -1064,7 +1064,7 @@ path_search (char *name, char *path)
 	{
 		if ((ptr = strchr (path, ':')) != NULL)
 			*(ptr++) = '\0';
-		strcpy (buffer, empty_string);
+		strcpy (buffer, empty_str);
 		if (path[0] == '~')
 		{
 			strmcat (buffer, my_path, BIG_BUFFER_SIZE);
@@ -1538,7 +1538,7 @@ time_to_next_minute (void)
 char *
 plural (int number)
 {
-	return (number != 1) ? "s" : empty_string;
+	return (number != 1) ? "s" : empty_str;
 }
 
 char *
@@ -1702,124 +1702,6 @@ on_off (int var)
 		return ("On");
 	return ("Off");
 }
-
-#ifdef NEED_STRTOUL
-#ifndef ULONG_MAX
-#define ULONG_MAX (unsigned long) -1
-#endif
-
-/*
- * Copyright (c) 1990 Regents of the University of California.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by the University of
- *      California, Berkeley and its contributors.
- * 4. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
-
-/*
- * Convert a string to an unsigned long integer.
- *
- * Ignores `locale' stuff.  Assumes that the upper and lower case
- * alphabets and digits are each contiguous.
- */
-unsigned long 
-strtoul (const char *nptr, char **endptr, int base)
-{
-	const char *s;
-	unsigned long acc, cutoff;
-	int c;
-	int neg, any, cutlim;
-
-	s = nptr;
-	do
-		c = *s++;
-	while (my_isspace (c));
-
-	if (c == '-')
-	{
-		neg = 1;
-		c = *s++;
-	}
-	else
-	{
-		neg = 0;
-		if (c == '+')
-			c = *s++;
-	}
-
-	if ((base == 0 || base == 16) && c == '0' && (*s == 'x' || *s == 'X'))
-	{
-		c = s[1];
-		s += 2;
-		base = 16;
-	}
-
-	if (base == 0)
-		base = c == '0' ? 8 : 10;
-
-	cutoff = ULONG_MAX / (unsigned long) base;
-	cutlim = ULONG_MAX % (unsigned long) base;
-
-	for (acc = 0, any = 0;; c = *s++)
-	{
-		if (isdigit (c))
-			c -= '0';
-		else if (isalpha (c))
-			c -= isupper (c) ? 'A' - 10 : 'a' - 10;
-		else
-			break;
-
-		if (c >= base)
-			break;
-
-		if (any < 0)
-			continue;
-
-		if (acc > cutoff || acc == cutoff && c > cutlim)
-		{
-			any = -1;
-			acc = ULONG_MAX;
-			errno = ERANGE;
-		}
-		else
-		{
-			any = 1;
-			acc *= (unsigned long) base;
-			acc += c;
-		}
-	}
-	if (neg && any > 0)
-		acc = -acc;
-	if (endptr != 0)
-		*endptr = (char *) (any ? s - 1 : nptr);
-	return (acc);
-}
-#endif
 
 extern char *
 strfill (char c, int num)

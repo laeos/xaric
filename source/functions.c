@@ -1,4 +1,4 @@
-#ident "@(#)functions.c 1.12"
+#ident "@(#)functions.c 1.13"
 /*
  * functions.c -- Built-in functions for ircII
  *
@@ -127,7 +127,7 @@ built_in_alias (char c)
 		if (c == tmp->name)
 			return tmp->func ();
 
-	return m_strdup (empty_string);
+	return m_strdup (empty_str);
 }
 
 /* built in expando functions */
@@ -154,7 +154,7 @@ alias_dollar (void)
 static char *
 alias_nick (void)
 {
-	return m_strdup (curr_scr_win->server != -1 ? get_server_nickname (curr_scr_win->server) : empty_string);
+	return m_strdup (curr_scr_win->server != -1 ? get_server_nickname (curr_scr_win->server) : empty_str);
 }
 char *
 alias_away (void)
@@ -164,27 +164,27 @@ alias_away (void)
 static char *
 alias_sent_nick (void)
 {
-	return m_strdup ((sent_nick) ? sent_nick : empty_string);
+	return m_strdup ((sent_nick) ? sent_nick : empty_str);
 }
 static char *
 alias_recv_nick (void)
 {
-	return m_strdup ((recv_nick) ? recv_nick : empty_string);
+	return m_strdup ((recv_nick) ? recv_nick : empty_str);
 }
 static char *
 alias_msg_body (void)
 {
-	return m_strdup ((sent_body) ? sent_body : empty_string);
+	return m_strdup ((sent_body) ? sent_body : empty_str);
 }
 static char *
 alias_joined_nick (void)
 {
-	return m_strdup ((joined_nick) ? joined_nick : empty_string);
+	return m_strdup ((joined_nick) ? joined_nick : empty_str);
 }
 static char *
 alias_public_nick (void)
 {
-	return m_strdup ((public_nick) ? public_nick : empty_string);
+	return m_strdup ((public_nick) ? public_nick : empty_str);
 }
 static char *
 alias_show_realname (void)
@@ -199,12 +199,12 @@ alias_version_str (void)
 static char *
 alias_invite (void)
 {
-	return m_strdup ((invite_channel) ? invite_channel : empty_string);
+	return m_strdup ((invite_channel) ? invite_channel : empty_str);
 }
 static char *
 alias_oper (void)
 {
-	return m_strdup (get_server_operator (from_server) ? get_string_var (STATUS_OPER_VAR) : empty_string);
+	return m_strdup (get_server_operator (from_server) ? get_string_var (STATUS_OPER_VAR) : empty_str);
 }
 static char *
 alias_online (void)
@@ -256,21 +256,21 @@ alias_server (void)
 	return m_strdup ((parsing_server_index != -1) ?
 			 get_server_itsname (parsing_server_index) :
 			 (get_window_server (0) != -1) ?
-		 get_server_itsname (get_window_server (0)) : empty_string);
+		 get_server_itsname (get_window_server (0)) : empty_str);
 }
 
 static char *
 alias_query_nick (void)
 {
 	char *tmp;
-	return m_strdup ((tmp = query_nick ())? tmp : empty_string);
+	return m_strdup ((tmp = query_nick ())? tmp : empty_str);
 }
 
 static char *
 alias_target (void)
 {
 	char *tmp;
-	return m_strdup ((tmp = get_target_by_refnum (0)) ? tmp : empty_string);
+	return m_strdup ((tmp = get_target_by_refnum (0)) ? tmp : empty_str);
 }
 
 static char *
@@ -290,7 +290,7 @@ alias_chanop (void)
 {
 	char *tmp;
 	return m_strdup (((tmp = get_current_channel_by_refnum (0)) && get_channel_oper (tmp, from_server)) ?
-			 "@" : empty_string);
+			 "@" : empty_str);
 }
 
 static char *
@@ -298,7 +298,7 @@ alias_modes (void)
 {
 	char *tmp;
 	return m_strdup ((tmp = get_current_channel_by_refnum (0)) ?
-			 get_channel_mode (tmp, from_server) : empty_string);
+			 get_channel_mode (tmp, from_server) : empty_str);
 }
 
 

@@ -1,4 +1,4 @@
-#ident "@(#)fset.c 1.8"
+#ident "@(#)fset.c 1.9"
 /*
  * fset.c - keep track of all our format strings
  * Modified by Rex Feany (laeos@laeos.net) for Xaric
@@ -259,7 +259,7 @@ set_format (xformat loc, const char *value)
 	struct format_set *var = &(formatset_array[loc]);
 	
 	if ( value && *value == '\0' ) {
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_SET_FSET), "%s %s", var->name, var->value ? var->value : empty_string));
+		put_it ("%s", convert_output_format (get_fset_var (FORMAT_SET_FSET), "%s %s", var->name, var->value ? var->value : empty_str));
 		return;
 	}
 
@@ -411,7 +411,7 @@ cmd_freset(struct command *cmd, char *args)
 				break;
 			default:
 				say ("%s is ambiguous", var);
-				set_format_range(loc, cnt, empty_string);
+				set_format_range(loc, cnt, empty_str);
 				break;
 		}
 
@@ -457,10 +457,10 @@ cmd_fset (struct command *cmd, char *args)
 				break;
 			default:
 				say ("%s is ambiguous", var);
-				set_format_range(loc, cnt, empty_string);
+				set_format_range(loc, cnt, empty_str);
 				break;
 		}
 	} else 
-		set_format_range(0, NUMBER_OF_FSET - 1, empty_string);
+		set_format_range(0, NUMBER_OF_FSET - 1, empty_str);
 }
 

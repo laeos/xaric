@@ -1,14 +1,15 @@
-dnl aclocal.m4 generated automatically by aclocal 1.4
+# aclocal.m4 generated automatically by aclocal 1.5
 
-dnl Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
-dnl This file is free software; the Free Software Foundation
-dnl gives unlimited permission to copy and/or distribute it,
-dnl with or without modifications, as long as this notice is preserved.
+# Copyright 1996, 1997, 1998, 1999, 2000, 2001
+# Free Software Foundation, Inc.
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-dnl This program is distributed in the hope that it will be useful,
-dnl but WITHOUT ANY WARRANTY, to the extent permitted by law; without
-dnl even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-dnl PARTICULAR PURPOSE.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
 
 dnl ##
 dnl ##  GNU Pth - The GNU Portable Threads
@@ -36,7 +37,7 @@ dnl ##
 dnl ##
 dnl ## shamelessly stolen for use in Xaric.. 
 dnl ##
-dnl ## @(#)acinclude.m4 1.2
+dnl ## @(#)acinclude.m4 1.3
 dnl ##
 
 divert(-1)
@@ -140,7 +141,6 @@ dnl ##                <copyright>)
 dnl ##
 
 AC_DEFUN(AC_HEADLINE,[dnl
-AC_DIVERT_PUSH(AC_DIVERSION_NOTICE)dnl
 #   configuration header
 if test ".`echo dummy [$]@ | grep enable-subdir`" != .; then
     enable_subdir=yes
@@ -177,7 +177,6 @@ changequote([, ])dnl
     $3_HEX="`$ac_shtool version -l c -d hex $ac_srcdir/$4`"
     AC_SUBST($3_HEX)
 fi
-AC_DIVERT_POP()
 ])dnl
 
 
@@ -189,9 +188,9 @@ dnl ##    AC_PLATFORM(<variable>)
 dnl ##
 
 AC_DEFUN(AC_PLATFORM,[
-if test ".$host" != .NONE; then
+if test ".$host" != . ; then
     $1="$host"
-elif test ".$nonopt" != .NONE; then
+elif test ".$nonopt" != . ; then
     $1="$nonopt"
 else
     $1=`${CONFIG_SHELL-/bin/sh} $srcdir/config.guess`
@@ -303,7 +302,7 @@ else
     esac
 fi
 msg="enabled"
-AC_DEFINE(XARIC_DEBUG)
+AC_DEFINE(XARIC_DEBUG,1,Define to enable some debug code)
 ],[
 if test ".$ac_cv_prog_gcc" = ".yes"; then
 case "$CFLAGS" in
@@ -982,7 +981,7 @@ AC_DEFUN(AC_PATH_REP,
       AC_SUBST(REP_CFLAGS)
       AC_SUBST(REP_LIBS)
       AC_SUBST(REP_EXECDIR)
-      AC_DEFINE(HAVE_REP)
+      AC_DEFINE(HAVE_REP, 1, Defined if the rep library is installed.)
       AC_MSG_RESULT([version ${rep_version}])
     else
       AC_MSG_ERROR([version ${rep_version}; require $min_rep_version])
@@ -1010,23 +1009,79 @@ AC_DEFUN(AC_PATH_REP,
   AC_SUBST(REP_MSGFMT)
 ])dnl
 
-divert
 
-dnl AM_MISSING_PROG(NAME, PROGRAM, DIRECTORY)
-dnl The program must properly implement --version.
-AC_DEFUN(AM_MISSING_PROG,
-[AC_MSG_CHECKING(for working $2)
-# Run test in a subshell; some versions of sh will print an error if
-# an executable is not found, even if stderr is redirected.
-# Redirect stdin to placate older versions of autoconf.  Sigh.
-if ($2 --version) < /dev/null > /dev/null 2>&1; then
-   $1=$2
-   AC_MSG_RESULT(found)
-else
-   $1="$3/missing $2"
-   AC_MSG_RESULT(missing)
-fi
+
+# serial 2
+
+# AM_MISSING_PROG(NAME, PROGRAM)
+# ------------------------------
+AC_DEFUN([AM_MISSING_PROG],
+[AC_REQUIRE([AM_MISSING_HAS_RUN])
+$1=${$1-"${am_missing_run}$2"}
 AC_SUBST($1)])
+
+
+# AM_MISSING_HAS_RUN
+# ------------------
+# Define MISSING if not defined so far and test if it supports --run.
+# If it does, set am_missing_run to use it, otherwise, to nothing.
+AC_DEFUN([AM_MISSING_HAS_RUN],
+[AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
+test x"${MISSING+set}" = xset || MISSING="\${SHELL} $am_aux_dir/missing"
+# Use eval to expand $SHELL
+if eval "$MISSING --run true"; then
+  am_missing_run="$MISSING --run "
+else
+  am_missing_run=
+  am_backtick='`'
+  AC_MSG_WARN([${am_backtick}missing' script is too old or missing])
+fi
+])
+
+# AM_AUX_DIR_EXPAND
+
+# For projects using AC_CONFIG_AUX_DIR([foo]), Autoconf sets
+# $ac_aux_dir to `$srcdir/foo'.  In other projects, it is set to
+# `$srcdir', `$srcdir/..', or `$srcdir/../..'.
+#
+# Of course, Automake must honor this variable whenever it calls a
+# tool from the auxiliary directory.  The problem is that $srcdir (and
+# therefore $ac_aux_dir as well) can be either absolute or relative,
+# depending on how configure is run.  This is pretty annoying, since
+# it makes $ac_aux_dir quite unusable in subdirectories: in the top
+# source directory, any form will work fine, but in subdirectories a
+# relative path needs to be adjusted first.
+#
+# $ac_aux_dir/missing
+#    fails when called from a subdirectory if $ac_aux_dir is relative
+# $top_srcdir/$ac_aux_dir/missing
+#    fails if $ac_aux_dir is absolute,
+#    fails when called from a subdirectory in a VPATH build with
+#          a relative $ac_aux_dir
+#
+# The reason of the latter failure is that $top_srcdir and $ac_aux_dir
+# are both prefixed by $srcdir.  In an in-source build this is usually
+# harmless because $srcdir is `.', but things will broke when you
+# start a VPATH build or use an absolute $srcdir.
+#
+# So we could use something similar to $top_srcdir/$ac_aux_dir/missing,
+# iff we strip the leading $srcdir from $ac_aux_dir.  That would be:
+#   am_aux_dir='\$(top_srcdir)/'`expr "$ac_aux_dir" : "$srcdir//*\(.*\)"`
+# and then we would define $MISSING as
+#   MISSING="\${SHELL} $am_aux_dir/missing"
+# This will work as long as MISSING is not called from configure, because
+# unfortunately $(top_srcdir) has no meaning in configure.
+# However there are other variables, like CC, which are often used in
+# configure, and could therefore not use this "fixed" $ac_aux_dir.
+#
+# Another solution, used here, is to always expand $ac_aux_dir to an
+# absolute PATH.  The drawback is that using absolute paths prevent a
+# configured tree to be moved without reconfiguration.
+
+AC_DEFUN([AM_AUX_DIR_EXPAND], [
+# expand $ac_aux_dir to an absolute path
+am_aux_dir=`CDPATH=:; cd $ac_aux_dir && pwd`
+])
 
 #serial 1
 # This test replaces the one in autoconf.

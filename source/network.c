@@ -1,4 +1,4 @@
-#ident "@(#)network.c 1.5"
+#ident "@(#)network.c 1.6"
 /*
  * network.c -- handles stuff dealing with connecting and name resolving
  *
@@ -214,7 +214,7 @@ host_to_ip (const char *host)
 			       hep->h_addr[1] & 0xff,
 			       hep->h_addr[2] & 0xff,
 			       hep->h_addr[3] & 0xff),
-		ip : empty_string);
+		ip : empty_str);
 }
 
 extern struct hostent *
@@ -243,7 +243,7 @@ ip_to_host (const char *ip)
 	struct hostent *hep = lookup_ip (ip);
 	static char host[128];
 
-	return (hep ? strcpy (host, hep->h_name) : empty_string);
+	return (hep ? strcpy (host, hep->h_name) : empty_str);
 }
 
 extern char *

@@ -1,4 +1,4 @@
-#ident "@(#)irc.c 1.22"
+#ident "@(#)irc.c 1.23"
 /*
  * Original from ircII: a new irc client.  I like it.  I hope you will too!
  * Written By Michael Sandrof
@@ -71,12 +71,12 @@
 /** Global Variables **/
 
 /* These are all just "handy" variables. */
-char zero[] = "0", 
-     one[] = "1", 
-     space[] = " ", 
-     on[] = "ON", 
-     off[] = "OFF",
-     empty_string[] = "";
+char zero_str[] = "0", 
+     one_str[] = "1", 
+     space_str[] = " ", 
+     on_str[] = "ON", 
+     off_str[] = "OFF",
+     empty_str[] = "";
 
 char *invite_channel = NULL,	/* last channel of an INVITE */
  *ircrc_file = NULL,		/* full path .ircrc file */
@@ -141,7 +141,7 @@ startup_message (void)
 	int old = strip_ansi_in_echo; strip_ansi_in_echo = 0;
 
 	/* black magic. leave me alone. */
-	put_it (empty_string);
+	put_it (empty_str);
 
 	put_fmt_str("%g***%n", NULL);
 	put_fmt_str("%g***%C $0-", "%s", xversion.v_tex);
@@ -611,7 +611,7 @@ get_line (char *prompt, int new_input, void (*func) (char, char *))
 		set_input_prompt (curr_scr_win, get_string_var (INPUT_PROMPT_VAR), 0);
 	else
 		set_input_prompt (curr_scr_win, prompt, 0);
-	set_input (empty_string);
+	set_input (empty_str);
 
 	/* ok.  we call io() until the user presses return, ending 
 	 * the input line.  get_line_return will then set get_line_done
@@ -853,7 +853,7 @@ xaric_main (void)
 
 	get_connected (0);
 
-	set_input (empty_string);
+	set_input (empty_str);
 	get_line (NULL, -1, send_line);
 
 	ircpanic ("get_line() returned");

@@ -114,8 +114,8 @@ typedef	struct	DCC_struct
 	u_32int_t	bytes_read;
 	u_32int_t	bytes_sent;
 
-	int				window_sent;
-	int				window_max;
+	int		window_sent;
+	int		window_max;
 
 	int		in_dcc_chat;
 	int		echo;
@@ -204,6 +204,7 @@ typedef struct nick_stru
 	int	need_userhost;		/* on join we send a userhost for this nick */	
 }	NickList;
 
+
 typedef	struct	DisplayStru
 {
 	char	*line;
@@ -214,7 +215,7 @@ typedef	struct	DisplayStru
 
 typedef	struct	WindowStru
 {
-	char			*name;
+	char		*name;
 	unsigned int	refnum;		/* the unique reference number,
 					 * assigned by IRCII */
 	int	server;			/* server index */
@@ -241,7 +242,7 @@ typedef	struct	WindowStru
 	char	*prompt;		/* A prompt string, usually set by EXEC'd process */
 
 	/* Real status stuff */
-	int	double_status;		/* number of status lines */
+	int w_status_size;
 	char	*status_line[3];	/* The status lines string current display */
 
 	Display *top_of_scrollback,	/* Start of the scrollback buffer */
@@ -271,7 +272,6 @@ typedef	struct	WindowStru
 		
 	NickList *nicks;		/* List of nicks that will go to window */
 
-
 	/* lastlog stuff */
 	Lastlog	*lastlog_head;		/* pointer to top of lastlog list */
 	Lastlog	*lastlog_tail;		/* pointer to bottom of lastlog list */
@@ -293,16 +293,6 @@ typedef	struct	WindowStru
 	struct	WindowStru	*prev;	/* pointer to previous entry in window list
 					 * (null is end) */
 }	Window;
-
-/*
- * WindowStack: The structure for the POP, PUSH, and STACK functions. A
- * simple linked list with window refnums as the data 
- */
-typedef	struct	window_stack_stru
-{
-	unsigned int	refnum;
-	struct	window_stack_stru	*next;
-}	WindowStack;
 
 typedef	struct
 {
@@ -335,7 +325,6 @@ typedef	struct	ScreenStru
 	Window	*cursor_window;			/* Last window to have
 						 * something written to it */
 	int	visible_windows;		/* total number of windows */
-	WindowStack	*window_stack;		/* the windows here */
 
 	struct	ScreenStru *prev;		/* These are the Screen list */
 	struct	ScreenStru *next;		/* pointers */

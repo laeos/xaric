@@ -1,4 +1,4 @@
-#ident "@(#)exec.c 1.7"
+#ident "@(#)exec.c 1.8"
 /*
  * exec.c: handles exec'd process for IRCII 
  *
@@ -701,7 +701,7 @@ start_process (char *name, char *logical, char *redirect, char *who, unsigned in
 			else
 			{
 				if ((flag = get_string_var (SHELL_FLAGS_VAR)) == NULL)
-					flag = empty_string;
+					flag = empty_str;
 				setuid (getuid ());
 				setgid (getgid ());
 				execl (shell, shell, flag, name, NULL);
@@ -748,7 +748,7 @@ text_to_process (int proc_index, const char *text, int show)
 		put_it ("%s%s", get_prompt_by_refnum (ref), text);	/* lynx */
 	write (proc->p_stdin, text, strlen (text));
 	write (proc->p_stdin, "\n", 1);
-	set_prompt_by_refnum (ref, empty_string);
+	set_prompt_by_refnum (ref, empty_str);
 	message_to (0);
 	return (0);
 }

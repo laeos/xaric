@@ -1,4 +1,4 @@
-#ident "@(#)cmd_scan.c 1.7"
+#ident "@(#)cmd_scan.c 1.8"
 /*
  * cmd_scan.c : the /scan command
  *
@@ -115,7 +115,7 @@ cmd_scan (struct command *cmd, char *args)
 	else
 		fmt = get_format (FORMAT_NAMES_FSET);
 
-	put_it ("%s", convert_output_format (fmt, "%s %s %d %s", update_clock (GET_TIME), chan->channel, count, space));
+	put_it ("%s", convert_output_format (fmt, "%s %s %d %s", update_clock (GET_TIME), chan->channel, count, space_str));
 	if (count)
 	{
 		count = 0;
@@ -135,7 +135,7 @@ cmd_scan (struct command *cmd, char *args)
 				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '*', nick->nick));
 			else
 				continue;
-			malloc_strcat (&buffer, space);
+			malloc_strcat (&buffer, space_str);
 			if (count++ == 4)
 			{
 				if (get_format (FORMAT_NAMES_BANNER_FSET))

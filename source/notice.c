@@ -148,7 +148,7 @@ parse_notice (char *from, char **Args)
 				high = highlight_char;
 				break;
 			default:
-				high = empty_string;
+				high = empty_str;
 			}
 			/*
 			 * only dots in servernames, right ?

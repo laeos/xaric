@@ -192,7 +192,7 @@ dgets (char *str, int len, int des, char *specials)
 		s = select (des + 1, &rd, 0, 0, timer);
 		if (s <= 0)
 		{
-			strcpy (str, empty_string);
+			strcpy (str, empty_str);
 			dgets_errno = (s == 0) ? -1 : errno;
 			return 0;
 		}

@@ -24,7 +24,7 @@ dnl ##
 dnl ##
 dnl ## shamelessly stolen for use in Xaric.. 
 dnl ##
-dnl ## @(#)acinclude.m4 1.2
+dnl ## @(#)acinclude.m4 1.3
 dnl ##
 
 divert(-1)
@@ -128,7 +128,6 @@ dnl ##                <copyright>)
 dnl ##
 
 AC_DEFUN(AC_HEADLINE,[dnl
-AC_DIVERT_PUSH(AC_DIVERSION_NOTICE)dnl
 #   configuration header
 if test ".`echo dummy [$]@ | grep enable-subdir`" != .; then
     enable_subdir=yes
@@ -165,7 +164,6 @@ changequote([, ])dnl
     $3_HEX="`$ac_shtool version -l c -d hex $ac_srcdir/$4`"
     AC_SUBST($3_HEX)
 fi
-AC_DIVERT_POP()
 ])dnl
 
 
@@ -177,9 +175,9 @@ dnl ##    AC_PLATFORM(<variable>)
 dnl ##
 
 AC_DEFUN(AC_PLATFORM,[
-if test ".$host" != .NONE; then
+if test ".$host" != . ; then
     $1="$host"
-elif test ".$nonopt" != .NONE; then
+elif test ".$nonopt" != . ; then
     $1="$nonopt"
 else
     $1=`${CONFIG_SHELL-/bin/sh} $srcdir/config.guess`
@@ -291,7 +289,7 @@ else
     esac
 fi
 msg="enabled"
-AC_DEFINE(XARIC_DEBUG)
+AC_DEFINE(XARIC_DEBUG,1,Define to enable some debug code)
 ],[
 if test ".$ac_cv_prog_gcc" = ".yes"; then
 case "$CFLAGS" in
@@ -970,7 +968,7 @@ AC_DEFUN(AC_PATH_REP,
       AC_SUBST(REP_CFLAGS)
       AC_SUBST(REP_LIBS)
       AC_SUBST(REP_EXECDIR)
-      AC_DEFINE(HAVE_REP)
+      AC_DEFINE(HAVE_REP, 1, Defined if the rep library is installed.)
       AC_MSG_RESULT([version ${rep_version}])
     else
       AC_MSG_ERROR([version ${rep_version}; require $min_rep_version])
@@ -998,4 +996,3 @@ AC_DEFUN(AC_PATH_REP,
   AC_SUBST(REP_MSGFMT)
 ])dnl
 
-divert

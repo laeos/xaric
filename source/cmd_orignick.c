@@ -1,4 +1,4 @@
-#ident "@(#)cmd_orignick.c 1.4"
+#ident "@(#)cmd_orignick.c 1.5"
 /*
  * cmd_hostname.c : virtual host support 
  *
@@ -43,10 +43,12 @@
 #include "struct.h"
 #include "screen.h"
 #include "tcommand.h"
+#include "timer.h"
 
 static char *org_nick;
 
-void change_orig_nick(void)
+static void
+change_orig_nick (void)
 {
 	change_server_nickname(from_server, org_nick);
 	bitchsay("Regained nick [%s]", org_nick);

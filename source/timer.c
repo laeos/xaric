@@ -39,7 +39,7 @@ void
 cmd_timer (struct command *cmd, char *args)
 {
 	char *waittime, *flag;
-	char *want = empty_string;
+	char *want = empty_str;
 	char *ptr;
 	int repeat = 0;
 	long events = 1;
@@ -109,7 +109,7 @@ static TimerList *PendingTimers;
 static char *schedule_timer (TimerList * ntimer);
 
 
-static char *current_exec_timer = empty_string;
+static char *current_exec_timer = empty_str;
 
 /*
  * ExecuteTimers:  checks to see if any currently pending timers have
@@ -152,7 +152,7 @@ ExecuteTimers (void)
 		else
 			parse_line ("TIMER", (char *) current->command, current->subargs, 0, 0);
 
-		current_exec_timer = empty_string;
+		current_exec_timer = empty_str;
 		in_on_who = old_in_on_who;
 
 
@@ -236,7 +236,7 @@ create_timer_ref (char *refnum_want, char *refnum_gets)
 		refnum_want[REFNUM_MAX] = 0;
 
 	/* If the user doesnt care */
-	if (!strcmp (refnum_want, empty_string))
+	if (!strcmp (refnum_want, empty_str))
 	{
 		/* Find the lowest refnum available */
 		for (tmp = PendingTimers; tmp; tmp = tmp->next)
@@ -272,7 +272,7 @@ delete_timer (char *ref)
 {
 	TimerList *tmp, *prev;
 
-	if (current_exec_timer != empty_string)
+	if (current_exec_timer != empty_str)
 	{
 		say ("You may not remove a TIMER from itself");
 		return -1;

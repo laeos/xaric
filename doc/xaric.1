@@ -1,254 +1,88 @@
-.TH Xaric 1L "29 October 1997"
-.SH NAME
-Xaric \- A client for the Internet Relay Chat system
-.SH SYNOPSIS
-.B xaric
-.RB [ \-bfFqav ]
-.RB [ \-H
-.IR hostname ]
-.RB [ \-n
-.IR nick ]
-.RB [ \-r
-.IR file ]
-.RB [ \-d
-.IR flag ]
-.RB [ \-l
-.IR file ]
-.RB [ \-L
-.IR file ]
-.RB [ \-p
-.IR port ]
-.SH DESCRIPTION
-The
-.I xaric
-program is a full screen, termcap based interface to Internet Relay Chat.
-It gives full access to all of the normal
-.I IRC
-functions, plus a variety of additional options.
-.SH OPTIONS
-.TP
-.BI \-c " chan"
-Automatically join channel
-.I chan .
-.TP
-.BI \-p " portno"
-Set the port number to
-.I portno
-(default: 6667, the standard
-.I IRC
-port).
-Only supply this if you connect to a server which uses a port other than 6667.
-.TP
-.B \-f
-Use flow control (^S and ^Q) to stop/start the display.
-Normally these are both bound to other functions within
-.IR irc .
-This switch is ignored if the
-.B \ -d
-switch is used.
-.TP
-.B \-F
-Don't use flow control (^S and ^Q) to stop start the display.
-.TP
-.I nickname
-Set the nickname
-(overrides the environment variable
-.BR IRCNICK ;
-default: the username).
-.TP
-.I server
-Set the list of servers with which
-.B irc
-will try to connect upon startup.
-This list is also used by the program's
-.B /server
-command.
-The format for lines in the list is:
-.IP
-.B hostname
-.RB [:portno[:password[:nick]]]
-.TP
-.BI \-l " filename"
-Selects a different file to be used as the .ircrc file for 
-.B ircII.
-There is no exansion of $ expandos when using this option.
-The default is $HOME/.ircrc.
-.TP
-.BI \-L " filename"
-Selects a different file to be used as the .ircrc file for
-.B ircII.
-Expansion of $ expandos happens with this option.  
-The default is $HOME/.ircrc.
-.TP
-.BI \-a
-This adds the normal
-.B irc
-server list to the command line list of
-.B irc
-servers.
-.TP
-.BI \-v
-Print the version and release date of
-.I ircII
-and exit.
-.TP
-.BI \-q
-Start up
-.B irc
-quickly -- don't load the IRCRC file.
-.SH "DETAILED DESCRIPTION"
-.SS "The Screen:"
-The
-screen is split into two parts, separated by an inverse-video
-status line (if supported).
-The upper (larger) part of the screen displays responses from the
-.I IRC
-server.
-The lower part of the screen (a single line) accepts keyboard input.
-.LP
-Some terminals do not support certain features required by
-.IR ircII ,
-in which case you receive a message stating this.
-If this occurs, try changing the terminal type or run
-.I ircII
-with the
-.B -d
-option.
-.SS "Irc Commands:"
-Any line beginning with the slash character '/' is regarded as an
-.I ircII
-command (the command character may be changed; type '/help set cmdchar').
-Any line not beginning with this character is treated as a message to
-be sent to the current channel.
-To produce a listing of commands, type '/help ?'.
-To receive information about the commands type '/help
-.B <command> '.
-.SS "The .ircrc File:"
-When
-.I ircII
-is executed, it checks the user's home directory for a
-.I \&.ircrc
-file, executing the commands in the file. Commands in this file do not
-need to have a leading slash character '/'
-This allows predefinition of aliases and other features.
-.SH EXAMPLES
-.TP
-.B "irc -c 128 -p 5555"
-Connect
-.I IRC
-to port number 5555 of the default host and enter on channel number 128.
-.TP
-.B "irc Mermaid"
-Use the nickname "Mermaid".
-.TP
-.B "irc Mermaid server1:5000 server2::passwd server3"
-Use the nickname "Mermaid" and the modified server list.
-.TP
-.B "irc -d"
-Use dumb mode.
-.TP
-.B "irc -f"
-Allow use of ^S/^Q to stop/start screen display.
-.TP
-.B "irc -e elisa"
-Interface
-.I IRC
-with a program called
-.IR elisa .
-.LP
-.B "setenv IRCNICK Mermaid"
-.br
-.B "setenv IRCNAME \"The one and only :)\""
-.TP
-.B irc
-Set the username (if not specified elsewhere) to "Mermaid".
-The user's name (when provided inside parentheses in response to a
-WHOIS command) is set to "The one and only :)".
-.SH FILES
-.TP 2.2i
-.I .../bin/ircII
-the executable program
-.TP
-~/.ircrc
-default initialization file
-.TP
-~/.irc/
-directory you can put your own
-.I ircII
-scripts into, that can then be loaded with /load
-.TP
-.I .../lib/irc/
-directory containing message-of-the-day, master initialization, help files and 
-.I ircII
-scripts
-.SH "THE HELP FILES"
-All of the
-.B ircII
-commands are fully described in the help files package.  The best way to
-start here is with the
-.IR /HELP\ ?
-command as this prints a listing of all available help files.
-.SH "SIGNALS"
-.I ircII
-handles the following signals
-.TP
-.B SIGUSR1
-Closes all
-.I DCC
-connections and
-.I EXEC'ed
-processes.
-.TP
-.B SIGUSR2
-Drops
-.I ircII
-back to the command line.
-.SH "ENVIRONMENT VARIABLES"
-It can be helpful to predefine certain variables in
-in the
-.IR \&.cshrc ,
-.IR \&.profile ,
-or
-.IR \&.login
-file:
-.TP
-.B IRCNICK
-The user's
-.I IRC
-nickname.
-.TP
-.B IRCNAME
-The user's
-.I IRC
-realname (otherwise retreived from
-.IR /etc/passwd )
-.TP
-.B IRCSERVER
-The default
-.I IRC
-server(s) (see server
-.B option
-for details)
-.TP
-.B HOME   
-Overrides the default home path in
-.IR /etc/passwd .
-.TP
-.B TERM   
-The type of terminal in use.
-.fi
-.SH "SEE ALSO"
-irc(1),
-ircd(8)
-.SH BUGS
-Please notify the current developer of the software of any bugs in
-current versions.
-.SH AUTHORS
-Program written by Michael Sandrof (ms5n+@andrew.cmu.edu).
-Now being maintained by Matthew Green (mrg@mame.mu.oz.au)
-Names of contributors and contact address can be retrieved with the
-.B /info command.
-This manual page written by Darren Reed (avalon@coombs.anu.EDU.AU),
-revised by R. P. C. Rodgers (rodgers@maxwell.mmwb.ucsf.edu),
-by the lynX, and by Matthew Green (mrg@mame.mu.oz.au).
-.\" end of man page
+.TH "xaric" "1" "" "Alan P. Laudicina" ""
+.SH "NAME"
+.LP 
+xaric \- Internet Relay Chat client for UNIX systems
+.SH "SYNTAX"
+.LP 
+xaric [\fI\-b\fP] [\fI\-f\fP] [\fI\-F\fP] [\fI\-q\fP] [\fI\-a\fP] [\fI\-x\fP] [\fI\-v\fP]
+.br 
+[\fI\-p port\fP] [\fI\-H hostname\fP] [\fI\-r file\fP] [\fI\-n nickname\fP] [\fI\-l file\fP] [\fI\-L file\fP]
+.SH "DESCRIPTION"
+.LP 
+Xaric is a UNIX irc client similer to BitchX or ircII. I would impress you
+with a list of features, but since it has no impressive features (and lacks a few important ones) that probably is not a good idea. The whole reason for Xaric was to remove all of the bogus, broken crap and silly features from BitchX and have a nice colorful client. 
+.SH "OPTIONS"
+.LP 
+.TP 
+\fB\-H\fR <\fIhostname\fP>
+Use the IP address of the specified hostname as the IP you connect to the IRC server with.  This is very common with virtual hosting.  It can also be used if gethostname(3) doesn't return a hostname.
+.TP 
+\fB\-p\fR <\fIport\fP>
+Connect to the IRC server on the port specified instead of the default that you set in your config.h file.
+.TP 
+\fB\-n\fR <\fInickname\fP>
+When connecting to the IRC server, use \fInickname\fP instead of the default of your UNIX login name.
+.TP 
+\fB\-l\fR <\fIfile\fP>
+This option will let you load \fIfile\fP instead of your ~/.ircrc
+.TP 
+\fB\-L\fR <\fIfile\fP>
+This option does the same thing as \fB\-l\fR, except in this case it also expands $ expandos
+\fB\-b\fR
+Load your ~/.ircrc file after you connect to the IRC server, instead of before.
+.TP 
+\fB\-f\fR
+If your term uses flow controls (^S/^Q), run xaric with this option and it will not.
+.TP 
+\fB\-F\fR
+Your terminal doesn't use flow controls (this is a default).
+.TP 
+\fB\-q\fR
+Do not load your ~/.ircrc
+.TP 
+\fB\-a\fR
+Adds default servers and command line servers to server list
+.TP 
+\fB\-x\fR
+Run xaric in "debug" mode.
+.TP 
+\fB\-v\fR
+Tells you about the version of xaric that you are running.
+.SH "FILES"
+.LP 
+\fB/usr/local/bin/xaric\fR
+Default location for the xaric binary
+.LP 
+\fB~/.ircrc\fR
+Default initialization file
+.SH "EXAMPLES"
+.TP 
+\fBxaric\fR
+This is what should be tried first, it connects to the default server using the nickname $USER
+.TP 
+\fBxaric nickname\fR
+Connect to your default IRC server with the nickname specified.
+.TP 
+\fBxaric nickname ircd.grateful.org\fR
+Connect to the IRC server located at ircd.grateful.org with the nickname specified
+.TP 
+\fBxaric nickname ircd.grateful.org:6669\fR
+Connect to the IRC server located on ircd.grateful.org port 6669, with the nickname specified
+.TP 
+\fBxaric nickname irc.efnet.net\fR
+Try this if you're stumped and trying to get on EFnet
+.TP 
+\fBxaric nickname irc.dal.net\fR
+Try this if you're stumped and trying to get on DALnet
+.TP 
+\fBxaric nickname ircd.grateful.org\fR
+Try this if you're stumped and trying to get on UNIXNet
+.TP 
+\fBxaric nickname irc.undernet.org\fR
+Try this if you're stumped and trying to get to UnderNet
+.SH "WHAT NOW?"
+We wont explain what to do once you are connected to an IRC server here.  If you're connected and you're not sure what to do, you want to visit http://www.irchelp.org/
+.SH "AUTHORS"
+.LP 
+IRC Client: Rex G. Feany <laeos@laeos.net>
+Man Page:   Alan P. Laudicina <alanp@unixpower.org>

@@ -1,4 +1,4 @@
-#ident "@(#)cmd_modes.c 1.5"
+#ident "@(#)cmd_modes.c 1.6"
 /*
  * cmd_modes.c : commands that have to do with modes?!
  *
@@ -59,14 +59,13 @@ static char *mode_buf = NULL;
 static int mode_len = 0;
 
 static char *mode_str = NULL;
-static char *user = NULL;
+static char *user_str = NULL;
 static int mode_str_len = 0;
-static int len = 0;
 static char plus_mode[20] = "\0";
 
 
 static void 
-add_mode_buffer (char *buffer, int mode_str_len)
+add_mode_buffer (char *buffer, int len)
 {
 	malloc_strcat (&mode_buf, buffer);
 	mode_len += len;
@@ -85,14 +84,14 @@ void
 flush_mode_all (ChannelList * chan)
 {
 	char buffer[BIG_BUFFER_SIZE + 1];
+	int len;
 
-	if (mode_str && user)
-	{
-		len = sprintf (buffer, "MODE %s %s%s %s\r\n", chan->channel, plus_mode, mode_str, user);
+	if (mode_str && user_str) {
+		len = sprintf (buffer, "MODE %s %s%s %s\r\n", chan->channel, plus_mode, mode_str, user_str);
 		add_mode_buffer (buffer, len);
 		mode_str_len = 0;
 		new_free (&mode_str);
-		new_free (&user);
+		new_free (&user_str);
 		memset (plus_mode, 0, sizeof (plus_mode));
 		len = 0;
 	}
@@ -104,6 +103,8 @@ static void
 add_mode (ChannelList * chan, char *mode, int plus, char *nick, char *reason, int max_modes)
 {
 	char buffer[BIG_BUFFER_SIZE + 1];
+	int len;
+
 	/*
 	 * KICK $C nick :reason
 	 * MODE $C +/-o nick
@@ -113,7 +114,6 @@ add_mode (ChannelList * chan, char *mode, int plus, char *nick, char *reason, in
 	if (mode_len >= (IRCD_BUFFER_SIZE - 100))
 	{
 		flush_mode (chan);
-		len = 0;
 	}
 
 	if (reason)
@@ -126,14 +126,14 @@ add_mode (ChannelList * chan, char *mode, int plus, char *nick, char *reason, in
 		mode_str_len++;
 		malloc_strcat (&mode_str, plus ? "+" : "-");
 		malloc_strcat (&mode_str, mode);
-		malloc_strcat (&user, nick);
-		malloc_strcat (&user, " ");
+		malloc_strcat (&user_str, nick);
+		malloc_strcat (&user_str, " ");
 		if (mode_str_len >= max_modes)
 		{
-			len = sprintf (buffer, "MODE %s %s %s\r\n", chan->channel, mode_str, user);
+			len = sprintf (buffer, "MODE %s %s %s\r\n", chan->channel, mode_str, user_str);
 			add_mode_buffer (buffer, len);
 			new_free (&mode_str);
-			new_free (&user);
+			new_free (&user_str);
 			memset (plus_mode, 0, sizeof (plus_mode));
 			mode_str_len = len = 0;
 		}
@@ -263,7 +263,7 @@ userhost_unban (WhoisStuff * stuff, char *nick1, char *args)
 	from_server = old_server;
 }
 
-void 
+static void 
 userhost_ban (WhoisStuff * stuff, char *nick1, char *args)
 {
 	char *temp;
@@ -541,13 +541,14 @@ cmd_ban (struct command *cmd, char *args)
 
 	for (nicks = next_nicklist (chan, NULL); nicks; nicks = next_nicklist (chan, nicks))
 	{
-		if (!my_stricmp (spec, nicks->nick))
+		if (!my_stricmp (spec, nicks->nick) && strcmp (nicks->host, "<UNKNOWN>"))
 		{
 			char *t = NULL, *host, *user;
 
 			malloc_strcpy (&t, nicks->host);
 			user = clear_server_flags (t);
 			host = strchr (user, '@');
+
 			if (host)
 			{
 				*host++ = 0;
@@ -854,7 +855,7 @@ void
 cmd_umode (struct command *cmd, char *args)
 {
 	send_to_server ("%s %s %s", cmd->rname, get_server_nickname (from_server),
-			(args && *args) ? args : empty_string);
+			(args && *args) ? args : empty_str);
 }
 
 void
@@ -879,7 +880,7 @@ cmd_kill (struct command *cmd, char *args)
 	if ((reason = strchr (args, ' ')) != NULL)
 		*reason++ = '\0';
 	else if ((reason = get_reason (args)))
-		reason = empty_string;
+		reason = empty_str;
 
 	if (!strcmp (args, "*"))
 	{

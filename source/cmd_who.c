@@ -1,4 +1,4 @@
-#ident "@(#)cmd_who.c 1.6"
+#ident "@(#)cmd_who.c 1.7"
 /*
  * cmd_who.c : the who command 
  *
@@ -202,7 +202,7 @@ cmd_who (struct command *cmd, char *args)
 		if (!channel && who_mask & WHO_OPS)
 			channel = "*.*";
 		send_to_server ("%s %s %c", "WHO", channel ? channel :
-				empty_string, (who_mask & WHO_OPS) ?
+				empty_str, (who_mask & WHO_OPS) ?
 				'o' : '\0');
 	}
 

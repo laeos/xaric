@@ -1,4 +1,4 @@
-#ident "@(#)vars.c 1.12"
+#ident "@(#)vars.c 1.13"
 /*
  * vars.c: All the dealing of the irc variables are handled here. 
  *
@@ -574,7 +574,7 @@ cmd_set (struct command *cmd, char *args)
 		if (!my_strnicmp (var, "FORMAT", 2) || !my_strnicmp (var, "-FORMAT", 3))
 		{
 			char *t = NULL;
-			malloc_sprintf (&t, "%s%s%s", var, args && *args ? " " : empty_string, args && *args ? args : empty_string);
+			malloc_sprintf (&t, "%s%s%s", var, args && *args ? " " : empty_str, args && *args ? args : empty_str);
 			t_parse_command ("FSET", t);
 			new_free (&t);
 			return;
@@ -597,7 +597,7 @@ cmd_set (struct command *cmd, char *args)
 		}
 
 		if (hook)
-			hook = do_hook (SET_LIST, "%s %s", var, args ? args : empty_string);
+			hook = do_hook (SET_LIST, "%s %s", var, args ? args : empty_str);
 		else
 			hook = 1;
 		if (cnt < 0)
@@ -614,14 +614,14 @@ cmd_set (struct command *cmd, char *args)
 			{
 				say ("%s is ambiguous", var);
 				for (cnt += var_index; var_index < cnt; var_index++)
-					set_var_value (var_index, empty_string);
+					set_var_value (var_index, empty_str);
 			}
 		}
 	}
 	else
 	{
 		for (var_index = 0; var_index < NUMBER_OF_VARIABLES; var_index++)
-			set_var_value (var_index, empty_string);
+			set_var_value (var_index, empty_str);
 	}
 }
 
@@ -741,7 +741,7 @@ set_realname (Window * win, char *value, int unused)
 	if (value)
 		strmcpy (realname, value, REALNAME_LEN);
 	else
-		strmcpy (realname, empty_string, REALNAME_LEN);
+		strmcpy (realname, empty_str, REALNAME_LEN);
 }
 
 static void 

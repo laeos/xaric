@@ -122,7 +122,7 @@ convert_time (time_t ltime)
 	hours = ltime % 24;
 	days = (ltime - hours) / 24;
 	sprintf (buffer, "%2ldd %2ldh %2ldm %2lds", days, hours, minutes, seconds);
-	return (*buffer ? buffer : empty_string);
+	return (*buffer ? buffer : empty_str);
 }
 
 int 
@@ -227,7 +227,7 @@ mircansi (char *line)
 	short code;
 
 	if (!*line)
-		return empty_string;
+		return empty_str;
 	*newline1 = 0;
 	while (*sptr)
 	{
@@ -1133,7 +1133,7 @@ show_server_map (void)
 		else
 			*tmp1 = 0;
 		snprintf (tmp2, BIG_BUFFER_SIZE, "$G %%W$[-%d]1%%c $0 %s", tmp->hopcount * 3, tmp1);
-		put_it ("%s", convert_output_format (tmp2, "%s %s", tmp->name, prevdist != tmp->hopcount ? ascii : empty_string));
+		put_it ("%s", convert_output_format (tmp2, "%s %s", tmp->name, prevdist != tmp->hopcount ? ascii : empty_str));
 		prevdist = tmp->hopcount;
 		new_free (&tmp->name);
 		new_free ((char **) &tmp);

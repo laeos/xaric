@@ -70,7 +70,7 @@ char *joined_nick = NULL;
 char *public_nick = NULL;
 
 /* User and host information from server 2.7 */
-char *FromUserHost = empty_string;
+char *FromUserHost = empty_str;
 
 /* doing a PRIVMSG */
 int doing_privmsg = 0;
@@ -157,7 +157,7 @@ BreakArgs (char *Input, char **Sender, char **OutPut, int ig_sender)
 		 * No sender present.
 		 */
 		else
-			*Sender = FromUserHost = empty_string;
+			*Sender = FromUserHost = empty_str;
 	}
 	/*
 	 * Now we go through the argument list...
@@ -247,7 +247,7 @@ p_wallops (char *from, char **ArgList)
 			high = highlight_char;
 			break;
 		default:
-			high = empty_string;
+			high = empty_str;
 			break;
 		}
 		message_from (from, LOG_WALLOP);
@@ -437,7 +437,7 @@ p_privmsg (char *from, char **Args)
 		high = highlight_char;
 		break;
 	default:
-		high = empty_string;
+		high = empty_str;
 		break;
 	}
 
@@ -749,7 +749,7 @@ p_invite (char *from, char **ArgList)
 		high = highlight_char;
 		break;
 	default:
-		high = empty_string;
+		high = empty_str;
 		break;
 	}
 	if (ArgList[0] && ArgList[1])
@@ -802,7 +802,7 @@ p_kill (char *from, char **ArgList)
 			local = 1;
 	snprintf (sc, 19, "+%i %d", from_server, port);
 
-	close_server (from_server, empty_string);
+	close_server (from_server, empty_str);
 	clean_whois_queue ();
 	window_check_servers ();
 	set_input_prompt (curr_scr_win, get_string_var (INPUT_PROMPT_VAR), 0);
@@ -1062,14 +1062,14 @@ p_kick (char *from, char **ArgList)
 				malloc_strcpy (&chankey, chan->key);
 			if (get_int_var (AUTO_REJOIN_VAR))
 			{
-				send_to_server ("JOIN %s %s", channel, chankey ? chankey : empty_string);
+				send_to_server ("JOIN %s %s", channel, chankey ? chankey : empty_str);
 				add_to_join_list (channel, from_server, window ? window->refnum : 0);
 			}
 			new_free (&chankey);
 			remove_channel (channel, from_server);
 			update_all_status (curr_scr_win, NULL, 0);
 			update_input (UPDATE_ALL);
-			if (do_hook (KICK_LIST, "%s %s %s %s", who, from, channel, comment ? comment : empty_string))
+			if (do_hook (KICK_LIST, "%s %s %s %s", who, from, channel, comment ? comment : empty_str))
 				put_it ("%s", convert_output_format (get_format (FORMAT_KICK_USER_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, channel, who, comment));
 		}
 		else
@@ -1114,8 +1114,8 @@ p_part (char *from, char **ArgList)
 	in_on_who = 1;
 
 	if ((check_ignore (from, FromUserHost, channel, IGNORE_PARTS | IGNORE_CRAP, NULL) != IGNORED) &&
-	    do_hook (LEAVE_LIST, "%s %s %s %s", from, channel, FromUserHost, ArgList[1] ? ArgList[1] : empty_string))
-		put_it ("%s", convert_output_format (get_format (FORMAT_LEAVE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, channel, ArgList[1] ? ArgList[1] : empty_string));
+	    do_hook (LEAVE_LIST, "%s %s %s %s", from, channel, FromUserHost, ArgList[1] ? ArgList[1] : empty_str))
+		put_it ("%s", convert_output_format (get_format (FORMAT_LEAVE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, channel, ArgList[1] ? ArgList[1] : empty_str));
 	if (!my_stricmp (from, get_server_nickname (from_server)))
 	{
 		remove_channel (channel, from_server);

@@ -1,4 +1,4 @@
-#ident "@(#)ctcp.c 1.9"
+#ident "@(#)ctcp.c 1.10"
 /*
  * ctcp.c:handles the client-to-client protocol(ctcp). 
  *
@@ -194,7 +194,7 @@ CTCP_HANDLER (do_utc)
 {
 
 	if (!cmd || !*cmd)
-		return m_strdup (empty_string);
+		return m_strdup (empty_str);
 
 	return m_strdup (my_ctime (my_atol (cmd)));
 }
@@ -382,7 +382,7 @@ CTCP_HANDLER (do_echo)
 
 CTCP_HANDLER (do_ping)
 {
-	send_ctcp (CTCP_NOTICE, from, CTCP_PING, "%s", cmd ? cmd : empty_string);
+	send_ctcp (CTCP_NOTICE, from, CTCP_PING, "%s", cmd ? cmd : empty_str);
 	return NULL;
 }
 
@@ -572,7 +572,7 @@ do_ctcp (char *from, char *to, char *str)
 		if (ctcp_argument)
 			*ctcp_argument++ = 0;
 		else
-			ctcp_argument = empty_string;
+			ctcp_argument = empty_str;
 
 		/* Global messages -- just drop the CTCP */
 		if (*to == '$' || (*to == '#' && !lookup_channel (to, from_server, 0)))
@@ -612,7 +612,7 @@ do_ctcp (char *from, char *to, char *str)
 			{
 				if (allow_ctcp_reply && get_int_var (CTCP_VERBOSE_VAR))
 					put_it ("%s", convert_output_format (get_fset_var (FORMAT_CTCP_UNKNOWN_FSET),
-									     "%s %s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ctcp_command, *ctcp_argument ? ctcp_argument : empty_string));
+									     "%s %s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ctcp_command, *ctcp_argument ? ctcp_argument : empty_str));
 			}
 			allow_ctcp_reply = 0;
 			continue;
@@ -644,7 +644,7 @@ do_ctcp (char *from, char *to, char *str)
 
 				if (get_int_var (CTCP_VERBOSE_VAR))
 					put_it ("%s", convert_output_format (get_fset_var (FORMAT_CTCP_FSET),
-									     "%s %s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ctcp_command, *ctcp_argument ? ctcp_argument : empty_string));
+									     "%s %s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ctcp_command, *ctcp_argument ? ctcp_argument : empty_str));
 				/* Reset the window level/logging */
 				message_from (NULL, LOG_CRAP);
 				set_lastlog_msg_level (lastlog_level);
@@ -659,7 +659,7 @@ do_ctcp (char *from, char *to, char *str)
 	if (*local_ctcp_buffer)
 		return strcpy (str, local_ctcp_buffer);
 	else
-		return empty_string;
+		return empty_str;
 }
 
 
@@ -722,7 +722,7 @@ do_notice_ctcp (char *from, char *to, char *str)
 		if (ctcp_argument)
 			*ctcp_argument++ = 0;
 		else
-			ctcp_argument = empty_string;
+			ctcp_argument = empty_str;
 
 		/* Find the correct CTCP and run it. */
 		for (i = 0; i < NUMBER_OF_CTCPS; i++)

@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)Makefile 1.7
+# @(#)Makefile 1.9
 #
 
 ifndef REALLY_INCLUDE
@@ -29,7 +29,7 @@ else
 
 # source files
 source-src-lcl =	\
-	alist.c  cmd_modes.c commands.c ctcp.c dcc.c     \
+	alist.c  cmd_modes.c ctcp.c dcc.c     \
 	debug.c exec.c expr.c flood.c fset.c functions.c funny.c  \
 	hash.c history.c hook.c iflist.c ignore.c input.c irc.c ircaux.c   \
 	signals.c keys.c lastlog.c list.c lister.c  log.c misc.c names.c network.c  \
@@ -42,8 +42,8 @@ source-src-lcl =	\
 source-obj-lcl =
 
 # this should't change.
-O_SRC +=  $(addprefix source/, $(sort $(source-src-lcl)))
-O_OBJ +=  $(addprefix source/, $(sort $(source-obj-lcl)))
+SRCS +=  $(addprefix source/, $(sort $(source-src-lcl)))
+OBJS +=  $(addprefix source/, $(sort $(source-obj-lcl)))
 
 endif
 

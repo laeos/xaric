@@ -1,4 +1,4 @@
-#ident "$Id: numbers.c,v 1.1.1.3 1999/10/20 20:33:43 laeos Exp $"
+#ident "$Id: numbers.c,v 1.2 1999/12/02 06:38:34 laeos Exp $"
 /*
  * numbers.c:handles all those strange numeric response dished out by that
  * wacky, nutty program we call ircd 
@@ -136,6 +136,30 @@ handle_stats (int comm, char *from, char **ArgList)
    ^on ^raw_irc "% 242 *" {suecho $0 has been up for $5- }
    ^on ^raw_irc "% 243 *" {suecho \($3:line\) \($[20]4\) \($[9]6\)}
    ^on ^raw_irc "% 244 *" {suecho \($3:line\) \($[25]4\) \($[25]6\)}
+ */
+
+/*   c - Shows C/N lines
+ * ^ b - Shows B lines
+ * ^ d - Shows D lines
+ * ^ e - Shows E lines
+ * ^ f - Shows F lines
+ *   g - Shows G lines
+ *   h - Shows H/L lines
+ *   i - Shows I lines
+ *   K - Shows K lines (or matched klines)
+ *   k - Shows temporary K lines (or matched temp klines)
+ *   L - Shows IP and generic info about [nick]
+ *   l - Shows hostname and generic info about [nick]
+ *   m - Shows commands and their usage
+ *   o - Shows O/o lines
+ *   p - Shows opers connected and their idle times
+ *   r - Shows resource usage by ircd (only in DEBUGMODE)
+ * * t - Shows generic server stats
+ *   u - Shows server uptime
+ *   v - Shows connected servers and their idle times
+ *   y - Shows Y lines
+ * * z - Shows memory stats
+ *   ? - Shows connected servers and sendq info about them
  */
 	case 211:
 		format_str = "L:line $[20]left($rindex([ $1) $1)  :$[-5]2 $[-5]3 $[-6]4 $[-5]5 $[-6]6 $[-8]strip(: $7) $strip(: $8)";

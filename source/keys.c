@@ -570,7 +570,7 @@ init_keys_2 (void)
 #endif
 	snew_key (0, 9, TAB_MSG);	/* ^I (tab) */
 	snew_key (0, 10, SEND_LINE);	/* ^J (enter) */
-	snew_key (0, 11, JOIN_LAST_INVITE);	/* ^K */
+	snew_key (0, 11, ERASE_TO_END_OF_LINE);	/* ^K */
 	snew_key (0, 12, REFRESH_SCREEN);	/* ^L (linefeed) */
 	snew_key (0, 13, SEND_LINE);	/* ^M (return) */
 	snew_key (0, 14, QUOTE_CHARACTER);	/* ^N */

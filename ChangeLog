@@ -1,3 +1,14 @@
+Wed Dec 01 16:59:24 1999 Rex Feany <laeos@ptw.com>
+
+	* changed version to 0.9f
+	* changed ctrl-k to clear_to_end_of_line 
+	* made /window query call query (to make mullein happy:)
+	* added /operwall for ircd-hybrid 
+	* added /locops
+	* switched rehash and restart to use cmd_oper_stuff
+	* added /htm
+	
+
 Wed Oct 20 14:24:21 1999 Rex Feany <laeos@ptw.com>
 
 	* Branched off the perl stuff in the CVS tree,

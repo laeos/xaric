@@ -3142,6 +3142,15 @@ window_unbind (Window * window, char **args, char *usage)
 	return window;
 }
 
+static Window * window_query(Window * window, char **args, char *usage)
+{
+	char *arg;
+
+	arg = next_arg (*args, args);
+	t_parse_command ("QUERY", arg);
+	return window;
+}
+
 typedef Window *(*window_func) (Window *, char **args, char *usage);
 
 typedef struct window_ops_T
@@ -3193,6 +3202,7 @@ static window_ops options[] =
 	{"PREVIOUS", window_previous, NULL},
 	{"PROMPT", window_prompt, NULL},
 	{"PUSH", window_push, NULL},
+	{"QUERY", window_query, NULL},
 	{"REFNUM", window_refnum, NULL},
 	{"REMOVE", window_remove, NULL},
 	{"SERVER", window_server, NULL},
@@ -3206,6 +3216,9 @@ static window_ops options[] =
 	{"UNBIND", window_unbind, NULL},
 	{NULL, NULL, NULL}
 };
+
+
+
 
 
 static Window *

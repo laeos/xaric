@@ -1,4 +1,4 @@
-#ident "$Id: ncommand.c,v 1.2 1999/10/20 23:02:18 laeos Exp $"
+#ident "$Id: ncommand.c,v 1.4 1999/12/02 03:30:51 laeos Exp $"
 /*
  * ncommand.c : new commands for Xaric
  * (c) 1998 Rex Feany <laeos@ptw.com> 
@@ -2018,25 +2018,25 @@ cmd_users (struct command *cmd, char *args)
 
 }
 
-void
-cmd_wallops (struct command *cmd, char *args)
+
+void cmd_oper_stuff (struct command *cmd, char *args)
 {
-	if ((!args || !*args))
+	char *use = cmd->rname ? cmd->rname : cmd->name;
+
+	if ( cmd->data && (!args || !*args))
 	{
 		userage (cmd->name, cmd->qhelp);
 		return;
 	}
 	if (!get_server_operator (current_screen->current_window->server))
 	{
-		yell ("You arn't worthy enough to use /WALLOPS!");
+		yell ("You arn't worthy enough to use /%s!", cmd->name);
 		return;
 	}
-
+	
 	message_from (NULL, LOG_WALLOP);
 	if (!in_on_who)
-		send_to_server ("WALLOPS :%s", args);
-	if (get_server_flag (from_server, USER_MODE_W))
-		put_it ("!! %s", args);
+		send_to_server ("%s :%s", use, args);
 
 	message_from (NULL, LOG_CRAP);
 }
@@ -2168,7 +2168,8 @@ struct command xaric_cmds[] =
 	{"CL", NULL, NULL, cmd_clear, "- Clears the screen"},
 	{"CLEAR", NULL, NULL, cmd_clear, "- Clears the screen"},
 	{"CLEARTAB", NULL, NULL, cmd_clear_tab, "- Clears the nicks in the tabkey list"},
-	{"CONNECT", NULL, NULL, cmd_generic, "%Y<%nserver1%Y>%n %Y<%nport%Y>%n %R[%nserver2%R]%n\n%Y*%n Requires irc operator status"},
+	{"CLOSE", NULL, NULL, cmd_oper_stuff, "Requires irc operator status. Close any connections from clients who have not fully registered yet."},   
+	{"CONNECT", NULL, NULL, cmd_oper_stuff, "%Y<%nserver1%Y>%n %Y<%nport%Y>%n %R[%nserver2%R]%n\n%Y*%n Requires irc operator status"},
 	{"CTCP", NULL, NULL, cmd_ctcp, "%Y<%Cnick%Y>%n %Y<%nrequest%Y>%n\n- CTCP sends %Y<%Cnick%Y>%n with %Y<%nrequest%Y>%n"},
 	{"CYCLE", NULL, NULL, cmd_cycle, "%R[%Bchannel%R]%n\n- Leaves current channel or %R[%Bchannel%R]%n and immediately rejoins"},
 	{"D", NULL, NULL, cmd_describe, "See %YDESCRIBE%n"},
@@ -2191,11 +2192,12 @@ struct command xaric_cmds[] =
 	{"EXIT", NULL, NULL, cmd_quit, "- Quits IRC"},
 	{"FLUSH", NULL, NULL, cmd_flush, "- Flush ALL server output"},
 	{"FSET", NULL, NULL, cmd_fset, NULL},
-	{"HASH", NULL, NULL, cmd_generic, "- I'm not sure!"},
+	{"HASH", NULL, NULL, cmd_generic, "- Shows some stats about ircd's internal hashes."},
 	{"HELP", NULL, NULL, cmd_help, "%Y<%nindex%Y|%ncommand%Y>%n\n- Show an index of commands or get help on a specific command"},
 	{"HISTORY", NULL, NULL, cmd_history, "- Shows recently typed commands"},
 	{"HOSTNAME", NULL, NULL, cmd_hostname, "%Y<%nhostname%Y>%n\n- Shows list of possible hostnames with option to change it on virtual hosts"},
 	{"HOOK", NULL, NULL, cmd_hook, "- View / delete / add a hook"},
+	{"HTM", NULL, NULL, cmd_oper_stuff, "- manipulate ircd's High Traffic Mode. Requires irc operator status"},
 	{"I", NULL, NULL, cmd_invite, "- See %YINVITE%n"},
 	{"IG", NULL, NULL, cmd_doig, "+%G|%n-%Y<%Cnick%Y>%n\n- Ignores ALL except crap and public of nick!host matching %Y<%Cnick%Y>%n"},
 	{"IGH", NULL, NULL, cmd_doig, "+%G|%n-%Y<%Cnick%Y>%n\n- Ignores ALL except crap and public of hostname matching %Y<%Cnick%Y>%n"},
@@ -2217,6 +2219,7 @@ struct command xaric_cmds[] =
 	{"LINKS", NULL, NULL, cmd_generic, "- Shows servers and links to other servers"},
 	{"LIST", NULL, NULL, cmd_generic, "- Lists all channels"},
 	{"LLOOK", NULL, NULL, cmd_linklook, "%Y*%n Requires set %YLLOOK%n %RON%n\n- Lists all the servers which are current split from the IRC network"},
+	{"LOCOPS", NULL, empty_string, cmd_oper_stuff, "\n%Y<%Cmessage%Y>%n Requires irc operator status. Sends a message to all local operators.%n"},
 	{"LUSERS", NULL, NULL, cmd_generic, "- Shows stats on current server"},
 	{"M", "PRIVMSG", NULL, cmd_privmsg, "See %YMSG%n"},
 	{"MAP", NULL, NULL, cmd_map, "- Displays a map of the current servers"},
@@ -2238,6 +2241,7 @@ struct command xaric_cmds[] =
 	{"NWHOWAS", NULL, NULL, cmd_nwhowas, "- Displays internal whowas info for all channels. This information expires after 20 minutes for users on internal list, 10 minutes for others"},
 	{"OP", NULL, NULL, cmd_op, "%Y<%Cnick%Y>%n\n- Gives %Y<%Cnick%Y>%n +o"},
 	{"OPER", NULL, NULL, cmd_oper, "%Y*%n Requires irc operator status\n%Y<%Cnick%Y>%n %R[%npassword%R]%n"},
+	{"OPERWALL", NULL, empty_string, cmd_oper_stuff, "\n%Y<%Cmessage%Y>%n Requires irc operator status. Sends a message to operators.%n"},
 	{"ORIGNICK", NULL, NULL, cmd_orig_nick, "- Trys to regain old nick"},
 	{"PART", NULL, NULL, cmd_part, "- Leaves %Y<%nchannel%Y>%n"},
 	{"PARTALL", NULL, NULL, cmd_part, "- Leaves all channels"},
@@ -2249,9 +2253,9 @@ struct command xaric_cmds[] =
 	{"READLOG", NULL, NULL, cmd_readlog, "- Displays current away log"},
 	{"REMLOG", NULL, NULL, cmd_remove_log, "- Removes logfile"},
 	{"RECONNECT", NULL, NULL, cmd_reconnect, "- Reconnects you to current server"},
-	{"REHASH", NULL, NULL, cmd_generic, "%Y*%n Requires irc operator status\n- Rehashs ircd.conf for new configuration"},
+	{"REHASH", NULL, NULL, cmd_oper_stuff, "%Y*%n Requires irc operator status\n- Rehashs ircd.conf for new configuration"},
 	{"RESET", NULL, NULL, cmd_reset, "- Fixes flashed terminals"},
-	{"RESTART", NULL, NULL, cmd_generic, "%Y*%n Requires irc operator status\n- Restarts server"},
+	{"RESTART", NULL, NULL, cmd_oper_stuff, "%Y*%n Requires irc operator status\n- Restarts server"},
 	{"QUIT", NULL, NULL, cmd_quit, "- Quit IRC"},
 	{"QUOTE", NULL, NULL, cmd_quote, "%Y<%ntext%Y>%n\n- Sends text directly to the server"},
 	{"SAVEIRC", NULL, NULL, cmd_save, "- Saves ~/.ircrc"},
@@ -2296,7 +2300,7 @@ struct command xaric_cmds[] =
 	{"VERSION", NULL, NULL, cmd_ircii_version, "- Gives server and client version (a la ircII)"},
 	{"VOICE", "Voice", NULL, cmd_op, "- Gives someone voice (+v) on the channel"},
 	{"WALL", NULL, NULL, cmd_chwall, "- Send a message to all channel ops"},
-	{"WALLOPS", NULL, NULL, cmd_wallops, NULL},
+	{"WALLOPS", NULL, empty_string, cmd_oper_stuff, NULL},
 	{"WALLCHOPS", NULL, NULL, cmd_chwall, "- Send a message to all channel ops"},
 	{"WHOIS", NULL, NULL, cmd_whois, "- Get info on a person"},
 	{"WHOLEFT", NULL, NULL, cmd_wholeft, "- Shows who left?"},

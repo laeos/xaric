@@ -625,6 +625,7 @@ status_right_justify (Window * window)
 	return (my_buffer);
 }
 
+
 static char *
 status_notify_windows (Window * window)
 {

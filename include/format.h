@@ -211,7 +211,7 @@
 #define DEFAULT_STATUS_LAG " [0;44;36m[[0;44;37mLag[1;37m %L[0;44;36m]"
 #define DEFAULT_STATUS_MODE " [1;37m([0;44;36m+[0;44;37m%+[1;37m)"
 #define DEFAULT_STATUS_MSGCOUNT " Received [0;44;36m[[1;37m%^[0;44;36m] msg's since away"
-#define DEFAULT_STATUS_NOTIFY " [0;44;36m[[37mActivity: [1;37m%F[0;44;36m]"
+#define DEFAULT_STATUS_NOTIFY " [0;44;36m[[37mAct: [1;37m%F[0;44;36m]"
 #define DEFAULT_STATUS_OPER "[1;31m*[0;44;37m"
 #define DEFAULT_STATUS_VOICE "[1;32m+[0;44;37m"
 #define DEFAULT_STATUS_OVERWRITE "(overtype) "

@@ -1,4 +1,4 @@
-#ident "@(#)functions.c 1.8"
+#ident "@(#)functions.c 1.9"
 /*
  * functions.c -- Built-in functions for ircII
  *
@@ -62,7 +62,6 @@ static char *alias_chanop (void);
 static char *alias_modes (void);
 static char *alias_buffer (void);
 static char *alias_time (void);
-static char *alias_version (void);
 static char *alias_currdir (void);
 static char *alias_current_numeric (void);
 static char *alias_show_userhost (void);
@@ -109,7 +108,6 @@ static BuiltIns built_in[] =
 	{'S', alias_server},
 	{'T', alias_target},
 	{'U', alias_buffer},
-	{'V', alias_version},
 	{'W', alias_currdir},
 	{'X', alias_show_userhost},
 	{'Y', alias_show_realname},
@@ -222,11 +220,6 @@ static char *
 alias_oper (void)
 {
 	return m_strdup (get_server_operator (from_server) ? get_string_var (STATUS_OPER_VAR) : empty_string);
-}
-static char *
-alias_version (void)
-{
-	return m_strdup (internal_version);
 }
 static char *
 alias_online (void)

@@ -15,7 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)Makefile 1.4
+# @(#)Makefile 1.5
 #
 
 .DELETE_ON_ERROR:
@@ -35,6 +35,27 @@ VERSION:=`$(SHTOOL) version -d short $(VFILE_DIR)/$(VFILE)`
 
 # This contains all the build rules.
 -include Makerules
+
+
+########################################
+# Figure out what the default rule is  #
+########################################
+all: do-it-all
+
+ifneq (configure, $(wildcard configure))
+do-it-all: gen
+	@echo "Make sure you now run the configure script!"
+else
+
+ifneq (Makerules, $(wildcard Makerules)) 
+do-it-all:
+	@echo "Hey now, you need to run the configure script!"
+else
+do-it-all: xaric
+endif # Makerules?
+
+endif # configure?
+
 
 ########################################
 # Generate autoconf files              #

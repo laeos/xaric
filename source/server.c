@@ -14,6 +14,7 @@
 
 #include "irc.h"
 #include "parse.h"
+#include "build.h"
 
 #include <stdarg.h>
 
@@ -883,7 +884,7 @@ read_server_file (char *servers_file)
 
 	window_display = 0;
 #ifdef SERVERS_FILE
-	malloc_sprintf (&file_path, "%s/%s", irc_lib, SERVERS_FILE);
+	malloc_sprintf (&file_path, "%s/%s", XARIC_DATA_PATH, SERVERS_FILE);
 	if ((fp = fopen (file_path, "r")))
 	{
 		while (fgets (buffer, BIG_BUFFER_SIZE, fp))

@@ -16,6 +16,8 @@
 #ifndef __config_h_
 #define __config_h_
 
+#include "build.h"  /* for path to help files */
+
 /*
  * Set your favorite default server list here.  This list should be a
  * whitespace separated hostname:portnum:password list (with portnums and
@@ -116,7 +118,7 @@
 
 
 /* The default help file to use */ 
-#define DEFAULT_HELP_FILE "/usr/local/share/xaric/xaric.help"
+#define DEFAULT_HELP_FILE XARIC_DATA_PATH "/xaric.help"
 
 /*
  * Below are the IRCII variable defaults.  For boolean variables, use 1 for
@@ -186,7 +188,7 @@
 #define DEFAULT_INPUT_PROTECTION 0
 #define DEFAULT_INSERT_MODE 1
 #define DEFAULT_INVERSE_VIDEO 1
-#define DEFAULT_LASTLOG 1000
+#define DEFAULT_LASTLOG 10000
 #define DEFAULT_LASTLOG_LEVEL "ALL"
 #define DEFAULT_MSGLOG_LEVEL "MSGS NOTICES SEND_MSG"
 
@@ -250,7 +252,7 @@
 #define DEFAULT_CONNECT_TIMEOUT 30
 #define DEFAULT_STATUS_NO_REPEAT 0
 #define DEFAULT_DISPATCH_UNKNOWN_COMMANDS 0
-#define DEFAULT_SHOW_NUMERICS_STR "%g***%n"
+#define DEFAULT_SHOW_NUMERICS_STR "***"
 
 #define DEFAULT_USERMODE "+i"  /* change this to the default usermode */
 #define DEFAULT_OPERMODE "swfck"

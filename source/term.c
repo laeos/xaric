@@ -58,7 +58,7 @@ int (*term_cursor_right) (void);	/* this is set to the best right available */
 int (*term_clear_to_eol) (void);	/* this is set... figure it out */
 
 /* The termcap variables */
-char *CM, *CE, *CL, *CR, *NL, *AL, *DL, *CS, *DC, *IC, *IM, *EI, *SO, *SE,
+char *CM, *CE, *CL, *CR, *NL, *AL, *DL, *tCS, *DC, *IC, *IM, *EI, *SO, *SE,
  *US, *UE, *MD, *ME, *SF, *SR, *ND, *LE, *BL, *BS;
 int CO = 79, LI = 24, SG;
 
@@ -179,8 +179,8 @@ term_reset (void)
 {
 	tcsetattr (tty_des, TCSADRAIN, &oldb);
 
-	if (CS)
-		tputs_x (tgoto (CS, LI - 1, 0));
+	if (tCS)
+		tputs_x (tgoto (tCS, LI - 1, 0));
 	term_move_cursor (0, LI - 1);
 	term_flush ();
 }
@@ -251,7 +251,7 @@ term_init (void)
 	BS = tgetstr ("bs", &ptr);	/* move cursor with Backspace */
 	SF = tgetstr ("sf", &ptr);	/* Scroll Forward (up) */
 	SR = tgetstr ("sr", &ptr);	/* Scroll Reverse (down) */
-	CS = tgetstr ("cs", &ptr);	/* Change Scrolling region */
+	tCS = tgetstr ("cs", &ptr);	/* Change Scrolling region */
 	AL = tgetstr ("AL", &ptr);	/* Add blank Lines */
 	DL = tgetstr ("DL", &ptr);	/* Delete Lines */
 	IC = tgetstr ("ic", &ptr);	/* Insert Character */
@@ -303,7 +303,7 @@ term_init (void)
 	}
 
 
-	if (!CM || !CL || !CE || !ND || (!LE && !BS) || (!CS && !(AL && DL)))
+	if (!CM || !CL || !CE || !ND || (!LE && !BS) || (!tCS && !(AL && DL)))
 	{
 		fprintf (stderr, "\nYour terminal cannot run IRC II in full screen mode.\n");
 		fprintf (stderr, "The following features are missing from your TERM setting.\n");
@@ -318,7 +318,7 @@ term_init (void)
 			fprintf (stderr, "\tCursor right\n");
 		if (!LE && !BS)
 			fprintf (stderr, "\tCursor left\n");
-		if (!CS && !(AL && DL))
+		if (!tCS && !(AL && DL))
 			fprintf (stderr, "\tScrolling\n");
 
 		fprintf (stderr, "Try using VT100 emulation or better.\n");
@@ -332,7 +332,7 @@ term_init (void)
 	term_cursor_right = term_ND_cursor_right;
 	term_cursor_left = (LE) ? term_LE_cursor_left
 		: term_BS_cursor_left;
-	term_scroll = (CS) ? term_CS_scroll
+	term_scroll = (tCS) ? term_CS_scroll
 		: term_param_ALDL_scroll;
 	term_delete = (DC) ? term_DC_delete
 		: term_null_function;
@@ -458,7 +458,7 @@ term_CS_scroll (int line1, int line2, int n)
 	else
 		return 0;
 
-	tputs_x (tgoto (CS, line2, line1));	/* shouldn't do this each time */
+	tputs_x (tgoto (tCS, line2, line1));	/* shouldn't do this each time */
 	if (n < 0)
 	{
 		term_move_cursor (0, line1);
@@ -468,7 +468,7 @@ term_CS_scroll (int line1, int line2, int n)
 		term_move_cursor (0, line2);
 	for (i = 0; i < n; i++)
 		tputs_x (thing);
-	tputs_x (tgoto (CS, LI - 1, 0));	/* shouldn't do this each time */
+	tputs_x (tgoto (tCS, LI - 1, 0));	/* shouldn't do this each time */
 	return (0);
 }
 

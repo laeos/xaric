@@ -1,4 +1,4 @@
-#ident "@(#)irc.c 1.12"
+#ident "@(#)irc.c 1.15"
 /*
  * ircII: a new irc client.  I like it.  I hope you will too!
  *
@@ -7,24 +7,14 @@
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
 
-/*
- * INTERNAL_VERSION is the number that the special alias $V returns.
- * Make sure you are prepared for floods, pestilence, hordes of locusts,
- * and all sorts of HELL to break loose if you change this number.
- * Its format is actually YYYYMMDD, for the _release_ date of the
- * client..
- */
-const char internal_version[] = "19971106";
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "xaric_version.h"
 
-char irc_lib[] = "/usr/local/share/xaric";
-
 #include "irc.h"
+#include "build.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -111,7 +101,6 @@ char *invite_channel = NULL,	/* last channel of an INVITE */
  *who_nick = NULL,		/* extra /who switch info */
  *who_real = NULL,		/* extra /who switch info */
  *cannot_open = NULL,		/* extra /who switch info */
- *auto_str = NULL,		/* auto response str */
  *cut_buffer = NULL,		/* global cut_buffer */
  *line_thing = NULL;		/* show_numeric_str, say( ), put at begin of line */
  
@@ -346,7 +335,8 @@ parse_args (char *argv[], int argc)
 
 			case 'v':	/* Output ircII version */
 				{
-					printf ("xaric version %s (%s)\n\r", xversion.v_short, internal_version);
+					puts(xversion.v_tex);
+					putchar('\n');
 					exit (0);
 				}
 
@@ -587,8 +577,8 @@ parse_args (char *argv[], int argc)
 	else
 	{
 		malloc_strcpy (&irc_path, ".:~/.irc:");
-		printf ("%s\n", irc_lib);
-		malloc_strcat (&irc_path, irc_lib);
+		puts(XARIC_DATA_PATH);
+		malloc_strcat (&irc_path, XARIC_DATA_PATH);
 		malloc_strcat (&irc_path, "script");
 	}
 

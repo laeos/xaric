@@ -1,3 +1,25 @@
+2000-Nov-12 	Rex Feany	<laeos@laeos.net>
+
+	* Released Xaric 0.11.1
+
+2000-Nov-11 	Rex Feany	<laeos@laeos.net>
+
+	* Removed some autoreply code, check_auto_reply
+	  and all of the *_AR formats.
+	* Replaced the irc_lib stuff with a compile time
+	  constant. Now --prefix should work compleatly.
+	* Removed internal_version, not needed.
+
+2000-Nov-8 	Rex Feany	<laeos@laeos.net>
+
+	* Fix the Makefiles. make install now works.
+	* Changed the color of the *** thing to the normal 
+	  color.
+	* Increased the size of the lastlog buffer tenfold
+	* Fix in the terminal code so it compiles on some 
+	  machines.
+	* Incremented the version number to 0.11.1
+
 2000-Nov-4 	Rex Feany	<laeos@laeos.net>
 
 	* Released Xaric 0.11.0

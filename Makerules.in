@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)Makerules.in 1.7
+# @(#)Makerules.in 1.8
 #
 
 .DELETE_ON_ERROR:
@@ -75,7 +75,7 @@ EXTRA   := @EXTRA_SRC@ @ALLOCA@
 # this is so makefiles in directories work. 
 REALLY_INCLUDE := 1
 
-# Header files that get generated automagicly
+# Header files that are generated automagicly
 AUTOHDR := include/build.h include/fset_gen.h include/vars_gen.h
 
 # This is the default target, which compiles the xaric binary
@@ -110,18 +110,21 @@ include/vars_gen.h: source/vars.c
 	cat $< | $(SED) -n -e "/\*--start--\*/,/\*--end--\*/ { s/^[^\"]*\"\([^\"]*\).*$$/\1_VAR,/; s/\/\*[^*]*\*\///; p; }" > $@
 
 install: installxaric installhelp installman
+	@echo ""
 	@echo "run 'make installdata' if you want the default datafiles installed"
+	@echo ""
 
 installxaric:
 	$(SHTOOL) mkdir -f -p -m 755  $(bindir)
 	$(SHTOOL) install -c xaric $(bindir)
 
 installhelp:
-	$(SHTOOL) mkdir -f -p -m 755 $(INSTALL_HELP)
-	cd help; tar -cf - . | ( cd $(INSTALL_HELP); tar -xf - )
+	( $(SHTOOL) mkdir -f -p -m 755 $(INSTALL_HELP) && \
+		cd help && tar -cf - . | ( cd $(INSTALL_HELP); tar -xf - ) )
 
 installman:
-	for i in xaric.1; do $(SHTOOL) install -c doc/$$i $(mandir); done
+	( $(SHTOOL) mkdir -f -p -m 755 $(mandir)/man1 && \
+		for i in xaric.1; do $(SHTOOL) install -c doc/$$i $(mandir)/man1; done )
 
 installdata:
 	for i in servers; do $(SHTOOL) install -c doc/$$i $(pkgdatadir); done

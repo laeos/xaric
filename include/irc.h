@@ -3,7 +3,7 @@
 
 #include "defaults.h"
 
-#define XARIC_COMMENT   "\002is there no end in sight?\002"
+#define XARIC_COMMENT   "\002Let's kill something!\002"
 
 /*
  * Here you can set the in-line quote character, normally backslash, to
@@ -12,7 +12,6 @@
  */
 #define QUOTE_CHAR '\\'
 
-extern const char internal_version[];
 extern char	*line_thing;
 extern char	space[];
 
@@ -158,7 +157,6 @@ extern	int	away_set;
 extern	int	background;
 extern	char	*my_path;
 extern	char	*irc_path;
-extern	char	irc_lib[];
 extern	char	*args_str;
 extern	char	*invite_channel;
 extern	int	who_mask;

@@ -1,4 +1,4 @@
-#ident "@(#)vars.c 1.8"
+#ident "@(#)vars.c 1.9"
 /*
  * vars.c: All the dealing of the irc variables are handled here. 
  *
@@ -47,8 +47,6 @@ char *var_settings[] =
 	"OFF", "ON", "TOGGLE"
 };
 
-
-extern char *auto_str;
 
 extern Screen *screen_list, *current_screen;
 

@@ -17,7 +17,6 @@
 	int	annoy_kicks(int, char *, char *, char *, NickList *);
 	int	ctcp_flood_check(char *, char *, char *);
 	void	load_scripts(void);
-	int	check_auto_reply(char *);
 	BanList *ban_is_on_channel(char *ban, ChannelList *);
 					
 extern	char	*FromUserHost;

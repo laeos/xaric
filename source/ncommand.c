@@ -1794,7 +1794,7 @@ cmd_ircii_version (struct command *cmd, char *args)
 		send_to_server ("%s %s", cmd->name, host);
 	else
 	{
-		bitchsay ("Client: %s (internal version %s)", xversion.v_short, internal_version);
+		bitchsay ("Client: %s", xversion.v_short);
 		send_to_server ("%s", cmd->name);
 	}
 }

@@ -135,10 +135,8 @@ parse_notice (char *from, char **Args)
 			nick = find_nicklist_in_channellist (from, tmpc, 0);
 		if (from && *from && strcmp (get_server_itsname (from_server), from))
 		{
-			int not_reply = 0;
 			char *newline = NULL;
-			if (check_auto_reply (line))
-				not_reply++;
+
 			switch ((flag = check_ignore (from, FromUserHost, to, IGNORE_NOTICES, line)))
 			{
 			case IGNORED:
@@ -210,7 +208,7 @@ parse_notice (char *from, char **Args)
 					else
 					{
 						if (do_hook (type, "%s %s %s", from, to, line))
-							put_it ("%s", convert_output_format (get_fset_var (not_reply ? FORMAT_PUBLIC_NOTICE_AR_FSET : FORMAT_PUBLIC_NOTICE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, newline));
+							put_it ("%s", convert_output_format (get_fset_var (FORMAT_PUBLIC_NOTICE_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, newline));
 						if (beep_on_level & LOG_NOTICE)
 							beep_em (1);
 						logmsg (LOG_NOTICE, from, line, 0);

@@ -150,13 +150,9 @@
 #define DEF_FORMAT_NOTIFY_SIGNON_UH "$G %GSignon%n by %R$1%K!%R$2%K@%R$3%n at $0"
 #define DEF_FORMAT_NOTIFY_SIGNON "$G %GSignon%n by %r$[-10]1%n at $0"
 #define DEF_FORMAT_PUBLIC "%b<%n$1%b>%n $3-"
-#define DEF_FORMAT_PUBLIC_AR "%b<%C$1%b>%n $3-"
 #define DEF_FORMAT_PUBLIC_MSG "%b(%n$1%K/%n$3%b)%n $4-"
-#define DEF_FORMAT_PUBLIC_MSG_AR "%b(%Y$1%K/%Y$3%b)%n $4-"
 #define DEF_FORMAT_PUBLIC_NOTICE "%K-%P$1%K:%p$3%K-%n $4-"
-#define DEF_FORMAT_PUBLIC_NOTICE_AR "%K-%G$1%K:%g$3%K-%n $4-"
 #define DEF_FORMAT_PUBLIC_OTHER "%b<%n$1%K:%n$2%b>%n $3-"
-#define DEF_FORMAT_PUBLIC_OTHER_AR "%b<%Y$1%K:%n$2%b>%n $3-"
 #define DEF_FORMAT_SEND_ACTION "%K.%n.%W. %W$1 %n$3-"
 #define DEF_FORMAT_SEND_ACTION_OTHER "%K.%n.%W. %n-> %W$1%n/%c$2 %n$3-"
 #define DEF_FORMAT_SEND_AWAY "[Away ($strftime($1 %a %b %d %I:%M%p))] [Current ($strftime($0 %a %b %d %I:%M%p))]"
@@ -196,11 +192,10 @@
 #define DEF_FORMAT_USERS "%K[%n$[10]3%K] %K[%n%C$6%B$[10]4%K] %K[%n$[37]5%K] %K[%n$[-3]0%b:%n$1%b:%n$2%K]"
 #define DEF_FORMAT_USERS_USER "%K[%n$[10]3%K] %K[%n%C$6%B$[10]4%K] %K[%n%B$[37]5%K] %K[%n$[-3]0%b:%n$1%b:%n$2%K]"
 #define DEF_FORMAT_USERS_HEADER "%K[ %WC%nhannel  %K] [ %WN%wickname  %K] [%n %Wu%wser@host                           %K] [%n %Wl%wevel %K]"
-#define DEF_FORMAT_VERSION "\002Xaric v$0\002 running $1 $2"
+#define DEF_FORMAT_VERSION "\002Xaric v$0\002 running $1"
 
 
 #define DEF_FORMAT_WALL "%G!%g$1:$2%G!%n $3-"
-#define DEF_FORMAT_WALL_AR "%G!%g$1:$2%G!%n $3-"
 
 
 #define DEF_FORMAT_WALLOP "%G!%g$1$2%G!%n $3-"

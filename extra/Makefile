@@ -1,4 +1,4 @@
-# config.param : paramaters file
+# Makefile fragment
 # Copyright (c) 2000 Rex Feany (laeos@xaric.org)
 #
 # This file is a part of Xaric, a silly IRC client.
@@ -18,13 +18,34 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
+# @(#)Makefile 1.1
+#
 
+ifndef REALLY_INCLUDE
+all clean distclean:
+	@echo "Doh, wrong directory. Lets try again"
+	make -C .. $@
+endif
 
-# common paramaters
-common {
-}
+# extra files
+extra-src-lcl =	
 
-# debugging flags
-debug {
-	--enable-debug
-}
+ifdef ALLOCA
+extra-src-lcl += alloca.c
+endif
+
+ifdef STRTOUL
+extra-src-lcl += strtoul.c
+endif
+
+ifdef SETENV
+extra-src-lcl += setenv.c
+endif
+
+# prebuilt object files
+extra-obj-lcl =
+
+# this should't change.
+extra-src =  $(addprefix extra/, $(sort $(extra-src-lcl)))
+extra-obj =  $(addprefix extra/, $(sort $(extra-obj-lcl)))
+

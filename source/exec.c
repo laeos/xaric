@@ -1,4 +1,4 @@
-#ident "@(#)exec.c 1.9"
+#ident "@(#)exec.c 1.10"
 /*
  * exec.c: handles exec'd process for IRCII 
  *
@@ -38,6 +38,7 @@
 #include "newio.h"
 #include "tcommand.h"
 #include "util.h"
+#include "xmalloc.h"
 
 #include <sys/wait.h>
 
@@ -449,10 +450,10 @@ delete_process (int process)
 
 				if (process_list_size)
 					process_list = (Process **)
-						RESIZE (process_list, Process *, process_list_size);
+						process_list = xrealloc(process_list, sizeof(Process *) * process_list_size);
 				else
 				{
-					new_free ((char **) &process_list);
+					xfree ((char **) &process_list);
 					process_list = NULL;
 				}
 			}
@@ -474,11 +475,11 @@ delete_process (int process)
 						say ("Process %d (%s) terminated with return code %d", process, dead->name, dead->retcode);
 				}
 			}
-			new_free (&dead->name);
-			new_free (&dead->logical);
-			new_free (&dead->who);
-			new_free (&dead->redirect);
-			new_free ((char **) &dead);
+			xfree (&dead->name);
+			xfree (&dead->logical);
+			xfree (&dead->who);
+			xfree (&dead->redirect);
+			xfree ((char **) &dead);
 			return (0);
 		}
 	}
@@ -498,7 +499,7 @@ add_process (char *name, char *logical, int pid, int p_stdin, int p_stdout, int 
 
 	if (process_list == NULL)
 	{
-		process_list = (Process **) new_malloc (sizeof (Process *));
+		process_list = (Process **) xmalloc (sizeof (Process *));
 		process_list[0] = NULL;
 		process_list_size = 1;
 	}
@@ -506,7 +507,7 @@ add_process (char *name, char *logical, int pid, int p_stdin, int p_stdout, int 
 	{
 		if (!process_list[i])
 		{
-			proc = process_list[i] = (Process *) new_malloc (sizeof (Process));
+			proc = process_list[i] = (Process *) xmalloc (sizeof (Process));
 			proc->name = m_strdup (name);
 			proc->logical = m_strdup (logical);
 			proc->pid = pid;
@@ -526,9 +527,9 @@ add_process (char *name, char *logical, int pid, int p_stdin, int p_stdout, int 
 		}
 	}
 	process_list_size++;
-	process_list = (Process **) RESIZE (process_list, Process *, process_list_size);
+	process_list = xrealloc(process_list, sizeof(Process *) * process_list_size);
 	process_list[process_list_size - 1] = NULL;
-	proc = process_list[i] = (Process *) new_malloc (sizeof (Process));
+	proc = process_list[i] = (Process *) xmalloc (sizeof (Process));
 	proc->name = m_strdup (name);
 	proc->logical = m_strdup (logical);
 
@@ -684,13 +685,13 @@ start_process (char *name, char *logical, char *redirect, char *who, unsigned in
 
 				cnt = 0;
 				max = 5;
-				args = (char **) new_malloc (sizeof (char *) * max);
+				args = (char **) xmalloc (sizeof (char *) * max);
 				while ((arg = next_arg (name, &name)) != NULL)
 				{
 					if (cnt == max)
 					{
 						max += 5;
-						RESIZE (args, char *, max);
+						args = xrealloc(args, sizeof(char *) * max);
 					}
 					args[cnt++] = arg;
 				}

@@ -24,7 +24,7 @@ dnl ##
 dnl ##
 dnl ## shamelessly stolen for use in Xaric.. 
 dnl ##
-dnl ## @(#)acinclude.m4 1.3
+dnl ## @(#)acinclude.m4 1.4
 dnl ##
 
 divert(-1)
@@ -191,90 +191,6 @@ if test ".$enable_subdir" != .yes; then
 fi
 ])dnl
 
-dnl ##
-dnl ##  Support for config.param files
-dnl ##
-dnl ##  configure.in:
-dnl ##    AC_CONFIG_PARAM(<file>)
-dnl ##
-
-AC_DEFUN(AC_CONFIG_PARAM,[
-AC_DIVERT_PUSH(-1)
-AC_ARG_WITH(param,[  --with-param=ID[,ID,..] load parameters from $1])
-AC_DIVERT_POP()
-AC_DIVERT_PUSH(AC_DIVERSION_NOTICE)
-ac_prev=""
-ac_param=""
-if test -f $1; then
-    ac_param="$1:common"
-fi
-for ac_option
-do
-    if test ".$ac_prev" != .; then
-        eval "$ac_prev=\$ac_option"
-        ac_prev=""
-        continue
-    fi
-    case "$ac_option" in
-        -*=*) ac_optarg=`echo "$ac_option" | sed 's/[[-_a-zA-Z0-9]]*=//'` ;;
-           *) ac_optarg="" ;;
-    esac
-    case "$ac_option" in
-        --with-param=* )
-            case $ac_optarg in
-                *:* )
-                    ac_from=`echo $ac_optarg | sed -e 's/:.*//'`
-                    ac_what=`echo $ac_optarg | sed -e 's/.*://'`
-                    ;;
-                * )
-                    ac_from="$1"
-                    ac_what="$ac_optarg"
-                    ;;
-            esac
-            if test ".$ac_param" = .; then
-                ac_param="$ac_from:$ac_what"
-            else
-                ac_param="$ac_param,$ac_from:$ac_what"
-            fi
-            ;;
-    esac
-done
-if test ".$ac_param" != .; then
-    # echo "loading parameters"
-    OIFS="$IFS"
-    IFS=","
-    pconf="/tmp/autoconf.$$"
-    echo "ac_options=''" >$pconf
-    ac_from="$1"
-    for ac_section in $ac_param; do
-        changequote(, )
-        case $ac_section in
-            *:* )
-                ac_from=`echo "$ac_section" | sed -e 's/:.*//'`
-                ac_section=`echo "$ac_section" | sed -e 's/.*://'`
-                ;;
-        esac
-        (echo ''; cat $ac_from; echo '') |\
-        sed -e "1,/[ 	]*[ 	]*${ac_section}[ 	]*{[ 	]*/d" \
-            -e '/[ 	]*}[ 	]*/,$d' \
-            -e ':join' -e '/\\[ 	]*$/N' -e 's/\\[ 	]*\n[ 	]*//' -e 'tjoin' \
-            -e 's/^[ 	]*//g' \
-            -e 's/^\(--.*=.*\)$/ac_options="$ac_options \1"/' \
-            -e 's/^\(--.*\)$/ac_options="$ac_options \1"/' \
-            >>$pconf
-        changequote([, ])
-    done
-    IFS="$OIFS"
-    . $pconf
-    rm -f $pconf >/dev/null 2>&1
-    if test ".[$]*" = .; then
-        set -- $ac_options
-    else
-        set -- "[$]@" $ac_options
-    fi
-fi
-AC_DIVERT_POP()
-])dnl
 
 dnl ##
 dnl ##  Check whether compiler option works
@@ -975,6 +891,44 @@ fi
 AC_MSG_RESULT([$with_$2])
 ])dnl
 
+
+dnl ##
+dnl ##  Check for readline support.. 
+dnl ##  Either system shlibs or our local copy.
+dnl ##
+
+AC_DEFUN(AC_READLINE_CHECK,
+[AC_MSG_CHECKING(for readline)
+AC_CACHE_VAL(ac_cv_precompiled_readline,
+[
+   old_LIBS="$LIBS"
+   LIBS="-lreadline $READLINE_SUPPLIB $LIBS"
+   AC_TRY_LINK([extern int (*rl_getc_function)();],
+      [rl_getc_function=0;],
+      [AC_TRY_CPP([#include <readline/readline.h>],
+		[ac_cv_precompiled_readline=yes],
+		[ac_cv_precompiled_readline=no])
+      ],ac_cv_precompiled_readline=no)
+   LIBS="$old_LIBS"
+])
+if test $ac_cv_precompiled_readline = yes; then
+   AC_MSG_RESULT(yes)
+   READLINE='-lreadline'
+   READLINE_DEPEND=''
+   XARIC_READLINE="external"
+else
+   AC_MSG_RESULT(no - will compile)
+   READLINE='$(READLINE_DIR)/libreadline.a'
+   READLINE_DEPEND='$(READLINE_DIR)/libreadline.a'
+   XARIC_READLINE=internal
+   AC_DEFINE(XARIC_READLINE)
+fi
+AC_CONFIG_SUBDIRS($READLINE_DIR)
+AC_SUBST(XARIC_READLINE)
+AC_SUBST(READLINE_DIR)
+AC_SUBST(READLINE_DEPEND)
+AC_SUBST(READLINE)
+])
 
 divert
 

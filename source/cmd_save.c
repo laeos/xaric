@@ -1,4 +1,4 @@
-#ident "@(#)cmd_save.c 1.9"
+#ident "@(#)cmd_save.c 1.10"
 /*
  * cmd_save.c : save Xaric settings 
  *
@@ -59,7 +59,6 @@ really_save (char *file, char *line)
 	FILE *fp;
 	int save_do_all = 0;
 
-	context;
 	if (*line != 'y' && *line != 'Y')
 		return;
 	if ((fp = fopen (file, "w")) != NULL)

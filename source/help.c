@@ -1,4 +1,4 @@
-#ident "@(#)help.c 1.8"
+#ident "@(#)help.c 1.9"
 /*
  * help.c -- Xaric help system
  * (c) 1997,1998,1999,2000 Rex Feany (laeos@laeos.net) 
@@ -31,6 +31,7 @@
 #include "misc.h"
 #include "vars.h"
 #include "tcommand.h"
+#include "xmalloc.h"
 
 struct help_ent_
 {
@@ -92,7 +93,7 @@ add_topic (char *topic, long loc)
 	}
 
 	hash = hash_str (topic);
-	h = new_malloc (sizeof (help_ent));
+	h = xmalloc (sizeof (help_ent));
 
 	h->topic = m_strdup (topic);
 	h->where = loc;

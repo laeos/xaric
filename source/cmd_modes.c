@@ -1,4 +1,4 @@
-#ident "@(#)cmd_modes.c 1.9"
+#ident "@(#)cmd_modes.c 1.10"
 /*
  * cmd_modes.c : commands that have to do with modes?!
  *
@@ -50,6 +50,8 @@
 #include "hash2.h"
 #include "fset.h"
 
+
+#include "xmalloc.h"
 #include "util.h"
 
 
@@ -75,7 +77,7 @@ flush_mode (ChannelList * chan)
 {
 	if (mode_buf)
 		send_to_server ("%s", mode_buf);
-	new_free (&mode_buf);
+	xfree (&mode_buf);
 	mode_len = 0;
 }
 
@@ -89,8 +91,8 @@ flush_mode_all (ChannelList * chan)
 		len = sprintf (buffer, "MODE %s %s%s %s\r\n", chan->channel, plus_mode, mode_str, user);
 		add_mode_buffer (buffer, len);
 		mode_str_len = 0;
-		new_free (&mode_str);
-		new_free (&user);
+		xfree (&mode_str);
+		xfree (&user);
 		memset (plus_mode, 0, sizeof (plus_mode));
 		len = 0;
 	}
@@ -130,8 +132,8 @@ add_mode (ChannelList * chan, char *mode, int plus, char *nick, char *reason, in
 		{
 			len = sprintf (buffer, "MODE %s %s %s\r\n", chan->channel, mode_str, user);
 			add_mode_buffer (buffer, len);
-			new_free (&mode_str);
-			new_free (&user);
+			xfree (&mode_str);
+			xfree (&user);
 			memset (plus_mode, 0, sizeof (plus_mode));
 			mode_str_len = len = 0;
 		}
@@ -191,7 +193,7 @@ ban_it (char *nick, char *u, char *host)
 	case 6:		/* Screw        */
 		malloc_sprintf (&tmpstr, "*!*%s@%s", t1, host);
 		strcpy (banstr, screw (tmpstr));
-		new_free (&tmpstr);
+		xfree (&tmpstr);
 		break;
 	case 1:		/* Normal       */
 	default:
@@ -239,7 +241,7 @@ userhost_unban (WhoisStuff * stuff, char *nick1, char *args)
 
 	if (!(chan = prepare_command (&from_server, NULL, NEED_OP)))
 	{
-		new_free (&host);
+		xfree (&host);
 		return;
 	}
 
@@ -257,7 +259,7 @@ userhost_unban (WhoisStuff * stuff, char *nick1, char *args)
 	flush_mode_all (chan);
 	if (!count)
 		bitchsay ("No match for Unban of %s on %s", nick1, args);
-	new_free (&host);
+	xfree (&host);
 	from_server = old_server;
 }
 
@@ -289,7 +291,7 @@ userhost_ban (WhoisStuff * stuff, char *nick1, char *args)
 			if (strcmp (u, "<UNKNOWN>") == 0)
 			{
 				bitchsay ("No match for the ban of %s", nick1);
-				new_free (&u);
+				xfree (&u);
 				return;
 			}
 			host = strchr (u, '@');
@@ -312,14 +314,14 @@ userhost_ban (WhoisStuff * stuff, char *nick1, char *args)
 	if (!(my_stricmp (nick, get_server_nickname (from_server))))
 	{
 		bitchsay ("Try to kick yourself again!!");
-		new_free (&u);
+		xfree (&u);
 		return;
 	}
 
 	send_to_server ("MODE %s %s %s", channel, stuff->channel ? ob : b, ban_it (nick, u, host));
 	send_to_server ("KICK %s %s :%s", channel, nick, args ? args : get_reason (nick));
 
-	new_free (&u);
+	xfree (&u);
 }
 
 void
@@ -402,13 +404,13 @@ cmd_unban (struct command *cmd, char *args)
 			if (count && (count % get_int_var (NUM_BANMODES_VAR) == 0))
 			{
 				send_to_server ("MODE %s -%s %s", chan->channel, strfill ('b', num), banstring);
-				new_free (&banstring);
+				xfree (&banstring);
 				num = 0;
 			}
 		}
 		if (banstring && num)
 			send_to_server ("MODE %s -%s %s", chan->channel, strfill ('b', num), banstring);
-		new_free (&banstring);
+		xfree (&banstring);
 	}
 	if (!count)
 		bitchsay ("No ban matching %s found", spec);
@@ -498,7 +500,7 @@ cmd_kickban (struct command *cmd, char *args)
 			send_to_server ("KICK %s %s :%s", chan->channel, nicks->nick,
 				    rest ? rest : get_reason (nicks->nick));
 			count++;
-			new_free (&t);
+			xfree (&t);
 		}
 
 	}
@@ -554,7 +556,7 @@ cmd_ban (struct command *cmd, char *args)
 			else
 				send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, u, "*"));
 
-			new_free (&t);
+			xfree (&t);
 			found++;
 
 		}
@@ -611,8 +613,8 @@ cmd_banstat (struct command *cmd, char *args)
 			if (do_hook (BANS_LIST, "%d %s %s %s %lu", count, chan->channel, tmpc->ban, tmpc->setby ? tmpc->setby : get_server_name (from_server), (unsigned long) tmpc->time))
 				put_it ("%s", convert_output_format (get_fset_var (FORMAT_BANS_FSET), "%d %s %s %s %l", count, chan->channel, tmpc->ban, tmpc->setby ? tmpc->setby : get_server_name (from_server), tmpc->time));
 		}
-		new_free (&check);
-		new_free (&channel);
+		xfree (&check);
+		xfree (&channel);
 	}
 	else if (channel)
 		send_to_server ("MODE %s b", channel);
@@ -647,7 +649,7 @@ remove_bans (char *stuff, char *line)
 				if (num % get_int_var (NUM_BANMODES_VAR) == 0)
 				{
 					send_to_server ("MODE %s -%s %s", stuff, strfill ('b', num), banstring);
-					new_free (&banstring);
+					xfree (&banstring);
 					num = 0;
 				}
 			}
@@ -660,14 +662,14 @@ remove_bans (char *stuff, char *line)
 			{
 				if ((tmpc = (BanList *) remove_from_list ((List **) & chan->bans, tmpc->ban)))
 				{
-					new_free (&tmpc->ban);
-					new_free (&tmpc->setby);
-					new_free ((char **) &tmpc);
+					xfree (&tmpc->ban);
+					xfree (&tmpc->setby);
+					xfree ((char **) &tmpc);
 					tmpc = NULL;
 				}
 			}
 		}
-		new_free (&banstring);
+		xfree (&banstring);
 	}
 }
 

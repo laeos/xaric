@@ -70,7 +70,9 @@
 #include "xaric_version.h"
 #include "util.h"
 
+#include "xmalloc.h"
 #include "tcommand.h"
+#include "xdebug.h"
 
 
 
@@ -223,7 +225,6 @@ cmd_back (struct command *cmd, char *args)
 	int hours = 0;
 	int seconds = 0;
 
-	context;
 	if (!curr_scr_win || curr_scr_win->server == -1)
 		return;
 
@@ -265,7 +266,7 @@ cmd_back (struct command *cmd, char *args)
 	{
 		malloc_sprintf (&tmp, " read /away msgs (%d msg%s) log [Y/n]? ", get_int_var (MSGCOUNT_VAR), plural (get_int_var (MSGCOUNT_VAR)));
 		add_wait_prompt (tmp, read_away_log, empty_string, WAIT_PROMPT_LINE);
-		new_free (&tmp);
+		xfree (&tmp);
 	}
 	set_int_var (MSGCOUNT_VAR, 0);
 	update_all_status (curr_scr_win, NULL, 0);
@@ -312,9 +313,9 @@ cmd_chwall (struct command *cmd, char *args)
 		if (!args || !*args)
 		{
 			bitchsay ("NO Wallmsg included");
-			new_free (&exclude);
-			new_free (&include);
-			new_free (&channel);
+			xfree (&exclude);
+			xfree (&include);
+			xfree (&channel);
 		}
 		message_from (channel, LOG_NOTICE);
 		sprintf (buffer, "[\002Xaric-Wall\002/\002%s\002] %s", channel, args);
@@ -336,7 +337,7 @@ cmd_chwall (struct command *cmd, char *args)
 				send_to_server ("%s %s :%s", "NOTICE", chops, buffer);
 				i += count;
 				count = 0;
-				new_free (&chops);
+				xfree (&chops);
 			}
 		}
 		i += count;
@@ -362,10 +363,10 @@ cmd_chwall (struct command *cmd, char *args)
 	}
 	else
 		say ("No Current Channel for this Window.");
-	new_free (&include);
-	new_free (&channel);
-	new_free (&chops);
-	new_free (&exclude);
+	xfree (&include);
+	xfree (&channel);
+	xfree (&chops);
+	xfree (&exclude);
 }
 
 static void
@@ -574,7 +575,7 @@ cmd_disconnect (struct command *cmd, char *args)
 			yell ("Ouch.. this is a -shouldnt-happen-");
 			return;
 		}
-		bitchsay ("You arn't connected to any server!!");
+		bitchsay ("You aren't connected to any server!!");
 		return;
 	}
 
@@ -615,7 +616,7 @@ cmd_echo (struct command *cmd, char *args)
 	Window *old_to_window;
 
 	old_to_window = to_window;
-	context;
+
 	if (*cmd->name == 'X')
 	{
 		while (args && (*args == '-' || *args == '/'))
@@ -721,7 +722,7 @@ cmd_echo (struct command *cmd, char *args)
 		message_from_level (from_level);
 	}
 	if (stuff)
-		new_free (&stuff);
+		xfree (&stuff);
 	to_window = old_to_window;
 }
 
@@ -1516,7 +1517,7 @@ cmd_topic (struct command *cmd, char *args)
 			char *p = NULL;
 			p = m_sprintf ("%s%s%s", arg, arg ? space_string : empty_string, args ? args : empty_string);
 			my_send_to_server (server, "TOPIC %s :%s%s%s", chan->channel, arg, args ? space_string : empty_string, args ? args : empty_string);
-			new_free (&p);
+			xfree (&p);
 		}
 	}
 	else
@@ -1724,12 +1725,10 @@ cmd_ison (struct command *cmd, char *args)
 	add_ison_to_whois (args, ison_now);
 }
 
-extern void display_name (int);
-
 static void
 cmd_info (struct command *cmd, char *args)
 {
-	display_name (0);
+	display_intro();
 	say ("We should say something really nice here. But i dont know what.");
 	send_to_server ("%s %s", cmd->name, args);
 }
@@ -1839,7 +1838,7 @@ cmd_userhost (struct command *cmd, char *args)
 			else
 				add_to_whois_queue (buffer, USERHOST_USERHOST, "%s", empty_string);
 		}
-		new_free (&the_list);
+		xfree (&the_list);
 	}
 	else if (!total)
 		/* Default to yourself.  */
@@ -2030,7 +2029,7 @@ cmd_oper_stuff1 (struct command *cmd, char *args)
 	}
 	if (!get_server_operator (current_screen->current_window->server))
 	{
-		yell ("You arn't worthy enough to use /%s!", cmd->name);
+		yell ("You aren't worthy enough to use /%s!", cmd->name);
 		return;
 	}
 	
@@ -2049,7 +2048,7 @@ cmd_oper_stuff2 (struct command *cmd, char *args)
 	char *a1, *a2;
 
 	if (!get_server_operator (current_screen->current_window->server)) {
-		yell ("You arn't worthy enough to use /%s!", cmd->name);
+		yell ("You aren't worthy enough to use /%s!", cmd->name);
 		return;
 	}
 
@@ -2123,10 +2122,23 @@ cmd_whowas (struct command *cmd, char *args)
 		malloc_sprintf (&stuff, "%s %d", get_server_nickname (from_server), /*get_int_var(NUM_OF_WHOWAS_VAR) */ 4);
 
 	send_to_server ("WHOWAS %s", stuff);
-	new_free (&stuff);
+	xfree (&stuff);
 }
 
 
+#ifdef XARIC_DEBUG
+static void 
+cmd_debug (struct command *cmd, char *args)
+{
+	if (args && *args) {
+		if ( xd_parse(args) ) {
+			yell("Invalid DEBUG values!");
+		}
+	} else {
+		xd_list(0);
+	}
+}
+#endif /* XARIC_DEBUG */
 
 
 struct command xaric_cmds[] =
@@ -2160,12 +2172,14 @@ struct command xaric_cmds[] =
 	{"DBAN", NULL, NULL, cmd_unban, "- Clears all bans on current channel"},
 	{"DC", NULL, NULL, cmd_dcc_chat, "%Y<%Cnick%Y>%n\n- Starts a DCC CHAT to %Y<%Cnick%Y>%n"},
 	{"DCC", NULL, NULL, cmd_dcc, "try /dcc help"},
+#ifdef XARIC_DEBUG
+	{"DEBUG", NULL, NULL, cmd_debug, "- set debug flags."},
+#endif
 	{"DEBUGHASH", NULL, NULL, cmd_show_hash, NULL},
 	{"DEOP", NULL, NULL, cmd_deop, "%Y<%C%nnick(s)%Y>%n\n- Deops %Y<%Cnick%y(%Cs%y)%Y>%n"},
 	{"DEOPER", NULL, NULL, cmd_deoper, "%Y*%n Requires irc operator status\n- Removes irc operator status"},
 	{"DESCRIBE", NULL, NULL, cmd_describe, "%Y<%Cnick%G|%Bchannel%Y>%n %Y<%naction%Y>%n\n- Describes to %Y<%Cnick%G|%Bchannel%Y>%n with %Y<%naction%Y>%n"},
 	{"DEVOICE", "DeVoice", NULL, cmd_deop, "%Y<%C%nnick(s)%Y>%n\n- de-voices %Y<%Cnick%y(%Cs%y)%Y>%n"},
-	{"DEBUG", NULL, NULL, cmd_debug, NULL},
 	{"DIE", NULL, NULL, cmd_generic, "%Y*%n Requires irc operator status\n- Kills the IRC server you are on"},
 	{"DISCONNECT", NULL, NULL, cmd_disconnect, "- Disconnects you from the current server"},
 	{"DNS", NULL, NULL, cmd_nslookup, "%Y<%nnick|hostname%y>%n\n- Attempts to nslookup on nick or hostname"},

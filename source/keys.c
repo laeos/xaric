@@ -1,4 +1,4 @@
-#ident "@(#)keys.c 1.11"
+#ident "@(#)keys.c 1.12"
 /*
  * keys.c: Decides what happens when you press a key
  *
@@ -30,6 +30,7 @@
 #include "tcommand.h"
 #include "util.h"
 #include "expr.h"
+#include "xmalloc.h"
 
 extern void get_line_return (char, char *);
 
@@ -523,14 +524,14 @@ new_key (int map, int chr, int type, int change, char *stuff)
 	if (keys[map][chr])
 	{
 		if (keys[map][chr]->stuff)
-			new_free (&(keys[map][chr]->stuff));
-		new_free ((char **) &(keys[map][chr]));
+			xfree (&(keys[map][chr]->stuff));
+		xfree ((char **) &(keys[map][chr]));
 		keys[map][chr] = NULL;
 	}
 
 	if (type != NOTHING)
 	{
-		keys[map][chr] = (KeyMap *) new_malloc (sizeof (KeyMap));
+		keys[map][chr] = (KeyMap *) xmalloc (sizeof (KeyMap));
 		keys[map][chr]->key_index = type;
 		keys[map][chr]->changed = change;
 		if (stuff)
@@ -758,8 +759,8 @@ clear_bindings (void)
 		for (j = 0; j < charsize; j++)
 		{
 			if (keys[i][j] && keys[i][j]->stuff)
-				new_free (&(keys[i][j]->stuff));
+				xfree (&(keys[i][j]->stuff));
 			if (keys[i][j])
-				new_free ((char **) &(keys[i][j]));
+				xfree ((char **) &(keys[i][j]));
 		}
 }

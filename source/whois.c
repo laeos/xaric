@@ -1,4 +1,4 @@
-#ident "@(#)whois.c 1.10"
+#ident "@(#)whois.c 1.11"
 /*
  * whois.c: Some tricky routines for querying the server for information
  * about a nickname using WHOIS.... all the time hiding this from the user.  
@@ -35,6 +35,7 @@
 #include "ctcp.h"
 #include "misc.h"
 #include "status.h"
+#include "xmalloc.h"
 #include "whowas.h"
 #include "struct.h"
 #include "util.h"
@@ -119,9 +120,9 @@ clean_whois_queue (void)
 	while (whois_queue_head (from_server))
 	{
 		thing = remove_from_whois_queue (from_server);
-		new_free (&thing->nick);
-		new_free (&thing->text);
-		new_free ((char **) &thing);
+		xfree (&thing->nick);
+		xfree (&thing->text);
+		xfree ((char **) &thing);
 	}
 	ignore_whois_crap = 0;
 	eat_away = 0;
@@ -141,9 +142,9 @@ ison_returned (char *from, char **ArgList)
 	{
 		thing = remove_from_whois_queue (from_server);
 		thing->func (thing->nick, ArgList[0] ? ArgList[0] : empty_string);
-		new_free (&thing->nick);
-		new_free (&thing->text);
-		new_free ((char **) &thing);
+		xfree (&thing->nick);
+		xfree (&thing->text);
+		xfree ((char **) &thing);
 	}
 	else
 		ison_now (NULL, ArgList[0] ? ArgList[0] : empty_string);
@@ -285,9 +286,9 @@ userhost_returned (char *from, char **ArgList)
 			if (!ishere)
 				malloc_strcpy (&whois_stuff->away, empty_string);
 			else
-				new_free (&whois_stuff->away);
+				xfree (&whois_stuff->away);
 			thing->func (whois_stuff, tnick, thing->text);
-			new_free (&whois_stuff->away);
+			xfree (&whois_stuff->away);
 		}
 		else
 		{
@@ -307,9 +308,9 @@ userhost_returned (char *from, char **ArgList)
 	}
 	if (thing)
 	{
-	      out_free:new_free (&thing->nick);
-		new_free (&thing->text);
-		new_free ((char **) &thing);
+	      out_free:xfree (&thing->nick);
+		xfree (&thing->text);
+		xfree ((char **) &thing);
 	}
 }
 
@@ -351,7 +352,7 @@ whois_name (char *from, char **ArgList)
 		malloc_strcpy (&whois_stuff->host, host);
 		malloc_strcpy (&whois_stuff->name, name);
 		malloc_strcpy (&whois_stuff->channel, channel);
-		new_free (&whois_stuff->away);
+		xfree (&whois_stuff->away);
 		whois_stuff->oper = 0;
 		whois_stuff->chop = 0;
 		whois_stuff->not_on = 0;
@@ -410,7 +411,7 @@ whowas_name (char *from, char **ArgList)
 		malloc_strcpy (&whois_stuff->host, host);
 		malloc_strcpy (&whois_stuff->name, name);
 		malloc_strcpy (&whois_stuff->channel, channel);
-		new_free (&whois_stuff->away);
+		xfree (&whois_stuff->away);
 		whois_stuff->oper = 0;
 		whois_stuff->chop = 0;
 		whois_stuff->not_on = 1;
@@ -580,10 +581,10 @@ end_of_whois (char *from, char **ArgList)
 			thing = remove_from_whois_queue (from_server);
 			whois_stuff->not_on = 0;
 			thing->func (whois_stuff, thing->nick, thing->text);
-			new_free (&whois_stuff->channels);
-			new_free (&thing->nick);
-			new_free (&thing->text);
-			new_free ((char **) &thing);
+			xfree (&whois_stuff->channels);
+			xfree (&thing->nick);
+			xfree (&thing->text);
+			xfree ((char **) &thing);
 			ignore_whois_crap = 0;
 			return;
 		}
@@ -636,10 +637,10 @@ no_such_nickname (char *from, char **ArgList)
 			thing = remove_from_whois_queue (from_server);
 			whois_stuff->not_on = 0;
 			thing->func (whois_stuff, thing->nick, thing->text);
-			new_free (&whois_stuff->channels);
-			new_free (&thing->nick);
-			new_free (&thing->text);
-			new_free ((char **) &thing);
+			xfree (&whois_stuff->channels);
+			xfree (&thing->nick);
+			xfree (&thing->text);
+			xfree ((char **) &thing);
 			ignore_whois_crap = 0;
 			return;
 		}
@@ -670,10 +671,10 @@ no_such_nickname (char *from, char **ArgList)
 		{
 			/* take it off all together */
 			thing = remove_from_whois_queue (from_server);
-			new_free (&whois_stuff->channels);
-			new_free (&thing->nick);
-			new_free (&thing->text);
-			new_free ((char **) &thing);
+			xfree (&whois_stuff->channels);
+			xfree (&thing->nick);
+			xfree (&thing->text);
+			xfree ((char **) &thing);
 			ignore_whois_crap = 0;
 		}
 		return;
@@ -736,7 +737,7 @@ whois_ignore_msgs (WhoisStuff * stuff, char *nick, char *text)
 
 	if (stuff)
 	{
-		ptr = (char *) new_malloc (strlen (stuff->user) +
+		ptr = (char *) xmalloc (strlen (stuff->user) +
 					   strlen (stuff->host) + 2);
 		strcpy (ptr, stuff->user);
 		strcat (ptr, "@");
@@ -776,7 +777,7 @@ whois_ignore_msgs (WhoisStuff * stuff, char *nick, char *text)
 		else if (get_int_var (SEND_IGNORE_MSG_VAR))
 			send_to_server ("NOTICE %s :%s is ignoring you.",
 				   nick, get_server_nickname (from_server));
-		new_free (&ptr);
+		xfree (&ptr);
 	}
 }
 
@@ -803,7 +804,7 @@ whois_ignore_notices (WhoisStuff * stuff, char *nick, char *text)
 
 	if (stuff)
 	{
-		ptr = (char *) new_malloc (strlen (stuff->user) +
+		ptr = (char *) xmalloc (strlen (stuff->user) +
 					   strlen (stuff->host) + 2);
 		strcpy (ptr, stuff->user);
 		strcat (ptr, "@");
@@ -822,7 +823,7 @@ whois_ignore_notices (WhoisStuff * stuff, char *nick, char *text)
 			set_lastlog_msg_level (level);
 			sed = 0;
 		}
-		new_free (&ptr);
+		xfree (&ptr);
 	}
 }
 
@@ -837,7 +838,7 @@ whois_ignore_invites (WhoisStuff * stuff, char *nick, char *text)
 
 	if (stuff)
 	{
-		ptr = (char *) new_malloc (strlen (stuff->user) +
+		ptr = (char *) xmalloc (strlen (stuff->user) +
 					   strlen (stuff->host) + 2);
 		strcpy (ptr, stuff->user);
 		strcat (ptr, "@");
@@ -860,7 +861,7 @@ whois_ignore_invites (WhoisStuff * stuff, char *nick, char *text)
 		else if (get_int_var (SEND_IGNORE_MSG_VAR))
 			send_to_server ("NOTICE %s :%s is ignoring you.",
 				   nick, get_server_nickname (from_server));
-		new_free (&ptr);
+		xfree (&ptr);
 	}
 }
 
@@ -878,7 +879,7 @@ whois_ignore_walls (WhoisStuff * stuff, char *nick, char *text)
 	message_from (stuff->nick, LOG_WALL);
 	if (stuff)
 	{
-		ptr = (char *) new_malloc (strlen (stuff->user) +
+		ptr = (char *) xmalloc (strlen (stuff->user) +
 					   strlen (stuff->host) + 2);
 		strcpy (ptr, stuff->user);
 		strcat (ptr, "@");
@@ -890,7 +891,7 @@ whois_ignore_walls (WhoisStuff * stuff, char *nick, char *text)
 			if (beep_on_level & LOG_WALL)
 				beep_em (1);
 		}
-		new_free (&ptr);
+		xfree (&ptr);
 	}
 	set_lastlog_msg_level (level);
 }
@@ -962,7 +963,7 @@ typed_add_to_whois_queue (int type, char *nick, void (*func) (WhoisStuff *, char
 
 	if (strchr (nick, '*') == NULL)
 	{
-		new = (WhoisQueue *) new_malloc (sizeof (WhoisQueue));
+		new = (WhoisQueue *) xmalloc (sizeof (WhoisQueue));
 		memset (new, 0, sizeof (WhoisQueue));
 		new->func = func;
 		new->type = type;

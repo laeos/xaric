@@ -1,4 +1,4 @@
-#ident "@(#)window.c 1.10"
+#ident "@(#)window.c 1.11"
 /*
  * window.c: Handles the Main Window stuff for irc.  This includes proper
  * scrolling, saving of screen memory, refreshing, clearing, etc. 
@@ -32,6 +32,7 @@
 #include "misc.h"
 #include "util.h"
 #include "tcommand.h"
+#include "xmalloc.h"
 
 /* Resize relatively or absolutely? */
 #define RESIZE_REL 1
@@ -94,7 +95,7 @@ new_window (void)
 		no_screens = 0;
 	}
 
-	new = (Window *) new_malloc (sizeof (Window));
+	new = (Window *) xmalloc (sizeof (Window));
 
 	tmp = NULL;
 	while (traverse_all_windows (&tmp))
@@ -140,7 +141,7 @@ new_window (void)
 		resize_window_display (new);
 	}
 	else
-		new_free (&new);
+		xfree (&new);
 
 	term_flush ();
 	return (new);
@@ -180,14 +181,14 @@ delete_window (Window * window)
 	if (current_screen->last_window_refnum == window->refnum)
 		current_screen->last_window_refnum = curr_scr_win->refnum;
 
-	new_free (&window->query_nick);
-	new_free (&window->query_host);
-	new_free (&window->query_cmd);
-	new_free (&window->current_channel);
-	new_free (&window->bind_channel);
-	new_free (&window->waiting_channel);
-	new_free (&window->logfile);
-	new_free (&window->name);
+	xfree (&window->query_nick);
+	xfree (&window->query_host);
+	xfree (&window->query_cmd);
+	xfree (&window->current_channel);
+	xfree (&window->bind_channel);
+	xfree (&window->waiting_channel);
+	xfree (&window->logfile);
+	xfree (&window->name);
 
 	/*
 	 * Free off the display
@@ -197,8 +198,8 @@ delete_window (Window * window)
 		while (window->top_of_scrollback)
 		{
 			next = window->top_of_scrollback->next;
-			new_free (&window->top_of_scrollback->line);
-			new_free ((char **) &window->top_of_scrollback);
+			xfree (&window->top_of_scrollback->line);
+			xfree ((char **) &window->top_of_scrollback);
 			window->display_buffer_size--;
 			window->top_of_scrollback = next;
 		}
@@ -222,8 +223,8 @@ delete_window (Window * window)
 		while (window->nicks)
 		{
 			next = window->nicks->next;
-			new_free (&window->nicks->nick);
-			new_free ((char **) &window->nicks);
+			xfree (&window->nicks->nick);
+			xfree ((char **) &window->nicks);
 			window->nicks = next;
 		}
 	}
@@ -236,10 +237,10 @@ delete_window (Window * window)
 	/*
 	 * status lines
 	 */
-	new_free (&window->status_line[0]);
-	new_free (&window->status_line[1]);
+	xfree (&window->status_line[0]);
+	xfree (&window->status_line[1]);
 
-	new_free ((char **) &window);
+	xfree ((char **) &window);
 	window_check_servers ();
 	do_hook (WINDOW_KILL_LIST, "%s", buffer);
 }
@@ -1357,8 +1358,8 @@ update_window_status (Window * window, int refresh)
 		window = curr_scr_win;
 	if (refresh)
 	{
-		new_free (&(window->status_line[0]));
-		new_free (&(window->status_line[1]));
+		xfree (&(window->status_line[0]));
+		xfree (&(window->status_line[1]));
 	}
 	make_status (window);
 }
@@ -1509,15 +1510,15 @@ set_query_nick (char *nick, char *host, char *cmd)
 				*(ptr++) = 0;
 			if ((tmp = (NickList *) remove_from_list ((List **) & (curr_scr_win->nicks), snick)) != NULL)
 			{
-				new_free (&tmp->nick);
-				new_free (&tmp->host);	/* CDE why was this not done */
-				new_free ((char **) &tmp);
+				xfree (&tmp->nick);
+				xfree (&tmp->host);	/* CDE why was this not done */
+				xfree ((char **) &tmp);
 			}
 			snick = ptr;
 		}
-		new_free (&curr_scr_win->query_nick);
-		new_free (&curr_scr_win->query_host);
-		new_free (&curr_scr_win->query_cmd);
+		xfree (&curr_scr_win->query_nick);
+		xfree (&curr_scr_win->query_host);
+		xfree (&curr_scr_win->query_cmd);
 	}
 	if (nick)
 	{
@@ -1530,7 +1531,7 @@ set_query_nick (char *nick, char *host, char *cmd)
 		{
 			if ((ptr = (char *) strchr (nick, ',')) != NULL)
 				*(ptr++) = 0;
-			tmp = (NickList *) new_malloc (sizeof (NickList));
+			tmp = (NickList *) xmalloc (sizeof (NickList));
 			tmp->nick = NULL;
 			malloc_strcpy (&tmp->nick, nick);
 			malloc_strcpy (&tmp->host, host);
@@ -1563,7 +1564,7 @@ is_current_channel (char *channel, int server, int delete)
 			found = 1;
 			if (delete)
 			{
-				new_free (&(tmp->current_channel));
+				xfree (&(tmp->current_channel));
 				tmp->update |= UPDATE_STATUS;
 			}
 		}
@@ -1590,7 +1591,7 @@ set_current_channel_by_refnum (unsigned int refnum, char *channel)
 		if (strcmp (channel, zero_string) == 0)
 			channel = NULL;
 	malloc_strcpy (&tmp->current_channel, channel);
-	new_free (&tmp->waiting_channel);
+	xfree (&tmp->waiting_channel);
 	tmp->update |= UPDATE_STATUS;
 	set_channel_window (tmp, channel, tmp->server);
 	return (channel);
@@ -1665,7 +1666,7 @@ unbind_channel (const char *channel, int server)
 		if (tmp->server == server && tmp->bind_channel
 		    && !my_stricmp (tmp->bind_channel, channel))
 		{
-			new_free (&tmp->bind_channel);
+			xfree (&tmp->bind_channel);
 			/* ARGH! COREDUMPS! */
 			tmp->bind_channel = NULL;
 			return;
@@ -2198,7 +2199,7 @@ window_add (Window * window, char **args, char *usage)
 			if (!find_in_list ((List **) & window->nicks, arg, !USE_WILDCARDS))
 			{
 				say ("Added %s to window name list", arg);
-				new = (NickList *) new_malloc (sizeof (NickList));
+				new = (NickList *) xmalloc (sizeof (NickList));
 				new->nick = m_strdup (arg);
 				add_to_list ((List **) & (window->nicks), (List *) new);
 			}
@@ -2890,7 +2891,7 @@ window_pop (Window * window, char **args, char *usage)
 	{
 		refnum = current_screen->window_stack->refnum;
 		tmp = current_screen->window_stack->next;
-		new_free ((char **) &current_screen->window_stack);
+		xfree ((char **) &current_screen->window_stack);
 		current_screen->window_stack = tmp;
 
 		win = get_window_by_refnum (refnum);
@@ -2937,7 +2938,7 @@ window_push (Window * window, char **args, char *usage)
 {
 	WindowStack *new;
 
-	new = (WindowStack *) new_malloc (sizeof (WindowStack));
+	new = (WindowStack *) xmalloc (sizeof (WindowStack));
 	new->refnum = window->refnum;
 	new->next = current_screen->window_stack;
 	current_screen->window_stack = new;
@@ -2986,8 +2987,8 @@ window_remove (Window * window, char **args, char *usage)
 			if ((new = (NickList *) remove_from_list ((List **) & (window->nicks), arg)))
 			{
 				say ("Removed %s from window name list", new->nick);
-				new_free (&new->nick);
-				new_free ((char **) &new);
+				xfree (&new->nick);
+				xfree ((char **) &new);
 			}
 			else
 				say ("%s is not on the list for this window!", arg);
@@ -3015,7 +3016,7 @@ window_server (Window * window, char **args, char *usage)
 			set_window_server (window->refnum, from_server, 0);
 			window->window_level = LOG_ALL;
 			if (window->current_channel)
-				new_free (&window->current_channel);
+				xfree (&window->current_channel);
 			update_all_status (window, NULL, 0);
 		}
 	}
@@ -3097,7 +3098,7 @@ window_stack (Window * window, char **args, char *usage)
 		else
 		{
 			crap = tmp->next;
-			new_free ((char **) &tmp);
+			xfree ((char **) &tmp);
 			if (last)
 				last->next = crap;
 			else
@@ -3138,7 +3139,7 @@ window_unbind (Window * window, char **args, char *usage)
 	else
 	{
 		say ("Channel %s is no longer bound", window->bind_channel);
-		new_free (&window->bind_channel);
+		xfree (&window->bind_channel);
 	}
 	return window;
 }
@@ -3311,9 +3312,9 @@ delete_display_line (Display * stuff)
 	if (recycle == stuff)
 		ircpanic ("error in delete_display_line");
 	if (recycle)
-		new_free ((char **) &recycle);
+		xfree ((char **) &recycle);
 	recycle = stuff;
-	new_free (&stuff->line);
+	xfree (&stuff->line);
 }
 
 Display *
@@ -3327,7 +3328,7 @@ new_display_line (Display * prev)
 		recycle = NULL;
 	}
 	else
-		stuff = (Display *) new_malloc (sizeof (Display));
+		stuff = (Display *) xmalloc (sizeof (Display));
 
 	stuff->line = NULL;
 	stuff->prev = prev;

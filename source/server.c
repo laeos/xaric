@@ -1,4 +1,4 @@
-#ident "@(#)server.c 1.10"
+#ident "@(#)server.c 1.12"
 /*
  * server.c: Things dealing with server connections, etc. 
  *
@@ -36,6 +36,11 @@
 #include "status.h"
 #include "fset.h"
 #include "util.h"
+#include "xmalloc.h"
+#include "xdebug.h"
+
+/* for XDEBUG */
+#define MODULE_ID	XD_COMM
 
 static void add_to_server_buffer (int, char *);
 static char *set_umode (int du_index);
@@ -120,7 +125,7 @@ close_server (int cs_index, char *message)
 		server_list[i].connected = 0;
 		server_list[i].buffer = NULL;
 		server_list[i].close_serv = -1;
-		new_free (&server_list[i].away);
+		xfree (&server_list[i].away);
 		if (server_list[i].write != -1)
 		{
 			if (message && *message)
@@ -176,7 +181,7 @@ timed_server (void *args)
 		get_connected (atol (p));
 		bitchsay ("Servers exhausted. Restarting. [%d]", ++retry);
 	}
-	new_free (&p);
+	xfree (&p);
 	in_timed_server = 0;
 	return 0;
 }
@@ -320,11 +325,12 @@ do_server (fd_set * rd, fd_set * wr)
 				{
 					last_timeout = 0;
 					parsing_server_index = i;
-					if (x_debug & DEBUG_INBOUND)
-						yell ("[%d] <- [%s]", des, buffer);
+
+					XDEBUG(21, "[%d] <- [%s]", des, buffer);
+
 					server_list[i].last_msg = time (NULL);
 					parse_server (buffer);
-					new_free (&server_list[i].buffer);
+					xfree (&server_list[i].buffer);
 					parsing_server_index = -1;
 					message_from (NULL, LOG_CRAP);
 					break;
@@ -472,7 +478,8 @@ add_to_server_list (char *server, int port, char *password, char *nick, int over
 	if ((from_server = find_in_server_list (server, port)) == -1)
 	{
 		from_server = number_of_servers++;
-		RESIZE (server_list, Server, number_of_servers + 1);
+
+		server_list = xrealloc(server_list, sizeof(Server) * number_of_servers + 1);
 
 		server_list[from_server].name = m_strdup (server);
 		server_list[from_server].read = -1;
@@ -502,14 +509,14 @@ add_to_server_list (char *server, int port, char *password, char *nick, int over
 				if (password && *password)
 					malloc_strcpy (&(server_list[from_server].password), password);
 				else
-					new_free (&(server_list[from_server].password));
+					xfree (&(server_list[from_server].password));
 			}
 			if (nick || !server_list[from_server].d_nickname)
 			{
 				if (nick && *nick)
 					malloc_strcpy (&(server_list[from_server].d_nickname), nick);
 				else
-					new_free (&(server_list[from_server].d_nickname));
+					xfree (&(server_list[from_server].d_nickname));
 			}
 		}
 		if (strlen (server) > strlen (server_list[from_server].name))
@@ -532,23 +539,23 @@ remove_from_server_list (int i)
 	clean_whois_queue ();
 	from_server = old_server;
 
-	new_free (&server_list[i].name);
-	new_free (&server_list[i].itsname);
-	new_free (&server_list[i].password);
-	new_free (&server_list[i].away);
-	new_free (&server_list[i].version_string);
-	new_free (&server_list[i].nickname);
-	new_free (&server_list[i].s_nickname);
-	new_free (&server_list[i].d_nickname);
+	xfree (&server_list[i].name);
+	xfree (&server_list[i].itsname);
+	xfree (&server_list[i].password);
+	xfree (&server_list[i].away);
+	xfree (&server_list[i].version_string);
+	xfree (&server_list[i].nickname);
+	xfree (&server_list[i].s_nickname);
+	xfree (&server_list[i].d_nickname);
 
-	new_free (&server_list[i].whois_stuff.nick);
-	new_free (&server_list[i].whois_stuff.user);
-	new_free (&server_list[i].whois_stuff.host);
-	new_free (&server_list[i].whois_stuff.channel);
-	new_free (&server_list[i].whois_stuff.channels);
-	new_free (&server_list[i].whois_stuff.name);
-	new_free (&server_list[i].whois_stuff.server);
-	new_free (&server_list[i].whois_stuff.server_stuff);
+	xfree (&server_list[i].whois_stuff.nick);
+	xfree (&server_list[i].whois_stuff.user);
+	xfree (&server_list[i].whois_stuff.host);
+	xfree (&server_list[i].whois_stuff.channel);
+	xfree (&server_list[i].whois_stuff.channels);
+	xfree (&server_list[i].whois_stuff.name);
+	xfree (&server_list[i].whois_stuff.server);
+	xfree (&server_list[i].whois_stuff.server_stuff);
 
 	/* 
 	 * this should save a coredump.  If number_of_servers drops
@@ -563,7 +570,8 @@ remove_from_server_list (int i)
 
 	memmove (&server_list[i], &server_list[i + 1], (number_of_servers - i) * sizeof (Server));
 	number_of_servers--;
-	RESIZE (server_list, Server, number_of_servers);
+
+	server_list = xrealloc(server_list, sizeof(Server) * number_of_servers);
 
 	/* update all he structs with server in them */
 	channel_server_delete (i);
@@ -699,10 +707,10 @@ connect_to_server_direct (char *server_name, int port)
 
 	new_des = connect_by_number (server_name, &this_sucks, SERVICE_CLIENT, PROTOCOL_TCP, 0);
 	port = this_sucks;
+	XDEBUG(19, "Descriptor for [%s:%d]: %d", server_name, port, new_des);
+
 	if (new_des < 0)
 	{
-		if (x_debug)
-			say ("new_des is %d", new_des);
 		say ("Unable to connect to port %d of server %s: %s", port,
 		     server_name, errno ? strerror (errno) :
 		     "unknown host");
@@ -895,7 +903,7 @@ read_server_file (char *servers_file)
 	}
 	else
 		some = 1;
-	new_free (&file_path);
+	xfree (&file_path);
 #endif
 	malloc_sprintf (&file_path, "~/%s", servers_file);
 	if ((fp = uzfopen (&file_path, ".")))
@@ -908,7 +916,7 @@ read_server_file (char *servers_file)
 		fclose (fp);
 		some = 0;
 	}
-	new_free (&file_path);
+	xfree (&file_path);
 	window_display = old_window_display;
 	return (some ? 0 : 1);
 }
@@ -1149,7 +1157,7 @@ set_server_away (int ssa_index, char *message)
 		if (server_list[ssa_index].away)
 			away_set--;
 		server_list[ssa_index].awaytime = 0;
-		new_free (&server_list[ssa_index].away);
+		xfree (&server_list[ssa_index].away);
 		if (server_list[ssa_index].connected)
 			send_to_server ("AWAY :");
 	}
@@ -1517,9 +1525,10 @@ send_to_server (const char *format,...)
 		len = strlen (buffer);
 		if (len > (IRCD_BUFFER_SIZE - 2) || len == -1)
 			buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
+
+		XDEBUG(20, "[%d] -> [%s]", des, buffer);
 		strmcat (buffer, "\r\n", IRCD_BUFFER_SIZE);
-		if (x_debug & DEBUG_OUTBOUND)
-			yell ("[%d] -> [%s]", des, buffer);
+
 		if (do_hook (SEND_TO_SERVER_LIST, "%d %d %s", server, des, buffer))
 		{
 			send (des, buffer, strlen (buffer), 0);
@@ -1558,8 +1567,8 @@ my_send_to_server (int server, const char *format,...)
 		if (len > (IRCD_BUFFER_SIZE - 2) || len == -1)
 			buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
 		strmcat (buffer, "\r\n", IRCD_BUFFER_SIZE);
-		if (x_debug & DEBUG_OUTBOUND)
-			yell ("[%d] -> [%s]", des, buffer);
+		XDEBUG(20, "[%d] -> [%s]", des, buffer);
+
 		if (do_hook (SEND_TO_SERVER_LIST, "%d %d %s", server, des, buffer))
 		{
 			send (des, buffer, strlen (buffer), 0);
@@ -1661,8 +1670,8 @@ change_server_nickname (int ssn_index, char *nick)
 				for (i = 0; i < number_of_servers; i++)
 				{
 					malloc_strcpy (&server_list[i].nickname, nickname);
-					new_free (&server_list[i].d_nickname);
-					new_free (&server_list[i].s_nickname);
+					xfree (&server_list[i].d_nickname);
+					xfree (&server_list[i].s_nickname);
 				}
 				user_changing_nickname = 0;
 				return;
@@ -1683,7 +1692,7 @@ accept_server_nickname (int ssn_index, char *nick)
 {
 	malloc_strcpy (&server_list[ssn_index].nickname, nick);
 	malloc_strcpy (&server_list[ssn_index].d_nickname, nick);
-	new_free (&server_list[ssn_index].s_nickname);
+	xfree (&server_list[ssn_index].s_nickname);
 	server_list[ssn_index].fudge_factor = 0;
 
 	if (from_server == primary_server)
@@ -1718,7 +1727,7 @@ fudge_nickname (int servnum)
 	 */
 	if (user_changing_nickname)
 	{
-		new_free (&server_list[from_server].s_nickname);
+		xfree (&server_list[from_server].s_nickname);
 		return;
 	}
 

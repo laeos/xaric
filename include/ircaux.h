@@ -20,20 +20,6 @@
 
 
 
-
-/* malloc wrappers. please use them! */
-
-void *n_malloc(size_t, char *, int);
-void *n_realloc(void **, size_t, char *, int);
-void *n_free(void **, char *, int);
-
-#define new_malloc(x) 	n_malloc(x, __FILE__, __LINE__)
-#define new_free(x) 	n_free((void **)(x), __FILE__, __LINE__)
-#define new_realloc(x,y) n_realloc((x),(y),__FILE__,__LINE__)
-
-#define RESIZE(x, y, z) n_realloc     ((void **)& (x), sizeof(y) * (z), __FILE__, __LINE__)
-
-
 typedef int comp_len_func(char *, char *, int);
 typedef int comp_func(char *, char *);
 

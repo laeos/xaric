@@ -1,4 +1,4 @@
-#ident "@(#)funny.c 1.9"
+#ident "@(#)funny.c 1.10"
 /*
  * funny.c: Well, I put some stuff here and called it funny.  So sue me. 
  *
@@ -31,6 +31,7 @@
 #include "misc.h"
 #include "screen.h"
 #include "fset.h"
+#include "xmalloc.h"
 
 static char *match_str = NULL;
 
@@ -132,10 +133,10 @@ funny_print_widelist (void)
 		put_it ("%s", convert_output_format (get_fset_var (FORMAT_WIDELIST_FSET), "%s %s", update_clock (GET_TIME), buffer1));
 	for (i = 0; i < wl_elements; i++)
 	{
-		new_free (&wide_list[i]->channel);
-		new_free ((char **) &wide_list[i]);
+		xfree (&wide_list[i]->channel);
+		xfree ((char **) &wide_list[i]);
 	}
-	new_free ((char **) &wide_list);
+	xfree ((char **) &wide_list);
 	wl_elements = wl_size = 0;
 }
 
@@ -180,17 +181,17 @@ funny_list (char *from, char **ArgList)
 	{
 		if (wl_elements >= wl_size)
 		{
-			new_list = (WideList **) new_malloc (sizeof (WideList *) *
+			new_list = (WideList **) xmalloc (sizeof (WideList *) *
 							     (wl_size + 50));
 			memset (new_list, 0, sizeof (WideList *) * (wl_size + 50));
 			if (wl_size)
 				memcpy (new_list, wide_list, sizeof (WideList *) * wl_size);
 			wl_size += 50;
-			new_free ((char **) &wide_list);
+			xfree ((char **) &wide_list);
 			wide_list = new_list;
 		}
 		wide_list[wl_elements] = (WideList *)
-			new_malloc (sizeof (WideList));
+			xmalloc (sizeof (WideList));
 		wide_list[wl_elements]->channel = NULL;
 		wide_list[wl_elements]->users = cnt;
 		malloc_strcpy (&wide_list[wl_elements]->channel,
@@ -237,7 +238,7 @@ print_funny_names (char *line)
 				if (get_fset_var (FORMAT_NAMES_BANNER_FSET))
 					malloc_strcpy (&buffer, get_fset_var (FORMAT_NAMES_BANNER_FSET));
 				else
-					new_free (&buffer);
+					xfree (&buffer);
 				count = 0;
 			}
 		}
@@ -245,7 +246,7 @@ print_funny_names (char *line)
 
 		if (buffer)
 			put_it (buffer);
-		new_free (&buffer);
+		xfree (&buffer);
 	}
 }
 
@@ -304,7 +305,7 @@ funny_namreply (char *from, char **Args)
 			default:
 				add_to_channel (channel, nick, from_server, 0, 0, NULL, Args[3], Args[5]);
 			}
-		new_free (&p);
+		xfree (&p);
 		message_from (NULL, LOG_CURRENT);
 		return;
 	}

@@ -18,18 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)Makefile.in 1.9
+# @(#)Makefile.in 1.16
 #
 
 
-.EXPORT_ALL_VARIABLES:
-
-O_OBJS	:=	# Object files, to link together in the final binary
-MX_OBJS	:=	# Each object gets compiled and linked to a single module
-MT_OBJS	:=	# Objects NOT linked but used in modules (for moduels that 
-		# take more then one object file
-M_OBJS	:=	# modules linked from MT_OBJS
-
+.DELETE_ON_ERROR:
 
 # Paths
 srcdir = @srcdir@
@@ -53,9 +46,9 @@ oldincludedir = /usr/include
 
 DESTDIR =
 
-pkgdatadir = $(datadir)/@PACKAGE@
-pkglibdir = $(libdir)/@PACKAGE@
-pkgincludedir = $(includedir)/@PACKAGE@
+pkgdatadir = $(datadir)/xaric
+pkglibdir = $(libdir)/xaric
+pkgincludedir = $(includedir)/xaric
 
 ACLOCAL = @ACLOCAL@
 AUTOCONF = @AUTOCONF@
@@ -66,47 +59,96 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 
-XARIC_VERS = source/xaric_vers.c
+# Where do we install the help files?
+INSTALL_HELP = $(pkgdatadir)/help
+
+XARIC_VERS = source/xversion.c
 
 # Programs
 SHTOOL	:= $(srcdir)/shtool
 RM	:= rm -f
+SED	:= sed
 SHELL	:= @SHELL@
 CC 	:= @CC@
-CFLAGS 	:= @CFLAGS@ @DEFS@ -Iinclude -Isource
+CFLAGS 	:= @CFLAGS@ @DEFS@ -Iinclude 
 CPP 	:= @CPP@
 LDFLAGS := @LDFLAGS@
 LIBS	:= @LIBS@
 
+# Extra stuff we need to have here
+ALLOCA  := @ALLOCA@
+STRTOUL := @STRTOUL@
+SETENV  := @SETENV@
+
+# Find out our version from the xaric version file.
 VERSION=`$(SHTOOL) version -d short $(XARIC_VERS)`
 
+# yes, we're including makefiles not asking them to run.
+# this is so makefiles in directories work. 
+REALLY_INCLUDE := 1
+
 # things that we should ignore when building the distribution tar
-TARIGNORE=config.log,config.cache,config.status,SCCS,BitKeeper,CVS,ChangeSet,\\.cvsignore,\\.[oa]\\$ 
+TARIGNORE=config.log,config.cache,config.status,SCCS,.depend,BitKeeper,CVS,ChangeSet,\\.cvsignore,\\.[oa]\\$ 
 
-# include data from the subdirectories
-include source/module.mk
+# Header files that get generated automagicly
+AUTOHDR= include/xformats_gen.h
 
-MIX_OBJS := $(MX_OBJS:.o.so)
-MIX_OBJS += $(M_OBJS:.o.so)
+# Sections
+SECTIONS = source extra
 
-all:  xaric addon
+# This is the default target, which compiles the xaric binary
+all:  xaric
 
-xaric:	$(O_OBJS) Makefile
-	$(CC) -o xaric $(CFLAGS) $(O_OBJS) $(LIBS)
 
-addon: $(MIX_OBJS)
+# Include the data from the subdirectories
+# Each Makefile in a subdirectory should have:
+#
+#      section-obj = obj1.o obj2.o obj3.o # extra objects, not compiled from .c source
+#      section-src = srcfile.c srcfile3.c 
+#
+include source/Makefile
+include extra/Makefile
 
-install-xaric:
+# and our dependancy info
+-include .depend
+
+# Figure out ...
+# ... what source files we have
+O_SRC = $(sort $(foreach i, $(patsubst %,%-src, $(SECTIONS)), $($(i))) )
+
+# ... what object files we have
+O_EXTRA = $(sort $(foreach i, $(patsubst %,%-obj, $(SECTIONS)), $($(i))))
+
+# ... what we should depend on
+O_OBJ = $(O_SRC:.c=.o) $(O_EXTRA)
+
+# Build xaric!
+xaric: Makefile $(AUTOHDR) $(O_OBJ)
+	$(CC) -o xaric $(CFLAGS) $(O_OBJ) $(LIBS)
+
+dep: $(O_SRC)
+	@touch $(AUTOHDR) # so it works ...
+	$(CC) $(CFLAGS) $(INCLUDES) -MM $(O_SRC) | $(SED) -e "s/\(^[^: ]\+\): \([^. ]\+\).c/\2.o: \2.c/"  > .depend
+	@rm -f $(AUTOHDR)
+
+install: installxaric installhelp installman
+	@echo "run 'make installdata' if you want the default datafiles installed"
+
+installxaric:
 	$(SHTOOL) mkdir -p $(bindir)
 	$(SHTOOL) install -c xaric $(bindir)
 
-install-addon:
-	$(SHTOOL) mkdir -p $(sharedstatedir)/addons
-	@for i in $(srcdir)/modules/*; do \
-		echo "$(SHTOOL) install -c $$i $(sharedstatedir)/addons"; \
-		$(SHTOOL) install -c $$i $(sharedstatedir)/addons; \
-	done
+installhelp:
+	$(SHTOOL) mkdir -p $(INSTALL_HELP)
+	cd help; tar -cf - . | ( cd $(INSTALL_HELP); tar -xf - )
 
+installman:
+	cd doc; for i in xaric.1; do $(SHTOOL) install -c $i $(mandir); done
+
+installdata:
+	cd doc; for i in servers; do $(SHTOOL) install -c $i $(pkgdatadir); done
+ 
+# rebuild makefile and configure
 ${srcdir}/configure: configure.in aclocal.m4 acinclude.m4
 	cd ${srcdir} && $(AUTOCONF)
 
@@ -126,35 +168,54 @@ Makefile: Makefile.in config.status
 config.status: configure
 	./config.status --recheck
 
+
+# generate array indexes automagicly
+
+
+
+
+include/xformats_gen.h: source/fset.c
+	cat source/fset.c | $(SED) -n -e "/\*--start--\*/,/\*--end--\*/ { s/.*\"\([^\"]\+\)\".*/\1_FSET,/; s/\/\*[^*]*\*\///; p; }" > include/xformats_gen.h
+
+# include/variables_gen.h: engine/variables.c
+#      cat engine/variables.c | $(SED) -n -e "/\*--start--\*/,/\*--end--\*/ { s/.*\"\([^\"]\+\)\".*/\1_VAR,/; s/\/\*[^*]*\*\///; p; }" > include/variables_gen.h
+
+
 clean:
-	$(RM) $(O_OBJS) $(MX_OBJS) $(MT_OBJS)
+	$(RM) $(O_OBJ)
 
 distclean: clean
-	$(RM) Makefile config.status config.log include/config.h 
-	$(RM) config.cache modules/*.so $(M_OBJS)
+	$(RM) Makefile config.status config.log include/config.h .depend include/stamp-h
+	$(RM) config.cache $(AUTOHDR)
 	$(RM) xaric
+
+mtclean: distclean
+	$(RM) aclocal.m4 configure include/config.h.in
 
 dist:
 	@echo "Building distribution for Xaric v$(VERSION)"
 	@$(RM) include/config.h # sorta broken but i can't seem to make it work in the ignore string :(
 	@$(SHTOOL) tarball -o xaric-$(VERSION).tar.gz -c 'gzip -9' -e '$(TARIGNORE)' .
+	@/usr/bin/md5sum xaric-$(VERSION).tar.gz > xaric-$(VERSION).tar.gz.md5
 	@echo "Done."
 
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
-
 .o.so:
 	$(LD) -shared -o $@ $<
 
 update-tools:
+	@if [ ! -w shtool ]; then echo "Maybe you should check tools out first?"; exit 1; fi
 	@$(RM) shtool
 	$(MAKE) shtool
 
 shtool:
 	shtoolize -o shtool echo version mkdir install tarball
 
-newversion:
+
+# Targets to update xaric version file.
+release:
 	@$(SHTOOL) version -lc -n xaric -p XARIC  -iv $(XARIC_VERS)
 revision:
 	@$(SHTOOL) version -lc -n xaric -p XARIC  -ir $(XARIC_VERS)

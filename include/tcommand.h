@@ -35,7 +35,6 @@ void cmd_orig_nick(struct command *cmd, char *args);	/* cmd_orignick.c */
 void cmd_scan(struct command *cmd, char *args);		/* cmd_scan.c */
 void cmd_who(struct command *cmd, char *args);		/* cmd_who.c */
 void cmd_chat(struct command *cmd, char *args);		/* dcc.c */
-void cmd_debug(struct command *cmd, char *args);	/* debug.c */
 void cmd_exec(struct command *cmd, char *args);		/* exee.c */
 void cmd_no_flood(struct command *cmd, char *args);	/* flood.c */
 void cmd_show_hash(struct command *cmd, char *args);	/* hash.c */

@@ -1,4 +1,4 @@
-#ident "@(#)expr.c 1.1"
+#ident "@(#)expr.c 1.3"
 /*
  * This file is a combination of what was left of alias.c and expr.c
  *
@@ -33,8 +33,12 @@
 #include "config.h"
 #endif
 
-#include <stdio.h>
-#include <sys/stat.h>
+#ifdef HAVE_STDIO_H
+#  include <stdio.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#  include <sys/stat.h>
+#endif
 
 
 #include "irc.h"
@@ -46,6 +50,11 @@
 #include "fset.h"
 #include "input.h"
 #include "util.h"
+#include "xmalloc.h"
+#include "xdebug.h"
+
+/* for XDEBUG */
+#define MODULE_ID 	XD_EXPR
 
 
 #define LEFT_BRACE '{'
@@ -55,7 +64,6 @@
 #define LEFT_PAREN '('
 #define RIGHT_PAREN ')'
 #define DOUBLE_QUOTE '"'
-
 
 
 /* alias_illegals: characters that are illegal in alias names */
@@ -79,7 +87,7 @@ get_variable_with_args (char *str, char *args, int *args_flag)
 
 	if ((strlen (str) == 1) && (ret = built_in_alias (*str)))
 	{
-		new_free (&name);
+		xfree (&name);
 		return ret;
 	}
 	else if ((ret = make_string_var (str)))
@@ -89,7 +97,7 @@ get_variable_with_args (char *str, char *args, int *args_flag)
 	else
 		ret = getenv (str);
 
-	new_free (&name);
+	xfree (&name);
 	return m_strdup (ret);
 }
 
@@ -172,7 +180,7 @@ expand_alias (char *string, char *args, int *args_flag, char **more_text)
 				}
 				stuff = alias_special_char (&buffer, ptr, args, quote_str, args_flag);
 				if (quote_str)
-					new_free (&quote_str);
+					xfree (&quote_str);
 				ptr = stuff;
 				break;
 			}
@@ -227,9 +235,9 @@ expand_alias (char *string, char *args, int *args_flag, char **more_text)
 	if (stuff)
 		m_strcat_ues (&buffer, stuff, unescape);
 
-	new_free (&free_stuff);
-	if (get_int_var (DEBUG_VAR) & DEBUG_EXPANSIONS)
-		yell ("Expanded [%s] to [%s]", string, buffer);
+	xfree (&free_stuff);
+
+	XDEBUG(1, "expanded [%s] to [%s]", string, buffer);
 
 	return buffer;
 }
@@ -286,8 +294,8 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 			tmp = expand_alias (tmp, args, args_flag, NULL);
 			alias_special_char (&sub_buffer, tmp, args, quote_em, args_flag);
 			TruncateAndQuote (buffer, sub_buffer, length, quote_em, pad_char);
-			new_free (&sub_buffer);
-			new_free (&tmp);
+			xfree (&sub_buffer);
+			xfree (&tmp);
 			*args_flag = 1;
 			return (ptr);
 		}
@@ -298,7 +306,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 			if ((tmp = do_history (tmp, empty_string)) != NULL)
 			{
 				TruncateAndQuote (buffer, tmp, length, quote_em, pad_char);
-				new_free (&tmp);
+				xfree (&tmp);
 			}
 			return (ptr);
 		}
@@ -309,7 +317,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 			alias_string = (char *) 0;
 			get_line (tmp, 0, do_alias_string);
 			TruncateAndQuote (buffer, alias_string, length, quote_em, pad_char);
-			new_free (&alias_string);
+			xfree (&alias_string);
 			return (ptr);
 		}
 	case '*':
@@ -343,8 +351,8 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				val = m_strdup (ltoa (strlen (sub_buffer)));
 
 			TruncateAndQuote (buffer, val, length, quote_em, pad_char);
-			new_free (&val);
-			new_free (&sub_buffer);
+			xfree (&val);
+			xfree (&sub_buffer);
 
 			if (rest)
 				*rest = c2;
@@ -408,7 +416,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 					tmp2 = extract2 (args, lwer, uper);
 
 				TruncateAndQuote (buffer, tmp2, length, quote_em, pad_char);
-				new_free (&tmp2);
+				xfree (&tmp2);
 				return (ptr ? ptr : empty_string);
 			}
 			else
@@ -478,7 +486,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				if (tmp)
 				{
 					TruncateAndQuote (buffer, tmp, length, quote_em, pad_char);
-					new_free (&tmp);
+					xfree (&tmp);
 				}
 
 				if (rest)

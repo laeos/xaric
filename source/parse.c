@@ -1,4 +1,4 @@
-#ident "@(#)parse.c 1.9"
+#ident "@(#)parse.c 1.10"
 /*
  * parse.c: handles messages from the server.   Believe it or not.  I
  * certainly wouldn't if I were you. 
@@ -46,6 +46,8 @@
 #include "fset.h"
 #include "util.h"
 #include "tcommand.h"
+#include "xmalloc.h"
+
 
 #define space ' '
 static void strip_modes (char *, char *, char *);
@@ -137,10 +139,10 @@ check_auto_reply (char *str)
 			}
 		}
 	}
-	new_free (&q);
+	xfree (&q);
 	return 0;
       found_auto:
-	new_free (&q);
+	xfree (&q);
 	return 1;
 }
 
@@ -792,7 +794,7 @@ p_channel (char *from, char **ArgList)
 	set_input_prompt (curr_scr_win, get_string_var (INPUT_PROMPT_VAR), 0);
 	update_all_status (curr_scr_win, NULL, 0);
 	notify_mark (from, user, host, 1);
-	new_free (&user);
+	xfree (&user);
 }
 
 static void 
@@ -946,7 +948,7 @@ p_nick (char *from, char **ArgList)
 
 		notify_mark (from, user, host, 0);
 		notify_mark (line, user, host, 1);
-		new_free (&user);
+		xfree (&user);
 	}
 }
 
@@ -1094,7 +1096,7 @@ strip_modes (char *from, char *channel, char *line)
 		}
 	}
 #ifndef __GNUC__
-	new_free (&free_copy);
+	xfree (&free_copy);
 #endif
 }
 
@@ -1128,7 +1130,7 @@ p_kick (char *from, char **ArgList)
 				send_to_server ("JOIN %s %s", channel, chankey ? chankey : empty_string);
 				add_to_join_list (channel, from_server, window ? window->refnum : 0);
 			}
-			new_free (&chankey);
+			xfree (&chankey);
 			remove_channel (channel, from_server);
 			update_all_status (curr_scr_win, NULL, 0);
 			update_input (UPDATE_ALL);

@@ -1,4 +1,4 @@
-#ident "@(#)status.c 1.11"
+#ident "@(#)status.c 1.12"
 /*
  * status.c: handles the status line updating, etc for IRCII 
  *
@@ -33,6 +33,7 @@
 #include "fset.h"
 #include "util.h"
 #include "xaric_version.h"
+#include "xmalloc.h"
 
 #define MY_BUFFER 150
 
@@ -223,7 +224,7 @@ convert_format (char *format, int k)
 				switch (*(ptr++))
 				{
 				case '&':
-					new_free (&dcccount_format);
+					xfree (&dcccount_format);
 					status_func[k][(*cp)++] = status_dcccount;
 					dcccount_format = convert_sub_format (get_string_var (STATUS_DCCCOUNT_VAR), '&');
 					break;
@@ -237,7 +238,7 @@ convert_format (char *format, int k)
 					break;
 
 				case '^':
-					new_free (&msgcount_format);
+					xfree (&msgcount_format);
 					msgcount_format = convert_sub_format (get_string_var (STATUS_MSGCOUNT_VAR), '^');
 					strmcat (buffer, "%s", BIG_BUFFER_SIZE);
 					status_func[k][(*cp)++] = status_msgcount;
@@ -248,17 +249,17 @@ convert_format (char *format, int k)
 					break;
 
 				case '+':
-					new_free (&mode_format);
+					xfree (&mode_format);
 					mode_format = convert_sub_format (get_string_var (STATUS_MODE_VAR), '+');
 					status_func[k][(*cp)++] = status_mode;
 					break;
 				case '-':
-					new_free (&topic_format);
+					xfree (&topic_format);
 					topic_format = convert_sub_format (get_string_var (STATUS_TOPIC_VAR), '-');
 					status_func[k][(*cp)++] = status_topic;
 					break;
 				case 'L':
-					new_free (&umode_format);
+					xfree (&umode_format);
 					umode_format = convert_sub_format (get_string_var (STATUS_UMODE_VAR), '#');
 					status_func[k][(*cp)++] = status_umode;
 					break;
@@ -273,12 +274,12 @@ convert_format (char *format, int k)
 					status_func[k][(*cp)++] = status_away;
 					break;
 				case 'B':
-					new_free (&hold_lines_format);
+					xfree (&hold_lines_format);
 					hold_lines_format = convert_sub_format (get_string_var (STATUS_HOLD_LINES_VAR), 'B');
 					status_func[k][(*cp)++] = status_hold_lines;
 					break;
 				case 'C':
-					new_free (&channel_format);
+					xfree (&channel_format);
 					channel_format = convert_sub_format (get_string_var (STATUS_CHANNEL_VAR), 'C');
 					status_func[k][(*cp)++] = status_channel;
 					break;
@@ -288,7 +289,7 @@ convert_format (char *format, int k)
 				case 'E':
 					break;
 				case 'F':
-					new_free (&notify_format);
+					xfree (&notify_format);
 					notify_format = convert_sub_format (get_string_var (STATUS_NOTIFY_VAR), 'F');
 					status_func[k][(*cp)++] = status_notify_windows;
 					break;
@@ -301,7 +302,7 @@ convert_format (char *format, int k)
 					status_func[k][(*cp)++] = status_insert_mode;
 					break;
 				case '#':
-					new_free (&status_lag_format);
+					xfree (&status_lag_format);
 					status_lag_format = convert_sub_format (get_string_var (STATUS_LAG_VAR), 'L');
 					status_func[k][(*cp)++] = status_lag;
 					break;
@@ -315,7 +316,7 @@ convert_format (char *format, int k)
 					status_func[k][(*cp)++] = status_position;
 					break;
 				case 'Q':
-					new_free (&query_format);
+					xfree (&query_format);
 					query_format = convert_sub_format (get_string_var (STATUS_QUERY_VAR), 'Q');
 					status_func[k][(*cp)++] = status_query_nick;
 					break;
@@ -323,12 +324,12 @@ convert_format (char *format, int k)
 					status_func[k][(*cp)++] = status_refnum;
 					break;
 				case 'S':
-					new_free (&server_format);
+					xfree (&server_format);
 					server_format = convert_sub_format (get_string_var (STATUS_SERVER_VAR), 'S');
 					status_func[k][(*cp)++] = status_server;
 					break;
 				case 'T':
-					new_free (&clock_format);
+					xfree (&clock_format);
 					clock_format = convert_sub_format (get_string_var (STATUS_CLOCK_VAR), 'T');
 					status_func[k][(*cp)++] = status_clock;
 					break;
@@ -465,7 +466,7 @@ build_status (Window * win, char *format, int unused)
 
 	for (k = 0; k < 2; k++)
 	{
-		new_free (&(status_format[k]));
+		xfree (&(status_format[k]));
 		func_cnt[k] = 0;
 		for (i = 0; i < MAX_FUNCTIONS; i++)
 			status_func[k][i] = status_null_function;
@@ -885,7 +886,7 @@ status_lag (Window * window)
 		{
 			p = m_sprintf ("%2d", get_server_lag (window->server));
 			snprintf (my_buffer, MY_BUFFER, status_lag_format, p);
-			new_free (&p);
+			xfree (&p);
 		}
 		else
 			snprintf (my_buffer, MY_BUFFER, status_lag_format, "??");

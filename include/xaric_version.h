@@ -22,12 +22,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * @(#)xaric_version.h 1.3
+ * @(#)xaric_version.h 1.6
  *
  */
 
 #define _AS_HEADER
-#include "xaric_vers.c"
+#include "../source/xversion.c"
 #undef _AS_HEADER
+
+/* In xintro.h, this has the copyright info in it */
+void display_intro (void);
 
 #endif /* xaric_version_h__ */

@@ -1,4 +1,4 @@
-#ident "@(#)cmd_orignick.c 1.8"
+#ident "@(#)cmd_orignick.c 1.9"
 /*
  * cmd_hostname.c : virtual host support 
  *
@@ -41,6 +41,7 @@
 #include "output.h"
 #include "tcommand.h"
 #include "util.h"
+#include "xmalloc.h"
 
 
 /* The nick we should have */
@@ -59,7 +60,7 @@ change_orig_nick(void)
 {
 	change_server_nickname(from_server, org_nick);
 	bitchsay("Regained nick [%s]", org_nick);
-	new_free(&org_nick);
+	xfree(&org_nick);
 	update_all_status(curr_scr_win, NULL, 0);
 	update_input(UPDATE_ALL);
 }
@@ -106,7 +107,7 @@ void cmd_orig_nick(struct command *cmd, char *args)
 			bitchsay("Not trying to gain a nick");
 		else {
 			bitchsay("Removing gain nick [%s]", org_nick);
-			new_free(&org_nick);
+			xfree(&org_nick);
 		}
 	}
 	else {

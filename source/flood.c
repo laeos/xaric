@@ -1,4 +1,4 @@
-#ident "@(#)flood.c 1.8"
+#ident "@(#)flood.c 1.10"
 /*
  * flood.c: handle channel flooding. 
  *
@@ -32,6 +32,7 @@
 #include "hash2.h"
 #include "fset.h"
 #include "tcommand.h"
+#include "xmalloc.h"
 
 
 static char *ignore_types[] =
@@ -111,8 +112,8 @@ cmd_no_flood (struct command *cmd, char *args)
 		{
 			if ((nptr = find_name_in_genericlist (nick + 1, no_flood_list, FLOOD_HASHSIZE, 1)))
 			{
-				new_free (&nptr->name);
-				new_free ((char **) &nptr);
+				xfree (&nptr->name);
+				xfree ((char **) &nptr);
 				bitchsay ("%s removed from no-flood list", nick);
 			}
 			else
@@ -281,7 +282,6 @@ is_other_flood (ChannelList * channel, NickList * tmpnick, int type, int *t_floo
 	int flood_rate = 0, flood_count = 0;
 
 	flood_time = time (NULL);
-	context;
 
 	if (!channel || !tmpnick)
 		return 0;
@@ -533,8 +533,8 @@ remove_oldest_flood_hashlist (HashEntry * list, time_t timet, int count)
 				if ((ptr->start + timet) <= t)
 				{
 					ptr = find_name_in_floodlist (ptr->name, flood_list, FLOOD_HASHSIZE, 1);
-					new_free (&(ptr->channel));
-					new_free ((char **) &ptr);
+					xfree (&(ptr->channel));
+					xfree ((char **) &ptr);
 					total++;
 					ptr = (Flooding *) (list + x)->list;
 				}
@@ -555,8 +555,8 @@ remove_oldest_flood_hashlist (HashEntry * list, time_t timet, int count)
 			{
 				ptr = find_name_in_floodlist (ptr->name, flood_list, FLOOD_HASHSIZE, 1);
 				next = ptr->next;
-				new_free (&(ptr->channel));
-				new_free ((char **) &ptr);
+				xfree (&(ptr->channel));
+				xfree ((char **) &ptr);
 				total++;
 				count--;
 				ptr = (Flooding *) (list + x)->list;

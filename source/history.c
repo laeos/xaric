@@ -1,4 +1,4 @@
-#ident "@(#)history.c 1.8"
+#ident "@(#)history.c 1.9"
 /*
  * history.c: stuff to handle command line history 
  *
@@ -24,6 +24,7 @@
 #include "input.h"
 #include "tcommand.h"
 #include "util.h"
+#include "xmalloc.h"
 
 static char *history_match (char *);
 static void add_to_history_list (int, char *);
@@ -76,7 +77,7 @@ history_match (char *pat)
 		malloc_strcpy (&match_str, pat);
 	else
 	{
-		match_str = (char *) new_malloc (strlen (pat) + 2);
+		match_str = (char *) xmalloc (strlen (pat) + 2);
 		strcpy (match_str, pat);
 		strcat (match_str, "*");
 	}
@@ -94,14 +95,14 @@ history_match (char *pat)
 
 			if (wild_match (match_str, ptr))
 			{
-				new_free (&match_str);
+				xfree (&match_str);
 				last_dir = PREV;
 				return (tmp->stuff);
 			}
 		}
 	}
 	last_dir = -1;
-	new_free (&match_str);
+	xfree (&match_str);
 	return NULL;
 }
 
@@ -135,14 +136,14 @@ add_to_history_list (int cnt, char *stuff)
 		new = command_history_tail;
 		command_history_tail = command_history_tail->prev;
 		command_history_tail->next = NULL;
-		new_free (&new->stuff);
-		new_free ((char **) &new);
+		xfree (&new->stuff);
+		xfree ((char **) &new);
 		if (command_history_tail == NULL)
 			command_history_head = NULL;
 	}
 	else
 		hist_size++;
-	new = (History *) new_malloc (sizeof (History));
+	new = (History *) xmalloc (sizeof (History));
 	new->stuff = NULL;
 	new->number = cnt;
 	new->next = command_history_head;
@@ -175,8 +176,8 @@ set_history_size (Window * win, char *unused, int size)
 		{
 			ptr = command_history_tail;
 			command_history_tail = ptr->prev;
-			new_free (&(ptr->stuff));
-			new_free ((char **) &ptr);
+			xfree (&(ptr->stuff));
+			xfree ((char **) &ptr);
 		}
 		if (command_history_tail == NULL)
 			command_history_head = NULL;

@@ -1,4 +1,4 @@
-#ident "@(#)functions.c 1.13"
+#ident "@(#)functions.c 1.15"
 /*
  * functions.c -- Built-in functions for ircII
  *
@@ -16,7 +16,6 @@
 #include "irc.h"
 #include "dcc.h"
 #include "commands.h"
-#include "files.h"
 #include "history.h"
 #include "hook.h"
 #include "input.h"
@@ -39,6 +38,7 @@
 #include "expr.h"
 #include "util.h"
 #include "xaric_version.h"
+#include "xmalloc.h"
 
 #include <sys/stat.h>
 
@@ -255,7 +255,7 @@ alias_uptime (void)
 static char *
 alias_currdir (void)
 {
-	char *tmp = (char *) new_malloc (MAXPATHLEN + 1);
+	char *tmp = (char *) xmalloc (MAXPATHLEN + 1);
 	return getcwd (tmp, MAXPATHLEN);
 }
 

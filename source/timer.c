@@ -1,4 +1,4 @@
-#ident "@(#)timer.c 1.8"
+#ident "@(#)timer.c 1.9"
 /*
  * timer.c -- handles timers in ircII
  * Copyright 1993, 1996 Matthew Green
@@ -27,6 +27,7 @@
 #include "vars.h"
 #include "fset.h"
 #include "tcommand.h"
+#include "xmalloc.h"
 
 static void show_timer (char *command);
 void delete_all_timers (void);
@@ -172,10 +173,10 @@ ExecuteTimers (void)
 		{
 			if (!current->callback)
 			{
-				new_free ((char **) &current->command);
-				new_free ((char **) &current->subargs);
+				xfree ((char **) &current->command);
+				xfree ((char **) &current->subargs);
 			}
-			new_free ((char **) &current);
+			xfree ((char **) &current);
 		}
 	}
 	parsingtimer = 0;
@@ -291,10 +292,10 @@ delete_timer (char *ref)
 				prev->next = tmp->next;
 			if (!tmp->callback)
 			{
-				new_free ((char **) &tmp->command);
-				new_free ((char **) &tmp->subargs);
+				xfree ((char **) &tmp->command);
+				xfree ((char **) &tmp->subargs);
 			}
-			new_free ((char **) &tmp);
+			xfree ((char **) &tmp);
 			return 0;
 		}
 	}
@@ -340,7 +341,7 @@ add_timer (char *refnum_want, long when, long events, int (callback) (void *), c
 
 	if (when == 0)
 		return NULL;
-	ntimer = (TimerList *) new_malloc (sizeof (TimerList));
+	ntimer = (TimerList *) xmalloc (sizeof (TimerList));
 	ntimer->in_on_who = in_on_who;
 	ntimer->time = time (NULL) + when;
 	ntimer->interval = when;
@@ -348,7 +349,7 @@ add_timer (char *refnum_want, long when, long events, int (callback) (void *), c
 	if (create_timer_ref (refnum_want, refnum_got) == -1)
 	{
 		say ("TIMER: Refnum %s already exists", refnum_want);
-		new_free ((char **) &ntimer);
+		xfree ((char **) &ntimer);
 		return NULL;
 	}
 

@@ -38,25 +38,6 @@
 #define __N    __attribute__ ((noreturn))
 #endif
 
-#if defined (__GNUC__) && !defined(HAVE_ALLOCA_H)
-#  ifndef HAVE_ALLOCA_H
-#    undef alloca
-#    define alloca __builtin_alloca
-#  endif
-#else
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  ifdef _AIX
- #pragma alloca
-#  else
-#   ifndef alloca
-char *alloca();
-#   endif
-#  endif
-# endif
-#endif
-
 
 # include <errno.h>
 extern	int	errno;

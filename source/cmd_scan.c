@@ -1,4 +1,4 @@
-#ident "@(#)cmd_scan.c 1.10"
+#ident "@(#)cmd_scan.c 1.11"
 /*
  * cmd_hostname.c : the /scan command
  *
@@ -39,6 +39,7 @@
 #include "tcommand.h"
 #include "fset.h"
 #include "util.h"
+#include "xmalloc.h"
 
 
 void
@@ -138,7 +139,7 @@ cmd_scan (struct command *cmd, char *args)
 					put_it ("%s%s", convert_output_format (get_fset_var (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
 				else
 					put_it (buffer);
-				new_free (&buffer);
+				xfree (&buffer);
 				count = 0;
 			}
 		}
@@ -151,7 +152,7 @@ cmd_scan (struct command *cmd, char *args)
 		}
 		if (get_fset_var (FORMAT_NAMES_FOOTER_FSET))
 			put_it ("%s", convert_output_format (get_fset_var (FORMAT_NAMES_FOOTER_FSET), NULL, NULL));
-		new_free (&buffer);
+		xfree (&buffer);
 	}
 	clear_sorted_nicklist (&snick);
 }

@@ -1,0 +1,26 @@
+#
+# debug values and modules
+#
+#
+
+
+Module		Switches	Description
+--------------------------------------------
+
+
+EXPR				Expression handling
+			1	Print expanded result
+
+COMM				Low level communication 
+			5	Calls to io()
+			19	New conneciton information
+			20	All outbound
+			21	All inbound
+
+CMD				User commands
+			1	Every command we execute
+
+
+
+TST				tst routines used for lots of things
+			15	tst_build

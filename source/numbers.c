@@ -40,6 +40,7 @@
 #include "timer.h"
 #include "fset.h"
 #include "util.h"
+#include "xmalloc.h"
 
 static void channel_topic (char *, char **, int);
 static void not_valid_channel (char *, char **);
@@ -83,8 +84,6 @@ check_sync (int comm, char *channel, char *nick, char *whom, char *bantime, Chan
 	ChannelList *tmp = NULL;
 	BanList *new;
 
-	context;
-
 	if (!chan)
 		if (!(tmp = lookup_channel (channel, from_server, CHAN_NOUNLINK)))
 			return -1;	/* channel lookup problem */
@@ -100,7 +99,7 @@ check_sync (int comm, char *channel, char *nick, char *whom, char *bantime, Chan
 		{
 			if (tmp)
 			{
-				new = (BanList *) new_malloc (sizeof (BanList));
+				new = (BanList *) xmalloc (sizeof (BanList));
 				malloc_strcpy (&new->ban, nick);
 				if (bantime)
 					new->time = strtoul (bantime, NULL, 10);
@@ -230,7 +229,6 @@ check_server_sync (char *from, char **ArgList)
 {
 	static char *desync = NULL;
 
-	context;
 	if (!desync || (desync && !match (desync, from)))
 	{
 		if (!match (from, get_server_name (from_server)))
@@ -256,7 +254,6 @@ display_msg (char *from, char **ArgList)
 	char *rest;
 	int drem;
 
-	context;
 	rest = PasteArgs (ArgList, 0);
 	if (from && (my_strnicmp (get_server_itsname (from_server), from,
 			   strlen (get_server_itsname (from_server))) == 0))
@@ -283,7 +280,6 @@ channel_topic (char *from, char **ArgList, int what)
 	char *topic, *channel;
 	ChannelList *chan;
 
-	context;
 	if (ArgList[1] && is_channel (ArgList[0]))
 	{
 		channel = ArgList[0];
@@ -313,7 +309,6 @@ not_valid_channel (char *from, char **ArgList)
 	char *channel;
 	char *s;
 
-	context;
 	if (!(channel = ArgList[0]) || !ArgList[1])
 		return;
 	PasteArgs (ArgList, 1);
@@ -339,7 +334,6 @@ cannot_join_channel (char *from, char **ArgList)
 	char buffer[BIG_BUFFER_SIZE + 1];
 	char *f = NULL;
 	char *chan;
-	context;
 
 	if (ArgList[0])
 		chan = ArgList[0];
@@ -533,7 +527,6 @@ numbered_command (char *from, int comm, char **ArgList)
 	char none_of_these = 0;
 	int flag, lastlog_level;
 
-	context;
 	if (!ArgList[1] || !from || !*from)
 		return;
 
@@ -698,7 +691,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			}
 			else
 				got_info (chan, from_server, GOTNAMES);
-			new_free (&tmp);
+			xfree (&tmp);
 		}
 		break;
 
@@ -987,7 +980,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			for (i = len = 0; ArgList[i]; len += strlen (ArgList[i++]))
 				;
 			len += (i - 1);
-			ArgSpace = new_malloc (len + 1);
+			ArgSpace = xmalloc (len + 1);
 			ArgSpace[0] = '\0';
 			/* this is cheating */
 
@@ -1003,14 +996,14 @@ numbered_command (char *from, int comm, char **ArgList)
 				message_from (ArgList[0], LOG_CRAP);
 			if (!do_hook (current_numeric, "%s %s", from, ArgSpace))
 			{
-				new_free (&ArgSpace);
+				xfree (&ArgSpace);
 				if (do_message_from)
 					message_from (NULL, lastlog_level);
 				return;
 			}
 			if (do_message_from)
 				message_from (NULL, lastlog_level);
-			new_free (&ArgSpace);
+			xfree (&ArgSpace);
 			none_of_these = 1;
 		}
 	}

@@ -56,6 +56,7 @@
 #include "hash2.h"
 #include "util.h"
 #include "fset.h"
+#include "xmalloc.h"
 
 
 char *alias_special_char (char **, char *, char *, char *, int *);
@@ -117,7 +118,6 @@ convert_time (time_t ltime)
 	time_t days = 0, hours = 0, minutes = 0, seconds = 0;
 	static char buffer[100];
 
-	context;
 	*buffer = '\0';
 	seconds = ltime % 60;
 	ltime = (ltime - seconds) / 60;
@@ -133,7 +133,7 @@ int
 check_serverlag (void *args)
 {
 	char *servern = (char *) args;
-	context;
+
 	if (servern && *servern)
 	{
 		int i;
@@ -161,7 +161,7 @@ timer_unban (void *args)
 	char *ban;
 	char *serv;
 	int server = from_server;
-	context;
+
 	serv = next_arg (p, &p);
 	if (my_atol (serv) != server)
 		server = my_atol (serv);
@@ -171,7 +171,7 @@ timer_unban (void *args)
 	ban = next_arg (p, &p);
 	if ((chan = (ChannelList *) find_in_list ((List **) & server_list[server].chan_list, channel, 0)) && ban_is_on_channel (ban, chan))
 		my_send_to_server (server, "MODE %s -b %s", channel, ban);
-	new_free (&serv);
+	xfree (&serv);
 	return 0;
 }
 
@@ -369,7 +369,7 @@ check_split (char *nick, char *reason, char *chan)
 	char *bogus = get_string_var (FAKE_SPLIT_PATS_VAR);
 	char *Reason = m_strdup (reason);
 	char *tmp;
-	context;
+
 	tmp = Reason;
 	if (word_count (Reason) > 3)
 		goto fail_split;
@@ -392,17 +392,17 @@ check_split (char *nick, char *reason, char *chan)
 			{
 				if (match (b_check, host1) || match (b_check, host2))
 				{
-					new_free (&temp);
+					xfree (&temp);
 					goto fail_split;
 				}
 			}
-			new_free (&temp);
+			xfree (&temp);
 		}
-		new_free (&tmp);
+		xfree (&tmp);
 		return 1;
 	}
       fail_split:
-	new_free (&tmp);
+	xfree (&tmp);
 	return 0;
 }
 
@@ -410,13 +410,13 @@ void
 clear_array (NickTab ** tmp)
 {
 	NickTab *t, *q;
-	context;
+
 	for (t = *tmp; t;)
 	{
 		q = t->next;
-		new_free (&t->nick);
-		new_free (&t->type);
-		new_free ((char **) &t);
+		xfree (&t->nick);
+		xfree (&t->type);
+		xfree ((char **) &t);
 		t = q;
 	}
 	*tmp = NULL;
@@ -426,7 +426,6 @@ void
 userage (char *command, char *use)
 {
 
-	context;
 	if (do_hook (USAGE_LIST, "%s %s", command, use ? use : "No Help Available for this command"))
 		put_it ("%s", convert_output_format (get_fset_var (FORMAT_USAGE_FSET), "%s %s", command, convert_output_format (use ? use : "%WNo Help available for this command", NULL, NULL)));
 }
@@ -438,7 +437,6 @@ random_str (int min, int max)
 	static char str[BIG_BUFFER_SIZE + 1];
 
 
-	context;
 	i = getrandom (min, max);
 	for (ii = 0; ii < i; ii++)
 		str[ii] = (char) getrandom (97, 122);
@@ -454,7 +452,6 @@ rename_file (char *old_file, char **new_file)
 	FILE *fp;
 
 
-	context;
 	if (get_string_var (DCC_DLDIR_VAR))
 		malloc_sprintf (&tmp, "%s/%%c%s", get_string_var (DCC_DLDIR_VAR), *new_file);
 	else
@@ -468,8 +465,8 @@ rename_file (char *old_file, char **new_file)
 	}
 	if (fp != NULL)
 		fclose (fp);
-	new_free (&tmp);
-	new_free (&new_f);
+	xfree (&tmp);
+	xfree (&new_f);
 	malloc_sprintf (new_file, "%c%s", c, *new_file);
 	return 0;
 }
@@ -489,10 +486,10 @@ clear_link (irc_server ** serv1)
 	while (temp != NULL)
 	{
 		hold = temp->next;
-		new_free (&temp->name);
-		new_free (&temp->link);
-		new_free (&temp->time);
-		new_free ((char **) &temp);
+		xfree (&temp->name);
+		xfree (&temp->link);
+		xfree (&temp->time);
+		xfree ((char **) &temp);
 		temp = hold;
 	}
 	*serv1 = NULL;
@@ -502,7 +499,7 @@ irc_server *
 add_server (irc_server ** serv1, char *channel, char *arg, int hops, char *thetime)
 {
 	irc_server *serv2;
-	serv2 = (irc_server *) new_malloc (sizeof (irc_server));
+	serv2 = (irc_server *) xmalloc (sizeof (irc_server));
 	serv2->next = *serv1;
 	malloc_strcpy (&serv2->name, channel);
 	malloc_strcpy (&serv2->link, arg);
@@ -550,10 +547,10 @@ remove_split_server (char *server)
 
 	if ((temp = (irc_server *) remove_from_list ((List **) & split_link, server)))
 	{
-		new_free (&temp->name);
-		new_free (&temp->link);
-		new_free (&temp->time);
-		new_free ((char **) &temp);
+		xfree (&temp->name);
+		xfree (&temp->link);
+		xfree (&temp->time);
+		xfree ((char **) &temp);
 	}
 }
 
@@ -1040,7 +1037,7 @@ convert_output_format (const char *format, const char *str,...)
 			in_cparse--;
 			if (new_str)
 				strcat (s, new_str);
-			new_free (&new_str);
+			xfree (&new_str);
 			while (*s)
 			{
 				if (*s == 255)
@@ -1062,7 +1059,7 @@ convert_output_format (const char *format, const char *str,...)
 	if (*s)
 		strcat (s, color_str[NO_COLOR]);
 	who_level = old_who_level;
-	new_free (&copy);
+	xfree (&copy);
 
 	cparse_recurse--;
 	return s;
@@ -1128,7 +1125,6 @@ prepare_command (int *active_server, char *channel, int need_op)
 
 	if (!channel && !curr_scr_win->current_channel)
 	{
-		context;
 		if (need_op != 3)
 			not_on_a_channel (curr_scr_win);
 		return NULL;
@@ -1137,14 +1133,12 @@ prepare_command (int *active_server, char *channel, int need_op)
 	*active_server = server;
 	if (!(chan = lookup_channel (channel ? channel : curr_scr_win->current_channel, server, 0)))
 	{
-		context;
 		if (need_op != 3)
 			not_on_a_channel (curr_scr_win);
 		return NULL;
 	}
 	if (need_op == NEED_OP && chan && !chan->chop)
 	{
-		context;
 		error_not_opped (chan->channel);
 		return NULL;
 	}
@@ -1172,7 +1166,7 @@ add_to_irc_map (char *server1, char *distance)
 	int dist = 0;
 	if (distance)
 		dist = atoi (distance);
-	tmp = (irc_server *) new_malloc (sizeof (irc_server));
+	tmp = (irc_server *) xmalloc (sizeof (irc_server));
 	malloc_strcpy (&tmp->name, server1);
 	tmp->hopcount = dist;
 	if (!map)
@@ -1220,8 +1214,8 @@ show_server_map (void)
 		snprintf (tmp2, BIG_BUFFER_SIZE, "$G %%W$[-%d]1%%c $0 %s", tmp->hopcount * 3, tmp1);
 		put_it ("%s", convert_output_format (tmp2, "%s %s", tmp->name, prevdist != tmp->hopcount ? ascii : empty_string));
 		prevdist = tmp->hopcount;
-		new_free (&tmp->name);
-		new_free ((char **) &tmp);
+		xfree (&tmp->name);
+		xfree ((char **) &tmp);
 	}
 }
 
@@ -1599,7 +1593,7 @@ do_nslookup_blah (void *arg)
 		else
 			bitchsay ("%s is %s (%s)", host, temp->h_name, (char *) inet_ntoa (*(struct in_addr *) temp->h_addr));
 	}
-	new_free (&arg);
+	xfree (&arg);
 	pthread_exit (NULL);
 	return NULL;
 }

@@ -1,4 +1,4 @@
-#ident "@(#)whowas.c 1.9"
+#ident "@(#)whowas.c 1.10"
 /*
  * whowas.c   a linked list buffer of people who have left your channel 
  * mainly used for ban prot and stats stuff.
@@ -38,6 +38,7 @@
 #include "hash2.h"
 #include "whowas.h"
 #include "fset.h"
+#include "xmalloc.h"
 
 WhowasWrapList whowas_userlist_list =
 {0};
@@ -114,7 +115,7 @@ add_to_whowas_buffer (NickList * nicklist, char *channel, char *server1, char *s
 			remove_oldest_whowas (&whowas_reg_list, 0,
 				   (whowas_reg_max + 1) - whowas_reg_count);
 	}
-	new = (WhowasList *) new_malloc (sizeof (WhowasList));
+	new = (WhowasList *) xmalloc (sizeof (WhowasList));
 	new->has_ops = nicklist->chanop;
 	new->nicklist = (NickList *) nicklist;
 	malloc_strcpy (&(new->channel), channel);
@@ -130,10 +131,10 @@ add_to_whosplitin_buffer (NickList * nicklist, char *channel, char *server1, cha
 {
 	WhowasList *new;
 
-	new = (WhowasList *) new_malloc (sizeof (WhowasList));
+	new = (WhowasList *) xmalloc (sizeof (WhowasList));
 	new->has_ops = nicklist->chanop;
 
-	new->nicklist = (NickList *) new_malloc (sizeof (NickList));	/*nicklist; */
+	new->nicklist = (NickList *) xmalloc (sizeof (NickList));	/*nicklist; */
 	new->nicklist->nick = m_strdup (nicklist->nick);
 	new->nicklist->host = m_strdup (nicklist->host);
 
@@ -204,7 +205,7 @@ add_to_whowas_chan_buffer (ChannelList * channel)
 			remove_oldest_chan_whowas (&whowas_chan_list, 0,
 				 (whowas_chan_max + 1) - whowas_chan_count);
 	}
-	new = (WhowasChanList *) new_malloc (sizeof (WhowasChanList));
+	new = (WhowasChanList *) xmalloc (sizeof (WhowasChanList));
 
 	new->channellist = channel;
 	new->time = time (NULL);
@@ -234,12 +235,12 @@ remove_oldest_chan_whowas (WhowasChanList ** list, time_t timet, int count)
 		while (*list && ((*list)->time + timet) <= t)
 		{
 			tmp = *list;
-			new_free (&(tmp->channellist->channel));
-			new_free (&(tmp->channellist->topic));
+			xfree (&(tmp->channellist->channel));
+			xfree (&(tmp->channellist->topic));
 			tmp->channellist->bans = NULL;
-			new_free ((char **) &(tmp->channellist));
+			xfree ((char **) &(tmp->channellist));
 			*list = tmp->next;
-			new_free ((char **) &tmp);
+			xfree ((char **) &tmp);
 			total++;
 		}
 	}
@@ -248,12 +249,12 @@ remove_oldest_chan_whowas (WhowasChanList ** list, time_t timet, int count)
 		while (*list && count)
 		{
 			tmp = *list;
-			new_free (&(tmp->channellist->channel));
-			new_free (&(tmp->channellist->topic));
+			xfree (&(tmp->channellist->channel));
+			xfree (&(tmp->channellist->topic));
 			tmp->channellist->bans = NULL;
-			new_free ((char **) &(tmp->channellist));
+			xfree ((char **) &(tmp->channellist));
 			*list = tmp->next;
-			new_free ((char **) &tmp);
+			xfree ((char **) &tmp);
 			total++;
 			count--;
 		}

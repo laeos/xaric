@@ -1,4 +1,4 @@
-#ident "@(#)cmd_hostname.c 1.8"
+#ident "@(#)cmd_hostname.c 1.9"
 /*
  * cmd_hostname.c : virtual host support 
  *
@@ -36,6 +36,7 @@
 #include "list.h"
 #include "misc.h"
 #include "tcommand.h"
+#include "xmalloc.h"
 
 typedef struct _virtuals_struc
 {
@@ -132,7 +133,7 @@ cmd_hostname (struct command *cmd, char *args)
 				ip = inet_addr (p);
 				if ((host = gethostbyaddr ((char *) &ip, sizeof (ip), AF_INET)))
 				{
-					new = (Virtuals *) new_malloc (sizeof (Virtuals));
+					new = (Virtuals *) xmalloc (sizeof (Virtuals));
 					new->hostname = m_strdup (host->h_name);
 					add_to_list ((List **) & virtuals, (List *) new);
 				}
@@ -156,8 +157,8 @@ cmd_hostname (struct command *cmd, char *args)
 					malloc_strcpy (&newhost, new->hostname);
 
 			}
-			new_free (&new->hostname);
-			new_free (&new);
+			xfree (&new->hostname);
+			xfree (&new);
 		}
 		if (newhost)
 		{
@@ -166,7 +167,7 @@ cmd_hostname (struct command *cmd, char *args)
 				memcpy ((void *) &LocalHostAddr, hp->h_addr, sizeof (LocalHostAddr));
 
 			bitchsay ("Local host name is now [%s]", LocalHostName);
-			new_free (&newhost);
+			xfree (&newhost);
 			t_parse_command ("RECONNECT", NULL);
 		}
 #endif

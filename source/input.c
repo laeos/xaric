@@ -1,4 +1,4 @@
-#ident "@(#)input.c 1.9"
+#ident "@(#)input.c 1.10"
 /*
  * input.c: does the actual input line stuff... keeps the appropriate stuff
  * on the input line, handles insert/delete of characters/words... the whole
@@ -41,6 +41,7 @@
 #include "tcommand.h"
 #include "expr.h"
 #include "util.h"
+#include "xmalloc.h"
 
 
 #include <sys/ioctl.h>
@@ -201,12 +202,12 @@ update_input (int update)
 				THIS_POS += (len - MIN_POS);
 				MIN_POS = strlen (ptr);
 				ADD_TO_INPUT (inp_ptr);
-				new_free (&inp_ptr);
+				xfree (&inp_ptr);
 				update = UPDATE_ALL;
 			}
 
 			if (free_it)
-				new_free (&ptr);
+				xfree (&ptr);
 		}
 	}
 	else
@@ -465,7 +466,7 @@ input_delete_character (char unused, char *not_used)
 
 		malloc_strcpy (&ptr, &(NEXT_CHAR));
 		strcpy (&(THIS_CHAR), ptr);
-		new_free (&ptr);
+		xfree (&ptr);
 		if (term_delete ())
 			update_input (UPDATE_FROM_CURSOR);
 		else
@@ -497,7 +498,7 @@ input_backspace (char key, char *blah)
 
 		malloc_strcpy (&ptr, &(THIS_CHAR));
 		strcpy (&(PREV_CHAR), ptr);
-		new_free (&ptr);
+		xfree (&ptr);
 		THIS_POS--;
 		term_cursor_left ();
 		if (THIS_CHAR)
@@ -632,7 +633,7 @@ input_delete_next_word (char unused, char *not_used)
 	INPUT_BUFFER[pos] = c;
 	malloc_strcpy (&ptr, &(INPUT_BUFFER[pos]));
 	strcpy (&(THIS_CHAR), ptr);
-	new_free (&ptr);
+	xfree (&ptr);
 	update_input (UPDATE_FROM_CURSOR);
 }
 
@@ -688,7 +689,7 @@ input_add_character (char c, char *unused)
 	}
 	if (in_completion == STATE_COMPLETE && c == ' ' && input_lastmsg)
 	{
-		new_free (&input_lastmsg);
+		xfree (&input_lastmsg);
 		*new_nick = 0;
 		in_completion = STATE_NORMAL;
 	}
@@ -719,7 +720,7 @@ input_clear_to_bol (char unused, char *not_used)
 	malloc_strcpy (&ptr, &(THIS_CHAR));
 	MIN_CHAR = (char) 0;
 	ADD_TO_INPUT (ptr);
-	new_free (&ptr);
+	xfree (&ptr);
 	THIS_POS = MIN_POS;
 	term_move_cursor (MIN_POS, input_line);
 	term_clear_to_eol ();
@@ -804,7 +805,7 @@ input_yank_cut_buffer (char unused, char *not_used)
 		THIS_CHAR = 0;
 		ADD_TO_INPUT (cut_buffer);
 		ADD_TO_INPUT (ptr);
-		new_free (&ptr);
+		xfree (&ptr);
 		update_input (UPDATE_FROM_CURSOR);
 		THIS_POS += strlen (cut_buffer);
 		if (THIS_POS > INPUT_BUFFER_SIZE)
@@ -894,7 +895,7 @@ input_msgreply (char dumb, char *dumber)
 			else
 				malloc_sprintf (&tmp, "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_string);
 			set_input (tmp);
-			new_free (&tmp);
+			xfree (&tmp);
 		}
 		else
 			command_completion (0, NULL);
@@ -902,7 +903,7 @@ input_msgreply (char dumb, char *dumber)
 	else
 		command_completion (0, NULL);
 	update_input (UPDATE_ALL);
-	new_free (&t);
+	xfree (&t);
 }
 
 #if 0 /* somebody please remove me if i am not needed XXX */
@@ -918,7 +919,7 @@ add_autonick_input (char *nick, char *line)
 		else
 			malloc_sprintf (&tmp1, "%s: %s", nick, line);
 		set_input (tmp1);
-		new_free (&tmp1);
+		xfree (&tmp1);
 	}
 	update_input (UPDATE_ALL);
 }
@@ -939,9 +940,9 @@ send_line (char dumb, char *dumber)
 		(*OldPrompt->func) (OldPrompt->data, get_input ());
 		set_input (empty_string);
 		current_screen->promptlist = OldPrompt->next;
-		new_free (&OldPrompt->data);
-		new_free (&OldPrompt->prompt);
-		new_free ((char **) &OldPrompt);
+		xfree (&OldPrompt->data);
+		xfree (&OldPrompt->prompt);
+		xfree ((char **) &OldPrompt);
 		change_input_prompt (-1);
 	}
 	else
@@ -997,9 +998,9 @@ send_line (char dumb, char *dumber)
 				parse_line (NULL, tmp, NULL, 1, 0);
 		}
 		update_input (UPDATE_ALL);
-		new_free (&tmp);
+		xfree (&tmp);
 	}
-	new_free (&input_lastmsg);
+	xfree (&input_lastmsg);
 	*new_nick = 0;
 	in_completion = STATE_NORMAL;
 	from_server = server;
@@ -1151,9 +1152,9 @@ edit_char (u_char key)
 
 		set_input (empty_string);
 		current_screen->promptlist = oldprompt->next;
-		new_free (&oldprompt->data);
-		new_free (&oldprompt->prompt);
-		new_free ((char **) &oldprompt);
+		xfree (&oldprompt->data);
+		xfree (&oldprompt->prompt);
+		xfree ((char **) &oldprompt);
 		change_input_prompt (-1);
 		return;
 	}
@@ -1253,7 +1254,7 @@ handle_swap (int windownum)
 	malloc_sprintf (&p, "SWAP %d", windownum);
 	t_parse_command ("WINDOW", p);
 	set_channel_window (curr_scr_win, get_current_channel_by_refnum (curr_scr_win->refnum), curr_scr_win->server);
-	new_free (&p);
+	xfree (&p);
 	set_input_prompt (curr_scr_win, get_string_var (INPUT_PROMPT_VAR), 0);
 	update_input (UPDATE_ALL);
 	update_all_windows ();
@@ -1436,7 +1437,7 @@ ignore_last_nick (char dumb, char *dumber)
 		set_input (empty_string);
 		tmp1 = m_sprintf ("%sig %s", get_string_var (CMDCHARS_VAR), nick->nick);
 		set_input (tmp1);
-		new_free (&tmp1);
+		xfree (&tmp1);
 	}
 	update_input (UPDATE_ALL);
 }
@@ -1466,8 +1467,8 @@ nick_completion (char dumb, char *dumber)
 		malloc_strcpy (&input_lastmsg, tmp);
 		in_completion = STATE_COMPLETE;
 	}
-	new_free (&q);
-	new_free (&nick);
+	xfree (&q);
+	xfree (&nick);
 }
 
 char *
@@ -1573,7 +1574,7 @@ addtabkey (char *nick, char *mytype)
 
 	if (!tmp || !(new = (NickTab *) remove_from_list ((List **) & tmp, nick)))
 	{
-		new = (NickTab *) new_malloc (sizeof (NickTab));
+		new = (NickTab *) xmalloc (sizeof (NickTab));
 		malloc_strcpy (&new->nick, nick);
 		if (mytype)
 			malloc_strcpy (&new->type, mytype);

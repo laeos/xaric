@@ -1,4 +1,4 @@
-#ident "@(#)hook.c 1.8"
+#ident "@(#)hook.c 1.9"
 /*
  * hook.c: Does those naughty hook functions. 
  *
@@ -38,6 +38,7 @@
 #include "misc.h"
 #include "util.h"
 #include "expr.h"
+#include "xmalloc.h"
 
 
 #define SILENT	0
@@ -273,7 +274,7 @@ add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int 
 	if ((entry = (NumericList *) find_in_list ((List **) & numeric_list, buf, 0)) ==
 	    NULL)
 	{
-		entry = (NumericList *) new_malloc (sizeof (NumericList));
+		entry = (NumericList *) xmalloc (sizeof (NumericList));
 		memset (entry, 0, sizeof (NumericList));
 		malloc_strcpy (&(entry->name), buf);
 		add_to_list ((List **) & numeric_list, (List *) entry);
@@ -283,11 +284,11 @@ add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int 
 	if ((new = (Hook *) remove_from_list_ext ((List **) & (entry->list), nick, (int (*)(List *, char *)) Add_Remove_Check)) != NULL)
 	{
 		new->not = 1;
-		new_free (&(new->nick));
-		new_free (&(new->stuff));
-		new_free ((char **) &new);
+		xfree (&(new->nick));
+		xfree (&(new->stuff));
+		xfree ((char **) &new);
 	}
-	new = (Hook *) new_malloc (sizeof (Hook));
+	new = (Hook *) xmalloc (sizeof (Hook));
 	memset (new, 0, sizeof (Hook));
 	new->noisy = noisy;
 	new->server = server;
@@ -320,11 +321,11 @@ add_hook (int which, char *nick, char *stuff, int noisy, int not, int server, in
 	if ((new = (Hook *) remove_from_list_ext ((List **) & (hook_functions[which].list), nick, (int (*)(List *, char *)) Add_Remove_Check)) != NULL)
 	{
 		new->not = 1;
-		new_free (&(new->nick));
-		new_free (&(new->stuff));
-		new_free ((char **) &new);
+		xfree (&(new->nick));
+		xfree (&(new->stuff));
+		xfree ((char **) &new);
 	}
-	new = (Hook *) new_malloc (sizeof (Hook));
+	new = (Hook *) xmalloc (sizeof (Hook));
 	memset (new, 0, sizeof (Hook));
 	new->noisy = noisy;
 	new->server = server;
@@ -381,7 +382,7 @@ show_hook (Hook * list, char *name)
 			     noise_level[list->noisy],
 			     list->sernum);
 	}
-	new_free (&text);
+	xfree (&text);
 }
 
 /*
@@ -548,7 +549,7 @@ do_hook (int which, char *format,...)
 				bestmatch = tmp;
 			}
 			if (tmp->flexible)
-				new_free (&tmpnick);
+				xfree (&tmpnick);
 		}
 		if (bestmatch)
 			hook_array[hook_num++] = bestmatch;
@@ -626,15 +627,15 @@ remove_numeric_hook (int numeric, char *nick, int server, int sernum, int quiet)
 					 (tmp->flexible ? '\'' : '"'), nick,
 					 (tmp->flexible ? '\'' : '"'), buf);
 				tmp->not = 1;
-				new_free (&(tmp->nick));
-				new_free (&(tmp->stuff));
-				new_free ((char **) &tmp);
+				xfree (&(tmp->nick));
+				xfree (&(tmp->stuff));
+				xfree ((char **) &tmp);
 				if (hook->list == NULL)
 				{
 					if ((hook = (NumericList *) remove_from_list ((List **) & numeric_list, buf)) != NULL)
 					{
-						new_free (&(hook->name));
-						new_free ((char **) &hook);
+						xfree (&(hook->name));
+						xfree ((char **) &hook);
 					}
 				}
 				return;
@@ -647,13 +648,13 @@ remove_numeric_hook (int numeric, char *nick, int server, int sernum, int quiet)
 			{
 				next = tmp->next;
 				tmp->not = 1;
-				new_free (&(tmp->nick));
-				new_free (&(tmp->stuff));
-				new_free ((char **) &tmp);
+				xfree (&(tmp->nick));
+				xfree (&(tmp->stuff));
+				xfree ((char **) &tmp);
 			}
 			hook->list = NULL;
-			new_free ((char **) &hook->name);
-			new_free ((char **) &hook);
+			xfree ((char **) &hook->name);
+			xfree ((char **) &hook);
 			if (!quiet)
 				say ("The %s list is empty", buf);
 			return;
@@ -705,9 +706,9 @@ remove_hook (int which, char *nick, int server, int sernum, int quiet)
 				     (tmp->flexible ? '\'' : '"'),
 				     hook_functions[which].name);
 			tmp->not = 1;
-			new_free (&(tmp->nick));
-			new_free (&(tmp->stuff));
-			new_free ((char **) &tmp);
+			xfree (&(tmp->nick));
+			xfree (&(tmp->stuff));
+			xfree ((char **) &tmp);
 		}
 		else if (!quiet)
 			say ("\"%s\" is not on the %s list", nick,
@@ -734,9 +735,9 @@ remove_hook (int which, char *nick, int server, int sernum, int quiet)
 			if (prev)
 				prev->next = tmp->next;
 			tmp->not = 1;
-			new_free (&(tmp->nick));
-			new_free (&(tmp->stuff));
-			new_free ((char **) &tmp);
+			xfree (&(tmp->nick));
+			xfree (&(tmp->stuff));
+			xfree ((char **) &tmp);
 		}
 		hook_functions[which].list = top;
 		if (!quiet)
@@ -1023,7 +1024,7 @@ BUILT_IN_COMMAND (oncmd)
 						if (!(exp = next_expr (&args, '{')))
 						{
 							say ("Unmatched brace in ON");
-							new_free (&nick);
+							xfree (&nick);
 							return;
 						}
 					}
@@ -1042,7 +1043,7 @@ BUILT_IN_COMMAND (oncmd)
 						     type, nick, type,
 						     (not ? "nothing" : exp),
 						noise_level[noisy], sernum);
-					new_free (&nick);
+					xfree (&nick);
 				}
 			}
 			/* End of doovie intentation */

@@ -1,12 +1,4 @@
-#ident "@(#)env.c 1.7"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "irc.h"
-#include "irc_std.h"
-#ifndef HAVE_SETENV
+#ident "@(#)setenv.c 1.9"
 /*
  * Copyright (c) 1987, 1988, 1993
  *      The Regents of the University of California.  All rights reserved.
@@ -39,6 +31,10 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdlib.h>
 #include <stddef.h>
@@ -80,6 +76,8 @@ __findenv (const char *name, int *offset)
 	return (NULL);
 }
 
+
+#ifdef NEED_GETENV
 /*
  * getenv --
  *      Returns ptr to value associated with name, if any, else NULL.
@@ -91,7 +89,11 @@ getenv (const char *name)
 
 	return (__findenv (name, &offset));
 }
+#endif /* NEED_GETENV */
 
+
+/* i see some os's have putenv but not setenv? */
+#ifdef NEED_PUTENV
 int 
 putenv (const char *str)
 {
@@ -110,6 +112,7 @@ putenv (const char *str)
 	(void) free (p);
 	return (rval);
 }
+#endif /* NEED_PUTENV */
 
 /*
  * setenv --
@@ -187,4 +190,3 @@ unsetenv (const char *name)
 			if (!(*p = *(p + 1)))
 				break;
 }
-#endif

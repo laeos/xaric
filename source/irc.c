@@ -1,4 +1,4 @@
-#ident "@(#)irc.c 1.15"
+#ident "@(#)irc.c 1.19"
 /*
  * irc.c - where it all starts!
  *
@@ -64,13 +64,14 @@
 #include "exec.h"
 #include "notify.h"
 #include "numbers.h"
-#include "debug.h"
+#include "xdebug.h"
 #include "newio.h"
 #include "timer.h"
 #include "whowas.h"
 #include "misc.h"
 #include "tcommand.h"
 #include "xaric_version.h"
+#include "xmalloc.h"
 #include "util.h"
 
 
@@ -138,12 +139,6 @@ int away_set = 0;		/* set if there is an away
 				 * message anywhere */
 int quick_startup = 0;		/* set if we ignore .ircrc */
 
-#ifdef XARIC_DEBUG
-int  cx_line = 0;
-char cx_file[BIG_BUFFER_SIZE / 4];	/* debug file info */
-char cx_function[BIG_BUFFER_SIZE / 4];
-#endif
-
 time_t idle_time = 0, start_time;
 fd_set readables, writables;
 int child_dead = 0;
@@ -181,7 +176,7 @@ static char switch_help[] =
    -r file\tload file as list of servers\n\
    -n nickname\tnickname to use\n\
    -a\t\tadds default servers and command line servers to server list\n\
-   -x\t\truns xaric in \"debug\" mode\n\
+   -d <flag>\tturns on debugging (if compiled in see /help xdebug)\n\
    -v\t\ttells you about the client's version\n\
    -l <file>\tloads <file> in place of your .ircrc\n\
    -L <file>\tloads <file> in place of your .ircrc and expands $ expandos\n";
@@ -304,21 +299,6 @@ cntl_c (int unused)
 }
 
 
-void 
-display_name (int j)
-{
-	int i = strip_ansi_in_echo;
-	strip_ansi_in_echo = 0;
-	charset_ibmpc ();
-
-	put_it (empty_string);
-	put_it ("%s", convert_output_format ("%G-%R*%G- %RX %Ca r i c %G-%R*%G-", NULL));
-	put_it ("[31mv%s brought to you by Laeos, Hawky, and Korndawg", XARIC_WebID);
-	put_it (empty_string);
-
-	charset_lat1 ();
-	strip_ansi_in_echo = i;
-}
 
 /*
  * parse_args: parse command line arguments for irc, and sets all initial
@@ -521,13 +501,29 @@ parse_args (char *argv[], int argc)
 					break;
 				}
 
-			case 'x':	/* set server debug */
+#ifdef XARIC_DEBUG
+			case 'd':
 				{
-					x_debug = (unsigned long) 0xffffffff;
+					char *what;
+
 					if (argv[ac][2])
-						fprintf (stderr, "Ignoring junk after -x\n");
+						what = &argv[ac][2];
+					else if (argv[ac + 1] && argv[ac + 1][0] != '-')
+					{
+						what = argv[ac + 1];
+						ac++;
+					}
+					else {
+						fprintf (stderr, "Missing argument for -d\n");
+						exit (1);
+					}
+					if ( xd_parse(what) ) {
+						fprintf(stderr, "Bad arguments to -d\n");
+						exit (1);
+					}
 					break;
 				}
+#endif
 
 			case 'z':
 				{
@@ -611,7 +607,7 @@ parse_args (char *argv[], int argc)
 	}
 
 	set_string_var (LOAD_PATH_VAR, irc_path);
-	new_free (&irc_path);
+	xfree (&irc_path);
 
 	if ((entry = getpwuid (getuid ())))
 	{
@@ -698,7 +694,7 @@ parse_args (char *argv[], int argc)
 	}
 	if (ircrc_file == NULL)
 	{
-		ircrc_file = (char *) new_malloc (strlen (my_path) + strlen (IRCRC_NAME) + 10);
+		ircrc_file = (char *) xmalloc (strlen (my_path) + strlen (IRCRC_NAME) + 10);
 		strcpy (ircrc_file, my_path);
 		strcat (ircrc_file, "/");
 		strcat (ircrc_file, IRCRC_NAME);
@@ -716,7 +712,7 @@ parse_args (char *argv[], int argc)
 #ifdef DEFAULT_SERVER
 		malloc_strcpy (&ptr, DEFAULT_SERVER);
 		build_server_list (ptr);
-		new_free (&ptr);
+		xfree (&ptr);
 #else
 		ircpanic ("DEFAULT_SERVER not defined -- no server list");
 #endif
@@ -780,8 +776,8 @@ get_line_return (char unused, char *not_used)
 		stuff->done = 1;
 		set_input (stuff->saved_input);
 		set_input_prompt (curr_scr_win, stuff->saved_prompt, 0);
-		new_free (&(stuff->saved_input));
-		new_free (&(stuff->saved_prompt));
+		xfree (&(stuff->saved_input));
+		xfree (&(stuff->saved_prompt));
 		stuff->next->prev = NULL;
 		GetLineStack = stuff->next;
 	}
@@ -813,7 +809,7 @@ get_line (char *prompt, int new_input, void (*func) (char, char *))
 		ircpanic ("Illegal call to get_line\n");
 
 	/* initialize the new item. */
-	stuff = (GetLine *) new_malloc (sizeof (GetLine));
+	stuff = (GetLine *) xmalloc (sizeof (GetLine));
 	stuff->done = 0;
 	stuff->func = func;
 	stuff->recursive_call = (new_input == -1) ? 0 : 1;
@@ -856,9 +852,9 @@ get_line (char *prompt, int new_input, void (*func) (char, char *))
 	 * interesting items in stuff and removed it from the list.
 	 * Noone but us has a pointer to it, so we free it here.
 	 */
-	new_free (&stuff->saved_input);
-	new_free (&stuff->saved_prompt);
-	new_free ((char **) &stuff);
+	xfree (&stuff->saved_input);
+	xfree (&stuff->saved_prompt);
+	xfree ((char **) &stuff);
 }
 
 /* This simply waits for a key to be pressed before it unrecurses.
@@ -906,15 +902,10 @@ io (const char *what)
 
 	level++;
 
-	if (x_debug & DEBUG_WAITS)
-	{
-		if (level != old_level)
-		{
-			yell ("Moving from io level [%d] to level [%d] from [%s]", old_level, level, what);
-			old_level = level;
-		}
+	if (level != old_level) {
+		DEBUG(XD_COMM, 5, "Moving from io level [%d] to level [%d] from [%s]", old_level, level, what);
+		old_level = level;
 	}
-
 
 	if (level && (level - last_warn == 5))
 	{
@@ -1073,13 +1064,6 @@ main (int argc, char *argv[], char *envp[])
 	time (&start_time);
 	time (&idle_time);
 
-
-#ifdef XARIC_DEBUG
-	*cx_file = 0;
-	cx_line = 0;
-	*cx_function = 0;
-#endif
-
 	if (isatty (0))
 	{
 		printf ("Process [%d] connected to tty [%s]\n", getpid (), ttyname (0));
@@ -1125,7 +1109,7 @@ main (int argc, char *argv[], char *envp[])
 	global_all_off[0] = ALL_OFF;
 	global_all_off[1] = '\0';
 
-	display_name (-1);
+	display_intro();
 	if (bflag)
 		load_scripts ();
 

@@ -1,4 +1,4 @@
-#ident "@(#)ctcp.c 1.13"
+#ident "@(#)ctcp.c 1.14"
 /*
  * ctcp.c:handles the client-to-client protocol(ctcp). 
  *
@@ -46,6 +46,7 @@
 #include "tcommand.h"
 #include "util.h"
 #include "xaric_version.h"
+#include "xmalloc.h"
 
 void split_CTCP (char *, char *, char *);
 extern char *mircansi (char *);
@@ -336,7 +337,7 @@ CTCP_HANDLER (do_version)
 #endif
 	malloc_strcpy (&version_reply, stripansicodes (convert_output_format (get_fset_var (FORMAT_VERSION_FSET), "%s %s %s", XARIC_PlainID, the_unix, the_version)));
 	send_ctcp (CTCP_NOTICE, from, CTCP_VERSION, "%s (%s)", version_reply, get_string_var (CLIENTINFO_VAR));
-	new_free (&version_reply);
+	xfree (&version_reply);
 	return NULL;
 }
 
@@ -650,7 +651,7 @@ do_ctcp (char *from, char *to, char *str)
 			}
 		}
 
-		new_free (&ptr);
+		xfree (&ptr);
 	}
 
 	if (in_ctcp_flag == 1)
@@ -692,7 +693,7 @@ do_notice_ctcp (char *from, char *to, char *str)
 
 	tbuf = stripansi (str);
 	strmcpy (local_ctcp_buffer, tbuf, IRCD_BUFFER_SIZE - 2);
-	new_free (&tbuf);
+	xfree (&tbuf);
 
 	for (;; strmcat (local_ctcp_buffer, last, IRCD_BUFFER_SIZE - 2))
 	{
@@ -737,7 +738,7 @@ do_notice_ctcp (char *from, char *to, char *str)
 			if ((ptr = ctcp_cmd[i].repl (ctcp_cmd + i, from, to, ctcp_argument)))
 			{
 				strmcat (local_ctcp_buffer, ptr, BIG_BUFFER_SIZE);
-				new_free (&ptr);
+				xfree (&ptr);
 				continue;
 			}
 		}
@@ -870,7 +871,7 @@ ctcp_unquote_it (char *str, int *len)
 	char c;
 	int i, new_size = 0;
 
-	buffer = (char *) new_malloc ((sizeof (char) * *len) + 1);
+	buffer = (char *) xmalloc ((sizeof (char) * *len) + 1);
 	ptr = buffer;
 	i = 0;
 	while (i < *len)

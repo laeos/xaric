@@ -15,16 +15,6 @@
 
 extern char	*line_thing;
 
-#ifdef XARIC_DEBUG
-extern char	cx_file[];
-extern char	cx_function[];
-extern int	cx_line;
-#define context { strcpy(cx_file,__FILE__); cx_line=__LINE__; strcpy(cx_function, __FUNCTION__); }
-
-#else
-#define context { };
-#endif
-
 #define STRING_CHANNEL '+'
 #define MULTI_CHANNEL '#'
 #define LOCAL_CHANNEL '&'
@@ -75,7 +65,6 @@ extern int	cx_line;
 
 
 #include "irc_std.h"
-#include "debug.h"
 #include "newio.h"
 
 /* these define what characters do, inverse, underline, bold and all off */

@@ -1,4 +1,4 @@
-#ident "@(#)dcc.c 1.9"
+#ident "@(#)dcc.c 1.10"
 /*
  * dcc.c: Things dealing client to client connections. 
  *
@@ -48,6 +48,7 @@
 #include "fset.h"
 #include "tcommand.h"
 #include "util.h"
+#include "xmalloc.h"
 
 
 
@@ -245,7 +246,7 @@ dcc_searchlist (char *name, char *user, int type, int flag, char *othername, cha
 	}
 	if (!flag)
 		return NULL;
-	*Client = NewClient = (DCC_list *) new_malloc (sizeof (DCC_list));
+	*Client = NewClient = (DCC_list *) xmalloc (sizeof (DCC_list));
 	NewClient->flags = type;
 	NewClient->read = NewClient->write = NewClient->file = -1;
 	NewClient->filesize = filesize;
@@ -282,7 +283,7 @@ dcc_add_deadclient (register DCC_list * client)
 {
 	struct deadlist *new;
 
-	new = (struct deadlist *) new_malloc (sizeof (struct deadlist));
+	new = (struct deadlist *) xmalloc (sizeof (struct deadlist));
 	new->next = deadlist;
 	new->it = client;
 	deadlist = new;
@@ -317,15 +318,15 @@ dcc_erase (DCC_list * Element)
 			if (Element->file > -1)
 				close (Element->file);
 
-			new_free (&Element->othername);
-			new_free (&Element->description);
-			new_free (&Element->userhost);
-			new_free (&Element->user);
-			new_free (&Element->buffer);
-			new_free (&Element->cksum);
+			xfree (&Element->othername);
+			xfree (&Element->description);
+			xfree (&Element->userhost);
+			xfree (&Element->user);
+			xfree (&Element->buffer);
+			xfree (&Element->cksum);
 			if (Element->dcc_handler)
 				(Element->dcc_handler) (NULL, NULL);
-			new_free ((char **) &Element);
+			xfree ((char **) &Element);
 			erase_one++;
 			break;
 		}
@@ -663,7 +664,7 @@ dcc_chat (char *command, char *args)
 
 	equal_user = m_sprintf ("=%s", user);
 	addtabkey (equal_user, "msg");
-	new_free (&equal_user);
+	xfree (&equal_user);
 
 	dcc_open (Client);
 	add_to_userhost_queue (user, add_userhost_to_dcc, "%d %s", Client->read, user);
@@ -835,7 +836,7 @@ dcc_resend (char *command, char *args)
 			return;
 		}
 		malloc_strcpy (&FileBuf, fullname);
-		new_free (&fullname);
+		xfree (&fullname);
 	}
 	else
 	{
@@ -847,7 +848,7 @@ dcc_resend (char *command, char *args)
 	if (access (FileBuf, R_OK))
 	{
 		put_it ("%s", convert_output_format ("$G %RDCC%n Cannot access: $0", "%s", FileBuf));
-		new_free (&FileBuf);
+		xfree (&FileBuf);
 		return;
 	}
 
@@ -865,7 +866,7 @@ dcc_resend (char *command, char *args)
 	}
 
 	real_dcc_filesend (FileBuf, filename, user, DCC_RESENDOFFER, portnum);
-	new_free (&FileBuf);
+	xfree (&FileBuf);
 }
 
 void 
@@ -893,7 +894,7 @@ dcc_filesend (char *command, char *args)
 			return;
 		}
 		strcpy (FileBuf, fullname);
-		new_free (&fullname);
+		xfree (&fullname);
 	}
 	else
 	{
@@ -944,8 +945,8 @@ multiget (char *usern, char *filen)
 			if (!dcc_quiet)
 				put_it ("%s", convert_output_format ("$G %RDCC%n Attempting DCC get: $0", "%s", dccList->description));
 			dcc_getfile (NULL, newbuf);
-			new_free (&expand);
-			new_free (&newbuf);
+			xfree (&expand);
+			xfree (&newbuf);
 		}
 	}
 	doing_multi = 0;
@@ -1012,8 +1013,8 @@ dcc_getfile (char *command, char *args)
 			dcc_active_count--;
 		Client->flags |= DCC_DELETE;
 	}
-	new_free (&fullname);
-	new_free (&tmp);
+	xfree (&fullname);
+	xfree (&tmp);
 }
 
 
@@ -1078,8 +1079,8 @@ dcc_regetfile (char *command, char *args)
 	Client->transfer_orders.byteoffset = buf.st_size;
 	Client->transfer_orders.byteorder = byteordertest ();
 
-	new_free (&fullname);
-	new_free (&tmp);
+	xfree (&fullname);
+	xfree (&tmp);
 }
 
 extern void 
@@ -1295,7 +1296,7 @@ process_incoming_chat (DCC_list * Client)
 		if (len > (MAX_DCC_BLOCK_SIZE / 2) - 1)
 		{
 			put_it ("%s", convert_output_format ("$G %RDCC buffer overrun. Data lost", NULL, NULL));
-			new_free (&(Client->buffer));
+			xfree (&(Client->buffer));
 		}
 		else
 		{
@@ -1333,7 +1334,7 @@ process_incoming_chat (DCC_list * Client)
 			foo = strchr(tmp, '\r');	/* mIRC etc are broken */
 			if ( foo ) *foo = '\0';
 
-			new_free (&Client->buffer);
+			xfree (&Client->buffer);
 
 			Client->bytes_read += bytesread;
 			message_from (Client->user, LOG_DCC);
@@ -1368,7 +1369,7 @@ process_incoming_chat (DCC_list * Client)
 		}
 	}
 	message_from (NULL, LOG_CRAP);
-	new_free (&buf);
+	xfree (&buf);
 }
 
 static void 
@@ -1437,7 +1438,7 @@ process_incoming_raw (DCC_list * Client)
 		if (len > MAX_DCC_BLOCK_SIZE - 1)
 		{
 			put_it ("%s", convert_output_format ("$G %RDCC raw buffer overrun. Data lost", NULL, NULL));
-			new_free (&Client->buffer);
+			xfree (&Client->buffer);
 		}
 		else
 		{
@@ -1464,7 +1465,7 @@ process_incoming_raw (DCC_list * Client)
 		}
 	default:
 		{
-			new_free (&Client->buffer);
+			xfree (&Client->buffer);
 			tmp[strlen (tmp) - 1] = '\0';
 			Client->bytes_read += bytesread;
 			if (Client->dcc_handler)
@@ -1859,7 +1860,7 @@ dcc_list (char *command, char *args)
 			st, size, completed, filename);
 
 		if (st && *st)
-			new_free (&st);
+			xfree (&st);
 		count++;
 	}
 }
@@ -2502,7 +2503,7 @@ dcc_rename (char *command, char *args)
 			put_it ("%s", convert_output_format ("$G %RDCC Too late to rename that file", NULL, NULL));
 			return;
 		}
-		new_free (&(Client->description));
+		xfree (&(Client->description));
 		malloc_strcpy (&(Client->description), newdesc);
 		put_it ("%s", convert_output_format ("$G %RDCC File $0 from $1 rename to $2", "%s %s %s", description ? description : "(null)", user, newdesc));
 	}
@@ -2565,7 +2566,7 @@ cmd_chat (struct command *cmd, char *args)
 		else
 			malloc_sprintf (&tmp, "CHAT %s", args);
 		process_dcc (tmp);
-		new_free (&tmp);
+		xfree (&tmp);
 	}
 	else if (last_chat_req)
 	{
@@ -2575,7 +2576,7 @@ cmd_chat (struct command *cmd, char *args)
 			if (no_chat)
 			{
 				dcc_close_filename (NULL, last_chat_req, "CHAT", DCC_CHAT);
-				new_free (&last_chat_req);
+				xfree (&last_chat_req);
 			}
 			else
 			{
@@ -2588,7 +2589,7 @@ cmd_chat (struct command *cmd, char *args)
 		else
 		{
 			bitchsay ("Error occurred");
-			new_free(&last_chat_req);
+			xfree(&last_chat_req);
 		}
 	}
 	else

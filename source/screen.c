@@ -1,4 +1,4 @@
-#ident "@(#)screen.c 1.8"
+#ident "@(#)screen.c 1.9"
 /*
  * screen.c
  *
@@ -34,6 +34,7 @@
 #include "newio.h"
 #include "misc.h"
 #include "util.h"
+#include "xmalloc.h"
 
 
 Window *to_window;
@@ -60,7 +61,7 @@ add_wait_prompt (char *prompt, void (*func) (char *, char *), char *data, int ty
 {
 	WaitPrompt **AddLoc, *New;
 
-	New = (WaitPrompt *) new_malloc (sizeof (WaitPrompt));
+	New = (WaitPrompt *) xmalloc (sizeof (WaitPrompt));
 	New->prompt = m_strdup (prompt);
 	New->data = m_strdup (data);
 	New->type = type;
@@ -348,7 +349,8 @@ split_up_line (const unsigned char *str)
 	if (!output_size)
 	{
 		int new = MAXIMUM_SPLITS;
-		RESIZE (output, char *, new);
+
+		output = xrealloc(output, sizeof(char *) * new);
 		output_size = new;
 	}
 
@@ -532,7 +534,8 @@ split_up_line (const unsigned char *str)
 			if (line >= output_size - 3)
 			{
 				int new = output_size + MAXIMUM_SPLITS + 1;
-				RESIZE (output, char *, new);
+
+				output = xrealloc(output, sizeof(char *) * new);
 				output_size = new;
 			}
 
@@ -608,7 +611,7 @@ split_up_line (const unsigned char *str)
 	if (*buffer)
 		malloc_strcpy ((char **) &(output[line++]), buffer);
 
-	new_free (&output[line]);
+	xfree (&output[line]);
 	recursion--;
 	return output;
 }
@@ -1166,7 +1169,7 @@ create_new_screen (void)
 	}
 	if (!new)
 	{
-		new = (Screen *) new_malloc (sizeof (Screen));
+		new = (Screen *) xmalloc (sizeof (Screen));
 		memset (new, 0, sizeof (Screen));
 		new->screennum = ++refnumber;
 		new->next = screen_list;

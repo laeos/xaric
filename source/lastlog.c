@@ -1,4 +1,4 @@
-#ident "@(#)lastlog.c 1.8"
+#ident "@(#)lastlog.c 1.10"
 /*
  * lastlog.c: handles the lastlog features of irc. 
  *
@@ -27,6 +27,7 @@
 #include "status.h"
 #include "fset.h"
 #include "tcommand.h"
+#include "xmalloc.h"
 
 /*
  * lastlog_level: current bitmap setting of which things should be stored in
@@ -196,8 +197,8 @@ remove_from_lastlog (Window * window)
 		else
 			window->lastlog_head = window->lastlog_tail;
 		window->lastlog_size--;
-		new_free (&end_holder->msg);
-		new_free ((char **) &end_holder);
+		xfree (&end_holder->msg);
+		xfree ((char **) &end_holder);
 	}
 	else
 		window->lastlog_size = 0;
@@ -403,7 +404,7 @@ cmd_lastlog (struct command *cmd, char *args)
 		}
 	}
 #ifndef __GNUC__
-	new_free (&blah);
+	xfree (&blah);
 #endif
 	if (header && !fp)
 		say ("End of Lastlog");
@@ -431,7 +432,7 @@ add_to_lastlog (Window * window, const char *line)
 		/* no nulls or empty lines (they contain "> ") */
 		if (line && (strlen (line) > 2))
 		{
-			new = (Lastlog *) new_malloc (sizeof (Lastlog));
+			new = (Lastlog *) xmalloc (sizeof (Lastlog));
 			new->next = window->lastlog_head;
 			new->prev = NULL;
 			new->level = msg_level;
@@ -482,8 +483,6 @@ logmsg (unsigned long log_type, char *from, char *string, int flag)
 	char *type = NULL;
 	unsigned char **lines = NULL;
 
-	context;
-
 	if (!get_string_var (MSGLOGFILE_VAR))
 		return 0;
 
@@ -510,21 +509,21 @@ logmsg (unsigned long log_type, char *from, char *string, int flag)
 	case 1:
 		malloc_sprintf (&filename, "%s", get_string_var (MSGLOGFILE_VAR));
 		expand = expand_twiddle (filename);
-		new_free (&filename);
+		xfree (&filename);
 		if (!do_hook (MSGLOG_LIST, "%s %s %s %s", timestr, "On", expand, ""))
 		{
-			new_free (&expand);
+			xfree (&expand);
 			return 1;
 		}
 		if (logptr)
 		{
-			new_free (&expand);
+			xfree (&expand);
 			return 1;
 		}
 		if (!(logptr = fopen (expand, get_int_var (APPEND_LOG_VAR) ? "at" : "wt")))
 		{
 			set_int_var (MSGLOG_VAR, 0);
-			new_free (&expand);
+			xfree (&expand);
 			return 0;
 		}
 
@@ -538,7 +537,7 @@ logmsg (unsigned long log_type, char *from, char *string, int flag)
 			return i;
 		}
 		bitchsay ("Now logging messages to: %s", expand);
-		new_free (&expand);
+		xfree (&expand);
 		break;
 	case 2:
 		if (!do_hook (MSGLOG_LIST, "%s %s %s %s", timestr, "Off", "", ""))

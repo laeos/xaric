@@ -1,4 +1,4 @@
-#ident "@(#)vars.c 1.11"
+#ident "@(#)vars.c 1.15"
 /*
  * vars.c: All the dealing of the irc variables are handled here. 
  *
@@ -39,6 +39,7 @@
 #include "format.h"
 #include "tcommand.h"
 #include "util.h"
+#include "xmalloc.h"
 
 
 
@@ -85,8 +86,6 @@ static IrcVariable irc_variable[] =
 	{"BEEP_ON_MSG", STR_TYPE_VAR, 0, NULL, set_beep_on_msg, 0, 0},
 	{"BEEP_WHEN_AWAY", INT_TYPE_VAR, DEFAULT_BEEP_WHEN_AWAY, NULL, NULL, 0, 0},
 	{"BOLD_VIDEO", BOOL_TYPE_VAR, DEFAULT_BOLD_VIDEO, NULL, NULL, 0, 0},
-	{"DCC_FLOOD_AFTER", INT_TYPE_VAR, 3, NULL, NULL, 0, 0},
-	{"DCC_FLOOD_RATE", INT_TYPE_VAR, 4, NULL, NULL, 0, 0},
 	{"CHANNEL_NAME_WIDTH", INT_TYPE_VAR, DEFAULT_CHANNEL_NAME_WIDTH, NULL, update_all_status, 0, 0},
 	{"CLIENT_INFORMATION", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"CLOCK", BOOL_TYPE_VAR, DEFAULT_CLOCK, NULL, update_all_status, 0, 0},
@@ -104,7 +103,8 @@ static IrcVariable irc_variable[] =
 	{"DCC_BAR_TYPE", INT_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"DCC_BLOCK_SIZE", INT_TYPE_VAR, DEFAULT_DCC_BLOCK_SIZE, NULL, NULL, 0, 0},
 	{"DCC_DLDIR", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
-	{"DEBUG", INT_TYPE_VAR, 0, NULL, NULL, 0, 0},
+	{"DCC_FLOOD_AFTER", INT_TYPE_VAR, 3, NULL, NULL, 0, 0},
+	{"DCC_FLOOD_RATE", INT_TYPE_VAR, 4, NULL, NULL, 0, 0},
 	{"DEFAULT_REASON", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"DEOPFLOOD", BOOL_TYPE_VAR, DEFAULT_DEOPFLOOD, NULL, NULL, 0, 0},
 	{"DEOPFLOOD_TIME", INT_TYPE_VAR, DEFAULT_DEOPFLOOD_TIME, NULL, NULL, 0, 0},
@@ -163,7 +163,7 @@ static IrcVariable irc_variable[] =
 
 	{"NICKFLOOD", BOOL_TYPE_VAR, DEFAULT_NICKFLOOD, NULL, NULL, 0, 0},
 	{"NICKFLOOD_TIME", INT_TYPE_VAR, DEFAULT_NICKFLOOD_TIME, NULL, NULL, 0, 0},
-	{"NICK_COMPLETION", BOOL_TYPE_VAR, 1, NULL, NULL, 0, 0},
+	{"NICK_COMPLETION", BOOL_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"NICK_COMPLETION_CHAR", CHAR_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"NICK_COMPLETION_TYPE", INT_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"NOTIFY_LEVEL", STR_TYPE_VAR, 0, NULL, set_notify_level, 0, 0},
@@ -182,7 +182,7 @@ static IrcVariable irc_variable[] =
 	{"SAVEFILE", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"SCROLL", BOOL_TYPE_VAR, DEFAULT_SCROLL, NULL, set_scroll, 0, 0},
 	{"SCROLL_LINES", INT_TYPE_VAR, DEFAULT_SCROLL_LINES, NULL, set_scroll_lines, 0, 0},
-	{"SEND_AWAY_MSG", BOOL_TYPE_VAR, 1, NULL, NULL, 0, 0},
+	{"SEND_AWAY_MSG", BOOL_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"SEND_IGNORE_MSG", BOOL_TYPE_VAR, DEFAULT_SEND_IGNORE_MSG, NULL, NULL, 0, 0},
 	{"SERVER_PROMPT", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"SHELL", STR_TYPE_VAR, 0, NULL, NULL, 0, VF_NODAEMON},
@@ -263,7 +263,7 @@ set_string_var (enum VAR_TYPES var, char *string)
 	if (string)
 		malloc_strcpy (&(irc_variable[var].string), string);
 	else
-		new_free (&(irc_variable[var].string));
+		xfree (&(irc_variable[var].string));
 }
 
 /*
@@ -287,7 +287,7 @@ init_variables ()
 	char *foo;
 
 
-#ifdef VAR_DEBUG
+#ifdef XARIC_DEBUG
 	int i;
 
 	for (i = 1; i < NUMBER_OF_VARIABLES - 1; i++)
@@ -356,7 +356,7 @@ init_variables ()
 	   in a next_arg or similer call, and gets written to */
 	foo = m_strdup (DEFAULT_BEEP_ON_MSG);
 	set_beep_on_msg (curr_scr_win, foo, 0);
-	new_free (&foo);
+	xfree (&foo);
 
 	set_string_var (CLIENTINFO_VAR, XARIC_COMMENT);
 	set_string_var (FAKE_SPLIT_PATS_VAR, "*fuck* *shit* *suck* *dick* *penis* *cunt* *haha* *fake* *split* *ass* *hehe* *bogus* *yawn* *leet* *blow* *screw* *dumb* *fbi*");
@@ -507,7 +507,7 @@ set_var_value (int var_index, char *value)
 				}
 				malloc_strcpy (&(var->string), value);
 				if (temp)
-					new_free (&temp);
+					xfree (&temp);
 			}
 			else
 			{
@@ -516,7 +516,7 @@ set_var_value (int var_index, char *value)
 			}
 		}
 		else
-			new_free (&(var->string));
+			xfree (&(var->string));
 		if (var->func && !(var->int_flags & VIF_PENDING))
 		{
 			var->int_flags |= VIF_PENDING;
@@ -552,7 +552,7 @@ cmd_set (struct command *cmd, char *args)
 			char *t = NULL;
 			malloc_sprintf (&t, "%s%s%s", var, args && *args ? " " : empty_string, args && *args ? args : empty_string);
 			t_parse_command ("FSET", t);
-			new_free (&t);
+			xfree (&t);
 			return;
 		}
 		if (*var == '-')
@@ -737,7 +737,7 @@ clear_sets (void)
 {
 	int i = 0;
 	for (i = 0; irc_variable[i].name; i++)
-		new_free (&irc_variable->string);
+		xfree (&irc_variable->string);
 }
 
 static void 

@@ -39,6 +39,8 @@
 #include "input.h"
 #include "fset.h"
 #include "util.h"
+#include "xmalloc.h"
+
 
 extern char *FromUserHost;
 static void parse_server_notice (char *, char *);
@@ -201,7 +203,7 @@ parse_notice (char *from, char **Args)
 							put_it ("%s", convert_output_format (get_fset_var (FORMAT_BWALL_FSET), "%s %s %s %s %s", update_clock (GET_TIME), q, from, FromUserHost, newline));
 						}
 						logmsg (LOG_WALL, from, line, 0);
-						new_free (&channel);
+						xfree (&channel);
 					}
 					else if (type == NOTICE_LIST)
 					{
@@ -218,7 +220,7 @@ parse_notice (char *from, char **Args)
 						logmsg (LOG_NOTICE, from, line, 0);
 					}
 				}
-				new_free (&free_me);
+				xfree (&free_me);
 				set_lastlog_msg_level (level);
 				if (not_from_server)
 					notify_mark (from, NULL, NULL, 0);

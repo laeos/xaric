@@ -1,4 +1,4 @@
-#ident "@(#)ignore.c 1.8"
+#ident "@(#)ignore.c 1.9"
 /*
  * ignore.c: handles the ingore command for irc 
  *
@@ -25,6 +25,7 @@
 #include "output.h"
 #include "tcommand.h"
 #include "util.h"
+#include "xmalloc.h"
 
 int ignore_usernames = 0;
 char *highlight_char = NULL;
@@ -64,26 +65,26 @@ add_channel_grep (char *channel, char *what, int flag)
 			char *s;
 			if ((new = (Ignore *) remove_from_list ((List **) & ignored_nicks, channel)) != NULL)
 			{
-				new_free (&(new->nick));
+				xfree (&(new->nick));
 				for (tmp = new->except; tmp; tmp = old)
 				{
 					old = tmp->next;
-					new_free (&(tmp->nick));
-					new_free (&(tmp));
+					xfree (&(tmp->nick));
+					xfree (&(tmp));
 				}
 				for (tmp = new->looking; tmp; tmp = old)
 				{
 					old = tmp->next;
-					new_free (&(tmp->nick));
-					new_free (&(tmp));
+					xfree (&(tmp->nick));
+					xfree (&(tmp));
 				}
-				new_free ((char **) &new);
+				xfree ((char **) &new);
 			}
-			new = (Ignore *) new_malloc (sizeof (Ignore));
+			new = (Ignore *) xmalloc (sizeof (Ignore));
 			new->nick = m_strdup (chan);
 			while ((s = new_next_arg (new_str, &new_str)))
 			{
-				tmp = (Ignore *) new_malloc (sizeof (Ignore));
+				tmp = (Ignore *) xmalloc (sizeof (Ignore));
 				tmp->nick = m_strdup (s);
 				add_to_list ((List **) & new->looking, (List *) tmp);
 			}
@@ -93,7 +94,7 @@ add_channel_grep (char *channel, char *what, int flag)
 		if (ptr)
 			*(ptr++) = ',';
 		channel = ptr;
-		new_free (&p);
+		xfree (&p);
 	}
 	for (new = ignored_nicks, count = 1; new; new = new->next, count++)
 		new->num = count;
@@ -140,23 +141,23 @@ ignore_nickname (char *nick, long type, int flag)
 					if ((new = (Ignore *) remove_from_list ((List **) & ignored_nicks, nick)) != NULL)
 					{
 						Ignore *tmp, *old;
-						new_free (&(new->nick));
-						new_free (&new->looking);
+						xfree (&(new->nick));
+						xfree (&new->looking);
 						for (tmp = new->except; tmp; tmp = old)
 						{
 							old = tmp->next;
-							new_free (&(tmp->nick));
-							new_free (&(tmp));
+							xfree (&(tmp->nick));
+							xfree (&(tmp));
 						}
 						for (tmp = new->looking; tmp; tmp = old)
 						{
 							old = tmp->next;
-							new_free (&(tmp->nick));
-							new_free (&(tmp));
+							xfree (&(tmp->nick));
+							xfree (&(tmp));
 						}
-						new_free ((char **) &new);
+						xfree ((char **) &new);
 					}
-					new = (Ignore *) new_malloc (sizeof (Ignore));
+					new = (Ignore *) xmalloc (sizeof (Ignore));
 					new->nick = new_nick;
 					add_to_list ((List **) & ignored_nicks, (List *) new);
 				}
@@ -294,20 +295,20 @@ remove_ignore (char *nick)
 	if ((tmp = (Ignore *) list_lookup ((List **) & ignored_nicks, new_nick, !USE_WILDCARDS, REMOVE_FROM_LIST)) != NULL)
 	{
 		say ("%s removed from ignorance list", tmp->nick);
-		new_free (&(tmp->nick));
+		xfree (&(tmp->nick));
 		for (new = tmp->except; new; new = old)
 		{
 			old = new->next;
-			new_free (&(new->nick));
-			new_free (&(new));
+			xfree (&(new->nick));
+			xfree (&(new));
 		}
 		for (new = tmp->looking; new; new = old)
 		{
 			old = new->next;
-			new_free (&(new->nick));
-			new_free (&(new));
+			xfree (&(new->nick));
+			xfree (&(new));
 		}
-		new_free ((char **) &tmp);
+		xfree ((char **) &tmp);
 		count++;
 	}
 
@@ -318,20 +319,20 @@ remove_ignore (char *nick)
 		while ((tmp = (Ignore *) list_lookup ((List **) & ignored_nicks, new_nick, USE_WILDCARDS, REMOVE_FROM_LIST)) != NULL)
 		{
 			say ("%s removed from ignorance list", tmp->nick);
-			new_free (&(tmp->nick));
+			xfree (&(tmp->nick));
 			for (new = tmp->except; new; new = old)
 			{
 				old = new->next;
-				new_free (&(new->nick));
-				new_free (&(new));
+				xfree (&(new->nick));
+				xfree (&(new));
 			}
 			for (new = tmp->looking; new; new = old)
 			{
 				old = new->next;
-				new_free (&(new->nick));
-				new_free (&(new));
+				xfree (&(new->nick));
+				xfree (&(new));
 			}
-			new_free ((char **) &tmp);
+			xfree ((char **) &tmp);
 
 			count++;
 		}
@@ -339,7 +340,7 @@ remove_ignore (char *nick)
 	if (!count)
 		say ("%s is not in the ignorance list!", new_nick);
 
-	new_free (&new_nick);
+	xfree (&new_nick);
 	return count;
 }
 
@@ -629,7 +630,7 @@ ignore_exception (Ignore * old, char *args)
 	int flag = 0;
 	if (args && !(new = (Ignore *) list_lookup ((List **) & old->except, args, !USE_WILDCARDS, !REMOVE_FROM_LIST)))
 	{
-		new = new_malloc (sizeof (Ignore));
+		new = xmalloc (sizeof (Ignore));
 		malloc_strcpy (&new->nick, args);
 		add_to_list ((List **) & old->except, (List *) new);
 		flag = DONT_IGNORE;
@@ -766,11 +767,11 @@ check_ignore (char *nick, char *userhost, char *channel, long type, char *str)
 		{
 			if (tmp->except && list_lookup ((List **) & tmp->except, nickuserhost, USE_WILDCARDS, !REMOVE_FROM_LIST))
 			{
-				new_free (&nickuserhost);
+				xfree (&nickuserhost);
 				return (DONT_IGNORE);
 			}
 
-			new_free (&nickuserhost);
+			xfree (&nickuserhost);
 			if (tmp->dont & type)
 				return (DONT_IGNORE);
 			if (tmp->type & type)
@@ -778,7 +779,7 @@ check_ignore (char *nick, char *userhost, char *channel, long type, char *str)
 			if (tmp->high & type)
 				return (HIGHLIGHTED);
 		}
-		new_free (&nickuserhost);
+		xfree (&nickuserhost);
 		if (channel && is_channel (channel) && (tmp = (Ignore *) list_lookup ((List **) & ignored_nicks, channel, USE_WILDCARDS, !REMOVE_FROM_LIST)))
 		{
 			if (tmp->dont & type)
@@ -799,7 +800,7 @@ check_ignore (char *nick, char *userhost, char *channel, long type, char *str)
 			}
 		}
 	}
-	new_free (&nickuserhost);
+	xfree (&nickuserhost);
 	return (DONT_IGNORE);
 }
 
@@ -865,7 +866,7 @@ cut_n_fix_glob (char *nickuserhost)
 		}
 	}
 	final_stuff = m_opendup (nick, "!", user, "@", host, NULL);
-	new_free (&copy);
+	xfree (&copy);
 	return final_stuff;
 }
 

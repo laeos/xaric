@@ -1,4 +1,4 @@
-#ident "@(#)hash.c 1.8"
+#ident "@(#)hash.c 1.9"
 /************
  *  hash.c  *
  ************
@@ -39,6 +39,7 @@
 #include "hash.h"
 #include "hash2.h"
 #include "tcommand.h"
+#include "xmalloc.h"
 
 
 /*
@@ -106,7 +107,7 @@ add_name_to_genericlist (char *name, HashEntry * list, unsigned int size)
 	List *nptr;
 	unsigned long hvalue = hash_nickname (name, size);
 
-	nptr = (List *) new_malloc (sizeof (List));
+	nptr = (List *) xmalloc (sizeof (List));
 	nptr->next = (List *) list[hvalue].list;
 	nptr->name = m_strdup (name);
 
@@ -692,13 +693,13 @@ remove_oldest_whowas_hashlist (WhowasWrapList * list, time_t timet, int count)
 				if ((ptr->time + timet) <= t)
 				{
 					ptr = find_userhost_channel (ptr->nicklist->host, ptr->channel, 1, list);
-					new_free (&(ptr->nicklist->nick));
-					new_free (&(ptr->nicklist->host));
-					new_free ((char **) &(ptr->nicklist));
-					new_free (&(ptr->channel));
-					new_free (&(ptr->server1));
-					new_free (&(ptr->server2));
-					new_free ((char **) &ptr);
+					xfree (&(ptr->nicklist->nick));
+					xfree (&(ptr->nicklist->host));
+					xfree ((char **) &(ptr->nicklist));
+					xfree (&(ptr->channel));
+					xfree (&(ptr->server1));
+					xfree (&(ptr->server2));
+					xfree ((char **) &ptr);
 					total++;
 					ptr = (WhowasList *) (&(list->NickListTable[x]))->list;
 				}
@@ -715,14 +716,14 @@ remove_oldest_whowas_hashlist (WhowasWrapList * list, time_t timet, int count)
 			ptr = find_userhost_channel (ptr->nicklist->host, ptr->channel, 1, list);
 			if (ptr->nicklist)
 			{
-				new_free (&(ptr->nicklist->nick));
-				new_free (&(ptr->nicklist->host));
-				new_free ((char **) &(ptr->nicklist));
+				xfree (&(ptr->nicklist->nick));
+				xfree (&(ptr->nicklist->host));
+				xfree ((char **) &(ptr->nicklist));
 			}
-			new_free (&(ptr->channel));
-			new_free (&(ptr->server1));
-			new_free (&(ptr->server2));
-			new_free ((char **) &ptr);
+			xfree (&(ptr->channel));
+			xfree (&(ptr->server1));
+			xfree (&(ptr->server2));
+			xfree ((char **) &ptr);
 			total++;
 			count--;
 		}
@@ -736,7 +737,7 @@ sorted_nicklist (ChannelList * chan)
 	NickList *tmp, *l = NULL, *list = NULL;
 	for (tmp = next_nicklist (chan, NULL); tmp; tmp = next_nicklist (chan, tmp))
 	{
-		l = (NickList *) new_malloc (sizeof (NickList));
+		l = (NickList *) xmalloc (sizeof (NickList));
 		memcpy (l, tmp, sizeof (NickList));
 		l->next = NULL;
 		add_to_list ((List **) & list, (List *) l);
@@ -751,7 +752,7 @@ clear_sorted_nicklist (NickList ** list)
 	while (*list)
 	{
 		t = (*list)->next;
-		new_free ((char **) &(*list));
+		xfree ((char **) &(*list));
 		*list = t;
 	}
 }
@@ -761,7 +762,7 @@ add_name_to_floodlist (char *name, char *channel, HashEntry * list, unsigned int
 {
 	Flooding *nptr;
 	unsigned long hvalue = hash_nickname (name, size);
-	nptr = (Flooding *) new_malloc (sizeof (Flooding));
+	nptr = (Flooding *) xmalloc (sizeof (Flooding));
 	nptr->next = (Flooding *) list[hvalue].list;
 	strmcpy (nptr->name, name, sizeof (nptr->name) - 1);
 	list[hvalue].list = (void *) nptr;

@@ -16,23 +16,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)configure.in 1.10
+# @(#)configure.in 1.12
 #
 
 dnl ---------------------------------------------------------------
 dnl autoconf prolog
 dnl ---------------------------------------------------------------
 
-AC_REVISION([$Revision$])dnl
-AC_INIT(source/module.mk)dnl
+AC_REVISION([%W%])dnl
+AC_INIT(source/xversion.c)dnl
 AC_PREREQ(2.12)dnl
 
 AC_HEADLINE(dnl
 Xaric, IRC Client, dnl
-XARIC_VERSION, source/xaric_vers.c, dnl
+XARIC_VERSION, source/xversion.c, dnl
 [Copyright (c) 1999-2000 Rex G. Feany <laeos@laeos.net>])
 
-AC_CONFIG_PARAM(config.param)
 AC_CONFIG_HEADER(include/config.h)dnl
 AC_PREFIX_DEFAULT(/usr/local)
 AC_PLATFORM(PLATFORM)
@@ -47,6 +46,7 @@ AC_MSG_PART(Build Tools)
 
 AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_INSTALL
 AC_SET_MAKE
 AC_SANITY_CHECK
 AC_ISC_POSIX
@@ -56,11 +56,21 @@ AC_CHECK_DEBUGGING
 AC_CHECK_PROFILING
 AC_CHECK_OPTIMIZE
 
-AC_MSG_CHECKING(if we want 'checker' support)
-AC_ARG_ENABLE(warn, [  --enable-checker ]       Enables compilation by checker [default=no].,
-	CC="checker $CC"
-	AC_MSG_RESULT(yes),
-	AC_MSG_RESULT(no))
+AC_MSG_CHECKING(if we should turn on assert checking)
+AC_ARG_ENABLE(assert,dnl
+[  --disable-assert          enable runtime assertion checking (default=yes)],
+ASSERT="$enableval",
+if test ".$ASSERT" = .; then
+    ASSERT=yes
+fi
+)dnl
+
+if test ".$ASSERT" = .yes; then
+       AC_MSG_RESULT(yeah)
+else
+       AC_DEFINE(NDEBUG)
+       AC_MSG_RESULT(nope)
+fi
 
 dnl ----------------------------------------------------------
 dnl Stuff we need
@@ -70,11 +80,12 @@ AC_MSG_PART(Mandatory stuff)
 
 dnl # check for standard headers
 AC_HEADER_STDC
+AC_FUNC_ALLOCA
 
 AC_HAVE_HEADERS(dnl
 	stdio.h stdlib.h stdarg.h string.h signal.h unistd.h fcntl.h dnl
 	ctype.h errno.h sys/types.h sys/time.h sys/wait.h sys/socket.h dnl
-	dirent.h)
+	dirent.h pwd.h sys/stat.h assert.h getopt.h)
 
 AC_CHECK_FUNC(select, ,
   AC_CHECK_LIB(socket, select, LIBS="$LIBS -lsocket",
@@ -84,7 +95,7 @@ AC_CHECK_FUNC(select, ,
           AC_CHECK_LIB(net, select, LIBS="$LIBS -lnet",
             AC_MSG_WARN(i can not find select.  you might need to help me)))))))
 
-AC_CHECK_FUNCTIONS(select sigaction memset strncasecmp snprintf vsnprintf snprintf)
+AC_CHECK_FUNCTIONS(sigaction memset strncasecmp snprintf vsnprintf getopt_long)
 
 AC_CHECK_LIB(termcap, tgetent, LIBS="-ltermcap $LIBS",
    AC_CHECK_LIB(termlib, tgetent, LIBS="-ltermlib $LIBS",
@@ -95,8 +106,9 @@ AC_CHECK_LIB(termcap, tgetent, LIBS="-ltermcap $LIBS",
 AC_BEGIN_DECISION([mandatory system headers and functions])
 AC_IFALLYES(dnl
     header:stdio.h header:stdlib.h header:stdarg.h header:string.h dnl
-    header:signal.h header:unistd.h header:fcntl.h header:errno.h header:ctype.h dnl
-    header:sys/types.h header:sys/time.h header:sys/wait.h header:sys/socket.h dnl
+    header:signal.h header:unistd.h header:fcntl.h header:errno.h dnl
+    header:ctype.h header:sys/types.h header:sys/time.h header:sys/wait.h dnl
+    header:sys/socket.h header:sys/stat.h dnl
     header:dirent.h func:vsnprintf func:snprintf dnl
     func:select func:sigaction func:memset func:strncasecmp func:snprintf,dnl
 AC_DECIDE(fine, [all fine]))
@@ -113,16 +125,16 @@ AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
-dnl need this for dcc stuff
+# XXX XXX XXX XXX this should be done differently. 
 AC_CHECK_SIZEOF(unsigned int, 4)
 if test "$ac_cv_sizeof_unsigned_int" = 4; then
-	AC_DEFINE(UNSIGNED_INT32)
+	AC_CHECK_TYPE(u_int32_t, unsigned int)
 else
 	AC_CHECK_SIZEOF(unsigned long, 4)
 	if test "$ac_cv_sizeof_unsigned_long" = 4; then
-		AC_DEFINE(UNSIGNED_LONG32)
+		AC_CHECK_TYPE(u_int32_t, unsigned long)
 	else
-		AC_DEFINE(UNKNOWN_32INT)
+		AC_ERROR(i need a 32 bit type!)
 	fi
 fi
 
@@ -186,12 +198,18 @@ AC_CHECK_HEADERS(sys/termios.h sys/ttycom.h termcap.h)
 AC_CHECK_FUNC(getpass, AC_DEFINE(HAVE_GETPASS),)
 AC_CHECK_FUNC(fpathconf, AC_DEFINE(HAVE_FPATHCONF),)
 AC_CHECK_FUNC(gettimeofday, AC_DEFINE(HAVE_GETTIMEOFDAY),)
-AC_CHECK_FUNC(strtoul,, AC_DEFINE(NEED_STRTOUL))
 AC_CHECK_FUNC(sysconf, AC_DEFINE(HAVE_SYSCONF),)
 AC_CHECK_FUNC(uname, AC_DEFINE(HAVE_UNAME),)
 AC_CHECK_FUNC(killpg, AC_DEFINE(HAVE_KILLPG),)
-AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV),)
 AC_CHECK_FUNC(inet_aton, AC_DEFINE(HAVE_INET_ATON),)
+AC_CHECK_FUNC(putenv,, AC_DEFINE(NEED_PUTENV))
+AC_CHECK_FUNC(getenv,, AC_DEFINE(NEED_GETENV))
+
+AC_CHECK_FUNC(setenv, SETENV='', SETENV=setenv.o)
+AC_SUBST(SETENV)
+
+AC_CHECK_FUNC(strtoul, STRTOUL='', STRTOUL=strtoul.o)
+AC_SUBST(STRTOUL)
 
 AC_MSG_CHECKING(for struct linger)
 AC_EGREP_HEADER([struct( |	)*linger], sys/socket.h, AC_MSG_RESULT(yes), AC_DEFINE(NO_STRUCT_LINGER) AC_MSG_RESULT(no, ugh.))
@@ -313,7 +331,7 @@ main()
 
 
 dnl ----------------------------------------------------------
-dnl Fun stuff
+dnl Features
 dnl ----------------------------------------------------------
 
 AC_MSG_PART([Features (hacks)])

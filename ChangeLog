@@ -1,4 +1,9 @@
 2001-Feb-17	Rex Feany	<laeos@laeos.net>
+	* Fixed ircterm.c, wouldnt compile on
+	  machines other the mine.
+	* Releaed 0.11.4
+
+2001-Feb-17	Rex Feany	<laeos@laeos.net>
 	* Fixed compile warnings in screen.c
 	* Removed attempting_to_connect that was not
 	  used anywhere.

@@ -1,4 +1,4 @@
-#ident "@(#)ircterm.c 1.8"
+#ident "@(#)ircterm.c 1.9"
 /*
  * ircterm.c - terminal-related functions for xaric
  *
@@ -102,7 +102,6 @@ static int term_null_function (void);
 extern char *tgetstr ();
 extern int tgetent ();
 extern char *getenv ();
-extern int tputs(const char *, int, int (*)(int));
 extern char *tgoto(const char *, int, int);
 
 

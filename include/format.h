@@ -34,7 +34,6 @@
 #define DEFAULT_FMT_CTCP_FUNC_USER_FSET "%K>%n>%W> %G$1 %K[%g$2%K]%g requested $4- from you"
 #define DEFAULT_FMT_CTCP_UNKNOWN_FSET "%K>%n>%W> %G$1 %K[%g$2%K]%g requested unknown ctcp $4- from $3"
 #define DEFAULT_FMT_CTCP_UNKNOWN_USER_FSET "%K>%n>%W> %G$1 %K[%g$2%K]%g requested unknown ctcp $4- from %g$3"
-#define DEFAULT_FMT_CTCP_USER_FSET "%K>%n>%W> %G$1 %K[%g$2%K]%g requested $4- from you"
 #define DEFAULT_FMT_CTCP_REPLY_FSET "$G %nCTCP %W$3 %nreply from %n$1: $4-"
 
 
@@ -86,7 +85,7 @@
 #define DEFAULT_FMT_IGNORE_WALL_FSET "%K%P$1%n $2-"
 #define DEFAULT_FMT_MSG_GROUP_FSET "%K-%P$1%K:%p$2%K-%n $3-"
 
-#define DEFAULT_FMT_NAMES_FSET "$G %K[%GUsers%K(%g$1%K:%g$2%K)]%c $3"
+#define DEFAULT_FMT_NAMES_FSET "$G%C $2 %Gusers on %C$1%G at %K[%g$0%K]%c $3"
 #define DEFAULT_FMT_NAMES_NICKCOLOR_FSET "%K[%B $[10]1%K]"
 #define DEFAULT_FMT_NAMES_NONOP_FSET "$G %K[%GNonChanOps%K(%g$1%K:%g$2%K)]%c $3"
 #define DEFAULT_FMT_NAMES_VOICECOLOR_FSET "%K[%Mv%B$[10]1%K]"
@@ -100,7 +99,7 @@
 #define DEFAULT_FMT_NETSPLIT_FSET "$G %nNetSplit detected: %W$1%n split from %W$2 %K[%c$0%K]"
 #define DEFAULT_FMT_NICKNAME_FSET "$G %W$1 %nis now known as %c$3"
 #define DEFAULT_FMT_NICKNAME_OTHER_FSET "$G %W$1 %nis now known as %c$4"
-#define DEFAULT_FMT_NICKNAME_USER_FSET "%K>%n>%W> %WYou%K(%n$1%K)%n are now known as %c$3"
+#define DEFAULT_FMT_NICKNAME_USER_FSET "%K*%n*%W* %WYou%K(%n$1%K)%n are now known as %c$3"
 #define DEFAULT_FMT_NONICK_FSET "%W$1%K:%n $3-"
 
 
@@ -122,9 +121,9 @@
 #define DEFAULT_FMT_PUBLIC_OTHER_AR_FSET "%b<%Y$1%K:%n$2%b>%n $3-"
 #define DEFAULT_FMT_SEND_ACTION_FSET "%K.%n.%W. %W$1 %n$3-"
 #define DEFAULT_FMT_SEND_ACTION_OTHER_FSET "%K.%n.%W. %n-> %W$1%n/%c$2 %n$3-"
-#define DEFAULT_FMT_SEND_AWAY_FSET "[Away ($strftime($1 %a %b %d %I:%M%p))] [Current ($strftime($0 %a %b %d %I:%M%p))] [MsgLog $2]"
+#define DEFAULT_FMT_SEND_AWAY_FSET "[Away ($strftime($1 %a %b %d %I:%M%p))] [Current ($strftime($0 %a %b %d %I:%M%p))]"
 #define DEFAULT_FMT_SEND_CTCP_FSET "%K[%rctcp%K(%R$1%K)] %n$2"
-#define DEFAULT_FMT_SEND_PUBLIC_FSET "%b<%W$2%b>%n $3-"
+#define DEFAULT_FMT_SEND_PUBLIC_FSET "%B<%w$2%B>%n $3-"
 #define DEFAULT_FMT_SEND_PUBLIC_OTHER_FSET "%p<%n$2%K:%n$1%p>%n $3-"
 #define DEFAULT_FMT_SERVER_FSET "$G%n $1: $2-"
 #define DEFAULT_FMT_SERVER_MSG1_FSET "$G%n $1: $2-"

@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 /*
  * server.c: Things dealing with server connections, etc. 
  *

@@ -73,29 +73,6 @@ typedef struct server_split
 	char *time; 	/* time of split */
 } irc_server;
 
-/*
- * ctcp_entry: the format for each ctcp function.   note that the function
- * described takes 4 parameters, a pointer to the ctcp entry, who the message
- * was from, who the message was to (nickname, channel, etc), and the rest of
- * the ctcp message.  it can return null, or it can return a malloced string
- * that will be inserted into the oringal message at the point of the ctcp.
- * if null is returned, nothing is added to the original message
-
- */
-struct _CtcpEntry;
-
-typedef char *(*CTCP_Handler)(struct _CtcpEntry *, char *, char *, char *);
-
-typedef	struct _CtcpEntry
-{
-	char		*name;  /* name of ctcp datatag */
-	int		id;	/* index of this ctcp command */
-	int		flag;	/* Action modifiers */
-	char		*desc;  /* description returned by ctcp clientinfo */
-	CTCP_Handler 	func;	/* function that does the dirty deed */
-	CTCP_Handler 	repl;	/* Function that is called for reply */
-}	CtcpEntry;
-
 
 struct transfer_struct {
 	unsigned short packet_id;
@@ -538,16 +515,6 @@ typedef struct nicktab_stru
 	char *type;
 } NickTab;
 
-typedef struct clonelist_stru
-{
-	struct clonelist_stru *next;
-	char *number;
-	char *server;
-	int  port;
-	int  socket_num;
-	int  warn;
-} CloneList;
-
 typedef struct IgnoreStru
 {
 	struct IgnoreStru *next;
@@ -571,7 +538,7 @@ typedef struct
 	int	type;			/* variable types, see below */
 	int	integer;		/* int value of variable */
 	char	*string;		/* string value of variable */
-	void	(*func)(Window *, char *, int);		/* function to do every time variable is set */
+	void    (*func)(Window *, char *, int);         /* function to do every time variable is set */
 	char	int_flags;		/* internal flags to the variable */
 	unsigned short	flags;		/* flags for this variable */
 }	IrcVariable;

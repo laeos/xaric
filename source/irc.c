@@ -1,3 +1,4 @@
+#ident "$Id$"
 /*
  * ircII: a new irc client.  I like it.  I hope you will too!
  *
@@ -52,6 +53,7 @@ const char internal_version[] = "19971106";
 #include "timer.h"
 #include "whowas.h"
 #include "misc.h"
+#include "tcommand.h"
 
 int irc_port = IRC_PORT,	/* port of ircd */
   strip_ansi_in_echo, current_on_hook = -1,	/* used in the send_text()
@@ -80,6 +82,7 @@ extern char *last_away_nick;
 
 extern int split_watch;
 char empty_string[] = "";
+char three_stars[] = "***";
 
 char *invite_channel = NULL,	/* last channel of an INVITE */
  *ircrc_file = NULL,		/* full path .ircrc file */
@@ -101,7 +104,9 @@ char *invite_channel = NULL,	/* last channel of an INVITE */
  *who_real = NULL,		/* extra /who switch info */
  *cannot_open = NULL,		/* extra /who switch info */
  *auto_str = NULL,		/* auto response str */
- *cut_buffer = NULL;		/* global cut_buffer */
+ *cut_buffer = NULL,		/* global cut_buffer */
+ *line_thing = NULL;		/* show_numeric_str, say( ), put at begin of line */
+ 
 
 int away_set = 0;		/* set if there is an away
 				 * message anywhere */
@@ -969,7 +974,6 @@ io (const char *what)
 			do_server (&rd, &wd);
 			do_processes (&rd);
 			do_screens (&rd);
-			do_clones (&rd, &wd);
 			dcc_check_idle ();
 			scan_sockets (&rd, &wd);
 			set_current_screen (old_current_screen);
@@ -1071,8 +1075,8 @@ main (int argc, char *argv[], char *envp[])
 	my_signal (SIGCONT, term_cont, 0);
 	my_signal (SIGWINCH, sig_refresh_screen, 0);
 
-	init_keys_1 ();
 	init_variables ();
+	init_keys_1 ();
 	init_commands ();
 
 	build_status (curr_scr_win, NULL, 0);

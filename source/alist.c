@@ -15,6 +15,7 @@
  * me do this. ;-)
  */
 
+#include "irc.h"
 #include "alist.h"
 #include "ircaux.h"
 #include "output.h"
@@ -58,10 +59,9 @@ add_to_array (array * array, array_item * item)
  * Returns the entry that has been removed, if any.
  */
 array_item *
-remove_from_array (array * array, char *name)
+remove_from_array (array * array, const char *name)
 {
 	int count, location = 0;
-	array_item *ret = NULL;
 
 	if (array->max)
 	{
@@ -69,16 +69,27 @@ remove_from_array (array * array, char *name)
 		if (count >= 0)
 			return NULL;
 
-		ret = ARRAY_ITEM (array, location);
-		move_array_items (array, location + 1, array->max, -1);
-		array->max--;
-		return ret;
+		return array_pop(array, location);
 	}
 	return NULL;		/* Cant delete whats not there */
 }
 
 array_item *
-array_lookup (array * array, char *name, int wild, int delete)
+array_pop (array *array, int which)
+{
+	array_item *ret = NULL;
+
+	if (which < 0 || which >= array->max)
+		return NULL;
+
+	ret = ARRAY_ITEM(array, which);
+	move_array_items(array, which + 1, array->max, -1);
+	array->max--;
+	return ret;
+}
+
+array_item *
+array_lookup (array * array, const char *name, int wild, int delete)
 {
 	int count, location;
 
@@ -159,7 +170,7 @@ move_array_items (array * array, int start, int end, int dir)
  *      location is put into ``loc''.
  */
 array_item *
-find_array_item (array * set, char *name, int *cnt, int *loc)
+find_array_item (array * set, const char *name, int *cnt, int *loc)
 {
 	int len = strlen (name), c = 0, pos = 0, min, max;
 
@@ -175,7 +186,7 @@ find_array_item (array * set, char *name, int *cnt, int *loc)
 	while (max >= min)
 	{
 		pos = (max - min) / 2 + min;
-		c = strncmp (name, ARRAY_ITEM (set, pos)->name, len);
+		c = set->func (name, ARRAY_ITEM (set, pos)->name, len);
 		if (c == 0)
 			break;
 		else if (c < 0)
@@ -241,7 +252,7 @@ find_array_item (array * set, char *name, int *cnt, int *loc)
 	return ARRAY_ITEM (set, min);
 }
 
-#define FIXED_ITEM(list, pos, size) (*(array_item *) (list + ( pos * size )))
+#define FIXED_ITEM(list, pos, size) (*(array_item *) ((char *)list + ( pos * size )))
  /*
     * This is useful for finding items in a fixed array (eg, those lists that
     * are a simple fixed length arrays of 1st level structs.)
@@ -250,7 +261,7 @@ find_array_item (array * set, char *name, int *cnt, int *loc)
     * level array instead of a 2nd level array.
   */
 void *
-find_fixed_array_item (void *list, size_t size, int howmany, char *name, int *cnt, int *loc)
+find_fixed_array_item (void *list, size_t size, int howmany, const char *name, int *cnt, int *loc)
 {
 	int len = strlen (name), min = 0, max = howmany, old_pos = -1,
 	  pos, c;

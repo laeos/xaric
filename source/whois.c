@@ -1,3 +1,4 @@
+#ident "$Id$"
 /*
  * whois.c: Some tricky routines for querying the server for information
  * about a nickname using WHOIS.... all the time hiding this from the user.  
@@ -292,7 +293,7 @@ userhost_returned (char *from, char **ArgList)
 			if (do_hook (current_numeric, "%s %s %s %s %s", nick,
 				     isoper ? "+" : "-", ishere ? "+" : "-", user, nsl ? nsl : host))
 			{
-				put_it ("%s %s is %s@%s%s%s", numeric_banner (),
+				put_it ("%s %s is %s@%s%s%s", line_thing,
 				      nick, user, nsl ? nsl : host, isoper ?
 				     " (Is an IRC operator)" : empty_string,
 					ishere ? empty_string : " (away)");
@@ -396,7 +397,7 @@ whowas_name (char *from, char **ArgList)
 	lastlog_level = set_lastlog_msg_level (LOG_CRAP);
 	whois_stuff = get_server_whois_stuff (from_server);
 	if ((ptr = whois_queue_head (from_server)) &&
-	    (whois_type_head (from_server) & (WHOIS_WHOIS | WHOIS_ISON2)) &&
+	    (whois_type_head (from_server) & WHOIS_WHOIS) &&
 	    (my_stricmp (ptr, nick) == 0))
 	{
 		malloc_strcpy (&whois_stuff->nick, nick);
@@ -436,7 +437,7 @@ whois_channels (char *from, char **ArgList)
 	line = ArgList[1];
 	whois_stuff = get_server_whois_stuff (from_server);
 	if ((ptr = whois_queue_head (from_server)) &&
-	    (whois_type_head (from_server) & (WHOIS_WHOIS | WHOIS_ISON2)) &&
+	    (whois_type_head (from_server) & WHOIS_WHOIS ) &&
 	    whois_stuff->nick &&
 	    (my_stricmp (ptr, whois_stuff->nick) == 0))
 	{
@@ -485,7 +486,7 @@ whois_server (char *from, char **ArgList)
 	}
 	whois_stuff = get_server_whois_stuff (from_server);
 	if ((ptr = whois_queue_head (from_server)) &&
-	    (whois_type_head (from_server) & (WHOIS_WHOIS | WHOIS_ISON2)) &&
+	    (whois_type_head (from_server) & WHOIS_WHOIS ) &&
 	    whois_stuff->nick &&	/* This is *weird* */
 	    (!my_stricmp (ptr, whois_stuff->nick)))
 	{
@@ -566,7 +567,7 @@ end_of_whois (char *from, char **ArgList)
 	if ((nick = ArgList[0]) != NULL)
 	{
 		ptr = whois_queue_head (from_server);
-		if (ptr && (whois_type_head (from_server) & (WHOIS_WHOIS | WHOIS_ISON2)) &&
+		if (ptr && (whois_type_head (from_server) & WHOIS_WHOIS ) &&
 		    (!my_stricmp (ptr, nick)))
 		{
 			WhoisQueue *thing;
@@ -620,7 +621,7 @@ no_such_nickname (char *from, char **ArgList)
 	{
 		char *name = nick + 1;
 
-		if (ptr && (whois_type_head (from_server) & (WHOIS_WHOIS | WHOIS_ISON2)) && !strcmp (ptr, name))
+		if (ptr && (whois_type_head (from_server) & WHOIS_WHOIS ) && !strcmp (ptr, name))
 		{
 			WhoisQueue *thing;
 
@@ -635,14 +636,12 @@ no_such_nickname (char *from, char **ArgList)
 			new_free (&thing->text);
 			new_free ((char **) &thing);
 			ignore_whois_crap = 0;
-			say ("return here?? hmm...");
 			return;
 		}
-		say ("return here?? umm...");
 		return;
 	}
 	notify_mark (nick, NULL, NULL, 0);
-	if (ptr && (whois_type_head (from_server) & (WHOIS_ISON2 | WHOIS_USERHOST)) &&
+	if (ptr && (whois_type_head (from_server) & WHOIS_USERHOST) &&
 	    (bar = strstr (ptr, nick)))
 	{
 		WhoisQueue *thing;
@@ -693,7 +692,6 @@ no_such_nickname (char *from, char **ArgList)
 void 
 user_is_away (char *from, char **ArgList)
 {
-	static char *last_away_msg = NULL, *last_away_nick = NULL;
 	char *message, *who;
 	WhoisStuff *whois_stuff;
 
@@ -709,21 +707,10 @@ user_is_away (char *from, char **ArgList)
 			malloc_strcpy (&whois_stuff->away, message);
 		else
 		{
-			if (!show_away_flag && get_int_var (SHOW_AWAY_ONCE_VAR))
-			{
-				if (!last_away_msg || strcmp (last_away_nick, from) || strcmp (last_away_msg, message))
-				{
-					malloc_strcpy (&last_away_nick, from);
-					malloc_strcpy (&last_away_msg, message);
-				}
-				else
-					return;
-			}
 			message_from (NULL, LOG_CRAP);
 			if (do_hook (current_numeric, "%s %s", who, message))
 				put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_AWAY_FSET), "%s %s", who, message));
 		}
-		eat_away = 0;
 	}
 }
 
@@ -904,30 +891,6 @@ whois_ignore_walls (WhoisStuff * stuff, char *nick, char *text)
 }
 
 /*
- * whois_notify: used by the routines in notify.c to tell when someone has
- * signed on or off irc 
- */
-void 
-whois_notify (WhoisStuff * stuff, char *nick, char *text)
-{
-	int level;
-
-	level = set_lastlog_msg_level (LOG_CRAP);
-	if (stuff)
-		notify_mark (stuff->nick, stuff->user, stuff->host, 1);
-	else
-		notify_mark (nick, NULL, NULL, 0);
-	set_lastlog_msg_level (level);
-}
-
-
-extern void 
-got_userhost (WhoisStuff * stuff, char *nick, char *userhost)
-{
-	notify_mark (nick, stuff->user, stuff->host, stuff->not_on ? 0 : 1);
-}
-
-/*
  * add_to_whois_queue: This routine is called whenever you want to do a WHOIS
  * or WHOWAS.  What happens is this... each time this function is called it
  * adds a new element to the whois queue using the nick and func as in
@@ -941,8 +904,6 @@ add_to_whois_queue (char *nick, void (*func) (WhoisStuff *, char *, char *), cha
 
 	if (func == USERHOST_USERHOST || func == userhost_cmd_returned)
 		Type = WHOIS_USERHOST;
-	else if (func == whois_notify)
-		Type = WHOIS_ISON2;
 	else
 		Type = WHOIS_WHOIS;
 
@@ -1029,7 +990,6 @@ typed_add_to_whois_queue (int type, char *nick, void (*func) (WhoisStuff *, char
 #endif
 			send_to_server ("USERHOST %s", nick);
 			break;
-		case WHOIS_ISON2:
 		case WHOIS_WHOIS:
 #ifdef MONITOR_Q
 			put_it ("+++ WHOIS %s", nick);

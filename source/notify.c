@@ -199,11 +199,13 @@ do_serv_notify (int servnum)
 
 		if (!size)
 			continue;
+#if 0
 		if (is_server_connected (servnum) && *buf)
 		{
 			servnum = servnum;
 			add_to_userhost_queue (buf, got_userhost, "%s", buf);
 		}
+#endif
 	}
 	from_server = old_from_server;
 	return;

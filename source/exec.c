@@ -34,6 +34,10 @@
 
 #include <sys/wait.h>
 
+#ifdef HAVE_GETPGID
+pid_t getpgid(pid_t pid);
+#endif
+
 static int exec_close (int);
 void start_process (char *, char *, char *, char *, unsigned int, int);
 void kill_process (int, int);
@@ -736,7 +740,7 @@ start_process (char *name, char *logical, char *redirect, char *who, unsigned in
 				setgid (getgid ());
 				execl (shell, shell, flag, name, NULL);
 			}
-			snprintf (buffer, BIG_BUFFER_SIZE, "%s Error starting shell \"%s\": %s\n", thing_ansi ? thing_ansi : "***", shell,
+			snprintf (buffer, BIG_BUFFER_SIZE, "%s Error starting shell \"%s\": %s\n", line_thing, shell,
 				  strerror (errno));
 			write (1, buffer, strlen (buffer));
 			_exit (-1);

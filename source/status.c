@@ -1,6 +1,3 @@
-
-
-
 /*
  * status.c: handles the status line updating, etc for IRCII 
  *

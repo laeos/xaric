@@ -32,25 +32,11 @@ static int list_match (List *, char *);
  *
  */
 
-/*
-   static       int add_list_strcmp(List *item1, List *item2)
-   {
-   return strcmp(item1->name, item2->name);
-   }
- */
-
 static int 
 add_list_stricmp (List * item1, List * item2)
 {
 	return strcasecmp (item1->name, item2->name);
 }
-
-/*
-   static       int list_strcmp(List *item1, char *str)
-   {
-   return strcmp(item1->name, str);
-   }
- */
 
 static int 
 list_stricmp (List * item1, char *str)
@@ -62,15 +48,6 @@ int
 list_strnicmp (List * item1, char *str)
 {
 	return my_strnicmp (item1->name, str, strlen (str));
-}
-
-static int 
-list_wildstrcmp (List * item1, char *str)
-{
-	if (wild_match (item1->name, str) || wild_match (str, item1->name))
-		return 0;
-	else
-		return 1;
 }
 
 static int 
@@ -198,12 +175,6 @@ List *
 remove_from_list (List ** list, char *name)
 {
 	return remove_from_list_ext (list, name, NULL);
-}
-
-List *
-removewild_from_list (List ** list, char *name)
-{
-	return remove_from_list_ext (list, name, list_wildstrcmp);
 }
 
 

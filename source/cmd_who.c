@@ -1,7 +1,6 @@
-
 #ident "$Id$"
 /*
- * cmd_hostname.c : virtual host support
+ * cmd_hostname.c : the who command 
  *
  * Written By Michael Sandrof
  * Portions are based on EPIC.

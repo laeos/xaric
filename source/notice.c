@@ -130,7 +130,6 @@ parse_notice (char *from, char **Args)
 		}
 		if ((tmpc = lookup_channel (to, from_server, CHAN_NOUNLINK)))
 			nick = find_nicklist_in_channellist (from, tmpc, 0);
-		update_stats (NOTICELIST, to, nick, tmpc, 0);
 		if (from && *from && strcmp (get_server_itsname (from_server), from))
 		{
 			int not_reply = 0;

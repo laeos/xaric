@@ -1,3 +1,35 @@
+Sat Oct 17 01:16:57 1998 Rex Feany <laeos@ptw.com>
+
+	* 0.9c released to the world.	
+
+Sat Oct 17 00:49:29 1998 Rex Feany <laeos@ptw.com>
+
+	* define happy_crappy_hack, in config.h, and see what kind of fun things
+	  happens to lusers that /ctcp {sound|trout} you (as long as you have ops 
+	  in the chan;)
+
+Sat Oct 17 00:12:42 1998 Rex Feany <laeos@ptw.com>
+
+	* Removed SHOW_AWAY_ONCE variable. it was/is ugly.	
+
+Thu Oct 15 18:34:33 1998 Rex Feany <laeos@ptw.com>
+
+	* Incremented version (0.9c)
+	* Changed a few bitchsay()s to yell()s (might we get rid of "bitchsay" 
+	  altogehter?)
+	* Fixed makefile to not say "configure your bot correctly" :) 
+	  (this makefile was ripped from another one of my projects, Phosphene)
+
+Wed Oct 14 17:25:12 1998 Rex Feany <laeos@ptw.com>
+
+	* fixed the makefile to install the server and help
+	  files
+
+Wed Oct 14 15:42:29 1998 Rex Feany <laeos@ptw.com>
+
+	* got rid of thing_ansi, cleaned it all up.
+	  new incarnation is line_thing, and it is never NULL.
+
 Wed Oct 07 20:06:58 1998 Rex Feany <laeos@ptw.com>
 
 	* removed a lot of unused variables 

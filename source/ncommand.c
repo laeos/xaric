@@ -1,4 +1,4 @@
-#ident "$Id: ncommand.c,v 1.2 1998/10/08 00:22:44 laeos Exp $"
+#ident "$Id: ncommand.c,v 1.3 1998/10/14 22:52:01 laeos Exp $"
 /*
  * ncommand.c : new commands for Xaric
  * (c) 1998 Rex Feany <laeos@ptw.com> 
@@ -420,7 +420,7 @@ cmd_ctcp (struct command *cmd, char *args)
 			else
 				send_ctcp (type, to, tag, NULL);
 			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_CTCP_FSET),
-							     "%s %s %s %s", update_clock (GET_TIME), to, stag ? stag : "VERSION", args ? args : empty_string));
+			     "%s %s %s %s", update_clock (GET_TIME), to, stag ? stag : "VERSION", args ? args : empty_string));
 		}
 	}
 	else
@@ -676,7 +676,7 @@ cmd_echo (struct command *cmd, char *args)
 	strip_ansi_in_echo = 0;
 	if (banner)
 	{
-		malloc_strcpy (&stuff, numeric_banner ());
+		malloc_strcpy (&stuff, line_thing);
 		if (*stuff)
 		{
 			m_3cat (&stuff, space, args);
@@ -993,7 +993,12 @@ cmd_ping (struct command *cmd, char *args)
 	if (in_ctcp () == -1)
 		say ("You may not use the CTCP command in an ON CTCP_REPLY!");
 	else
+	{
 		send_ctcp (0, to, CTCP_PING, "%ld %ld", (long) tp.tv_sec, (long) tp.tv_usec);
+		put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_CTCP_FSET),
+		   "%s %s %s", update_clock (GET_TIME), to, "PING"));
+	}
+
 }
 
 void
@@ -1706,7 +1711,7 @@ void
 ison_now (char *notused, char *nicklist)
 {
 	if (do_hook (current_numeric, "%s", nicklist))
-		put_it ("%s Currently online: %s", numeric_banner (), nicklist);
+		put_it ("%s Currently online: %s", line_thing, nicklist);
 }
 
 void

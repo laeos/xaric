@@ -33,7 +33,8 @@
 #define CTCP_PING	10
 #define	CTCP_ECHO	11
 #define CTCP_SOUND	12
-#define CTCP_CUSTOM	13
+#define CTCP_TROUT	13
+#define CTCP_CUSTOM	14
 
 #define NUMBER_OF_CTCPS	CTCP_CUSTOM
 
@@ -45,7 +46,6 @@
 
 
 
-extern		char	*ctcp_type[];
 extern		int	sed;
 extern		int	in_ctcp_flag;
 

@@ -1,12 +1,12 @@
-
- /*
-    * functions.c -- Built-in functions for ircII
-    *
-    * Written by Michael Sandrof
-    * Copyright(c) 1990 Michael Sandrof
-    * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
-    *
-  */
+#ident "$Id$"
+/*
+ * functions.c -- Built-in functions for ircII
+ *
+ * Written by Michael Sandrof
+ * Copyright(c) 1990 Michael Sandrof
+ * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
+ *
+ */
 
 #include "irc.h"
 #include "alias.h"
@@ -65,7 +65,7 @@ static char *alias_online (void);
 static char *alias_idle (void);
 static char *alias_version_str (void);
 static char *alias_version_str1 (void);
-static char *alias_thingansi (void);
+static char *alias_line_thing (void);
 static char *alias_uptime (void);
 
 typedef struct
@@ -89,7 +89,7 @@ static BuiltIns built_in[] =
 	{'D', alias_detected},
 	{'E', alias_idle},
 	{'F', alias_online},
-	{'G', alias_thingansi},
+	{'G', alias_line_thing},
 	{'H', alias_current_numeric},
 	{'I', alias_invite},
 	{'J', alias_version_str},
@@ -243,9 +243,9 @@ alias_current_numeric (void)
 	return m_sprintf ("%03d", -current_numeric);
 }
 static char *
-alias_thingansi (void)
+alias_line_thing (void)
 {
-	return m_sprintf ("%s", numeric_banner ());
+	return m_sprintf ("%s", line_thing);
 }
 static char *
 alias_uptime (void)

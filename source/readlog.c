@@ -96,7 +96,7 @@ cmd_readlog (struct command *cmd, char *args)
 
 	if ((msg_fp = fopen (expand, "r")) == NULL)
 	{
-		log_put_it (expand, "%s Error Opening Log file %s", thing_ansi, expand);
+		log_put_it (expand, "%s Error Opening Log file %s", line_thing, expand);
 		new_free (&expand);
 		msg_fp = NULL;
 		return;

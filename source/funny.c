@@ -146,11 +146,11 @@ funny_list (char *from, char **ArgList)
 	if (last_width != get_int_var (CHANNEL_NAME_WIDTH_VAR))
 	{
 		if ((last_width = get_int_var (CHANNEL_NAME_WIDTH_VAR)) != 0)
-			snprintf (format, 25, "%%s %%-%u.%us %%-5s %%s",	/*thing_ansi, */
-				  (unsigned char) last_width,
-				  (unsigned char) last_width);
+			snprintf (format, 25, "%%s %%-%u.%us %%-5s %%s",
+				(unsigned char) last_width,
+				(unsigned char) last_width);
 		else
-			snprintf (format, 25, "%%s %%s %%-5s %%s" /*, thing_ansi */ );
+			snprintf (format, 25, "%%s %%s %%-5s %%s");
 	}
 	channel = ArgList[0];
 	user_cnt = ArgList[1];

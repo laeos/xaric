@@ -19,6 +19,8 @@ struct tnode *t_remove(struct tnode *root, char *s, struct command **data);
 struct command *t_search(struct tnode *root, char *s);
 struct tnode *t_build(struct tnode *root, struct command c[], int n);
 void t_traverse(struct tnode * p, char *s, void (*fcn)(struct command *, char *), char *data);
+void init_commands (void);
+
 
 
 void t_parse_command(char *command, char *line);

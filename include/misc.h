@@ -37,7 +37,6 @@ enum color_attributes {
 #define NEED_OP 1
 #define NO_OP 0
 	
-extern  CloneList *clones;
 extern char *color_str[];
 extern	int	split_watch;
 void	clear_link(irc_server **);

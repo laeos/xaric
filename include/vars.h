@@ -9,8 +9,6 @@
 #ifndef __vars_h_
 #define __vars_h_
 
-#include "tcommand.h"
-
 /* indexes for the irc_variable array */
 
 enum VAR_TYPES {
@@ -127,7 +125,6 @@ enum VAR_TYPES {
 	SHELL_VAR,
 	SHELL_FLAGS_VAR,
 	SHELL_LIMIT_VAR,
-	SHOW_AWAY_ONCE_VAR,
 	SHOW_CHANNEL_NAMES_VAR,
 	SHOW_CTCP_IDLE_VAR,
 	SHOW_END_OF_MSGS_VAR,
@@ -183,7 +180,6 @@ NUMBER_OF_VARIABLES
 	void	init_variables(void);
 	int	do_boolean(char *, int *);
 	void	set_var_value(int, char *);
-	void	cmd_set(struct command *cmd, char *args);
 	void	save_variables (FILE * fp, int do_all);
 	char	*make_string_var(char *);
 	int	charset_size(void);

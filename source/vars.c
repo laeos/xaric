@@ -51,6 +51,7 @@ extern Screen *screen_list, *current_screen;
 int loading_global = 0;
 
 extern ChannelList default_statchan;
+extern char three_stars[];
 
 
 enum VAR_TYPES find_variable (char *, int *);
@@ -189,7 +190,6 @@ static IrcVariable irc_variable[] =
 	{"SHELL", STR_TYPE_VAR, 0, NULL, NULL, 0, VF_NODAEMON},
 	{"SHELL_FLAGS", STR_TYPE_VAR, 0, NULL, NULL, 0, VF_NODAEMON},
 	{"SHELL_LIMIT", INT_TYPE_VAR, DEFAULT_SHELL_LIMIT, NULL, NULL, 0, VF_NODAEMON},
-	{"SHOW_AWAY_ONCE", BOOL_TYPE_VAR, DEFAULT_SHOW_AWAY_ONCE, NULL, NULL, 0, 0},
 	{"SHOW_CHANNEL_NAMES", BOOL_TYPE_VAR, DEFAULT_SHOW_CHANNEL_NAMES, NULL, NULL, 0, 0},
 	{"SHOW_CTCP_IDLE", BOOL_TYPE_VAR, DEFAULT_SHOW_CTCP_IDLE, NULL, NULL, 0, 0},
 	{"SHOW_END_OF_MSGS", BOOL_TYPE_VAR, DEFAULT_SHOW_END_OF_MSGS, NULL, NULL, 0, 0},
@@ -287,6 +287,8 @@ init_variables ()
 {
 	int old_display = window_display;
 	char *foo;
+
+
 #ifdef VAR_DEBUG
 	int i;
 
@@ -296,21 +298,18 @@ init_variables ()
 #endif
 
 	window_display = 0;
+	line_thing = m_strdup(three_stars);
 
 	set_string_var (HELP_VAR, DEFAULT_HELP_FILE);
 
-	set_string_var (SHOW_NUMERICS_STR_VAR, "-*-");
-
-	set_numeric_string (curr_scr_win, "-*-", 0);
-
 	set_string_var (MSGLOGFILE_VAR, DEFAULT_MSGLOGFILE);
-
 	set_string_var (MSGLOG_LEVEL_VAR, DEFAULT_MSGLOG_LEVEL);
 	set_int_var (LLOOK_DELAY_VAR, DEFAULT_LLOOK_DELAY);
 	set_int_var (MSGCOUNT_VAR, 0);
 
 	set_string_var (DEFAULT_REASON_VAR, DEFAULT_KICK_REASON);
 	set_string_var (DCC_DLDIR_VAR, DEFAULT_DCC_DLDIR);
+	set_string_var (SHOW_NUMERICS_STR_VAR, three_stars);
 
 	set_string_var (CMDCHARS_VAR, DEFAULT_CMDCHARS);
 	set_string_var (LOGFILE_VAR, DEFAULT_LOGFILE);
@@ -753,7 +752,7 @@ set_realname (Window * win, char *value, int unused)
 static void 
 set_numeric_string (Window * win, char *value, int unused)
 {
-	malloc_strcpy (&thing_ansi, value);
+	malloc_strcpy (&line_thing, value ? value : three_stars);
 }
 
 static void 

@@ -1,3 +1,4 @@
+#ident "$Id$"
 /*
  * alias.c Handles command aliases for irc.c 
  *

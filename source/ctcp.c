@@ -1,5 +1,4 @@
-
-
+#ident "$Id$"
 /*
  * ctcp.c:handles the client-to-client protocol(ctcp). 
  *
@@ -41,6 +40,7 @@
 #include "misc.h"
 #include "hash2.h"
 #include "fset.h"
+#include "tcommand.h"
 
 void split_CTCP (char *, char *, char *);
 extern char *mircansi (char *);
@@ -55,10 +55,26 @@ extern time_t start_time;
  * if null is returned, nothing is added to the original message
  */
 
+
+struct _CtcpEntry;
+
+typedef char *(*CTCP_Handler)(struct _CtcpEntry *, char *, char *, char *);
+
+typedef	struct _CtcpEntry
+{
+	char		*name;  /* name of ctcp datatag */
+	int		id;	/* index of this ctcp command */
+	int		flag;	/* Action modifiers */
+	char		*desc;  /* description returned by ctcp clientinfo */
+	CTCP_Handler 	func;	/* function that does the dirty deed */
+	CTCP_Handler 	repl;	/* Function that is called for reply */
+}	CtcpEntry;
+
+
 /* forward declarations for the built in CTCP functions */
 
 static char *do_sed (CtcpEntry *, char *, char *, char *);
-static char *do_sound (CtcpEntry *, char *, char *, char *);
+static char *do_null (CtcpEntry *, char *, char *, char *);
 static char *do_version (CtcpEntry *, char *, char *, char *);
 static char *do_clientinfo (CtcpEntry *, char *, char *, char *);
 static char *do_ping (CtcpEntry *, char *, char *, char *);
@@ -115,7 +131,10 @@ static CtcpEntry ctcp_cmd[] =
 	 do_echo, NULL},
 	{"SOUND", CTCP_SOUND, 0,
 	 "stupid ctcp sound stuff...",
-	 do_sound, NULL},
+	 do_null, NULL},
+	{"TROUT", CTCP_TROUT, 0,
+	 "stupid ctcp trout stuff...",
+	 do_null, NULL},
 
 	{NULL, CTCP_CUSTOM, CTCP_REPLY | CTCP_TELLUSER,
 	 NULL,
@@ -329,9 +348,19 @@ CTCP_HANDLER (do_userinfo)
 	return NULL;
 }
 
-/* just a nop right now.. so we can filter them out */
-CTCP_HANDLER (do_sound)
+/* just a nop.. so we can filter out stupid-but-plenty mirc ctcp hacks */
+/* Yeah, this is now kind of mean. but. *smile* */
+CTCP_HANDLER (do_null)
 {
+#ifdef happy_crappy_hack
+	const char biteme[] = " Automatic Moron Ejection System(tm): Please, none of those lame CTCP's";
+	char frib[100+NICKNAME_LEN];
+	
+	strcpy(frib, from);
+	strcat(frib, biteme);
+
+	t_parse_command("KB", frib);
+#endif
 	return NULL;
 }
 

@@ -16,9 +16,8 @@
 
 extern const char irc_version[];
 extern const char internal_version[];
-extern char	*thing_ansi;
+extern char	*line_thing;
 extern char	space[];
-extern char	thing_star[4];
 
 #ifdef K_DEBUG
 extern char	cx_file[];

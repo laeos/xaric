@@ -45,7 +45,6 @@ typedef	struct	WhoisQueueStru
 
 void	add_to_whois_queue(char *, void (*)(WhoisStuff *, char *, char *), char *, ...);
 void	add_to_userhost_queue(char *, void (*func)(WhoisStuff *, char *, char *), char *, ...);
-void	got_userhost(WhoisStuff *, char *, char *);
 void	got_my_userhost(WhoisStuff *, char *, char *);
 void	add_ison_to_whois(char *, void (*) ());
 void	whois_name(char *, char **);
@@ -59,7 +58,6 @@ void	whois_ignore_msgs(WhoisStuff *, char *, char *);
 void	whois_ignore_notices(WhoisStuff *, char *, char *);
 void	whois_ignore_walls(WhoisStuff *, char *, char *);
 void	whois_ignore_invites(WhoisStuff *, char *, char *);
-void	whois_notify(WhoisStuff *stuff, char *, char *);
 void	whois_new_wallops(WhoisStuff *, char *, char *);
 void	clean_whois_queue(void);
 void	set_beep_on_msg(Window *, char *, int);
@@ -79,7 +77,6 @@ extern	char	*redirect_format;
 #define	WHOIS_WHOIS	0x01
 #define	WHOIS_USERHOST	0x02
 #define	WHOIS_ISON	0x04
-#define WHOIS_ISON2	0x08
 #define WHOIS_WHOWAS	0x10
 
 #define USERHOST_USERHOST ((void (*)(WhoisStuff *, char *, char *)) 1)

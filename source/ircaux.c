@@ -349,31 +349,6 @@ stristr (char *source, char *search)
 	return NULL;
 }
 
-/* case insensitive string searching from the end */
-char *
-rstristr (char *source, char *search)
-{
-	char *ptr;
-	int x = 0;
-
-	if (!source || !*source || !search || !*search || strlen (source) < strlen (search))
-		return NULL;
-
-	ptr = source + strlen (source) - strlen (search);
-
-	while (ptr >= source)
-	{
-		if (!search[x])
-			return ptr;
-
-		if (toupper (ptr[x]) == toupper (search[x]))
-			x++;
-		else
-			ptr--, x = 0;
-	}
-	return NULL;
-}
-
 /* 
  * word_count:  Efficient way to find out how many words are in
  * a given string.  Relies on isspace() not being broken.
@@ -406,30 +381,6 @@ word_count (char *str)
 	}
 	return (cocs + 1) / 2;
 }
-
-#if 0
-extern int 
-word_scount (char *str)
-{
-	int cocs = 0;
-	char *foo = str;
-	int isv = 1;
-
-	if (!foo)
-		return 0;
-
-	while (*foo)
-	{
-		if (my_isspace (*foo) != !isv)
-		{
-			isv = my_isspace (*foo);
-			cocs++;
-		}
-		foo++;
-	}
-	return (cocs + 1) / 2;
-}
-#endif
 
 char *
 next_arg (char *str, char **new_ptr)
@@ -573,61 +524,6 @@ new_next_arg (char *str, char **new_ptr)
 	return ptr;
 }
 
-/*
- * This function is "safe" because it doesnt ever return NULL.
- * XXXX - this is an ugly kludge that needs to go away
- */
-char *
-safe_new_next_arg (char *str, char **new_ptr)
-{
-	char *ptr, *start;
-
-	if (!str || !*str)
-		return empty_string;
-
-	if ((ptr = sindex (str, "^ \t")) != NULL)
-	{
-		if (*ptr == '"')
-		{
-			start = ++ptr;
-			while ((str = sindex (ptr, "\"\\")) != NULL)
-			{
-				switch (*str)
-				{
-				case '"':
-					*str++ = '\0';
-					if (*str == ' ')
-						str++;
-					if (new_ptr)
-						*new_ptr = str;
-					return (start);
-				case '\\':
-					if (*(str + 1) == '"')
-						strcpy (str, str + 1);
-					ptr = str + 1;
-				}
-			}
-			str = empty_string;
-		}
-		else
-		{
-			if ((str = sindex (ptr, " \t")) != NULL)
-				*str++ = '\0';
-			else
-				str = empty_string;
-		}
-	}
-	else
-		str = empty_string;
-
-	if (new_ptr)
-		*new_ptr = str;
-
-	if (!ptr)
-		return empty_string;
-
-	return ptr;
-}
 
 char *
 new_new_next_arg (char *str, char **new_ptr, char *type)
@@ -1423,7 +1319,7 @@ uzfopen (char **filename, char *path)
 					/* Nope.  No more guesses? then punt */
 					if (!filename_path)
 					{
-						bitchsay ("File not found: %s", *filename);
+						yell ("File not found: %s", *filename);
 						new_free (filename);
 						return NULL;
 					}
@@ -1569,70 +1465,6 @@ vt100_decode (register unsigned char chr)
 	}
 	return 1;
 }
-
-#if 0
-/* some more string manips by hop (june, 1995) */
-extern int 
-fw_strcmp (comp_len_func * compar, char *one, char *two)
-{
-	int len = 0;
-	char *pos = one;
-
-	while (!my_isspace (*pos))
-		pos++, len++;
-
-	return compar (one, two, len);
-}
-
-
-/* 
- * Compares the last word in 'one' to the string 'two'.  You must provide
- * the compar function.  my_stricmp is a good default.
- */
-extern int 
-lw_strcmp (comp_func * compar, char *one, char *two)
-{
-	char *pos = one + strlen (one) - 1;
-
-	if (pos > one)		/* cant do pos[-1] if pos == one */
-		while (!my_isspace (pos[-1]) && (pos > one))
-			pos--;
-	else
-		pos = one;
-
-	if (compar)
-		return compar (pos, two);
-	else
-		return my_stricmp (pos, two);
-}
-
-/* 
- * you give it a filename, some flags, and a position, and it gives you an
- * fd with the file pointed at the 'position'th byte.
- */
-extern int 
-opento (char *filename, int flags, int position)
-{
-	int file;
-
-	file = open (filename, flags, 777);
-	lseek (file, position, SEEK_SET);
-	return file;
-}
-
-
-/* swift and easy -- returns the size of the file */
-long 
-file_size (char *filename)
-{
-	struct stat statbuf;
-
-	if (!stat (filename, &statbuf))
-		return (long) (statbuf.st_size);
-	else
-		return -1;
-}
-#endif
 
 /* Gets the time in second/usecond if you can,  second/0 if you cant. */
 struct timeval 
@@ -1827,24 +1659,6 @@ parse_number (char **str)
 	return (int) ret;
 }
 
-#if 0
-extern char *
-chop_word (char *str)
-{
-	char *end = str + strlen (str) - 1;
-
-	while (my_isspace (*end) && (end > str))
-		end--;
-	while (!my_isspace (*end) && (end > str))
-		end--;
-
-	if (end >= str)
-		*end = 0;
-
-	return str;
-}
-#endif
-
 extern int 
 splitw (char *str, char ***to)
 {
@@ -1877,139 +1691,6 @@ m_2dup (const char *str1, const char *str2)
 {
 	size_t msize = strlen (str1) + strlen (str2) + 1;
 	return strcat (strcpy ((char *) new_malloc (msize), str1), str2);
-}
-
-char *
-m_e3cat (char **one, const char *yes1, const char *yes2)
-{
-	if (*one && **one)
-		return m_3cat (one, yes1, yes2);
-	else
-		*one = m_2dup (yes1, yes2);
-	return *one;
-}
-
-#if 0
-#if !defined(HAVE_MEMMOVE)
-/*  $Revision$
-   **
-   **  This file has been modified to get it to compile more easily
-   **  on pre-4.4BSD systems.  Rich $alz, June 1991.
- */
-
-/*
- * sizeof(word) MUST BE A POWER OF TWO
- * SO THAT wmask BELOW IS ALL ONES
- */
-typedef int word;		/* "word" used for optimal copy speed */
-
-#define	wsize	sizeof(word)
-#define	wmask	(wsize - 1)
-
-/*
- * Copy a block of memory, handling overlap.
- * This is the routine that actually implements
- * (the portable versions of) bcopy, memcpy, and memmove.
- */
-void *
-memmove (char *dst0, const char *src0, register size_t length)
-{
-	register char *dst = dst0;
-	register const char *src = src0;
-	register size_t t;
-
-	if (length == 0 || dst == src)	/* nothing to do */
-		goto retval;
-
-	/*
-	 * Macros: loop-t-times; and loop-t-times, t>0
-	 */
-#define	TLOOP(s) if (t) TLOOP1(s)
-#define	TLOOP1(s) do { s; } while (--t)
-
-	if ((unsigned long) dst < (unsigned long) src)
-	{
-		/*
-		 * Copy forward.
-		 */
-		t = (int) src;	/* only need low bits */
-		if ((t | (int) dst) & wmask)
-		{
-			/*
-			 * Try to align operands.  This cannot be done
-			 * unless the low bits match.
-			 */
-			if ((t ^ (int) dst) & wmask || length < wsize)
-				t = length;
-			else
-				t = wsize - (t & wmask);
-			length -= t;
-			TLOOP1 (*dst++ = *src++);
-		}
-		/*
-		 * Copy whole words, then mop up any trailing bytes.
-		 */
-		t = length / wsize;
-		TLOOP (*(word *) dst = *(word *) src;
-		       src += wsize;
-		       dst += wsize);
-		t = length & wmask;
-		TLOOP (*dst++ = *src++);
-	}
-	else
-	{
-		/*
-		 * Copy backwards.  Otherwise essentially the same.
-		 * Alignment works as before, except that it takes
-		 * (t&wmask) bytes to align, not wsize-(t&wmask).
-		 */
-		src += length;
-		dst += length;
-		t = (int) src;
-		if ((t | (int) dst) & wmask)
-		{
-			if ((t ^ (int) dst) & wmask || length <= wsize)
-				t = length;
-			else
-				t &= wmask;
-			length -= t;
-			TLOOP1 (*--dst = *--src);
-		}
-		t = length / wsize;
-		TLOOP (src -= wsize;
-		       dst -= wsize;
-		       *(word *) dst = *(word *) src);
-		t = length & wmask;
-		TLOOP (*--dst = *--src);
-	}
-      retval:
-	return (dst0);
-}
-#endif
-#endif
-
-extern int 
-check_val (char *sub)
-{
-	long sval;
-	char *endptr;
-	double strtod ();
-
-	if (!*sub)
-		return 0;
-
-	/* get the numeric value (if any). */
-	sval = strtod (sub, &endptr);
-
-	/* Its OK if:
-	 *  1) the f-val is not zero.
-	 *  2) the first illegal character was not a null.
-	 *  3) there were no valid f-chars.
-	 */
-	if (sval || *endptr || (sub == endptr))
-		return 1;
-
-	return 0;
 }
 
 char *
@@ -2138,21 +1819,6 @@ strtoul (const char *nptr, char **endptr, int base)
 }
 #endif
 
-/*
- * Appends 'num' copies of 'app' to the end of 'str'.
- */
-extern char *
-strextend (char *str, char app, int num)
-{
-	char *ptr = str + strlen (str);
-
-	for (; num; num--)
-		*ptr++ = app;
-
-	*ptr = (char) 0;
-	return str;
-}
-
 extern char *
 strfill (char c, int num)
 {
@@ -2165,49 +1831,6 @@ strfill (char c, int num)
 	buffer[num] = '\0';
 	return buffer;
 }
-
-/*
- * Appends the given character to the string
- */
-char *
-strmccat (char *str, char c, int howmany)
-{
-	int x = strlen (str);
-
-	if (x < howmany)
-		str[x] = c;
-	str[x + 1] = 0;
-
-	return str;
-}
-
-#if 0
-/*
- * Pull a substring out of a larger string
- * If the ending delimiter doesnt occur, then we dont pass
- * anything (by definition).  This is because we dont want
- * to introduce a back door into CTCP handlers.
- */
-extern char *
-pullstr (char *source_string, char *dest_string)
-{
-	char delim = *source_string;
-	char *end;
-
-	end = strchr (source_string + 1, delim);
-
-	/* If there is no closing delim, then we punt. */
-	if (!end)
-		return NULL;
-
-	*end = 0;
-	end++;
-
-	strcpy (dest_string, source_string + 1);
-	strcpy (source_string, end);
-	return dest_string;
-}
-#endif
 
 extern int 
 empty (const char *str)
@@ -2264,27 +1887,6 @@ my_atol (char *str)
 		return 0L;
 }
 
-#if 0
-u_long 
-hashpjw (char *text, u_long prime)
-{
-	char *p;
-	u_long h = 0, g;
-
-	for (p = text; *p; p++)
-	{
-		h <<= 4;
-		h += *p;
-		if ((g = h & 0xf0000000))
-		{
-			h ^= (g >> 24);
-			h ^= g;
-		}
-	}
-	return h % prime;
-}
-#endif
-
 char *
 m_dupchar (int i)
 {
@@ -2295,40 +1897,6 @@ m_dupchar (int i)
 	ret[1] = 0;
 	return ret;
 }
-
-/*
- * This checks to see if ``root'' is a proper subname for ``var''.
- */
-int 
-is_root (char *root, char *var, int descend)
-{
-	int rootl, varl;
-
-	/* ``root'' must end in a dot */
-	rootl = strlen (root);
-	if (root[rootl] != '.')
-		return 0;
-
-	/* ``root'' must be shorter than ``var'' */
-	varl = strlen (var);
-	if (varl <= rootl)
-		return 0;
-
-	/* ``var'' must contain ``root'' as a leading subset */
-	if (my_strnicmp (root, var, rootl))
-		return 0;
-
-	/* 
-	 * ``var'' must not contain any additional dots
-	 * if we are checking for the current level only
-	 */
-	if (!descend && strchr (var + rootl, '.'))
-		return 0;
-
-	/* Looks like its ok */
-	return 1;
-}
-
 
 #ifndef HAVE_VSNPRINTF
 int 
@@ -2360,65 +1928,6 @@ snprintf (char *str, size_t size, const char *format,...)
 }
 #endif
 
-/* Returns the number of characters they are equal at. */
-size_t 
-streq (const char *one, const char *two)
-{
-	size_t cnt = 0;
-
-	while (*one && *two && (*one == *two))
-		cnt++, one++, two++;
-
-	return cnt;
-}
-
-char *
-m_strndup (const char *str, size_t len)
-{
-	char *retval = (char *) new_malloc (len + 1);
-	return strmcpy (retval, (char *) str, len);
-}
-
-#if 0
-char *
-remove_nl (char *str)
-{
-	char *ptr;
-
-	if ((ptr = strrchr (str, '\n')))
-		*ptr = 0;
-
-	return str;
-}
-
-char *
-spanstr (const char *str, const char *tar)
-{
-	int cnt = 1;
-	const char *p;
-
-	for (; *str; str++, cnt++)
-	{
-		for (p = tar; *p; p++)
-		{
-			if (*p == *str)
-				return (char *) p;
-		}
-	}
-
-	return 0;
-}
-
-char *
-s_next_arg (char **from)
-{
-	char *next = strchr (*from, ' ');
-	char *keep = *from;
-	*from = next;
-	return keep;
-}
-#endif
-
 char *
 strmopencat (char *dest, int maxlen,...)
 {
@@ -2445,21 +1954,6 @@ strmopencat (char *dest, int maxlen,...)
 
 	va_end (args);
 	return dest;
-}
-
-/*
- * An strcpy that is guaranteed to be safe for overlaps.
- */
-char *
-ov_strcpy (char *one, const char *two)
-{
-	if (two > one)
-	{
-		while (two && *two)
-			*one++ = *two++;
-		*one = 0;
-	}
-	return one;
 }
 
 char *

@@ -13,7 +13,6 @@
 #ifndef __numbers_h_
 #define __numbers_h_
 
-	char	*numeric_banner(void);
 	void	display_msg(char *, char **);
 	void	numbered_command(char *, int, char **);
 	int	check_sync(int, char *, char *, char *, char *, ChannelList *);

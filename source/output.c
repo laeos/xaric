@@ -1,4 +1,4 @@
-
+#ident "$Id$"
 /*
  * output.c: handles a variety of tasks dealing with the output from the irc
  * program 
@@ -36,8 +36,6 @@ int in_help = 0;
 #define LARGE_BIG_BUFFER_SIZE BIG_BUFFER_SIZE
 
 static char putbuf[LARGE_BIG_BUFFER_SIZE + 1];
-
-char three_stars[4] = "***";
 
 /* unflash: sends a ^[c to the screen */
 /* Must be defined to be useful, cause some vt100s really *do* reset when
@@ -166,14 +164,11 @@ say (const char *format,...)
 		va_list args;
 		va_start (args, format);
 
-		if (thing_ansi)
-			len = strlen (thing_ansi);
-		else
-			len = 3;
+		len = strlen (line_thing);
 
 		vsnprintf (&(putbuf[len + 1]), LARGE_BIG_BUFFER_SIZE, format, args);
 		va_end (args);
-		strcpy (putbuf, thing_ansi ? thing_ansi : three_stars);
+		strcpy (putbuf, line_thing);
 		putbuf[len] = ' ';
 
 		if (strip_ansi_in_echo)
@@ -196,7 +191,7 @@ bitchsay (const char *format,...)
 	{
 		va_list args;
 		va_start (args, format);
-		sprintf (putbuf, "%s \002%s\002: ", thing_ansi ? thing_ansi : three_stars, version);
+		sprintf (putbuf, "%s \002%s\002: ", line_thing, version);
 		len = strlen (putbuf);
 		vsnprintf (&(putbuf[len]), LARGE_BIG_BUFFER_SIZE, format, args);
 		va_end (args);
@@ -247,48 +242,4 @@ log_put_it (const char *topic, const char *format,...)
 	}
 }
 
-char *
-ov_server (int from_server)
-{
-	char *c;
-	char *d;
-	static char tmpstr[100];
-	char *string = get_server_itsname (from_server);
 
-	if (!string || !*string)
-		get_server_name (from_server);
-	strmcpy (tmpstr, string, 99);
-	if (!(c = rindex (tmpstr, '.')))
-		return (string);
-	*c = 0;
-	if (!(d = rindex (tmpstr, '.')))
-		d = ++c;	/* Extract domain */
-	d++;
-	return (d);
-}
-
-void 
-serversay (int save, int from_server, const char *format,...)
-{
-	Window *old_to_window = to_window;
-	int lastlog_level;
-	char servername[80];
-	int len = 0;
-	lastlog_level = set_lastlog_msg_level (LOG_CRAP);
-	sprintf (servername, get_string_var (SERVER_PROMPT_VAR), ov_server (from_server));
-	len = strlen (servername);
-	if (window_display && format)
-	{
-		va_list args;
-		va_start (args, format);
-		vsnprintf (&(putbuf[len + 1]), LARGE_BIG_BUFFER_SIZE, format, args);
-		va_end (args);
-		strcpy (putbuf, servername);
-		putbuf[len] = ' ';
-
-		if (*putbuf)
-			put_echo (putbuf);
-	}
-	set_lastlog_msg_level (lastlog_level);
-	to_window = old_to_window;
-}

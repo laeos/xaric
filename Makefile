@@ -12,7 +12,7 @@
 
 VERSION    := 0
 PATCHLEVEL := 9
-SUBLEVEL   := b
+SUBLEVEL   := c
 
 #
 # other magical stuff
@@ -106,10 +106,14 @@ install:
 	@echo ""
 	$(mkinstalldirs) $(bindir)
 	$(INSTALL_PROGRAM) -m 755 xaric $(bindir)
-	@echo ""	
+	@echo ""
+	@echo "Installing extra crap into $(datadir)..."
+	@echo ""
+	$(mkinstalldirs) $(datadir)
+	$(INSTALL_PROGRAM) -m 644 doc/xaric.servers $(datadir)
+	$(INSTALL_PROGRAM) -m 644 doc/xaric.help $(datadir)
+	@echo ""
 	@echo "Xaric Installation is compleate!"
-	@echo "Make sure you read the docs, and"
-	@echo "configure the bot correctly!"
 	@echo ""
 endif
 

@@ -72,8 +72,6 @@ ChannelList default_statchan =
 
 extern NickTab *tabkey_array;
 
-CloneList *clones = NULL;
-
 SocketList sockets[FD_SETSIZE] =
 {
 	{0, 0, 0, NULL}};
@@ -168,149 +166,6 @@ timer_unban (void *args)
 		my_send_to_server (server, "MODE %s -b %s", channel, ban);
 	new_free (&serv);
 	return 0;
-}
-
-
-
-void 
-update_stats (int what, char *channel, NickList * nick, ChannelList * chan, int splitter)
-{
-	time_t this_time = time (NULL);
-	int t = 0;
-	context;
-
-	if (!chan || !chan->channel)
-		return;
-
-	switch (what)
-	{
-	case KICKLIST:
-		{
-			chan->stats_kicks++;
-			chan->totalnicks--;
-			if (nick)
-				nick->stat_kicks++;
-			break;
-		}
-
-	case LEAVELIST:
-		{
-			chan->stats_parts++;
-			chan->totalnicks--;
-			break;
-		}
-	case JOINLIST:
-		{
-			chan->stats_joins++;
-			chan->totalnicks++;
-			if (chan->totalnicks > chan->maxnicks)
-			{
-				chan->maxnicks = chan->totalnicks;
-				chan->maxnickstime = this_time;
-			}
-			if (!splitter)
-			{
-				if (chan->chop && is_other_flood (chan, nick, JOIN_FLOOD, &t))
-				{
-					if (get_int_var (JOINFLOOD_VAR) && get_int_var (KICK_ON_JOINFLOOD_VAR) && !nick->kickcount++)
-					{
-						send_to_server ("MODE %s -o+b %s *!*%s", chan->channel, nick->nick, nick->host);
-						send_to_server ("KICK %s %s :\002Join flood\002 (%d joins in %dsecs of %dsecs)", chan->channel, nick->nick, get_int_var (KICK_ON_JOINFLOOD_VAR) /*chan->set_kick_on_joinflood */ , t, get_int_var (JOINFLOOD_TIME_VAR)	/*
-
-																																	   chan->set_joinflood_time */ );
-						if (get_int_var (AUTO_UNBAN_VAR))
-							add_timer ("", get_int_var (AUTO_UNBAN_VAR), 1, timer_unban, m_sprintf ("%d %s *!*%s", from_server, chan->channel, nick->host), NULL);
-					}
-				}
-			}
-			break;
-		}
-	case CHANNELSIGNOFFLIST:
-		{
-			chan->stats_signoffs++;
-			chan->totalnicks--;
-			break;
-		}
-	case PUBLICLIST:
-	case PUBLICOTHERLIST:
-	case PUBLICNOTICELIST:
-	case NOTICELIST:
-		{
-			chan->stats_pubs++;
-			if (nick)
-			{
-				nick->stat_pub++;
-				nick->idle_time = this_time;
-			}
-			break;
-		}
-	case TOPICLIST:
-		{
-			chan->stats_topics++;
-			break;
-		}
-	case MODEOPLIST:
-		if (splitter)
-			chan->stats_sops++;
-		else
-		{
-			if (nick)
-				nick->stat_ops++;
-			chan->stats_ops++;
-		}
-		break;
-	case MODEDEOPLIST:
-		if (splitter)
-			chan->stats_sdops++;
-		else
-		{
-			chan->stats_dops++;
-			if (nick)
-				nick->stat_dops++;
-		}
-
-		if (chan->chop && is_other_flood (chan, nick, DEOP_FLOOD, &t))
-		{
-			if (get_int_var (DEOP_ON_DEOPFLOOD_VAR) < get_int_var (KICK_ON_DEOPFLOOD_VAR))
-				send_to_server ("MODE %s -o %s", chan->channel, nick->nick);
-			else if (!nick->kickcount++)
-				send_to_server ("KICK %s %s :\002De-op flood\002 (%d de-ops in %dsecs of %dsecs)", chan->channel, nick->nick, get_int_var (KICK_ON_DEOPFLOOD_VAR) /*chan->set_kick_on_deopflood */ , t, get_int_var (DEOPFLOOD_TIME_VAR));
-
-
-		}
-		break;
-	case MODEBANLIST:
-		if (splitter)
-			chan->stats_sbans++;
-		else
-		{
-			if (nick)
-				nick->stat_bans++;
-			chan->stats_bans++;
-		}
-		chan->totalbans++;
-		if (chan->stats_bans > chan->maxbans)
-		{
-			chan->maxbans = chan->stats_bans;
-			chan->maxbanstime = this_time;
-		}
-		break;
-	case MODEUNBANLIST:
-		if (splitter)
-			chan->stats_sunbans++;
-		else
-		{
-			if (nick)
-				nick->stat_unbans++;
-			chan->stats_unbans++;
-		}
-		if (chan->totalbans)
-			chan->totalbans--;
-		break;
-	default:
-		bitchsay ("Illegal what %d passed to update_stats", what);
-		break;
-	}
 }
 
 char *
@@ -583,39 +438,6 @@ random_str (int min, int max)
 	str[ii] = '\0';
 	return str;
 }
-
-void 
-do_clones (fd_set * rd, fd_set * wr)
-{
-	CloneList *new = NULL;
-
-	context;
-	for (new = clones; new; new = new->next)
-	{
-		if (!new->warn && FD_ISSET (new->socket_num, rd))
-		{
-			int old_timeout = dgets_timeout (1);
-			char buffer[IRCD_BUFFER_SIZE + 1];
-			char *str = buffer;
-			switch (dgets (str, IRCD_BUFFER_SIZE - 2, new->socket_num, NULL))
-			{
-			case -1:
-				break;
-			case 0:
-				break;
-			default:
-				if ((buffer[strlen (buffer) - 1] == '\r') || (buffer[strlen (buffer) - 1] == '\n'))
-					buffer[strlen (buffer) - 1] = 0;
-				if ((buffer[strlen (buffer) - 1] == '\r') || (buffer[strlen (buffer) - 1] == '\n'))
-					buffer[strlen (buffer) - 1] = 0;
-				do_hook (CLONE_READ_LIST, "%d %d %s %s", new->socket_num, new->port, new->server, buffer);
-			}
-			dgets_timeout (old_timeout);
-		}
-	}
-}
-
-
 
 int 
 rename_file (char *old_file, char **new_file)
@@ -985,54 +807,6 @@ scan_sockets (fd_set * rd, fd_set * wr)
 		if (sockets[i].is_write && FD_ISSET (i, wr))
 			(sockets[i].func) (i);
 	}
-}
-
-extern int dgets_errno;
-
-int 
-caps_fucknut (register char *crap)
-{
-	int total = 0, allcaps = 0;
-/* removed from ComStud client */
-	while (*crap)
-	{
-		if ((*crap >= 'a' && *crap <= 'z') || (*crap >= 'A' && *crap <= 'Z'))
-		{
-			total++;
-			if (toupper (*crap) == *crap)
-				allcaps++;
-		}
-		crap++;
-	}
-	if (total)
-		if ((float) allcaps / (float) total >= .75 && total > 3)
-			return (1);
-	return (0);
-}
-
-int 
-char_fucknut (register char *crap, char looking, int max)
-{
-	int total = strlen (crap), allchar = 0;
-
-	while (*crap)
-	{
-		if ((*crap == looking))
-		{
-			crap++;
-			while (*crap && *crap != looking)
-			{
-				allchar++;
-				crap++;
-			}
-		}
-		if (*crap)
-			crap++;
-	}
-	if (total > 12)
-		if ((float) allchar / (float) total >= .75 && total > 3)
-			return (1);
-	return (0);
 }
 
 static int cparse_recurse = -1;
@@ -1502,7 +1276,7 @@ country (char *hostname)
 		{"BW", "Botswana"},
 		{"BY", "Belarus"},
 		{"BZ", "Belize"},
-		{"CA", "Canada (pHEAR)"},
+		{"CA", "Canada"},
 		{"CC", "Cocos Islands"},
 		{"CF", "Central African Republic"},
 		{"CG", "Congo"},
@@ -1649,7 +1423,7 @@ country (char *hostname)
 		{"QA", "Qatar"},
 		{"RE", "Reunion"},
 		{"RO", "Romania"},
-		{"RU", "Russian Federation (pHEAR)"},
+		{"RU", "Russian Federation"},
 		{"RW", "Rwanda"},
 		{"SA", "Saudi Arabia"},
 		{"Sb", "Solomon Islands"},
@@ -1667,7 +1441,7 @@ country (char *hostname)
 		{"SO", "Somalia"},
 		{"SR", "Suriname"},
 		{"ST", "Sao Tome and Principe"},
-		{"SU", "Former USSR (pHEAR)"},
+		{"SU", "Former USSR"},
 		{"SV", "El Salvador"},
 		{"SY", "Syria"},
 		{"SZ", "Swaziland"},

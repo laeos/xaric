@@ -17,6 +17,8 @@ typedef struct
 	char *name;
 } array_item;
 
+typedef int (*alist_func) (const char *, const char *, size_t);
+
 /*
  * This is the actual list, that contains structs that are of the
  * form described above.  It contains the current size and the maximum
@@ -27,13 +29,15 @@ typedef struct
 	array_item **list;
 	int max;
 	int total_max;
+	alist_func func;
 } array;
 
-array_item *add_to_array (array *, array_item *);
-array_item *remove_from_array (array *, char *);
-array_item *array_lookup (array *, char *, int wild, int delete);
-array_item *find_array_item (array *, char *, int *cnt, int *loc);
-
-void *find_fixed_array_item (void *array, size_t size, int siz, char *, int *cnt, int *loc);
+array_item *	add_to_array 		(array *, array_item *);
+array_item *	remove_from_array 	(array *, const char *);
+array_item *	array_lookup 		(array *, const char *, int, int);
+array_item *	find_array_item 	(array *, const char *, int *, int *);
+array_item *	array_pop		(array *, int);
+void *		find_fixed_array_item 	(void *, size_t, int, const char *, 
+					 int *, int *);
 
 #endif

@@ -1,4 +1,4 @@
-
+#ident "$Id: numbers.c,v 1.9 1998/10/16 01:44:41 laeos Exp $"
 /*
  * numbers.c:handles all those strange numeric response dished out by that
  * wacky, nutty program we call ircd 
@@ -51,7 +51,6 @@ extern int stats_k_grep (char **);
 extern int doing_who;
 extern void remove_from_server_list (int);
 
-char *thing_ansi = NULL;
 
 #ifdef HAVE_GETTIMEOFDAY
 extern struct timeval in_sping;
@@ -64,14 +63,14 @@ extern time_t in_sping;
  * numeric_banner: This returns in a static string of either "xxx" where
  * xxx is the current numeric, or "***" if SHOW_NUMBERS is OFF 
  */
-char *
+static char *
 numeric_banner (void)
 {
 	static char thing[4];
 	if (!get_int_var (SHOW_NUMERICS_VAR))
-		return (thing_ansi ? thing_ansi : empty_string);
+		return line_thing;
 	sprintf (thing, "%3.3u", -current_numeric);
-	return (thing);
+	return thing;
 }
 
 int 
@@ -521,7 +520,7 @@ numbered_command (char *from, int comm, char **ArgList)
 	{
 	case 001:		/* #define RPL_WELCOME          001 */
 		{
-			bitchsay ("For more information about \002Xaric\002 type \002/about\002");
+			yell ("For more information about \002Xaric\002 type \002/about\002");
 			set_server2_8 (from_server, 1);
 			accept_server_nickname (from_server, user);
 			attempting_to_connect--;

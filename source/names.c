@@ -227,8 +227,6 @@ add_channel (char *channel, int server)
 		{
 			if (tmp->server != from_server)
 				continue;
-			if (tmp->name && !strcmp (tmp->name, "oper_view"))
-				continue;
 			if (!wind)
 				wind = tmp;
 			if (!tmp->waiting_channel && !tmp->bind_channel)
@@ -329,7 +327,6 @@ add_to_channel (char *channel, char *nick, int server, int oper, int voice, char
 			}
 			context;
 			add_nicklist_to_channellist (new, chan);
-			update_stats (JOINLIST, chan->channel, new, chan, 0);
 		}
 		new->chanop = ischop;
 		new->voice = voice;
@@ -1005,7 +1002,6 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 					(*channel)->chop = add;
 				}
 				ThisNick = find_nicklist_in_channellist (from, *channel, 0);
-				update_stats (add ? MODEOPLIST : MODEDEOPLIST, (*channel)->channel, ThisNick, *channel, splitter);
 				if ((ThisNick = find_nicklist_in_channellist (person, *channel, 0)))
 					ThisNick->chanop = add;
 /* Sergs_ sent a patch for this */
@@ -1043,7 +1039,6 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 			if (!person || !*person)
 				break;
 			ThisNick = find_nicklist_in_channellist (from, *channel, 0);
-			update_stats (add ? MODEBANLIST : MODEUNBANLIST, (*channel)->channel, ThisNick, *channel, splitter);
 			if (add)
 			{
 				ThisNick = find_nicklist_in_channellist (person, *channel, 0);
@@ -1890,27 +1885,3 @@ chan_is_connected (char *channel, int server)
 	return (cp->connected);
 }
 
-void 
-flush_channel_stats (void)
-{
-	ChannelList *chan;
-	for (chan = server_list[from_server].chan_list; chan; chan = chan->next)
-	{
-		chan->stats_ops = 0;
-		chan->stats_dops = 0;
-		chan->stats_bans = 0;
-		chan->stats_unbans = 0;
-		chan->stats_sops = 0;
-		chan->stats_sdops = 0;
-		chan->stats_sbans = 0;
-		chan->stats_sunbans = 0;
-		chan->stats_topics = 0;
-		chan->stats_kicks = 0;
-		chan->stats_pubs = 0;
-		chan->stats_parts = 0;
-		chan->stats_signoffs = 0;
-		chan->stats_joins = 0;
-		chan->maxnicks = 0;
-		chan->maxnickstime = 0;
-	}
-}

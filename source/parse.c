@@ -54,7 +54,6 @@ char *last_split_from = NULL;
 int in_server_ping = 0;
 
 extern char *mircansi (char *);
-extern int char_fucknut (char *, char, int);
 #ifdef COMPRESS_MODES
 extern char *compress_modes (int, char *, char *);
 #endif
@@ -83,7 +82,6 @@ BanList *
 ban_is_on_channel (char *ban, ChannelList * chan)
 {
 	register BanList *bans;
-	context;
 	for (bans = chan->bans; bans; bans = bans->next)
 	{
 		if (match (bans->ban, ban) || match (ban, bans->ban))
@@ -233,14 +231,12 @@ p_topic (char *from, char **ArgList)
 {
 	ChannelList *tmp;
 
-	context;
 	if (!ArgList[1])
 	{
 		fake ();
 		return;
 	}
 	tmp = lookup_channel (ArgList[0], from_server, CHAN_NOUNLINK);
-	update_stats (TOPICLIST, tmp->channel, find_nicklist_in_channellist (from, tmp, 0), tmp, 0);
 	malloc_strcpy (&tmp->topic, ArgList[1]);
 	if (check_ignore (from, FromUserHost, tmp->channel, IGNORE_TOPICS | IGNORE_CRAP, NULL) != IGNORED)
 	{
@@ -269,7 +265,6 @@ p_wallops (char *from, char **ArgList)
 	int autorep = 0;
 	int from_server = strchr (from, '.') ? 1 : 0;
 
-	context;
 	if (!(line = PasteArgs (ArgList, 0)))
 	{
 		fake ();
@@ -317,7 +312,6 @@ whoreply (char *from, char **ArgList)
 	char buf_data[BIG_BUFFER_SIZE + 1];
 
 
-	context;
 	if (!ArgList[5])
 		return;
 
@@ -418,7 +412,6 @@ p_privmsg (char *from, char **Args)
 	NickList *tmpnick = NULL;
 
 
-	context;
 	if (!from)
 		return;
 	PasteArgs (Args, 1);
@@ -493,7 +486,6 @@ p_privmsg (char *from, char **Args)
 		doing_privmsg = 0;
 		return;
 	}
-	update_stats (PUBLICLIST, to, tmpnick, channel, 0);
 
 	level = set_lastlog_msg_level (log_type);
 	com_do_log = 0;
@@ -595,12 +587,10 @@ p_quit (char *from, char **ArgList)
 	int one_prints = 0;
 	char *chan = NULL;
 	char *Reason;
-	ChannelList *tmpc;
 	int netsplit = 0;
 	int ignore;
 
 
-	context;
 	PasteArgs (ArgList, 0);
 	if (ArgList[0])
 	{
@@ -614,10 +604,6 @@ p_quit (char *from, char **ArgList)
 	ignore = check_ignore (from, FromUserHost, NULL, (netsplit ? IGNORE_SPLITS : IGNORE_QUITS) | IGNORE_ALL, NULL);
 	for (chan = walk_channels (from, 1, from_server); chan; chan = walk_channels (from, 0, -1))
 	{
-		if ((tmpc = lookup_channel (chan, from_server, CHAN_NOUNLINK)))
-		{
-			update_stats (CHANNELSIGNOFFLIST, chan, find_nicklist_in_channellist (from, tmpc, 0), tmpc, netsplit);
-		}
 		if (ignore != IGNORED)
 		{
 			message_from (chan, LOG_CRAP);
@@ -648,7 +634,6 @@ p_pong (char *from, char **ArgList)
 	int is_server = 0;
 	int i;
 
-	context;
 	if (!ArgList[0])
 		return;
 	is_server = match ("*.*", ArgList[0]);
@@ -687,7 +672,6 @@ static void
 p_error (char *from, char **ArgList)
 {
 
-	context;
 	PasteArgs (ArgList, 0);
 	if (!ArgList[0])
 	{
@@ -706,7 +690,6 @@ p_channel (char *from, char **ArgList)
 	WhowasList *whowas = NULL;
 	int its_me = 0;
 
-	context;
 	if (!strcmp (ArgList[0], "0"))
 	{
 		fake ();
@@ -809,7 +792,6 @@ p_invite (char *from, char **ArgList)
 {
 	char *high;
 
-	context;
 	switch (check_ignore (from, FromUserHost, ArgList[1] ? ArgList[1] : NULL, IGNORE_INVITES, NULL))
 	{
 	case IGNORED:
@@ -856,7 +838,6 @@ p_silence (char *from, char **ArgList)
 	char *target = ArgList[0];
 	char *mag = target++;
 
-	context;
 	if (do_hook (SILENCE_LIST, "%c %s", *mag, target))
 		put_it ("%s", convert_output_format (get_fset_var (FORMAT_SILENCE_FSET), "%s %c %s", update_clock (GET_TIME), *mag, target));
 }
@@ -870,7 +851,6 @@ p_kill (char *from, char **ArgList)
 	int local = 0;
 
 
-	context;
 	port = get_server_port (from_server);
 	if (ArgList[1] && strstr (ArgList[1], get_server_name (from_server)))
 		if (!strchr (from, '.'))
@@ -910,7 +890,6 @@ static void
 p_ping (char **ArgList)
 {
 
-	context;
 	PasteArgs (ArgList, 0);
 	send_to_server ("PONG %s", ArgList[0]);
 }
@@ -923,7 +902,6 @@ p_nick (char *from, char **ArgList)
 	char *line;
 
 
-	context;
 	line = ArgList[0];
 	if (!my_stricmp (from, get_server_nickname (from_server)))
 	{
@@ -977,7 +955,6 @@ p_mode (char *from, char **ArgList)
 #ifdef COMPRESS_MODES
 	char *tmpbuf = NULL;
 #endif
-	context;
 	PasteArgs (ArgList, 1);
 	channel = ArgList[0];
 	line = ArgList[1];
@@ -1049,7 +1026,6 @@ strip_modes (char *from, char *channel, char *line)
 	malloc_strcpy (&free_copy, line);
 #endif
 
-	context;
 	copy = free_copy;
 	mode = next_arg (copy, &copy);
 	if (is_channel (channel))
@@ -1124,7 +1100,6 @@ p_kick (char *from, char **ArgList)
 	int t = 0;
 
 
-	context;
 	channel = ArgList[0];
 	who = ArgList[1];
 	comment = ArgList[2] ? ArgList[2] : "(no comment)";
@@ -1134,7 +1109,6 @@ p_kick (char *from, char **ArgList)
 	message_from (channel, LOG_CRAP);
 	if (channel && who && chan)
 	{
-		update_stats (KICKLIST, channel, tmpnick, chan, 0);
 		if (!my_stricmp (who, get_server_nickname (from_server)))
 		{
 			Window *window = chan->window;
@@ -1185,10 +1159,7 @@ static void
 p_part (char *from, char **ArgList)
 {
 	char *channel;
-	ChannelList *tmpc;
 
-
-	context;
 	if (!from || !*from)
 		return;
 	channel = ArgList[0];
@@ -1196,9 +1167,6 @@ p_part (char *from, char **ArgList)
 	PasteArgs (ArgList, 1);
 	message_from (channel, LOG_CRAP);
 	in_on_who = 1;
-
-	if ((tmpc = lookup_channel (channel, from_server, CHAN_NOUNLINK)))
-		update_stats (LEAVELIST, channel, find_nicklist_in_channellist (from, tmpc, 0), tmpc, 0);
 
 	if ((check_ignore (from, FromUserHost, channel, IGNORE_PARTS | IGNORE_CRAP, NULL) != IGNORED) &&
 	    do_hook (LEAVE_LIST, "%s %s %s %s", from, channel, FromUserHost, ArgList[1] ? ArgList[1] : empty_string))
@@ -1244,7 +1212,6 @@ parse_server (char *line)
 	{NULL};
 
 
-	context;
 	if (!line || !*line)
 		return;
 

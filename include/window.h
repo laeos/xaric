@@ -62,8 +62,6 @@
 	char 	*get_prompt_by_refnum		(unsigned);
 	char	*get_target_by_refnum		(unsigned);
 	char	*query_nick			(void);
-	char	*query_host			(void);
-	char	*query_cmd			(void);
 	void	set_query_nick			(char *, char *, char *);
 	int	is_current_channel		(char *, int, int);
 	char	*set_current_channel_by_refnum		(unsigned, char *);

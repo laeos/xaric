@@ -1,6 +1,6 @@
-#ident "@(#)cmd_scan.c 1.12"
+#ident "@(#)cmd_scan.c 1.5"
 /*
- * cmd_hostname.c : the /scan command
+ * cmd_scan.c : the /scan command
  *
  * Written By Michael Sandrof
  * Portions are based on EPIC.
@@ -32,15 +32,16 @@
 
 #include "irc.h"
 #include "ircaux.h"
+#include "whois.h"
 #include "output.h"
 #include "status.h"
 #include "hash2.h"
 #include "misc.h"
+#include "screen.h"
 #include "tcommand.h"
-#include "util.h"
+#include "fset.h"
 
-#include "xformats.h"
-#include "xmalloc.h"
+
 
 
 void
@@ -50,7 +51,7 @@ cmd_scan (struct command *cmd, char *args)
 	char *channel = NULL;
 	ChannelList *chan;
 	NickList *nick, *snick = NULL;
-	const char *s;
+	char *s;
 	char *buffer = NULL;
 	int count = 0;
 	int server;
@@ -68,19 +69,19 @@ cmd_scan (struct command *cmd, char *args)
 
 	while (args && *args)
 	{
-		char *ag = next_arg (args, &args);
-		if (is_channel (ag))
-			channel = ag;
-		else if (ag && all)
+		s = next_arg (args, &args);
+		if (is_channel (s))
+			channel = s;
+		else if (s && all)
 		{
 			all = 0;
-			if (*ag == 'v')
+			if (*s == 'v')
 				voice = 1;
-			else if (*ag == 'o')
+			else if (*s == 'o')
 				ops = 1;
-			else if (*ag == 'n')
+			else if (*s == 'n')
 				nops = 1;
-			else if (*ag == 'i')
+			else if (*s == 'i')
 				ircops = 1;
 		}
 	}
@@ -103,57 +104,57 @@ cmd_scan (struct command *cmd, char *args)
 
 	snick = sorted_nicklist (chan);
 	if (voice)
-		s = get_format (FORMAT_NAMES_VOICE_FSET);
+		s = get_fset_var (FORMAT_NAMES_VOICE_FSET);
 	else if (ops)
-		s = get_format (FORMAT_NAMES_OP_FSET);
+		s = get_fset_var (FORMAT_NAMES_OP_FSET);
 	else if (ircops)
-		s = get_format (FORMAT_NAMES_IRCOP_FSET);
+		s = get_fset_var (FORMAT_NAMES_IRCOP_FSET);
 	else if (nops)
-		s = get_format (FORMAT_NAMES_NONOP_FSET);
+		s = get_fset_var (FORMAT_NAMES_NONOP_FSET);
 	else
-		s = get_format (FORMAT_NAMES_FSET);
+		s = get_fset_var (FORMAT_NAMES_FSET);
 
-	put_it ("%s", convert_output_format (s, "%s %s %d %s", update_clock (GET_TIME), chan->channel, count, space_string));
+	put_it ("%s", convert_output_format (s, "%s %s %d %s", update_clock (GET_TIME), chan->channel, count, space));
 	if (count)
 	{
 		count = 0;
 		for (nick = snick; nick; nick = nick->next)
 		{
 			if (all && (nick->chanop || nick->voice))
-				malloc_strcat (&buffer, convert_output_format (get_format (nick->chanop ? FORMAT_NAMES_OPCOLOR_FSET : FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", nick->chanop ? '@' : '+', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_fset_var (nick->chanop ? FORMAT_NAMES_OPCOLOR_FSET : FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", nick->chanop ? '@' : '+', nick->nick));
 			else if (all)
-				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_NICKCOLOR_FSET), "%c %s", '$', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_NICKCOLOR_FSET), "%c %s", '$', nick->nick));
 			else if (voice && nick->voice)
-				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", '+', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", '+', nick->nick));
 			else if (ops && nick->chanop)
-				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '@', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '@', nick->nick));
 			else if (nops && !nick->chanop)
-				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_NICKCOLOR_FSET), "%c %s", '$', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_NICKCOLOR_FSET), "%c %s", '$', nick->nick));
 			else if (ircops && nick->ircop)
-				malloc_strcat (&buffer, convert_output_format (get_format (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '*', nick->nick));
+				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '*', nick->nick));
 			else
 				continue;
-			malloc_strcat (&buffer, space_string);
+			malloc_strcat (&buffer, space);
 			if (count++ == 4)
 			{
-				if (get_format (FORMAT_NAMES_BANNER_FSET))
-					put_it ("%s%s", convert_output_format (get_format (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
+				if (get_fset_var (FORMAT_NAMES_BANNER_FSET))
+					put_it ("%s%s", convert_output_format (get_fset_var (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
 				else
 					put_it (buffer);
-				xfree (&buffer);
+				new_free (&buffer);
 				count = 0;
 			}
 		}
 		if (count && buffer)
 		{
-			if (get_format (FORMAT_NAMES_BANNER_FSET))
-				put_it ("%s%s", convert_output_format (get_format (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
+			if (get_fset_var (FORMAT_NAMES_BANNER_FSET))
+				put_it ("%s%s", convert_output_format (get_fset_var (FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
 			else
 				put_it (buffer);
 		}
-		if (get_format (FORMAT_NAMES_FOOTER_FSET))
-			put_it ("%s", convert_output_format (get_format (FORMAT_NAMES_FOOTER_FSET), NULL, NULL));
-		xfree (&buffer);
+		if (get_fset_var (FORMAT_NAMES_FOOTER_FSET))
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_NAMES_FOOTER_FSET), NULL, NULL));
+		new_free (&buffer);
 	}
 	clear_sorted_nicklist (&snick);
 }

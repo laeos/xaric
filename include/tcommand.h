@@ -1,6 +1,8 @@
 #ifndef tcommand_h__
 #define tcommand_h__
 
+
+
 #define C_AMBIG (void *)(-1)
 
 struct command
@@ -27,6 +29,7 @@ void t_parse_command(char *command, char *line);
 void t_bind_exec(struct command *cmd, char *line);
 int t_bind(char *string, char *command, char *args);
 int t_unbind(char *command);
+
 
 /* Commands not in ncommand.c */
 
@@ -78,8 +81,4 @@ void cmd_umode(struct command *cmd, char *args);
 void cmd_unkey(struct command *cmd, char *args);
 void cmd_kill(struct command *cmd, char *args);
 
-
-
 #endif
-
-

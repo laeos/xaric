@@ -16,7 +16,6 @@
 #ifndef __config_h_
 #define __config_h_
 
-
 /*
  * Set your favorite default server list here.  This list should be a
  * whitespace separated hostname:portnum:password list (with portnums and
@@ -116,18 +115,8 @@
 #define COMPRESS_MODES
 
 
-
-/* this needs to go away. this is just temp. to make it work */
-#include "xbuild.h" /* ugh */
-
-/* The default help directory to use */ 
-#define DEFAULT_HELP XARIC_DATA_PATH "/help"
-
-
-#define DEFAULT_HELP_WINDOW	0
-#define DEFAULT_HELP_PAGER	1
-
-
+/* The default help file to use */ 
+#define DEFAULT_HELP_FILE "/usr/local/share/xaric/xaric.help"
 
 /*
  * Below are the IRCII variable defaults.  For boolean variables, use 1 for
@@ -137,7 +126,7 @@
  * proper compilation.
  */
 
-#define DEFAULT_SIGNOFF_REASON "When she hauled ass, it took three trips."
+#define DEFAULT_SIGNOFF_REASON "Jesus Saves! (And Esposito scores on the rebound!)"
 #define DEFAULT_BANTYPE 2
 #define DEFAULT_SHOW_CTCP_IDLE 1
 #define DEFAULT_PING_TYPE 1
@@ -238,7 +227,7 @@
 #define DEFAULT_LLOOK 0
 
 
-#define DEFAULT_AUTO_REJOIN 1
+#define DEFAULT_AUTO_REJOIN 0
 #define DEFAULT_DEOPFLOOD 1
 #define DEFAULT_DEOPFLOOD_TIME 30
 #define DEFAULT_DEOP_ON_DEOPFLOOD 3
@@ -268,7 +257,6 @@
 
 /* File in home directory to contain specific stuff */
 #define IRCRC_NAME ".ircrc"
-
 
 #define EXEC_COMMAND
 

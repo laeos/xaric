@@ -10,6 +10,9 @@
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
 
+/* Define to empty if the keyword does not work.  */
+#undef const
+
 /* Define to one of _getb67, GETB67, getb67 for Cray-2 and Cray-YMP systems.
    This function is required for alloca.c support on those systems.  */
 #undef CRAY_STACKSEG_END
@@ -25,6 +28,9 @@
 
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 #undef HAVE_ALLOCA_H
+
+/* Define as __inline if that's what the C compiler calls it.  */
+#undef inline
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef mode_t
@@ -59,27 +65,86 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
 
+/*  define if you have the fpathconf() function */
 #undef HAVE_FPATHCONF
+
+/* define if you have the getpass() function */
 #undef HAVE_GETPASS
+
+/* define if you have getpgid() */
 #undef HAVE_GETPGID
+
+/* define if you have gettimeofday() */
 #undef HAVE_GETTIMEOFDAY
+
+/* define if you have killpg() */
 #undef HAVE_KILLPG
-#undef HAVE_PTHREADS
-#undef HAVE_SETENV
+
+/* define if you have strerror() */
 #undef HAVE_STRERROR
+
+/* define if you have sun_len in struct sockaddr_un */
 #undef HAVE_SUN_LEN
+
+/* define if you have sysconf() */
 #undef HAVE_SYSCONF
+
+/* define if you have uname() */
 #undef HAVE_UNAME
-#undef NO_STRUCT_LINGER
-#undef SYS_ERRLIST_DECLARED
-#undef USING_CURSES
-#undef XARIC_DEBUG
+
+/* define if you have inet_aton */
 #undef HAVE_INET_ATON
-#undef HAVE_VSNPRINTF
+
+/* define if you do *not* have struct linger */
+#undef NO_STRUCT_LINGER
+
+/* define if we have sys_errlist */
+#undef SYS_ERRLIST_DECLARED
+
+/* define if we need to include the <curses.h> header file */
+#undef USING_CURSES
+
+/* define to include extra code to help debug xaric */
+#undef XARIC_DEBUG
+
+/* define to disable assert checking */
 #undef NDEBUG
+
+/* define to a 32 bit type if i is not already defined */
 #undef u_int32_t
+
+/* define if you need the putenv() function */
 #undef NEED_PUTENV
+
+/* define if you need the getenv() function */
 #undef NEED_GETENV
+
+/* define if your system supports IPv4 */
+#undef IPV4
+
+/* define if your system supports IPv6 */
+#undef IPV6
+
+/* deifne if you have the addrinfo struct */
+#undef HAVE_ADDRINFO_STRUCT
+
+/* define if your sockaddr struct has the sa_len member */
+#undef HAVE_SOCKADDR_SA_LEN
+
+/* socklen_t type, if we don't have it */
+#undef socklen_t
+
+/* define if you have freeaddrinfo() */
+#undef HAVE_FREEADDRINFO
+
+/* define if you have gai_strerror() */
+#undef HAVE_GAI_STRERROR
+
+/* define if you have getaddrinfo() */
+#undef HAVE_GETADDRINFO
+
+/* define if you have getnameinfo() */
+#undef HAVE_GETNAMEINFO
 
 /* The number of bytes in a unsigned int.  */
 #undef SIZEOF_UNSIGNED_INT
@@ -105,8 +170,14 @@
 /* Define if you have the <getopt.h> header file.  */
 #undef HAVE_GETOPT_H
 
+/* Define if you have the <net/if.h> header file.  */
+#undef HAVE_NET_IF_H
+
 /* Define if you have the <netdb.h> header file.  */
 #undef HAVE_NETDB_H
+
+/* Define if you have the <netinet/in.h> header file.  */
+#undef HAVE_NETINET_IN_H
 
 /* Define if you have the <pwd.h> header file.  */
 #undef HAVE_PWD_H
@@ -125,6 +196,9 @@
 
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
+
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
 
 /* Define if you have the <sys/ptem.h> header file.  */
 #undef HAVE_SYS_PTEM_H
@@ -167,3 +241,9 @@
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the pthread library (-lpthread).  */
+#undef HAVE_LIBPTHREAD
+
+/* Define if you have the pthreads library (-lpthreads).  */
+#undef HAVE_LIBPTHREADS

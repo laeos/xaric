@@ -1,4 +1,4 @@
-#ident "@(#)cmd_hostname.c 1.11"
+#ident "@(#)cmd_hostname.c 1.5"
 /*
  * cmd_hostname.c : virtual host support 
  * Copyright (C) 2000 Rex Feany <laeos@laeos.net>
@@ -23,62 +23,78 @@
 #include "config.h"
 #endif
 
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include <stdio.h>
 
 #include "irc.h"
 #include "ircaux.h"
 #include "output.h"
-#include "list.h"
 #include "misc.h"
 #include "tcommand.h"
 
-#include "xp_ifinfo.h"
+#include "iflist.h"
 
 
+/* XXX this should/will be part of the network code */
+/* XXX this will not work for IPv6 */
 static void
 set_hostname(char *host)
 {
-	struct hostent *hp;
+	const struct iflist *ifl = iface_find(host);
 	int reconn = 0;
 
-	if (LocalHostName == NULL || strcmp (LocalHostName, host))
+	if (ifl == NULL) {
+		yell("No such hostname [%s]!", host);
+		return;
+	}
+
+	if (LocalHostName == NULL || strcmp (LocalHostName, ifl->ifi_host))
 		reconn = 1;
 
-	malloc_strcpy (&LocalHostName, host);
-	if ((hp = gethostbyname (LocalHostName)))
-		memcpy ((void *) &LocalHostAddr, hp->h_addr, sizeof (LocalHostAddr));
+	malloc_strcpy (&LocalHostName, ifl->ifi_host);
+	memcpy((void *) &LocalHostAddr, &((struct sockaddr_in *)ifl->ifi_addr)->sin_addr.s_addr, sizeof (LocalHostAddr));
 
 	bitchsay ("Local host name is now %s", LocalHostName);
 	if (reconn)
 		t_parse_command ("RECONNECT", NULL);
 }
 
+/* list interface info */
+static void
+iface_callback (void *data, struct iflist *list)
+{
 
+	if (list == NULL && errno == 0) {
+		put_it("%s", convert_output_format("%G Unable to find anything!", NULL, NULL));
+	} else if (list == NULL) {
+		yell("Error fetching interface info: %s", strerror(errno));
+	} else {
+		int i;
+
+		say("Current hostnames available:");
+
+		for(i = 1; list; list = list->ifi_next, i++) {
+			put_it("%s", convert_output_format("%K[%W$[3]0%K] %B$1 %g[%c$2%g]", "%d %s %s", i, list->ifi_host, list->ifi_name));
+		}
+	}
+}
+
+
+/**
+ * cmd_hostname - change/list avaliable virtual hosts
+ * @cmd: normal command struct
+ * @args: command argument string
+ *
+ * Without any arguments, list the avaliable virtual hosts.
+ * Given one argument, try to set the default host for outgoing
+ * connections.
+ **/
 void
 cmd_hostname (struct command *cmd, char *args)
 {
 	if (args && *args && *args != '#') {
 		set_hostname(args);
 	} else {
-		struct xp_iflist * l = xp_get_iflist();
-		struct xp_iflist * c;
-		int i;
-
-		if ( l == NULL ) {
-			put_it("%s", convert_output_format("%G Unable to find anything!", NULL, NULL));
-			return;
-		}
-
-		for(c = l, i = 1; c; c = c->ifi_next, i++) {
-			put_it("%s", convert_output_format("%K[%W$[3]0%K] %B$1 %g[%c$2%g]", "%d %s %s", i, c->ifi_host, c->ifi_name));
-		}
-		xp_free_iflist(l);
+		ifaces(iface_callback, NULL);
 	}
-	return;
 }
 

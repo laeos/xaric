@@ -1,2 +1,0 @@
-%gUsage%n: %W/%nignore +%G|%n-%G|%n^%Y<%Cnick%Y>%n
-- Ignores ALL except crap and public from %Y<%Cnick%Y>%n

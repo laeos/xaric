@@ -1,4 +1,3 @@
-#ident "@(#)newio.c 1.8"
 /*
  * newio.c: This is some handy stuff to deal with file descriptors in a way
  * much like stdio's FILE pointers 
@@ -27,7 +26,6 @@
 #endif /* ISC22 */
 
 #include "irc_std.h"
-#include "xmalloc.h"
 
 #define IO_BUFFER_SIZE 512
 
@@ -91,7 +89,7 @@ init_io (void)
 	{
 		int c, max_fd = IO_ARRAYLEN;
 
-		io_rec = (MyIO **) xmalloc (sizeof (MyIO *) * max_fd);
+		io_rec = (MyIO **) new_malloc (sizeof (MyIO *) * max_fd);
 		for (c = 0; c < max_fd; c++)
 			io_rec[c] = NULL;
 		(void) dgets_timeout (-1);
@@ -115,7 +113,7 @@ dgets (char *str, int len, int des, char *specials)
 	init_io ();
 	if (io_rec[des] == NULL)
 	{
-		io_rec[des] = (MyIO *) xmalloc (sizeof (MyIO));
+		io_rec[des] = (MyIO *) new_malloc (sizeof (MyIO));
 		io_rec[des]->read_pos = 0;
 		io_rec[des]->write_pos = 0;
 		io_rec[des]->misc_flags = 0;
@@ -178,7 +176,7 @@ dgets (char *str, int len, int des, char *specials)
 	init_io ();
 	if (io_rec[des] == NULL)
 	{
-		io_rec[des] = (MyIO *) xmalloc (sizeof (MyIO));
+		io_rec[des] = (MyIO *) new_malloc (sizeof (MyIO));
 		io_rec[des]->read_pos = 0;
 		io_rec[des]->write_pos = 0;
 		io_rec[des]->misc_flags = 0;
@@ -200,13 +198,6 @@ dgets (char *str, int len, int des, char *specials)
 		}
 		else
 		{
-#ifdef FIONREAD
-			int nbytes;
-			ioctl (des, FIONREAD, &nbytes);
-			if (x_debug & DEBUG_INBOUND)
-				yell ("FD [%d], reading [%d] bytes", des, nbytes);
-#endif
-
 			c = read (des, io_rec[des]->buffer +
 				  io_rec[des]->write_pos,
 				  IO_BUFFER_SIZE - io_rec[des]->write_pos);
@@ -304,7 +295,7 @@ new_close (int des)
 {
 	if (des < 0 || !io_rec)
 		return;
-	xfree ((char **) &(io_rec[des]));
+	new_free ((char **) &(io_rec[des]));
 	close (des);
 }
 

@@ -1,2 +1,0 @@
-%gUsage%n: %W/%nexec %Y<%ncommand%Y>%n
-- Executes %Y<%ncommand%Y>%n with the shell set from %PSHELL%n

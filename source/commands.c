@@ -1,4 +1,4 @@
-#ident "@(#)commands.c 1.12"
+#ident "@(#)commands.c 1.5"
 /*
  * commands.c: This is really a mishmash of function and such that deal with IRCII
  * commands (both normal and keybinding commands) 
@@ -37,7 +37,9 @@
 #include "input.h"
 #include "ignore.h"
 #include "keys.h"
+#include "alist.h"
 #include "names.h"
+#include "alias.h"
 #include "history.h"
 #include "funny.h"
 #include "ctcp.h"
@@ -51,17 +53,12 @@
 #include "list.h"
 #include "misc.h"
 #include "hash2.h"
+#include "fset.h"
 #include "notice.h"
 #include "tcommand.h"
-#include "util.h"
-#include "expr.h"
+#include "debug.h"
 
-#include "xformats.h"
-#include "xmalloc.h"
-#include "xdebug.h"
 
-/* for XDEBUG */
-#define MODULE_ID 	XD_CMD
 
 extern int doing_notice;
 
@@ -111,10 +108,10 @@ struct target_type
 	char *message;
 	int hook_type;
 	char *command;
-	const char *format;
+	char *format;
 	int level;
-	const char *output;
-	const char *other_output;
+	char *output;
+	char *other_output;
 };
 
 
@@ -157,12 +154,12 @@ send_text (char *nick_list, char *text, char *command, int hook, int log)
 	};
 
 
-	target[0].output = get_format (FORMAT_SEND_MSG_FSET);
-	target[1].output = get_format (FORMAT_SEND_PUBLIC_FSET);
-	target[1].other_output = get_format (FORMAT_SEND_PUBLIC_OTHER_FSET);
-	target[2].output = get_format (FORMAT_SEND_NOTICE_FSET);
-	target[3].output = get_format (FORMAT_SEND_NOTICE_FSET);
-	target[3].other_output = get_format (FORMAT_SEND_NOTICE_FSET);
+	target[0].output = get_fset_var (FORMAT_SEND_MSG_FSET);
+	target[1].output = get_fset_var (FORMAT_SEND_PUBLIC_FSET);
+	target[1].other_output = get_fset_var (FORMAT_SEND_PUBLIC_OTHER_FSET);
+	target[2].output = get_fset_var (FORMAT_SEND_NOTICE_FSET);
+	target[3].output = get_fset_var (FORMAT_SEND_NOTICE_FSET);
+	target[3].other_output = get_fset_var (FORMAT_SEND_NOTICE_FSET);
 
 	if (recursion)
 		hook = 0;
@@ -196,9 +193,9 @@ send_text (char *nick_list, char *text, char *command, int hook, int log)
 			send_to_server ("%s", text);
 		else if (*current_nick == '/')
 		{
-			line = m_opendup (current_nick, space_string, text, NULL);
+			line = m_opendup (current_nick, space, text, NULL);
 			parse_command (line, 0, empty_string);
-			xfree (&line);
+			new_free (&line);
 		}
 		else if (*current_nick == '=')
 		{
@@ -286,9 +283,9 @@ send_text (char *nick_list, char *text, char *command, int hook, int log)
 				put_it ("%s", convert_output_format (target[i].other_output,
 								     "%s %s %s %s", update_clock (GET_TIME), target[i].nick_list, get_server_nickname (from_server), copy));
 		}
-		xfree (&copy);
+		new_free (&copy);
 		send_to_server ("%s %s :%s", target[i].command, target[i].nick_list, target[i].message);
-		xfree (&target[i].nick_list);
+		new_free (&target[i].nick_list);
 		target[i].message = NULL;
 		set_lastlog_msg_level (lastlog_level);
 		message_from (NULL, LOG_CRAP);
@@ -297,7 +294,7 @@ send_text (char *nick_list, char *text, char *command, int hook, int log)
 	if (hook && get_server_away (curr_scr_win->server) && get_int_var (AUTO_UNMARK_AWAY_VAR))
 		parse_line (NULL, "AWAY", empty_string, 0, 0);
 
-	xfree (&free_nick);
+	new_free (&free_nick);
 	window_display = old_window_display;
 	recursion--;
 }
@@ -335,7 +332,7 @@ parse_line (char *name, char *org_line, char *args, int hist_flag, int append_fl
 		{
 			if (!line || !*line)
 			{
-				xfree (&free_line);
+				new_free (&free_line);
 				return;
 			}
 			stuff = expand_alias (line, args, &args_flag, &line);
@@ -344,8 +341,8 @@ parse_line (char *name, char *org_line, char *args, int hist_flag, int append_fl
 
 			parse_command (stuff, hist_flag, args);
 			if (!line)
-				xfree (&free_line);
-			xfree (&stuff);
+				new_free (&free_line);
+			new_free (&stuff);
 		}
 		while (line && *line);
 	else
@@ -367,7 +364,7 @@ parse_line (char *name, char *org_line, char *args, int hist_flag, int append_fl
 			}
 		}
 	}
-	xfree (&free_line);
+	new_free (&free_line);
 	return;
 }
 
@@ -397,8 +394,7 @@ parse_command (char *line, int hist_flag, char *sub_args)
 	if (!line || !*line)
 		return 0;
 
-
-	XDEBUG(1, "Executing [%d] %s", level, line);
+	DEBUG(XD_CMD, 5, "Executing [%d] %s", level, line);
 	level++;
 
 	if (!(cmdchars = get_string_var (CMDCHARS_VAR)))
@@ -498,7 +494,7 @@ parse_command (char *line, int hist_flag, char *sub_args)
 				set_input (empty_string);
 			}
 			parse_line (alias_name, alias, rest, 0, 1);
-			xfree (&alias_name);
+			new_free (&alias_name);
 		}
 		else
 		{
@@ -515,7 +511,7 @@ parse_command (char *line, int hist_flag, char *sub_args)
 					else
 						parse_command (com, 0, sub_args);
 
-					xfree (&com);
+					new_free (&com);
 				}
 				else
 					set_input (empty_string);
@@ -532,7 +528,7 @@ parse_command (char *line, int hist_flag, char *sub_args)
 				t_parse_command (com, rest);
 			}
 			if (alias)
-				xfree (&alias_name);
+				new_free (&alias_name);
 		}
 	}
 	if (old_display_var != get_int_var (DISPLAY_VAR))
@@ -540,7 +536,7 @@ parse_command (char *line, int hist_flag, char *sub_args)
 	else
 		window_display = display;
 
-	xfree (&this_cmd);
+	new_free (&this_cmd);
 	level--;
 	return 0;
 }
@@ -563,12 +559,12 @@ BUILT_IN_COMMAND (load)
 	int paste_level = 0;
 	char *start, *current_row = NULL, buffer[BIG_BUFFER_SIZE + 1];
 	int no_semicolon = 1;
-	char *my_irc_path;
+	char *irc_path;
 	int display;
 	int ack = 0;
 
-	my_irc_path = get_string_var (LOAD_PATH_VAR);
-	if (!my_irc_path)
+	irc_path = get_string_var (LOAD_PATH_VAR);
+	if (!irc_path)
 	{
 		bitchsay ("LOAD_PATH has not been set");
 		return;
@@ -601,13 +597,13 @@ BUILT_IN_COMMAND (load)
 		}
 		else if ((expanded = expand_twiddle (filename)))
 		{
-			if (!(fp = uzfopen (&expanded, my_irc_path)))
+			if (!(fp = uzfopen (&expanded, irc_path)))
 			{
 				/* uzfopen emits an error if the file
 				 * is not found, so we dont have to. */
 				status_update (1);
 				load_depth--;
-				xfree (&expanded);
+				new_free (&expanded);
 				return;
 			}
 		/* Reformatted by jfn */
@@ -691,7 +687,7 @@ BUILT_IN_COMMAND (load)
 								if (!paste_level)
 								{
 									parse_line (NULL, current_row, flag ? args : get_int_var (INPUT_ALIASES_VAR) ? empty_string : NULL, 0, 0);
-									xfree (&current_row);
+									new_free (&current_row);
 								}
 								else if (!in_comment)
 									malloc_strcat (&current_row, ";");
@@ -752,7 +748,7 @@ BUILT_IN_COMMAND (load)
 													{
 														/* Send the line off to parse_line */
 														parse_line (NULL, current_row, flag ? args : get_int_var (INPUT_ALIASES_VAR) ? empty_string : NULL, 0, 0);
-														xfree (&current_row);
+														new_free (&current_row);
 														ack = 0;	/* no semicolon.. */
 													}
 													else
@@ -808,7 +804,7 @@ BUILT_IN_COMMAND (load)
 										if ((*(ptr + 1) == '\0') && (!paste_level))
 										{
 											parse_line (NULL, current_row, flag ? args : get_int_var (INPUT_ALIASES_VAR) ? empty_string : NULL, 0, 0);
-											xfree (&current_row);
+											new_free (&current_row);
 										}
 										else
 											malloc_strcat (&current_row, ";");
@@ -839,9 +835,9 @@ BUILT_IN_COMMAND (load)
 						      expanded, paste_line);
 					else
 						parse_line (NULL, current_row, flag ? args : get_int_var (INPUT_ALIASES_VAR) ? empty_string : NULL, 0, 0);
-					xfree (&current_row);
+					new_free (&current_row);
 				}
-				xfree (&expanded);
+				new_free (&expanded);
 				fclose (fp);
 				if (get_int_var (DISPLAY_VAR))
 					window_display = display;

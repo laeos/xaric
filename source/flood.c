@@ -1,4 +1,4 @@
-#ident "@(#)flood.c 1.11"
+#ident "@(#)flood.c 1.5"
 /*
  * flood.c: handle channel flooding. 
  *
@@ -17,6 +17,7 @@
 
 #include "irc.h"
 
+#include "alias.h"
 #include "hook.h"
 #include "ircaux.h"
 #include "ignore.h"
@@ -30,10 +31,8 @@
 #include "ignore.h"
 #include "status.h"
 #include "hash2.h"
+#include "fset.h"
 #include "tcommand.h"
-
-#include "xformats.h"
-#include "xmalloc.h"
 
 
 static char *ignore_types[] =
@@ -113,8 +112,8 @@ cmd_no_flood (struct command *cmd, char *args)
 		{
 			if ((nptr = find_name_in_genericlist (nick + 1, no_flood_list, FLOOD_HASHSIZE, 1)))
 			{
-				xfree (&nptr->name);
-				xfree ((char **) &nptr);
+				new_free (&nptr->name);
+				new_free ((char **) &nptr);
 				bitchsay ("%s removed from no-flood list", nick);
 			}
 			else
@@ -134,7 +133,7 @@ cmd_no_flood (struct command *cmd, char *args)
 	}
 }
 
-static int 
+int 
 get_flood_rate (int type, ChannelList * channel)
 {
 	int flood_rate = get_int_var (FLOOD_RATE_VAR);
@@ -175,7 +174,7 @@ get_flood_rate (int type, ChannelList * channel)
 	return flood_rate;
 }
 
-static int 
+int 
 get_flood_count (int type, ChannelList * channel)
 {
 	int flood_count = get_int_var (FLOOD_AFTER_VAR);
@@ -216,7 +215,7 @@ get_flood_count (int type, ChannelList * channel)
 	return flood_count;
 }
 
-static int 
+int 
 set_flood (int type, time_t flood_time, int reset, NickList * tmpnick)
 {
 	if (!tmpnick)
@@ -351,7 +350,7 @@ is_other_flood (ChannelList * channel, NickList * tmpnick, int type, int *t_floo
 	return 0;
 }
 
-static char *
+char *
 get_ignore_types (unsigned int type)
 {
 	int x = 0;
@@ -435,7 +434,7 @@ check_flooding (char *nick, int type, char *line, char *channel)
 					break;
 				}
 				if (get_int_var (FLOOD_WARNING_VAR))
-					put_it ("%s", convert_output_format (get_format (FORMAT_FLOOD_FSET), "%s %s %s %s %s", update_clock (GET_TIME), get_ignore_types (type), nick, FromUserHost, channel ? channel : "unknown"));
+					put_it ("%s", convert_output_format (get_fset_var (FORMAT_FLOOD_FSET), "%s %s %s %s %s", update_clock (GET_TIME), get_ignore_types (type), nick, FromUserHost, channel ? channel : "unknown"));
 			}
 			return 1;
 		}
@@ -534,8 +533,8 @@ remove_oldest_flood_hashlist (HashEntry * list, time_t timet, int count)
 				if ((ptr->start + timet) <= t)
 				{
 					ptr = find_name_in_floodlist (ptr->name, flood_list, FLOOD_HASHSIZE, 1);
-					xfree (&(ptr->channel));
-					xfree ((char **) &ptr);
+					new_free (&(ptr->channel));
+					new_free ((char **) &ptr);
 					total++;
 					ptr = (Flooding *) (list + x)->list;
 				}
@@ -556,8 +555,8 @@ remove_oldest_flood_hashlist (HashEntry * list, time_t timet, int count)
 			{
 				ptr = find_name_in_floodlist (ptr->name, flood_list, FLOOD_HASHSIZE, 1);
 				next = ptr->next;
-				xfree (&(ptr->channel));
-				xfree ((char **) &ptr);
+				new_free (&(ptr->channel));
+				new_free ((char **) &ptr);
 				total++;
 				count--;
 				ptr = (Flooding *) (list + x)->list;

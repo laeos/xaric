@@ -1,9 +1,0 @@
-- CTCP sends %Y<%Cnick%Y>%n with %Y<%nrequest%Y>%n
-%Y<%nrequest%Y>%n: %G(%nexamples which can be sent to other %GBitchX%n users%G)%n
-friends%G:%n
-%Y*%n INVITE   %M-%n Ask for an invite to %Y<%Bchannel%Y>%n
-%Y*%n OPS      %M-%n A legitimate way to gain ops
-%Y*%n WHOAMI   %M-%n Request %Y<%Cnick%Y> to display current attributes of me
-%Y*%n  %M-%n 
-other%G:%n
-%Y*%n XLINK    %M-%n ?

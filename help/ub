@@ -1,3 +1,0 @@
-%gUsage%n: %W/%nub %R[%Cnick%R]%n
-- Removes ban on %R[%Cnick%R]%n
-Hint: %W/%nub with no arguments removes all bans placed on current channel

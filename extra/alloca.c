@@ -1,4 +1,4 @@
-#ident "@(#)alloca.c 1.9"
+#ident "@(#)alloca.c 1.5"
 /* alloca.c -- allocate automatically reclaimed memory
    (Mostly) portable public-domain implementation -- D A Gwyn
 

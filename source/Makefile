@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)Makefile 1.22
+# @(#)Makefile 1.3
 #
 
 ifndef REALLY_INCLUDE
@@ -29,75 +29,33 @@ else
 
 # source files
 source-src-lcl =	\
-	bsearch.c	\
-	bitlist.c	\
-	cmd_help.c	\
-	cmd_hostname.c	\
-	cmd_modes.c	\
-	cmd_orignick.c	\
-	cmd_save.c	\
-	cmd_scan.c	\
-	cmd_who.c	\
-	commands.c	\
-	ctcp.c		\
-	dcc.c		\
-	exec.c		\
-	expr.c		\
-	flood.c		\
-	functions.c	\
-	funny.c		\
-	hash.c		\
-	history.c	\
-	hook.c		\
-	ignore.c	\
-	input.c		\
-	irc.c		\
-	ircaux.c	\
-	ircsig.c	\
-	keys.c		\
-	lastlog.c	\
-	list.c		\
-	log.c		\
-	misc.c		\
-	names.c		\
-	ncommand.c	\
-	network.c	\
-	newio.c		\
-	notice.c	\
-	notify.c	\
-	numbers.c	\
-	output.c	\
-	parse.c		\
-	pnt.c		\
-	readlog.c	\
-	reg.c		\
-	screen.c	\
-	server.c	\
-	status.c	\
-	tcommand.c	\
-	term.c		\
-	ternary.c	\
-	timer.c		\
-	vars.c		\
-	whois.c		\
-	whowas.c	\
-	window.c	\
-	words.c		\
-	util.c		\
-	xversion.c	\
-	xdebug.c	\
-	xscandir.c	\
-	xdlist.c	\
-	xformats.c	\
-	xintro.c	\
-	xmalloc.c	
+	alist.c alias.c cmd_modes.c commands.c ctcp.c dcc.c     \
+	debug.c exec.c  flood.c fset.c functions.c funny.c  \
+	hash.c help.c history.c hook.c iflist.c ignore.c input.c irc.c ircaux.c   \
+	ircsig.c keys.c lastlog.c list.c log.c misc.c names.c network.c  \
+	newio.c notice.c notify.c numbers.c output.c parse.c readlog.c   \
+	reg.c screen.c server.c status.c term.c timer.c vars.c whois.c   \
+	whowas.c window.c words.c tcommand.c ternary.c ncommand.c  \
+	cmd_hostname.c cmd_who.c cmd_scan.c cmd_save.c cmd_orignick.c \
+	version.c
 
-
-# prebuilt object files
 source-obj-lcl =
 
 # this should't change.
-source-src =  $(addprefix source/, $(sort $(source-src-lcl)))
-source-obj =  $(addprefix source/, $(sort $(source-obj-lcl)))
+O_SRC +=  $(addprefix source/, $(sort $(source-src-lcl)))
+O_OBJ +=  $(addprefix source/, $(sort $(source-obj-lcl)))
 
 endif
+
+
+
+## Process this file with automake to create Makefile.in
+
+
+bin_PROGRAMS = xaric
+
+xaric_SOURCES = \
+
+EXTRA_DIST = expr.c 
+
+

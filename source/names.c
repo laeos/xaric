@@ -1,4 +1,5 @@
-#ident "@(#)names.c 1.13"
+
+
 /*
  * names.c: This here is used to maintain a list of all the people currently
  * on your channel.  Seems to work 
@@ -37,15 +38,10 @@
 #include "vars.h"
 #include "status.h"
 #include "hash2.h"
-#include "util.h"
-
-#include "xformats.h"
-#include "xmalloc.h"
+#include "fset.h"
 
 extern int in_on_who;
 extern ChannelList default_statchan;
-extern char *last_split_server;
-extern char *last_split_from;
 
 static char mode_str[] = "iklmnpsta";
 
@@ -96,7 +92,7 @@ clear_channel (ChannelList * chan)
 }
 
 extern ChannelList *
-lookup_channel (char *channel, int server, int unlnk)
+lookup_channel (char *channel, int server, int unlink)
 {
 	register ChannelList *chan = NULL, *last = NULL;
 	if (server == -1)
@@ -115,7 +111,7 @@ lookup_channel (char *channel, int server, int unlnk)
 	{
 		if (chan->server == server && !my_stricmp (chan->channel, channel))
 		{
-			if (unlnk == CHAN_UNLINK)
+			if (unlink == CHAN_UNLINK)
 			{
 				if (last)
 					last->next = chan->next;
@@ -141,7 +137,7 @@ set_waiting_channel (int i)
 			if (tmp->bind_channel)
 				tmp->waiting_channel = tmp->current_channel;
 			else
-				xfree (&tmp->current_channel);
+				new_free (&tmp->current_channel);
 			tmp->current_channel = NULL;
 		}
 }
@@ -181,7 +177,7 @@ add_channel (char *channel, int server)
 		new->connected = 1;
 		new->mode = 0;
 		new->limit = 0;
-		xfree (&new->s_mode);
+		new_free (&new->s_mode);
 		new->server = server;
 		new->window = curr_scr_win;
 		malloc_strcpy (&(new->channel), channel);
@@ -192,7 +188,7 @@ add_channel (char *channel, int server)
 	{
 		if (!(whowaschan = check_whowas_chan_buffer (channel, 1)))
 		{
-			new = (ChannelList *) xmalloc (sizeof (ChannelList));
+			new = (ChannelList *) new_malloc (sizeof (ChannelList));
 			new->connected = 1;
 			get_time (&new->channel_create);
 			malloc_strcpy (&(new->channel), channel);
@@ -200,11 +196,11 @@ add_channel (char *channel, int server)
 		else
 		{
 			new = whowaschan->channellist;
-			xfree (&whowaschan->channel);
-			xfree ((char **) &whowaschan);
-			xfree (&(new->key));
+			new_free (&whowaschan->channel);
+			new_free ((char **) &whowaschan);
+			new_free (&(new->key));
 			new->mode = 0;
-			xfree (&new->s_mode);
+			new_free (&new->s_mode);
 			new->limit = new->i_mode = 0;
 			clear_channel (new);
 			clear_bans (new);
@@ -243,7 +239,7 @@ add_channel (char *channel, int server)
 			{
 				set_current_channel_by_refnum (tmp->refnum, channel);
 				new->window = tmp;
-				xfree (&tmp->waiting_channel);
+				new_free (&tmp->waiting_channel);
 				update_all_windows ();
 				return new;
 			}
@@ -293,7 +289,7 @@ add_to_channel (char *channel, char *nick, int server, int oper, int voice, char
 		{
 			if (!(whowas = check_whowas_buffer (nick, userhost ? userhost : "<UNKNOWN>", channel, 1)))
 			{
-				new = (NickList *) xmalloc (sizeof (NickList));
+				new = (NickList *) new_malloc (sizeof (NickList));
 
 				new->idle_time = new->kicktime =
 					new->doptime = new->nicktime =
@@ -309,8 +305,8 @@ add_to_channel (char *channel, char *nick, int server, int oper, int voice, char
 			else
 			{
 				new = whowas->nicklist;
-				xfree (&whowas->channel);
-				xfree ((char **) &whowas);
+				new_free (&whowas->channel);
+				new_free ((char **) &whowas);
 				malloc_strcpy (&(new->nick), nick);
 
 
@@ -375,7 +371,6 @@ recreate_mode (ChannelList * chan)
 	buffer[0] = 0;
 	s = buffer;
 	mode = chan->mode;
-
 	if (!mode)
 		return NULL;
 	while (mode)
@@ -499,7 +494,7 @@ compress_modes (int server, char *channel, char *modes)
 			}
 			else
 			{
-				tucm = (UserChanModes *) xmalloc (sizeof (UserChanModes));
+				tucm = (UserChanModes *) new_malloc (sizeof (UserChanModes));
 				malloc_strcpy (&tucm->nick, tmp);
 				if (add && !isopped)
 				{
@@ -546,7 +541,7 @@ compress_modes (int server, char *channel, char *modes)
 			}
 			else
 			{
-				tucm = (UserChanModes *) xmalloc (sizeof (UserChanModes));
+				tucm = (UserChanModes *) new_malloc (sizeof (UserChanModes));
 				malloc_strcpy (&tucm->nick, tmp);
 				if (add && !isvoiced)
 				{
@@ -597,7 +592,7 @@ compress_modes (int server, char *channel, char *modes)
 			}
 			else
 			{
-				tucm = (UserChanModes *) xmalloc (sizeof (UserChanModes));
+				tucm = (UserChanModes *) new_malloc (sizeof (UserChanModes));
 				malloc_strcpy (&tucm->nick, tmp);
 				if (add && !isbanned)
 				{
@@ -906,7 +901,7 @@ compress_modes (int server, char *channel, char *modes)
  * commands and convert that mode string into a one byte bit map of modes 
  */
 static int 
-decifer_mode (char *from, register char *mode_string, ChannelList ** channel, unsigned long *mode, char *chopp, char *voice, char **key)
+decifer_mode (char *from, register char *mode_string, ChannelList ** channel, unsigned long *mode, char *chop, char *voice, char **key)
 {
 
 	char *limit = 0;
@@ -951,7 +946,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 				limit_set = 1;
 				if (!(limit = next_arg (rest, &rest)))
 					limit = empty_string;
-				else if (!strncmp (limit, zero_string, 1))
+				else if (!strncmp (limit, zero, 1))
 					limit_reset = 1, limit_set = 0, add = 0;
 			}
 			else
@@ -983,7 +978,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 				{
 					if (add && add != (*channel)->chop && !in_join_list ((*channel)->channel, from_server))
 					{
-						*chopp = (*channel)->chop = add;
+						*chop = (*channel)->chop = add;
 						flush_mode_all (*channel);
 					}
 					else
@@ -995,7 +990,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 								tmp->sent_reop = tmp->sent_deop = 0;
 						}
 					}
-					*chopp = add;
+					*chop = add;
 					(*channel)->chop = add;
 				}
 				ThisNick = find_nicklist_in_channellist (from, *channel, 0);
@@ -1020,7 +1015,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 			if (add)
 				malloc_strcpy (key, the_key);
 			else
-				xfree (key);
+				new_free (key);
 			break;
 		case 'v':
 			if ((person = next_arg (rest, &rest)))
@@ -1041,7 +1036,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 				ThisNick = find_nicklist_in_channellist (person, *channel, 0);
 				if (!(new = (BanList *) find_in_list ((List **) & (*channel)->bans, person, 0)) || my_stricmp (person, new->ban))
 				{
-					new = (BanList *) xmalloc (sizeof (BanList));
+					new = (BanList *) new_malloc (sizeof (BanList));
 					malloc_strcpy (&new->ban, person);
 					add_to_list ((List **) & (*channel)->bans, (List *) new);
 				}
@@ -1054,9 +1049,9 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 			{
 				if ((new = (BanList *) remove_from_list ((List **) & (*channel)->bans, person)))
 				{
-					xfree (&new->setby);
-					xfree (&new->ban);
-					xfree ((char **) &new);
+					new_free (&new->setby);
+					new_free (&new->ban);
+					new_free ((char **) &new);
 				}
 			}
 			break;
@@ -1124,9 +1119,9 @@ clear_bans (ChannelList * channel)
 	for (bans = channel->bans; bans; bans = next)
 	{
 		next = bans->next;
-		xfree (&bans->setby);
-		xfree (&bans->ban);
-		xfree ((char **) &bans);
+		new_free (&bans->setby);
+		new_free (&bans->ban);
+		new_free ((char **) &bans);
 	}
 	channel->bans = NULL;
 }
@@ -1185,9 +1180,10 @@ remove_from_channel (char *channel, char *nick, int server, int netsplit, char *
 {
 	ChannelList *chan;
 	NickList *tmp = NULL;
+	extern char *last_split_server;
+	extern char *last_split_from;
 	char buf[BIG_BUFFER_SIZE + 1];
 	char *server1 = NULL, *server2 = NULL;
-
 	if (netsplit && reason)
 	{
 		char *p = NULL;
@@ -1206,7 +1202,7 @@ remove_from_channel (char *channel, char *nick, int server, int netsplit, char *
 			malloc_strcpy (&last_split_from, server2);
 			if (do_hook (LLOOK_SPLIT_LIST, "%s %s", server2, server1))
 			{
-				put_it ("%s", convert_output_format (get_format (FORMAT_NETSPLIT_FSET), "%s %s %s", update_clock (GET_TIME), server1, server2));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETSPLIT_FSET), "%s %s %s", update_clock (GET_TIME), server1, server2));
 				bitchsay ("\002Ctrl-F\002 to see who left \002Ctrl-E\002 to change to [%s]", server1);
 			}
 			message_from (NULL, LOG_CRAP);
@@ -1345,7 +1341,7 @@ show_channel (ChannelList * chan)
 	}
 	malloc_strcpy (&nicks, buffer);
 	say ("\t%s %c%s (%s): %s", chan->channel, s ? '+' : ' ', s ? s : "<none>", get_server_name (chan->server), nicks);
-	xfree (&nicks);
+	new_free (&nicks);
 }
 
 /* list_channels: displays your current channel and your channel list */
@@ -1388,6 +1384,7 @@ void
 switch_channels (char key, char *ptr)
 {
 	ChannelList *tmp;
+
 
 	if (server_list[from_server].chan_list)
 	{
@@ -1445,6 +1442,7 @@ change_server_channels (int old, int new)
 {
 	ChannelList *tmp;
 
+
 	if (new == old)
 		return;
 	if (new > -1 && server_list[new].chan_list)
@@ -1463,9 +1461,10 @@ clear_channel_list (int server)
 	ChannelList *tmp, *next;
 	Window *ptr = NULL;
 
+
 	while (traverse_all_windows (&ptr))
 		if (ptr->server == server && ptr->current_channel)
-			xfree (&ptr->current_channel);
+			new_free (&ptr->current_channel);
 
 	for (tmp = server_list[server].chan_list; tmp; tmp = next)
 	{
@@ -1492,6 +1491,7 @@ reconnect_all_channels (int server)
 	char *channels = NULL;
 	char *keys = NULL;
 
+
 	for (tmp = server_list[from_server].chan_list; tmp; tmp = tmp->next)
 	{
 		if ((mode = recreate_mode (tmp)))
@@ -1509,8 +1509,8 @@ reconnect_all_channels (int server)
 	if (channels)
 		send_to_server ("JOIN %s %s", channels, keys ? keys : empty_string);
 
-	xfree (&channels);
-	xfree (&keys);
+	new_free (&channels);
+	new_free (&keys);
 
 	clear_channel_list (from_server);
 /*      window_check_servers(); */
@@ -1521,6 +1521,7 @@ char *
 what_channel (char *nick, int server)
 {
 	ChannelList *tmp;
+
 
 	/*
 	   if (curr_scr_win->current_channel && is_on_channel(curr_scr_win->current_channel, curr_scr_win->server, nick))
@@ -1539,6 +1540,7 @@ walk_channels (char *nick, int init, int server)
 {
 	static ChannelList *tmp = NULL;
 
+
 	if (init)
 		tmp = server_list[server].chan_list;
 	else if (tmp)
@@ -1556,6 +1558,7 @@ int
 get_channel_oper (char *channel, int server)
 {
 	ChannelList *chan;
+
 
 	if ((chan = lookup_channel (channel, server, CHAN_NOUNLINK)))
 		return chan->chop;
@@ -1584,6 +1587,7 @@ get_channel_voice (char *channel, int server)
 {
 	ChannelList *chan;
 
+
 	if ((chan = lookup_channel (channel, server, CHAN_NOUNLINK)))
 		return chan->voice;
 	return 1;
@@ -1593,6 +1597,7 @@ extern void
 set_channel_window (Window * window, char *channel, int server)
 {
 	ChannelList *tmp;
+
 
 	if (!channel || server < 0)
 		return;
@@ -1612,6 +1617,7 @@ create_channel_list (Window * window)
 	ChannelList *tmp;
 	char buffer[BIG_BUFFER_SIZE + 1];
 
+
 	*buffer = 0;
 	for (tmp = server_list[window->server].chan_list; tmp; tmp = tmp->next)
 	{
@@ -1629,6 +1635,7 @@ channel_server_delete (int server)
 {
 	ChannelList *tmp;
 	int i;
+
 	for (i = server + 1; i < number_of_servers; i++)
 		for (tmp = server_list[i].chan_list; tmp; tmp = tmp->next)
 			if (tmp->server >= server)
@@ -1652,8 +1659,8 @@ remove_from_join_list (char *chan, int server)
 				join_list = next;
 			else
 				prev->next = next;
-			xfree (&tmp->chan);
-			xfree ((char **) &tmp);
+			new_free (&tmp->chan);
+			new_free ((char **) &tmp);
 			return;
 		}
 		else
@@ -1707,7 +1714,7 @@ in_join_list (char *chan, int server)
 	return 0;
 }
 
-static void 
+void 
 show_channel_sync (struct joinlist *tmp, char *chan)
 {
 	struct timeval tv;
@@ -1755,7 +1762,7 @@ add_to_join_list (char *chan, int server, int winref)
 			return;
 		}
 	}
-	tmp = (struct joinlist *) xmalloc (sizeof (struct joinlist));
+	tmp = (struct joinlist *) new_malloc (sizeof (struct joinlist));
 	tmp->chan = NULL;
 	malloc_strcpy (&tmp->chan, chan);
 	tmp->server = server;
@@ -1773,7 +1780,8 @@ add_to_mode_list (char *channel, int server, char *mode)
 
 	if (!channel || !*channel || !mode || !*mode)
 		return;
-	mptr = (struct modelist *) xmalloc (sizeof (struct modelist));
+
+	mptr = (struct modelist *) new_malloc (sizeof (struct modelist));
 	mptr->chan = NULL;
 	malloc_strcpy (&mptr->chan, channel);
 	mptr->server = server;
@@ -1821,9 +1829,9 @@ remove_from_mode_list (char *channel, int server)
 			else
 				prev->next = curr->next;
 			prev = curr;
-			xfree (&curr->chan);
-			xfree (&curr->mode);
-			xfree ((char **) &curr);
+			new_free (&curr->chan);
+			new_free (&curr->mode);
+			new_free ((char **) &curr);
 		}
 		else
 			prev = curr;
@@ -1844,9 +1852,9 @@ clear_mode_list (int server)
 		else
 			prev->next = curr->next;
 		prev = curr;
-		xfree (&curr->chan);
-		xfree (&curr->mode);
-		xfree ((char **) &curr);
+		new_free (&curr->chan);
+		new_free (&curr->mode);
+		new_free ((char **) &curr);
 	}
 }
 

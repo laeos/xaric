@@ -1,4 +1,3 @@
-#ident "@(#)readlog.c 1.10"
 /* 
  * Copyright Colten Edwards 1996
  */
@@ -20,8 +19,6 @@
 #include "output.h"
 #include "misc.h"
 #include "tcommand.h"
-#include "util.h"
-#include "xmalloc.h"
 
 FILE *msg_fp = NULL;
 
@@ -47,7 +44,7 @@ cmd_remove_log (struct command *cmd, char *args)
 		return;
 	malloc_sprintf (&filename, "%s", get_string_var (MSGLOGFILE_VAR));
 	expand = expand_twiddle (filename);
-	xfree (&filename);
+	new_free (&filename);
 	window_display = 0;
 	reset_logptr = logmsg (LOG_CURRENT, NULL, NULL, 3);
 	log_toggle (0, NULL);
@@ -55,7 +52,7 @@ cmd_remove_log (struct command *cmd, char *args)
 	if (unlink (expand))
 	{
 		bitchsay ("Error unlinking: %s", expand);
-		xfree (&expand);
+		new_free (&expand);
 		return;
 	}
 	window_display = 0;
@@ -64,7 +61,7 @@ cmd_remove_log (struct command *cmd, char *args)
 		log_toggle (1, NULL);
 	window_display = old_display;
 	bitchsay ("Removed %s.", expand);
-	xfree (&expand);
+	new_free (&expand);
 }
 
 static int in_read_log = 0;
@@ -94,7 +91,7 @@ cmd_readlog (struct command *cmd, char *args)
 		malloc_sprintf (&filename, "%s", get_string_var (MSGLOGFILE_VAR));
 
 	expand = expand_twiddle (filename);
-	xfree (&filename);
+	new_free (&filename);
 	stat (expand, &stat_buf);
 	strcpy (buffer, expand);
 
@@ -104,13 +101,13 @@ cmd_readlog (struct command *cmd, char *args)
 	if ((msg_fp = fopen (expand, "r")) == NULL)
 	{
 		log_put_it (expand, "%s Error Opening Log file %s", line_thing, expand);
-		xfree (&expand);
+		new_free (&expand);
 		msg_fp = NULL;
 		return;
 	}
 	if (read_log_func == rfgets)
 		fseek (msg_fp, 0, SEEK_END);
-	xfree (&expand);
+	new_free (&expand);
 	msg_window = curr_scr_win;
 	msg_screen = current_screen;
 	log_prompt (buffer, NULL);
@@ -159,7 +156,7 @@ show_log (Window * window, char *name)
 	return (1);
 }
 
-static void 
+void 
 remove_away_log (char *stuff, char *line)
 {
 	if ((line && toupper (*line) == 'Y'))

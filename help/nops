@@ -1,3 +1,0 @@
-%gUsage%n: %W/%nnops %R[%Bchannel%R]%n
-- Shows, in a full format, all the nicks without ops in %R[%Bchannel%R]%n or current
-channel

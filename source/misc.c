@@ -1,4 +1,3 @@
-#ident "%W%"
 /* 
  *  Copyright Colten Edwards (c) 1996
  */
@@ -54,10 +53,7 @@
 #include "parse.h"
 #include "whowas.h"
 #include "hash2.h"
-#include "util.h"
-
-#include "xformats.h"
-#include "xmalloc.h"
+#include "fset.h"
 
 
 char *alias_special_char (char **, char *, char *, char *, int *);
@@ -80,10 +76,6 @@ ChannelList default_statchan =
 {0};
 
 extern NickTab *tabkey_array;
-
-SocketList sockets[FD_SETSIZE] =
-{
-	{0, 0, 0, NULL}};
 
 extern Ignore *ignored_nicks;
 
@@ -172,7 +164,7 @@ timer_unban (void *args)
 	ban = next_arg (p, &p);
 	if ((chan = (ChannelList *) find_in_list ((List **) & server_list[server].chan_list, channel, 0)) && ban_is_on_channel (ban, chan))
 		my_send_to_server (server, "MODE %s -b %s", channel, ban);
-	xfree (&serv);
+	new_free (&serv);
 	return 0;
 }
 
@@ -393,17 +385,17 @@ check_split (char *nick, char *reason, char *chan)
 			{
 				if (match (b_check, host1) || match (b_check, host2))
 				{
-					xfree (&temp);
+					new_free (&temp);
 					goto fail_split;
 				}
 			}
-			xfree (&temp);
+			new_free (&temp);
 		}
-		xfree (&tmp);
+		new_free (&tmp);
 		return 1;
 	}
       fail_split:
-	xfree (&tmp);
+	new_free (&tmp);
 	return 0;
 }
 
@@ -415,9 +407,9 @@ clear_array (NickTab ** tmp)
 	for (t = *tmp; t;)
 	{
 		q = t->next;
-		xfree (&t->nick);
-		xfree (&t->type);
-		xfree ((char **) &t);
+		new_free (&t->nick);
+		new_free (&t->type);
+		new_free ((char **) &t);
 		t = q;
 	}
 	*tmp = NULL;
@@ -426,9 +418,8 @@ clear_array (NickTab ** tmp)
 void 
 userage (char *command, char *use)
 {
-
 	if (do_hook (USAGE_LIST, "%s %s", command, use ? use : "No Help Available for this command"))
-		put_it ("%s", convert_output_format (get_format (FORMAT_USAGE_FSET), "%s %s", command, convert_output_format (use ? use : "%WNo Help available for this command", NULL, NULL)));
+		put_it ("%s", convert_output_format (get_fset_var (FORMAT_USAGE_FSET), "%s %s", command, convert_output_format (use ? use : "%WNo Help available for this command", NULL, NULL)));
 }
 
 char *
@@ -466,8 +457,8 @@ rename_file (char *old_file, char **new_file)
 	}
 	if (fp != NULL)
 		fclose (fp);
-	xfree (&tmp);
-	xfree (&new_f);
+	new_free (&tmp);
+	new_free (&new_f);
 	malloc_sprintf (new_file, "%c%s", c, *new_file);
 	return 0;
 }
@@ -487,25 +478,25 @@ clear_link (irc_server ** serv1)
 	while (temp != NULL)
 	{
 		hold = temp->next;
-		xfree (&temp->name);
-		xfree (&temp->link);
-		xfree (&temp->time);
-		xfree ((char **) &temp);
+		new_free (&temp->name);
+		new_free (&temp->link);
+		new_free (&temp->time);
+		new_free ((char **) &temp);
 		temp = hold;
 	}
 	*serv1 = NULL;
 }
 
 irc_server *
-add_server (irc_server ** serv1, char *channel, char *arg, int hops, char *thetime)
+add_server (irc_server ** serv1, char *channel, char *arg, int hops, char *time)
 {
 	irc_server *serv2;
-	serv2 = (irc_server *) xmalloc (sizeof (irc_server));
+	serv2 = (irc_server *) new_malloc (sizeof (irc_server));
 	serv2->next = *serv1;
 	malloc_strcpy (&serv2->name, channel);
 	malloc_strcpy (&serv2->link, arg);
 	serv2->hopcount = hops;
-	serv2->time = m_strdup (thetime);
+	serv2->time = m_strdup (time);
 	*serv1 = serv2;
 	return serv2;
 }
@@ -524,10 +515,10 @@ find_server (irc_server * serv1, char *channel)
 }
 
 void 
-add_split_server (char *name, char *lnk, int hops)
+add_split_server (char *name, char *link, int hops)
 {
 	irc_server *temp;
-	temp = add_server (&split_link, name, lnk, hops, update_clock (GET_TIME));
+	temp = add_server (&split_link, name, link, hops, update_clock (GET_TIME));
 	temp->status = SPLIT;
 }
 
@@ -548,10 +539,10 @@ remove_split_server (char *server)
 
 	if ((temp = (irc_server *) remove_from_list ((List **) & split_link, server)))
 	{
-		xfree (&temp->name);
-		xfree (&temp->link);
-		xfree (&temp->time);
-		xfree ((char **) &temp);
+		new_free (&temp->name);
+		new_free (&temp->link);
+		new_free (&temp->time);
+		new_free ((char **) &temp);
 	}
 }
 
@@ -579,7 +570,7 @@ parse_365 (char *channel, char *args, char *subargs)
 				continue;
 			serv1->time = m_strdup (update_clock (GET_TIME));
 			if (do_hook (LLOOK_SPLIT_LIST, "%s %s %d %s", serv1->name, serv1->link, serv1->hopcount, serv1->time))
-				put_it ("%s", convert_output_format (get_format (FORMAT_NETSPLIT_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETSPLIT_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
 			serv1->count++;
 		}
 		else
@@ -588,7 +579,7 @@ parse_365 (char *channel, char *args, char *subargs)
 			{
 				serv1->status = ~SPLIT;
 				if (do_hook (LLOOK_JOIN_LIST, "%s %s %d %s", serv1->name, serv1->link, serv1->hopcount, serv1->time))
-					put_it ("%s", convert_output_format (get_format (FORMAT_NETJOIN_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
+					put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETJOIN_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
 				serv1->count = 0;
 			}
 		}
@@ -600,7 +591,7 @@ parse_365 (char *channel, char *args, char *subargs)
 			if (first_time == 1)
 			{
 				if (do_hook (LLOOK_ADDED_LIST, "%s %s %d", serv1->name, serv1->link, serv1->hopcount))
-					put_it ("%s", convert_output_format (get_format (FORMAT_NETADD_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
+					put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETADD_FSET), "%s %s %s %d", serv1->time, serv1->name, serv1->link, serv1->hopcount));
 				serv1->count = 0;
 			}
 			add_server (&server_last, serv1->name, serv1->link, serv1->hopcount, update_clock (GET_TIME));
@@ -645,7 +636,7 @@ error_not_opped (char *channel)
 	say ("You're not opped on %s", channel);
 }
 
-static int 
+int 
 freadln (FILE * stream, char *lin)
 {
 	char *p;
@@ -708,23 +699,23 @@ numchar (char *string, char c)
 }
 
 char *
-cluster (char *thehost)
+cluster (char *hostname)
 {
 	static char result[BIG_BUFFER_SIZE + 1];
 	char temphost[BIG_BUFFER_SIZE + 1];
 	char *host;
 
-	if (!thehost)
+	if (!hostname)
 		return NULL;
 	host = temphost;
 	*result = 0;
 	memset (result, 0, sizeof (result));
 	memset (temphost, 0, sizeof (temphost));
-	if (strchr (thehost, '@'))
+	if (strchr (hostname, '@'))
 	{
-		if (*thehost == '~')
-			thehost++;
-		strcpy (result, thehost);
+		if (*hostname == '~')
+			hostname++;
+		strcpy (result, hostname);
 		*strchr (result, '@') = '\0';
 		if (strlen (result) > 9)
 		{
@@ -732,11 +723,11 @@ cluster (char *thehost)
 			result[9] = '\0';
 		}
 		strcat (result, "@");
-		if (!(thehost = strchr (thehost, '@')))
+		if (!(hostname = strchr (hostname, '@')))
 			return NULL;
-		thehost++;
+		hostname++;
 	}
-	strcpy (host, thehost);
+	strcpy (host, hostname);
 
 	if (*host && isdigit (*(host + strlen (host) - 1)))
 	{
@@ -788,32 +779,6 @@ cluster (char *thehost)
 	return result;
 }
 
-void 
-set_socket_read (fd_set * rd, fd_set * wr)
-{
-	register int i;
-	for (i = 0; i < FD_SETSIZE; i++)
-	{
-		if (sockets[i].is_read)
-			FD_SET (i, rd);
-		if (sockets[i].is_write)
-			FD_SET (i, wr);
-	}
-}
-
-void 
-scan_sockets (fd_set * rd, fd_set * wr)
-{
-	register int i;
-	for (i = 0; i < FD_SETSIZE; i++)
-	{
-		if (sockets[i].is_read && FD_ISSET (i, rd))
-			(sockets[i].func) (i);
-		if (sockets[i].is_write && FD_ISSET (i, wr))
-			(sockets[i].func) (i);
-	}
-}
-
 static int cparse_recurse = -1;
 
 char *
@@ -851,9 +816,9 @@ convert_output_format (const char *format, const char *str,...)
 				{
 				case 's':
 					{
-						char *foo = (char *) va_arg (args, char *);
-						if (foo)
-							strcat (buffer2, foo);
+						char *s = (char *) va_arg (args, char *);
+						if (s)
+							strcat (buffer2, s);
 						break;
 					}
 				case 'd':
@@ -1038,7 +1003,7 @@ convert_output_format (const char *format, const char *str,...)
 			in_cparse--;
 			if (new_str)
 				strcat (s, new_str);
-			xfree (&new_str);
+			new_free (&new_str);
 			while (*s)
 			{
 				if (*s == 255)
@@ -1060,7 +1025,7 @@ convert_output_format (const char *format, const char *str,...)
 	if (*s)
 		strcat (s, color_str[NO_COLOR]);
 	who_level = old_who_level;
-	xfree (&copy);
+	new_free (&copy);
 
 	cparse_recurse--;
 	return s;
@@ -1167,7 +1132,7 @@ add_to_irc_map (char *server1, char *distance)
 	int dist = 0;
 	if (distance)
 		dist = atoi (distance);
-	tmp = (irc_server *) xmalloc (sizeof (irc_server));
+	tmp = (irc_server *) new_malloc (sizeof (irc_server));
 	malloc_strcpy (&tmp->name, server1);
 	tmp->hopcount = dist;
 	if (!map)
@@ -1215,8 +1180,8 @@ show_server_map (void)
 		snprintf (tmp2, BIG_BUFFER_SIZE, "$G %%W$[-%d]1%%c $0 %s", tmp->hopcount * 3, tmp1);
 		put_it ("%s", convert_output_format (tmp2, "%s %s", tmp->name, prevdist != tmp->hopcount ? ascii : empty_string));
 		prevdist = tmp->hopcount;
-		xfree (&tmp->name);
-		xfree ((char **) &tmp);
+		new_free (&tmp->name);
+		new_free ((char **) &tmp);
 	}
 }
 
@@ -1227,13 +1192,13 @@ check_server_connect (int server)
 {
 	if ((from_server == -1) || (!in_timed_server && server_list[from_server].last_msg + 50 < time (NULL)))
 	{
-		add_timer (empty_string, 10, 1, timed_server, m_strdup ("0"), NULL);
+		add_timer ("", 10, 1, timed_server, m_strdup ("0"), NULL);
 		in_timed_server++;
 	}
 }
 
 char *
-country (char *thehost)
+country (char *hostname)
 {
 	typedef struct _domain
 	{
@@ -1252,7 +1217,7 @@ country (char *thehost)
 		{"AM", "Armenia"},
 		{"AN", "Netherlands Antilles"},
 		{"AO", "Angola"},
-		{"AQ", "Antarctica"},
+		{"AQ", "Antarctica (pHEAR)"},
 		{"AR", "Argentina"},
 		{"AS", "American Samoa"},
 		{"AT", "Austria"},
@@ -1405,7 +1370,7 @@ country (char *thehost)
 		{"NO", "Norway"},
 		{"NP", "Nepal"},
 		{"NR", "Nauru"},
-		{"NT", "Neutral Zone"},
+		{"NT", "Neutral Zone (pHEAR)"},
 		{"NU", "Niue"},
 		{"NZ", "New Zealand"},
 		{"OM", "Oman"},
@@ -1502,15 +1467,12 @@ country (char *thehost)
 	static char unknown[] = "unknown";
 	char *p;
 	int i = 0;
-	if (!thehost || !*thehost) 
+	if (!hostname || !*hostname || isdigit (hostname[strlen (hostname) - 1]))
 		return unknown;
-	if (isdigit (thehost[strlen (thehost) - 1])) 
-		return "IP Address";
-
-	if ((p = strrchr (thehost, '.')))
+	if ((p = strrchr (hostname, '.')))
 		p++;
 	else
-		p = thehost;
+		p = hostname;
 	for (i = 0; domain[i].code; i++)
 		if (!my_stricmp (p, domain[i].code))
 			return domain[i].country;
@@ -1539,7 +1501,7 @@ do_nslookup (char *host)
 		temp = gethostbyname (host);
 		alarm (0);
 	}
-	if (do_hook (NSLOOKUP_LIST, "%s %s %s", host, temp ? temp->h_name : empty_string, temp ? (char *) inet_ntoa (*(struct in_addr *) temp->h_addr) : empty_string))
+	if (do_hook (NSLOOKUP_LIST, "%s %s %s", host, temp ? temp->h_name : "", temp ? (char *) inet_ntoa (*(struct in_addr *) temp->h_addr) : ""))
 	{
 		if (!temp)
 			bitchsay ("Error looking up %s", host);
@@ -1587,14 +1549,14 @@ do_nslookup_blah (void *arg)
 	{
 		temp = gethostbyname (host);
 	}
-	if (do_hook (NSLOOKUP_LIST, "%s %s %s", host, temp ? temp->h_name : empty_string, temp ? (char *) inet_ntoa (*(struct in_addr *) temp->h_addr) : empty_string))
+	if (do_hook (NSLOOKUP_LIST, "%s %s %s", host, temp ? temp->h_name : "", temp ? (char *) inet_ntoa (*(struct in_addr *) temp->h_addr) : ""))
 	{
 		if (!temp)
 			bitchsay ("Error looking up %s", host);
 		else
 			bitchsay ("%s is %s (%s)", host, temp->h_name, (char *) inet_ntoa (*(struct in_addr *) temp->h_addr));
 	}
-	xfree (&arg);
+	new_free (&arg);
 	pthread_exit (NULL);
 	return NULL;
 }

@@ -1,4 +1,4 @@
-#ident "@(#)screen.c 1.9"
+#ident "@(#)screen.c 1.6"
 /*
  * screen.c
  *
@@ -33,8 +33,6 @@
 #include "exec.h"
 #include "newio.h"
 #include "misc.h"
-#include "util.h"
-#include "xmalloc.h"
 
 
 Window *to_window;
@@ -61,7 +59,7 @@ add_wait_prompt (char *prompt, void (*func) (char *, char *), char *data, int ty
 {
 	WaitPrompt **AddLoc, *New;
 
-	New = (WaitPrompt *) xmalloc (sizeof (WaitPrompt));
+	New = (WaitPrompt *) new_malloc (sizeof (WaitPrompt));
 	New->prompt = m_strdup (prompt);
 	New->data = m_strdup (data);
 	New->type = type;
@@ -110,35 +108,28 @@ add_to_screen (unsigned char *buffer)
 	if (in_window_command)
 		update_all_windows ();
 
+	tmp = curr_scr_win;
 	if ((who_level == LOG_CURRENT) && (curr_scr_win->server == from_server))
-	{
-		add_to_window (curr_scr_win, buffer);
-		return;
-	}
-	else if (to_window)
-	{
-		add_to_window (to_window, buffer);
-		return;
-	}
-	else if (who_from && *who_from)
-	{
+		goto found;
+
+	tmp = to_window;
+	if (to_window)
+		goto found;
+
+	if (who_from && *who_from) {
 		tmp = NULL;
-		while (traverse_all_windows (&tmp))
-		{
-			if (((from_server == tmp->server) || (from_server == -1)) && (who_level & tmp->window_level))
-			{
-				add_to_window (tmp, buffer);
-				return;
-			}
-			if (tmp->current_channel)
-			{
-				if (!my_stricmp (who_from, tmp->current_channel) &&
-				    tmp->server == from_server)
-				{
-					add_to_window (tmp, buffer);
-					return;
+		if (is_channel(who_from)) {
+			while (traverse_all_windows (&tmp)) {
+				if (tmp->current_channel && tmp->server == from_server) {
+					if (! my_stricmp (who_from, tmp->current_channel)) 
+						goto found;
 				}
 			}
+		}
+
+		tmp = NULL;
+		while (traverse_all_windows (&tmp)) {
+
 			if (tmp->query_nick &&
 			 (((who_level == LOG_MSG || who_level == LOG_NOTICE)
 			   && !my_stricmp (who_from, tmp->query_nick) &&
@@ -146,58 +137,49 @@ add_to_screen (unsigned char *buffer)
 			  (who_level == LOG_DCC &&
 			   (*tmp->query_nick == '=' || *tmp->query_nick == '-') &&
 			   !my_stricmp (who_from, tmp->query_nick + 1))))
-			{
+				goto found;
 
-				add_to_window (tmp, buffer);
-				return;
-			}
 			if (from_server == tmp->server)
-			{
 				if (find_in_list ((List **) & (tmp->nicks), who_from, !USE_WILDCARDS))
-				{
-					add_to_window (tmp, buffer);
-					return;
-				}
-			}
+					goto found;
+
 		}
-		if (is_channel (who_from) && from_server != -1)
-		{
+
+		tmp = NULL;
+		while (traverse_all_windows (&tmp)) {
+			if (((from_server == tmp->server) || (from_server == -1)) && (who_level & tmp->window_level))
+				goto found;
+
+		}
+		if (is_channel (who_from) && from_server != -1) {
 			ChannelList *chan;
 			if ((chan = (ChannelList *) find_in_list ((List **) & (server_list[from_server].chan_list),
-						 who_from, !USE_WILDCARDS)))
-			{
+						 who_from, !USE_WILDCARDS))) {
 				if (chan->window && from_server == chan->window->server)
-				{
-					add_to_window (chan->window, buffer);
-					return;
-				}
+					goto found;
 			}
 		}
 	}
-	tmp = NULL;
 
-	while (traverse_all_windows (&tmp))
-	{
+	tmp = NULL;
+	while (traverse_all_windows (&tmp)) {
 		if (((from_server == tmp->server) || (from_server == -1)) &&
 		    (who_level & tmp->window_level))
-		{
-			add_to_window (tmp, buffer);
-			return;
-		}
+			goto found;
 	}
+	tmp = NULL;
 	if (from_server == curr_scr_win->server || from_server == -1)
 		tmp = curr_scr_win;
-	else
-	{
-		tmp = NULL;
-		while (traverse_all_windows (&tmp))
-		{
+	else {
+		while (traverse_all_windows (&tmp)) {
 			if (tmp->server == from_server)
 				break;
 		}
-		if (!tmp)
-			tmp = curr_scr_win;
 	}
+	if (!tmp)
+		tmp = curr_scr_win;
+
+found:
 	add_to_window (tmp, buffer);
 }
 
@@ -278,12 +260,15 @@ add_to_window (Window * window, const unsigned char *str)
 					set_lastlog_msg_level (lastlog_level);
 				}
 			}
-			update_all_status (curr_scr_win, NULL, 0);
 		}
 
 		cursor_in_display ();
 		term_flush ();
 	}
+
+	/* ok, we don't really need to update status every time but... */
+	/* it helps to give is consistent status */
+	update_all_status (curr_scr_win, NULL, 0);
 }
 
 
@@ -349,8 +334,7 @@ split_up_line (const unsigned char *str)
 	if (!output_size)
 	{
 		int new = MAXIMUM_SPLITS;
-
-		output = xrealloc(output, sizeof(char *) * new);
+		RESIZE (output, char *, new);
 		output_size = new;
 	}
 
@@ -534,8 +518,7 @@ split_up_line (const unsigned char *str)
 			if (line >= output_size - 3)
 			{
 				int new = output_size + MAXIMUM_SPLITS + 1;
-
-				output = xrealloc(output, sizeof(char *) * new);
+				RESIZE (output, char *, new);
 				output_size = new;
 			}
 
@@ -611,7 +594,7 @@ split_up_line (const unsigned char *str)
 	if (*buffer)
 		malloc_strcpy ((char **) &(output[line++]), buffer);
 
-	xfree (&output[line]);
+	new_free (&output[line]);
 	recursion--;
 	return output;
 }
@@ -1012,13 +995,6 @@ display_color (long color1, long color2)
 {
 	char seq[32];
 
-#ifndef CONTROL_C_COLOR
-#if 0
-	if (!(x_debug & DEBUG_COLOR))
-		return;
-#endif
-#endif
-
 	if (!get_int_var (MIRCS_VAR))
 		return;
 
@@ -1169,7 +1145,7 @@ create_new_screen (void)
 	}
 	if (!new)
 	{
-		new = (Screen *) xmalloc (sizeof (Screen));
+		new = (Screen *) new_malloc (sizeof (Screen));
 		memset (new, 0, sizeof (Screen));
 		new->screennum = ++refnumber;
 		new->next = screen_list;
@@ -1197,6 +1173,7 @@ create_new_screen (void)
 	new->fpin = stdin;
 	new->alive = 1;
 	new->promptlist = NULL;
+	new->tty_name = NULL;
 	new->li = 24;
 	new->co = 79;
 	last_input_screen = new;

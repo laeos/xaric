@@ -1,4 +1,3 @@
-#ident "@(#)timer.c 1.10"
 /*
  * timer.c -- handles timers in ircII
  * Copyright 1993, 1996 Matthew Green
@@ -23,12 +22,9 @@
 #include "output.h"
 #include "commands.h"
 #include "misc.h"
-#include "util.h"
 #include "vars.h"
+#include "fset.h"
 #include "tcommand.h"
-
-#include "xformats.h"
-#include "xmalloc.h"
 
 static void show_timer (char *command);
 void delete_all_timers (void);
@@ -174,10 +170,10 @@ ExecuteTimers (void)
 		{
 			if (!current->callback)
 			{
-				xfree ((char **) &current->command);
-				xfree ((char **) &current->subargs);
+				new_free ((char **) &current->command);
+				new_free ((char **) &current->subargs);
 			}
-			xfree ((char **) &current);
+			new_free ((char **) &current);
 		}
 	}
 	parsingtimer = 0;
@@ -206,7 +202,7 @@ show_timer (char *command)
 	}
 
 	time (&current);
-	put_it ("%s", convert_output_format (get_format (FORMAT_TIMER_FSET), "%s %s %s %s", "Timer", "Seconds", "Events", "Command"));
+	put_it ("%s", convert_output_format (get_fset_var (FORMAT_TIMER_FSET), "%s %s %s %s", "Timer", "Seconds", "Events", "Command"));
 	for (tmp = PendingTimers; tmp; tmp = tmp->next)
 	{
 		time_left = tmp->time - current;
@@ -216,7 +212,7 @@ show_timer (char *command)
 		if (tmp->callback)
 			continue;
 #endif
-		put_it ("%s", convert_output_format (get_format (FORMAT_TIMER_FSET), "%s %l %d %s", tmp->ref, time_left, tmp->events, tmp->callback ? "(internal callback)" : (tmp->command ? tmp->command : empty_string)));
+		put_it ("%s", convert_output_format (get_fset_var (FORMAT_TIMER_FSET), "%s %l %d %s", tmp->ref, time_left, tmp->events, tmp->callback ? "(internal callback)" : (tmp->command ? tmp->command : "")));
 	}
 }
 
@@ -293,10 +289,10 @@ delete_timer (char *ref)
 				prev->next = tmp->next;
 			if (!tmp->callback)
 			{
-				xfree ((char **) &tmp->command);
-				xfree ((char **) &tmp->subargs);
+				new_free ((char **) &tmp->command);
+				new_free ((char **) &tmp->subargs);
 			}
-			xfree ((char **) &tmp);
+			new_free ((char **) &tmp);
 			return 0;
 		}
 	}
@@ -342,7 +338,7 @@ add_timer (char *refnum_want, long when, long events, int (callback) (void *), c
 
 	if (when == 0)
 		return NULL;
-	ntimer = (TimerList *) xmalloc (sizeof (TimerList));
+	ntimer = (TimerList *) new_malloc (sizeof (TimerList));
 	ntimer->in_on_who = in_on_who;
 	ntimer->time = time (NULL) + when;
 	ntimer->interval = when;
@@ -350,7 +346,7 @@ add_timer (char *refnum_want, long when, long events, int (callback) (void *), c
 	if (create_timer_ref (refnum_want, refnum_got) == -1)
 	{
 		say ("TIMER: Refnum %s already exists", refnum_want);
-		xfree ((char **) &ntimer);
+		new_free ((char **) &ntimer);
 		return NULL;
 	}
 

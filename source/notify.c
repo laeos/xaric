@@ -1,4 +1,3 @@
-#ident "@(#)notify.c 1.10"
 /*
  * notify.c: a few handy routines to notify you when people enter and leave irc 
  *
@@ -27,10 +26,8 @@
 #include "timer.h"
 #include "misc.h"
 #include "status.h"
+#include "fset.h"
 #include "tcommand.h"
-
-#include "xformats.h"
-#include "xmalloc.h"
 
 /* NotifyList: the structure for the notify stuff */
 typedef struct notify_stru
@@ -83,10 +80,10 @@ cmd_notify (struct command *cmd, char *args)
 					{
 						if ((new = (NotifyList *) remove_from_list ((List **) & (server_list[servnum].notify_list), nick)))
 						{
-							xfree (&(new->nick));
-							xfree (&(new->host));
-							xfree (&(new->user));
-							xfree ((char **) &new);
+							new_free (&(new->nick));
+							new_free (&(new->host));
+							new_free (&(new->user));
+							new_free ((char **) &new);
 
 							if (!shown)
 							{
@@ -111,10 +108,10 @@ cmd_notify (struct command *cmd, char *args)
 						while ((new = server_list[servnum].notify_list))
 						{
 							server_list[servnum].notify_list = new->next;
-							xfree (&new->nick);
-							xfree (&(new->user));
-							xfree (&new->host);
-							xfree ((char **) &new);
+							new_free (&new->nick);
+							new_free (&(new->user));
+							new_free (&new->host);
+							new_free ((char **) &new);
 						}
 					}
 					bitchsay ("Notify list cleared");
@@ -136,12 +133,12 @@ cmd_notify (struct command *cmd, char *args)
 						{
 							if ((new = (NotifyList *) remove_from_list ((List **) & server_list[servnum].notify_list, nick)) != NULL)
 							{
-								xfree (&(new->nick));
-								xfree (&(new->user));
-								xfree (&(new->host));
-								xfree ((char **) &new);
+								new_free (&(new->nick));
+								new_free (&(new->user));
+								new_free (&(new->host));
+								new_free ((char **) &new);
 							}
-							new = (NotifyList *) xmalloc (sizeof (NotifyList));
+							new = (NotifyList *) new_malloc (sizeof (NotifyList));
 							new->nick = m_strdup (nick);
 							new->added = time (NULL);
 							add_to_list ((List **) & server_list[servnum].notify_list, (List *) new);
@@ -271,18 +268,18 @@ notify_mark (char *nick, char *user, char *host, int flag)
 				tmp->lastseen = 0;
 				tmp->times++;
 
-				put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_SIGNON_UH_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, tmp->user, tmp->host));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_SIGNON_UH_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, tmp->user, tmp->host));
 			}
 		}
 		else
 		{
 			if (tmp->flag)
 			{
-				put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_SIGNOFF_UH_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, tmp->user, tmp->host));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_SIGNOFF_UH_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, tmp->user, tmp->host));
 				tmp->offline += now - tmp->added;
 				tmp->lastseen = now - tmp->added;
-				xfree (&tmp->host);
-				xfree (&tmp->user);
+				new_free (&tmp->host);
+				new_free (&tmp->user);
 			}
 			tmp->flag = 0;
 		}
@@ -306,8 +303,8 @@ show_notify_list (void)
 		if (tmp->flag)
 		{
 			if (count == 0)
-				put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_ON_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times", "Period", "Last seen"));
-			put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_ON_FSET), "%s %s@%s %d %l %l", tmp->nick, tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times, tmp->offline, tmp->lastseen));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_ON_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times", "Period", "Last seen"));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_ON_FSET), "%s %s@%s %d %l %l", tmp->nick, tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times, tmp->offline, tmp->lastseen));
 			count++;
 		}
 	}
@@ -318,8 +315,8 @@ show_notify_list (void)
 		if (!(tmp->flag))
 		{
 			if (count == 0)
-				put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_OFF_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times", "Period", "Last seen"));
-			put_it ("%s", convert_output_format (get_format (FORMAT_NOTIFY_OFF_FSET), "%s %s@%s %d %l %l", tmp->nick, tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times, tmp->offline, tmp->lastseen));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_OFF_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times", "Period", "Last seen"));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_NOTIFY_OFF_FSET), "%s %s@%s %d %l %l", tmp->nick, tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times, tmp->offline, tmp->lastseen));
 			count++;
 		}
 	}
@@ -363,7 +360,7 @@ make_notify_list (int servnum)
 
 	for (tmp = server_list[0].notify_list; tmp; tmp = tmp->next)
 	{
-		NotifyList *new = (NotifyList *) xmalloc (sizeof (NotifyList));
+		NotifyList *new = (NotifyList *) new_malloc (sizeof (NotifyList));
 		new->nick = m_strdup (tmp->nick);
 		new->host = m_strdup (tmp->host);
 		new->user = m_strdup (tmp->user);

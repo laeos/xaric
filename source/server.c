@@ -1,4 +1,3 @@
-#ident "@(#)server.c 1.13"
 /*
  * server.c: Things dealing with server connections, etc. 
  *
@@ -34,14 +33,10 @@
 #include "notify.h"
 #include "misc.h"
 #include "status.h"
-#include "util.h"
+#include "fset.h"
 
-#include "xformats.h"
-#include "xmalloc.h"
-#include "xdebug.h"
-
-/* for XDEBUG */
-#define MODULE_ID	XD_COMM
+/* for debug */
+#define MODULE_ID XD_COMM
 
 static void add_to_server_buffer (int, char *);
 static char *set_umode (int du_index);
@@ -126,7 +121,7 @@ close_server (int cs_index, char *message)
 		server_list[i].connected = 0;
 		server_list[i].buffer = NULL;
 		server_list[i].close_serv = -1;
-		xfree (&server_list[i].away);
+		new_free (&server_list[i].away);
 		if (server_list[i].write != -1)
 		{
 			if (message && *message)
@@ -182,7 +177,7 @@ timed_server (void *args)
 		get_connected (atol (p));
 		bitchsay ("Servers exhausted. Restarting. [%d]", ++retry);
 	}
-	xfree (&p);
+	new_free (&p);
 	in_timed_server = 0;
 	return 0;
 }
@@ -281,7 +276,7 @@ do_server (fd_set * rd, fd_set * wr)
 					{
 						if (server_list[i].eof)
 						{
-							put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "Unable to connect to a server"));
+							put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "Unable to connect to a server"));
 							if (++i >= number_of_servers)
 							{
 								clean_whois_queue ();
@@ -298,7 +293,7 @@ do_server (fd_set * rd, fd_set * wr)
 							{
 								clean_whois_queue ();
 								if (do_hook (DISCONNECT_LIST, "No Connection"))
-									put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "No connection"));
+									put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "No connection"));
 								times = 0;
 							}
 							get_connected (i);
@@ -326,12 +321,10 @@ do_server (fd_set * rd, fd_set * wr)
 				{
 					last_timeout = 0;
 					parsing_server_index = i;
-
-					XDEBUG(21, "[%d] <- [%s]", des, buffer);
-
+					XDEBUG(5, "[%d] <- [%s]", des, buffer);
 					server_list[i].last_msg = time (NULL);
 					parse_server (buffer);
-					xfree (&server_list[i].buffer);
+					new_free (&server_list[i].buffer);
 					parsing_server_index = -1;
 					message_from (NULL, LOG_CRAP);
 					break;
@@ -479,8 +472,7 @@ add_to_server_list (char *server, int port, char *password, char *nick, int over
 	if ((from_server = find_in_server_list (server, port)) == -1)
 	{
 		from_server = number_of_servers++;
-
-		server_list = xrealloc(server_list, sizeof(Server) * number_of_servers + 1);
+		RESIZE (server_list, Server, number_of_servers + 1);
 
 		server_list[from_server].name = m_strdup (server);
 		server_list[from_server].read = -1;
@@ -510,14 +502,14 @@ add_to_server_list (char *server, int port, char *password, char *nick, int over
 				if (password && *password)
 					malloc_strcpy (&(server_list[from_server].password), password);
 				else
-					xfree (&(server_list[from_server].password));
+					new_free (&(server_list[from_server].password));
 			}
 			if (nick || !server_list[from_server].d_nickname)
 			{
 				if (nick && *nick)
 					malloc_strcpy (&(server_list[from_server].d_nickname), nick);
 				else
-					xfree (&(server_list[from_server].d_nickname));
+					new_free (&(server_list[from_server].d_nickname));
 			}
 		}
 		if (strlen (server) > strlen (server_list[from_server].name))
@@ -540,23 +532,23 @@ remove_from_server_list (int i)
 	clean_whois_queue ();
 	from_server = old_server;
 
-	xfree (&server_list[i].name);
-	xfree (&server_list[i].itsname);
-	xfree (&server_list[i].password);
-	xfree (&server_list[i].away);
-	xfree (&server_list[i].version_string);
-	xfree (&server_list[i].nickname);
-	xfree (&server_list[i].s_nickname);
-	xfree (&server_list[i].d_nickname);
+	new_free (&server_list[i].name);
+	new_free (&server_list[i].itsname);
+	new_free (&server_list[i].password);
+	new_free (&server_list[i].away);
+	new_free (&server_list[i].version_string);
+	new_free (&server_list[i].nickname);
+	new_free (&server_list[i].s_nickname);
+	new_free (&server_list[i].d_nickname);
 
-	xfree (&server_list[i].whois_stuff.nick);
-	xfree (&server_list[i].whois_stuff.user);
-	xfree (&server_list[i].whois_stuff.host);
-	xfree (&server_list[i].whois_stuff.channel);
-	xfree (&server_list[i].whois_stuff.channels);
-	xfree (&server_list[i].whois_stuff.name);
-	xfree (&server_list[i].whois_stuff.server);
-	xfree (&server_list[i].whois_stuff.server_stuff);
+	new_free (&server_list[i].whois_stuff.nick);
+	new_free (&server_list[i].whois_stuff.user);
+	new_free (&server_list[i].whois_stuff.host);
+	new_free (&server_list[i].whois_stuff.channel);
+	new_free (&server_list[i].whois_stuff.channels);
+	new_free (&server_list[i].whois_stuff.name);
+	new_free (&server_list[i].whois_stuff.server);
+	new_free (&server_list[i].whois_stuff.server_stuff);
 
 	/* 
 	 * this should save a coredump.  If number_of_servers drops
@@ -571,8 +563,7 @@ remove_from_server_list (int i)
 
 	memmove (&server_list[i], &server_list[i + 1], (number_of_servers - i) * sizeof (Server));
 	number_of_servers--;
-
-	server_list = xrealloc(server_list, sizeof(Server) * number_of_servers);
+	RESIZE (server_list, Server, number_of_servers);
 
 	/* update all he structs with server in them */
 	channel_server_delete (i);
@@ -873,7 +864,7 @@ get_connected (int server)
 	{
 		clean_whois_queue ();
 		if (do_hook (DISCONNECT_LIST, "No Server List"))
-			put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
 	}
 }
 
@@ -904,7 +895,7 @@ read_server_file (char *servers_file)
 	}
 	else
 		some = 1;
-	xfree (&file_path);
+	new_free (&file_path);
 #endif
 	malloc_sprintf (&file_path, "~/%s", servers_file);
 	if ((fp = uzfopen (&file_path, ".")))
@@ -917,7 +908,7 @@ read_server_file (char *servers_file)
 		fclose (fp);
 		some = 0;
 	}
-	xfree (&file_path);
+	new_free (&file_path);
 	window_display = old_window_display;
 	return (some ? 0 : 1);
 }
@@ -1130,24 +1121,24 @@ set_server_away (int ssa_index, char *message)
 			from_server = old_from_server;
 			return;
 		}
-		if (get_format (FORMAT_AWAY_FSET) && get_int_var (SEND_AWAY_MSG_VAR))
+		if (get_fset_var (FORMAT_AWAY_FSET) && get_int_var (SEND_AWAY_MSG_VAR))
 		{
 			ChannelList *chan;
 			for (chan = server_list[ssa_index].chan_list; chan; chan = chan->next)
 			{
 				send_to_server ("PRIVMSG %s :ACTION %s", chan->channel,
 
-						stripansicodes (convert_output_format (get_format (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message)));
+						stripansicodes (convert_output_format (get_fset_var (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message)));
 			}
 		}
-		if (get_format (FORMAT_AWAY_FSET))
+		if (get_fset_var (FORMAT_AWAY_FSET))
 		{
 			char buffer[BIG_BUFFER_SIZE + 1];
 			send_to_server ("%s :%s", "AWAY",
-					stripansicodes (convert_output_format (get_format (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message)));
+					stripansicodes (convert_output_format (get_fset_var (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message)));
 			strncpy (buffer, convert_output_format ("%Kð %W$N%n is away: ", NULL, NULL), BIG_BUFFER_SIZE);
 			strncat (buffer,
-				 convert_output_format (get_format (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message), BIG_BUFFER_SIZE);
+				 convert_output_format (get_fset_var (FORMAT_AWAY_FSET), "%s %s", update_clock (GET_TIME), message), BIG_BUFFER_SIZE);
 			put_it ("%s", buffer);
 		}
 		else
@@ -1158,7 +1149,7 @@ set_server_away (int ssa_index, char *message)
 		if (server_list[ssa_index].away)
 			away_set--;
 		server_list[ssa_index].awaytime = 0;
-		xfree (&server_list[ssa_index].away);
+		new_free (&server_list[ssa_index].away);
 		if (server_list[ssa_index].connected)
 			send_to_server ("AWAY :");
 	}
@@ -1462,7 +1453,7 @@ register_server (int ssn_index, char *nick)
 	send_to_server ("USER %s %s %s :%s", username,
 			(send_umode && *send_umode) ? send_umode :
 			(LocalHostName ? LocalHostName : hostname),
-			username, *realname ? realname : space_string);
+			username, *realname ? realname : space);
 	change_server_nickname (ssn_index, nick);
 	from_server = old_from_server;
 }
@@ -1526,10 +1517,8 @@ send_to_server (const char *format,...)
 		len = strlen (buffer);
 		if (len > (IRCD_BUFFER_SIZE - 2) || len == -1)
 			buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
-
-		XDEBUG(20, "[%d] -> [%s]", des, buffer);
 		strmcat (buffer, "\r\n", IRCD_BUFFER_SIZE);
-
+		XDEBUG(5, "[%d] -> [%s]", des, buffer);
 		if (do_hook (SEND_TO_SERVER_LIST, "%d %d %s", server, des, buffer))
 		{
 			send (des, buffer, strlen (buffer), 0);
@@ -1540,7 +1529,7 @@ send_to_server (const char *format,...)
 		/*if (from_server == -1) */
 	{
 		if (do_hook (DISCONNECT_LIST, "No Connection"))
-			put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
 	}
 }
 
@@ -1568,8 +1557,7 @@ my_send_to_server (int server, const char *format,...)
 		if (len > (IRCD_BUFFER_SIZE - 2) || len == -1)
 			buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
 		strmcat (buffer, "\r\n", IRCD_BUFFER_SIZE);
-		XDEBUG(20, "[%d] -> [%s]", des, buffer);
-
+		XDEBUG(5, "[%d] -> [%s]", des, buffer);
 		if (do_hook (SEND_TO_SERVER_LIST, "%d %d %s", server, des, buffer))
 		{
 			send (des, buffer, strlen (buffer), 0);
@@ -1579,7 +1567,7 @@ my_send_to_server (int server, const char *format,...)
 	else
 	{
 		if (do_hook (DISCONNECT_LIST, "No Connection"))
-			put_it ("%s", convert_output_format (get_format (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
 	}
 }
 
@@ -1616,7 +1604,7 @@ create_server_list (void)
 			if (server_list[i].itsname)
 			{
 				strcat (buffer, server_list[i].itsname);
-				strcat (buffer, space_string);
+				strcat (buffer, space);
 			}
 			else
 				yell ("Warning: server_list[%d].itsname is null and it shouldnt be", i);
@@ -1657,7 +1645,7 @@ change_server_nickname (int ssn_index, char *nick)
 
 	if (nick)
 	{
-		if ( is_nick (nick) )
+		if ((nick = check_nickname (nick)) != NULL)
 		{
 			if (from_server != -1)
 			{
@@ -1671,8 +1659,8 @@ change_server_nickname (int ssn_index, char *nick)
 				for (i = 0; i < number_of_servers; i++)
 				{
 					malloc_strcpy (&server_list[i].nickname, nickname);
-					xfree (&server_list[i].d_nickname);
-					xfree (&server_list[i].s_nickname);
+					new_free (&server_list[i].d_nickname);
+					new_free (&server_list[i].s_nickname);
 				}
 				user_changing_nickname = 0;
 				return;
@@ -1693,7 +1681,7 @@ accept_server_nickname (int ssn_index, char *nick)
 {
 	malloc_strcpy (&server_list[ssn_index].nickname, nick);
 	malloc_strcpy (&server_list[ssn_index].d_nickname, nick);
-	xfree (&server_list[ssn_index].s_nickname);
+	new_free (&server_list[ssn_index].s_nickname);
 	server_list[ssn_index].fudge_factor = 0;
 
 	if (from_server == primary_server)
@@ -1728,7 +1716,7 @@ fudge_nickname (int servnum)
 	 */
 	if (user_changing_nickname)
 	{
-		xfree (&server_list[from_server].s_nickname);
+		new_free (&server_list[from_server].s_nickname);
 		return;
 	}
 

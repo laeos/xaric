@@ -24,7 +24,7 @@ dnl ##
 dnl ##
 dnl ## shamelessly stolen for use in Xaric.. 
 dnl ##
-dnl ## @(#)acinclude.m4 1.4
+dnl ## @(#)acinclude.m4 1.1
 dnl ##
 
 divert(-1)

@@ -7,8 +7,7 @@
  *
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  *
- * %W%
- *
+ * @(#)$Id$
  */
 
 #ifndef _IRCAUX_H_
@@ -18,16 +17,30 @@
 #include "irc_std.h"
 #include <stdio.h>
 
-
-
 typedef int comp_len_func(char *, char *, int);
 typedef int comp_func(char *, char *);
 
+extern		void	*n_malloc (size_t, char *, int);
+extern		void	*n_realloc(void **, size_t, char *, int);
+
+extern		void	*n_free (void **, char *, int);
+
+#define new_malloc(x) n_malloc(x, __FILE__, __LINE__)
+#define new_free(x) n_free((void **)(x), __FILE__, __LINE__)
+
+/*#define new_realloc(x,y) n_realloc((x),(y),__FILE__,__LINE__)*/
+
+#define RESIZE(x, y, z) n_realloc     ((void **)& (x), sizeof(y) * (z), __FILE__, __LINE__)
+
 extern	void	beep_em			(int);
+extern	char *	check_nickname 		(char *);
 extern	char *	next_arg 		(char *, char **);
 extern	char *	new_next_arg 		(char *, char **);
 extern	char *	new_new_next_arg 	(char *, char **, char *);
 extern	char *	last_arg 		(char **);
+extern	char *	expand_twiddle 		(char *);
+extern	char *	upper 			(char *);
+extern	char *	lower 			(char *);
 extern	char *	sindex			(char *, char *);
 extern	char *	rsindex 		(char *, char *, char *);
 extern	char *	path_search 		(char *, char *);
@@ -46,6 +59,7 @@ extern	char *	m_strdup 		(const char *);
 extern	void	wait_new_free 		(char **);
 extern	char *	malloc_sprintf 		(char **, const char *, ...);
 extern	char *	m_sprintf 		(const char *, ...);
+extern	int	is_number 		(char *);
 extern	char *	my_ctime 		(time_t);
 extern	int	my_stricmp 		(const unsigned char *, unsigned const char *);
 extern	int	my_strnicmp 		(const unsigned char *, const unsigned char *, int);
@@ -70,12 +84,13 @@ extern	double 	time_diff 		(struct timeval, struct timeval);
 extern	char *	plural 			(int);
 extern	int	time_to_next_minute 	(void);
 extern  char *	remove_trailing_spaces 	(char *);
+extern	char *	ltoa 			(long);
 extern	char *	strformat 		(char *, char *, int, char);
 extern	char *	chop_word 		(char *);
 extern	int	splitw 			(char *, char ***);
 extern	char *	unsplitw 		(char **, int);
 extern  int	check_val 		(char *);
-extern  char *	strext	 		(char *, char *);
+extern  char *	strextend 		(char *, char, int);
 extern	char *	pullstr 		(char *, char *);
 extern 	int 	empty 			(const char *);
 extern	char *	safe_new_next_arg 	(char *, char **);
@@ -90,6 +105,12 @@ extern	long	file_size		(char *);
 extern	int	is_root			(char *, char *, int);
 extern	size_t	streq			(const char *, const char *);
 extern	char *	m_strndup		(const char *, size_t);
+#ifndef HAVE_VSNPRINTF
+extern	int	vsnprintf 		(char *, size_t, const char *, va_list);
+#endif
+#ifndef HAVE_SNPRINTF
+extern	int	snprintf 		(char *, size_t, const char *, ...);
+#endif
 extern	char *	on_off (int);
 extern	char *	rfgets (char *, int, FILE *);
 extern        char *  strmopencat             (char *, int, ...);

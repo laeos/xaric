@@ -110,8 +110,6 @@ ChannelList *	prepare_command(int *, char *, int);
 	int	matchmcommand(char *, int);
 	int	charcount(char *string, char what);
 	char	*convert_time(time_t);
-	void	set_socket_read(fd_set *, fd_set *);
-	void	scan_sockets(fd_set *, fd_set *);
 	void	flush_channel_stats (void);
 	char	*make_channel(char *);	
 	void	add_split_server (char *, char *, int);

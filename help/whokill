@@ -1,4 +1,0 @@
-%gUsage%n: %W/%nwhokill %Y<%Cnick%G!%nuser%Y@%nhostname%Y>%n %R[%nreason%R]%n
-%Y*%n Requires irc operator status
-- Kills multiple clients matching the filter %Y<%Cnick%G!%nuser%Y@%nhostname%Y>%n
-with %R[%nreason%R]%n

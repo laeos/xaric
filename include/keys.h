@@ -139,13 +139,7 @@ extern	void		save_bindings 	(FILE *, int);
 extern	void		bindcmd 	(char *, char *, char *, char *);
 extern  void    	rbindcmd 	(char *, char *, char *, char *);
 extern  void    	parsekeycmd 	(char *, char *, char *, char *);
+extern  void    	type 		(char *, char *, char *, char *);
 extern	void		init_keys_1 	(void);
-
-unsigned char *display_key(unsigned char c);
-void show_binding(unsigned char c, int meta);
-int parse_key(char *key_str);
-void new_key(int map, int chr, int type, int change, char *stuff);
-void clear_bindings(void);
-
 
 #endif /* _KEYS_H_ */

@@ -1,6 +1,0 @@
-%gUsage%n: %W/%nquery %Y<%n-cmd cmdname%Y> <%Cnick%Y>%n
-- Starts a query to %Y<%Cnick%Y>%n
-%GUsage%n: %W/%nquery
-- Whilst in a query, conclude the query if no arguments are present
-- Use -cmd to specify what type of output you want. default is a msg. 
-- cmsg wall csay are all possible to use here.

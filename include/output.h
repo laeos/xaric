@@ -13,6 +13,8 @@
 #ifndef __output_h_
 #define __output_h_
 
+#include "fset.h"
+
 	void	put_echo (char *);
 	void	put_it (const char *, ...);
 	void	send_to_server (const char *, ...);
@@ -27,6 +29,8 @@
 	int	init_screen(void);
 	void	put_file(char *);
 
+	void	put_fmt (xformat, const char *, ...);
+	void	log_put_it (const char *topic, const char *format, ...);
 	void	charset_ibmpc(void);
 	void	charset_lat1(void);
 	void	charset_graf(void);

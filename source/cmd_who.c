@@ -1,6 +1,6 @@
-#ident "@(#)cmd_who.c 1.11"
+#ident "@(#)cmd_who.c 1.6"
 /*
- * cmd_hostname.c : the who command 
+ * cmd_who.c : the who command 
  *
  * Written By Michael Sandrof
  * Portions are based on EPIC.
@@ -37,9 +37,6 @@
 #include "misc.h"
 #include "screen.h"
 #include "tcommand.h"
-#include "util.h"
-#include "xmalloc.h"
-
 
 void oh_my_wait (void);		/* in command.c for now XXX */
 
@@ -56,12 +53,12 @@ cmd_who (struct command *cmd, char *args)
 	doing_who = 1;
 
 	who_mask = 0;
-	xfree (&who_name);
-	xfree (&who_host);
-	xfree (&who_server);
-	xfree (&who_file);
-	xfree (&who_nick);
-	xfree (&who_real);
+	new_free (&who_name);
+	new_free (&who_host);
+	new_free (&who_server);
+	new_free (&who_file);
+	new_free (&who_nick);
+	new_free (&who_real);
 	while ((arg = next_arg (args, &args)) != NULL)
 	{
 		lower (arg);

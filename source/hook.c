@@ -1,4 +1,3 @@
-#ident "@(#)hook.c 1.10"
 /*
  * hook.c: Does those naughty hook functions. 
  *
@@ -9,37 +8,25 @@
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
 
-
-/*
- * XXX This file is one big mess of things ifdef'ed out. nothign in here is used, currently.
- * 
- * please oh please fix me someone, im hurt!
- * 
- */
-
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include <stdarg.h>
-
 #include "irc.h"
+
 #include "hook.h"
 #include "vars.h"
 #include "ircaux.h"
+#include "alias.h"
 #include "list.h"
 #include "window.h"
 #include "server.h"
 #include "output.h"
 #include "commands.h"
 #include "parse.h"
+#include "fset.h"
 #include "misc.h"
-#include "util.h"
-#include "expr.h"
-
-#include "xmalloc.h"
-
+#include <stdarg.h>
 
 #define SILENT	0
 #define QUIET	1
@@ -54,9 +41,9 @@
  * NOISY means you are notified when an action occur plus you see the action
  * in the display and the default actions still occurs 
  */
-/* static char *noise_level[] = 
+static char *noise_level[] =
 {"SILENT", "QUIET", "NORMAL", "NOISY"};
-*/
+
 #define	HS_NOGENERIC	0x1000
 #define HF_NORECURSE	0x0002
 #define HF_GLOBAL	0x0004
@@ -181,7 +168,6 @@ HookFunc hook_functions[] =
 	{"YELL", NULL, 1, 0, 0}
 };
 
-#if 0
 static char *
 fill_it_out (char *str, int params)
 {
@@ -214,7 +200,7 @@ fill_it_out (char *str, int params)
 	return (free_ptr);
 }
 
-#endif 
+
 /*
  * This crap here is used so we can use the list manip stuff.  Maybe 
  * we should fix the problem instead of using nasty hacks like this.
@@ -261,7 +247,6 @@ Add_Remove_Check (Hook * Item, char *Name)
 	return 0;
 }
 
-#if 0
 
 static void 
 add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int server, int sernum, int flexible)
@@ -274,7 +259,7 @@ add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int 
 	if ((entry = (NumericList *) find_in_list ((List **) & numeric_list, buf, 0)) ==
 	    NULL)
 	{
-		entry = (NumericList *) xmalloc (sizeof (NumericList));
+		entry = (NumericList *) new_malloc (sizeof (NumericList));
 		memset (entry, 0, sizeof (NumericList));
 		malloc_strcpy (&(entry->name), buf);
 		add_to_list ((List **) & numeric_list, (List *) entry);
@@ -284,11 +269,11 @@ add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int 
 	if ((new = (Hook *) remove_from_list_ext ((List **) & (entry->list), nick, (int (*)(List *, char *)) Add_Remove_Check)) != NULL)
 	{
 		new->not = 1;
-		xfree (&(new->nick));
-		xfree (&(new->stuff));
-		xfree ((char **) &new);
+		new_free (&(new->nick));
+		new_free (&(new->stuff));
+		new_free ((char **) &new);
 	}
-	new = (Hook *) xmalloc (sizeof (Hook));
+	new = (Hook *) new_malloc (sizeof (Hook));
 	memset (new, 0, sizeof (Hook));
 	new->noisy = noisy;
 	new->server = server;
@@ -321,11 +306,11 @@ add_hook (int which, char *nick, char *stuff, int noisy, int not, int server, in
 	if ((new = (Hook *) remove_from_list_ext ((List **) & (hook_functions[which].list), nick, (int (*)(List *, char *)) Add_Remove_Check)) != NULL)
 	{
 		new->not = 1;
-		xfree (&(new->nick));
-		xfree (&(new->stuff));
-		xfree ((char **) &new);
+		new_free (&(new->nick));
+		new_free (&(new->stuff));
+		new_free ((char **) &new);
 	}
-	new = (Hook *) xmalloc (sizeof (Hook));
+	new = (Hook *) new_malloc (sizeof (Hook));
 	memset (new, 0, sizeof (Hook));
 	new->noisy = noisy;
 	new->server = server;
@@ -382,7 +367,7 @@ show_hook (Hook * list, char *name)
 			     noise_level[list->noisy],
 			     list->sernum);
 	}
-	xfree (&text);
+	new_free (&text);
 }
 
 /*
@@ -435,7 +420,6 @@ show_list (int which)
 		show_hook (list, hook_functions[which].name);
 	return (cnt);
 }
-#endif
 
 /*
  * do_hook: This is what gets called whenever a MSG, INVITES, WALL, (you get
@@ -549,7 +533,7 @@ do_hook (int which, char *format,...)
 				bestmatch = tmp;
 			}
 			if (tmp->flexible)
-				xfree (&tmpnick);
+				new_free (&tmpnick);
 		}
 		if (bestmatch)
 			hook_array[hook_num++] = bestmatch;
@@ -627,15 +611,15 @@ remove_numeric_hook (int numeric, char *nick, int server, int sernum, int quiet)
 					 (tmp->flexible ? '\'' : '"'), nick,
 					 (tmp->flexible ? '\'' : '"'), buf);
 				tmp->not = 1;
-				xfree (&(tmp->nick));
-				xfree (&(tmp->stuff));
-				xfree ((char **) &tmp);
+				new_free (&(tmp->nick));
+				new_free (&(tmp->stuff));
+				new_free ((char **) &tmp);
 				if (hook->list == NULL)
 				{
 					if ((hook = (NumericList *) remove_from_list ((List **) & numeric_list, buf)) != NULL)
 					{
-						xfree (&(hook->name));
-						xfree ((char **) &hook);
+						new_free (&(hook->name));
+						new_free ((char **) &hook);
 					}
 				}
 				return;
@@ -648,13 +632,13 @@ remove_numeric_hook (int numeric, char *nick, int server, int sernum, int quiet)
 			{
 				next = tmp->next;
 				tmp->not = 1;
-				xfree (&(tmp->nick));
-				xfree (&(tmp->stuff));
-				xfree ((char **) &tmp);
+				new_free (&(tmp->nick));
+				new_free (&(tmp->stuff));
+				new_free ((char **) &tmp);
 			}
 			hook->list = NULL;
-			xfree ((char **) &hook->name);
-			xfree ((char **) &hook);
+			new_free ((char **) &hook->name);
+			new_free ((char **) &hook);
 			if (!quiet)
 				say ("The %s list is empty", buf);
 			return;
@@ -706,9 +690,9 @@ remove_hook (int which, char *nick, int server, int sernum, int quiet)
 				     (tmp->flexible ? '\'' : '"'),
 				     hook_functions[which].name);
 			tmp->not = 1;
-			xfree (&(tmp->nick));
-			xfree (&(tmp->stuff));
-			xfree ((char **) &tmp);
+			new_free (&(tmp->nick));
+			new_free (&(tmp->stuff));
+			new_free ((char **) &tmp);
 		}
 		else if (!quiet)
 			say ("\"%s\" is not on the %s list", nick,
@@ -735,9 +719,9 @@ remove_hook (int which, char *nick, int server, int sernum, int quiet)
 			if (prev)
 				prev->next = tmp->next;
 			tmp->not = 1;
-			xfree (&(tmp->nick));
-			xfree (&(tmp->stuff));
-			xfree ((char **) &tmp);
+			new_free (&(tmp->nick));
+			new_free (&(tmp->stuff));
+			new_free ((char **) &tmp);
 		}
 		hook_functions[which].list = top;
 		if (!quiet)
@@ -816,7 +800,7 @@ save_hooks (FILE * fp, int do_all)
 /*
  * find_hook: returns the numerical value for a specified hook name
  */
-static int 
+int 
 find_hook (char *name)
 {
 	int which = INVALID_HOOKNUM, i, len, cnt;
@@ -1024,7 +1008,7 @@ BUILT_IN_COMMAND (oncmd)
 						if (!(exp = next_expr (&args, '{')))
 						{
 							say ("Unmatched brace in ON");
-							xfree (&nick);
+							new_free (&nick);
 							return;
 						}
 					}
@@ -1043,7 +1027,7 @@ BUILT_IN_COMMAND (oncmd)
 						     type, nick, type,
 						     (not ? "nothing" : exp),
 						noise_level[noisy], sernum);
-					xfree (&nick);
+					new_free (&nick);
 				}
 			}
 			/* End of doovie intentation */

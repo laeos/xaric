@@ -1,5 +1,0 @@
-%gUsage%n: %W/%nconnect %Y<%nserver1%Y>%n %Y<%nport%Y>%n %R[%nserver2%R]%n
-%Y*%n Requires irc operator status
-- Connect %Y<%nserver1%Y>%n to %Y<%nport%Y>%n from current server or %R[%nserver2%R]%n
-%gUsage%n: %W/%ncset nickflood %Y<%non%G|%noff%Y>%n
-- Turn %Y<%non%G|%noff%Y>%n nick flood checking

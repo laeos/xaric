@@ -1,4 +1,3 @@
-#ident "@(#)history.c 1.9"
 /*
  * history.c: stuff to handle command line history 
  *
@@ -23,8 +22,6 @@
 #include "output.h"
 #include "input.h"
 #include "tcommand.h"
-#include "util.h"
-#include "xmalloc.h"
 
 static char *history_match (char *);
 static void add_to_history_list (int, char *);
@@ -68,17 +65,17 @@ static History *tmp = NULL;
  * there. 
  */
 static char *
-history_match (char *pat)
+history_match (char *match)
 {
 	char *ptr;
 	char *match_str = NULL;
 
-	if (*(pat + strlen (pat) - 1) == '*')
-		malloc_strcpy (&match_str, pat);
+	if (*(match + strlen (match) - 1) == '*')
+		malloc_strcpy (&match_str, match);
 	else
 	{
-		match_str = (char *) xmalloc (strlen (pat) + 2);
-		strcpy (match_str, pat);
+		match_str = (char *) new_malloc (strlen (match) + 2);
+		strcpy (match_str, match);
 		strcat (match_str, "*");
 	}
 	if (get_int_var (HISTORY_VAR))
@@ -95,14 +92,14 @@ history_match (char *pat)
 
 			if (wild_match (match_str, ptr))
 			{
-				xfree (&match_str);
+				new_free (&match_str);
 				last_dir = PREV;
 				return (tmp->stuff);
 			}
 		}
 	}
 	last_dir = -1;
-	xfree (&match_str);
+	new_free (&match_str);
 	return NULL;
 }
 
@@ -136,14 +133,14 @@ add_to_history_list (int cnt, char *stuff)
 		new = command_history_tail;
 		command_history_tail = command_history_tail->prev;
 		command_history_tail->next = NULL;
-		xfree (&new->stuff);
-		xfree ((char **) &new);
+		new_free (&new->stuff);
+		new_free ((char **) &new);
 		if (command_history_tail == NULL)
 			command_history_head = NULL;
 	}
 	else
 		hist_size++;
-	new = (History *) xmalloc (sizeof (History));
+	new = (History *) new_malloc (sizeof (History));
 	new->stuff = NULL;
 	new->number = cnt;
 	new->next = command_history_head;
@@ -176,8 +173,8 @@ set_history_size (Window * win, char *unused, int size)
 		{
 			ptr = command_history_tail;
 			command_history_tail = ptr->prev;
-			xfree (&(ptr->stuff));
-			xfree ((char **) &ptr);
+			new_free (&(ptr->stuff));
+			new_free ((char **) &ptr);
 		}
 		if (command_history_tail == NULL)
 			command_history_head = NULL;
@@ -282,7 +279,7 @@ cmd_history (struct command *cmd, char *args)
 {
 	int cnt, max;
 	char *value;
-	History *xtmp;
+	History *tmp;
 
 	if (get_int_var (HISTORY_VAR))
 	{
@@ -294,9 +291,9 @@ cmd_history (struct command *cmd, char *args)
 		}
 		else
 			max = get_int_var (HISTORY_VAR);
-		for (xtmp = command_history_tail, cnt = 0; xtmp && (cnt < max);
-		     xtmp = xtmp->prev, cnt++)
-			put_it ("%d: %s", xtmp->number, xtmp->stuff);
+		for (tmp = command_history_tail, cnt = 0; tmp && (cnt < max);
+		     tmp = tmp->prev, cnt++)
+			put_it ("%d: %s", tmp->number, tmp->stuff);
 	}
 }
 
@@ -309,7 +306,7 @@ cmd_history (struct command *cmd, char *args)
 char *
 do_history (char *com, char *rest)
 {
-	History *xtmp;
+	History *tmp;
 	int hist_num;
 	char *ptr, *ret = NULL;
 	static char *last_com = NULL;
@@ -340,14 +337,14 @@ do_history (char *com, char *rest)
 
 	hist_num = my_atol (com);
 
-	for (xtmp = command_history_head; xtmp; xtmp = xtmp->next)
+	for (tmp = command_history_head; tmp; tmp = tmp->next)
 	{
-		if (xtmp->number == hist_num)
+		if (tmp->number == hist_num)
 		{
 			if (rest && *rest)
-				ret = m_sprintf ("%s %s", xtmp->stuff, rest);
+				ret = m_sprintf ("%s %s", tmp->stuff, rest);
 			else
-				malloc_strcpy (&ret, xtmp->stuff);
+				malloc_strcpy (&ret, tmp->stuff);
 			return (ret);
 		}
 	}

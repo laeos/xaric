@@ -1,4 +1,3 @@
-#ident "@(#)ircaux.c 1.17"
 /*
  * ircaux.c: some extra routines... not specific to irc... that I needed 
  *
@@ -14,11 +13,11 @@
 #endif
 
 #include "irc.h"
+#include "alias.h"
 #include "log.h"
 #include "misc.h"
 #include "vars.h"
 #include "screen.h"
-#include "util.h"
 
 #include <pwd.h>
 
@@ -27,33 +26,124 @@
 #include "ircaux.h"
 #include "output.h"
 #include "ircterm.h"
-#include "expr.h"
 
-#include "xversion.h"
-#include "xmalloc.h"
+#include "xaric_version.h"
 
+
+/*
+ * These are used by the malloc routines.  We actually ask for an int-size
+ * more of memory, and in that extra int we store the malloc size.  Very
+ * handy for debugging and other hackeries.
+ */
+/*#include <dmalloc.h> */
+
+#define alloc_start(ptr) ((ptr) - sizeof(void *) - sizeof(void *))
+#define alloc_size(ptr) (*(int *)( alloc_start((ptr)) + sizeof(void *)))
+#define alloc_magic(ptr) (*(int *)( alloc_start((ptr)) ))
+
+#define FREED_VAL -3
+#define ALLOC_MAGIC 0xafbdce70
+
+/*
+ * really_new_malloc is the general interface to the malloc(3) call.
+ * It is only called by way of the ``new_malloc'' #define.
+ * It wont ever return NULL.
+ */
+
+/*
+ * Malloc allocator with size caching.
+ */
+void *
+n_malloc (size_t size, char *file, int line)
+{
+	char *ptr;
+
+	if (!(ptr = (char *) calloc (1, size + sizeof (void *) + sizeof (void *))))
+	{
+		yell ("Malloc() failed, giving up!");
+		term_reset ();
+		exit (1);
+	}
+
+	/* Store the size of the allocation in the buffer. */
+	ptr += sizeof (void *) + sizeof (void *);
+	alloc_magic (ptr) = ALLOC_MAGIC;
+	alloc_size (ptr) = size;
+	return ptr;
+}
+
+/*
+ * new_free:  Why do this?  Why not?  Saves me a bit of trouble here and there 
+ */
+void *
+n_free (void **ptr, char *file, int line)
+{
+	if (*ptr)
+	{
+#ifdef XARIC_DEBUG
+		if (alloc_magic (*ptr) != ALLOC_MAGIC)
+			abort ();
+
+		/* Check to make sure its not been freed before */
+		if (alloc_size (*ptr) == FREED_VAL)
+			abort ();
+#endif
+		alloc_size (*ptr) = FREED_VAL;
+		free ((void *) alloc_start (*ptr));
+		*ptr = NULL;
+	}
+	return (*ptr);
+}
+
+void *
+n_realloc (void **ptr, size_t size, char *file, int line)
+{
+	char *ptr2 = NULL;
+
+	if (*ptr)
+	{
+		if (size)
+		{
+			size_t msize = alloc_size (*ptr);
+
+			if (msize >= size)
+				return *ptr;
+
+			ptr2 = new_malloc (size);
+			memmove (ptr2, *ptr, msize);
+			new_free (ptr);
+			return ((*ptr = ptr2));
+		}
+		new_free (ptr);
+		return NULL;
+	}
+	else if (size)
+		ptr2 = new_malloc (size);
+
+	return ((*ptr = ptr2));
+}
 
 /*
  * malloc_strcpy:  Mallocs enough space for src to be copied in to where
  * ptr points to.
  *
  * Never call this with ptr pointinng to an uninitialised string, as the
- * call to xfree() might crash the client... - phone, jan, 1993.
+ * call to new_free() might crash the client... - phone, jan, 1993.
  */
 char *
 malloc_strcpy (char **ptr, const char *src)
 {
 	if (!src)
-		return xfree (ptr), NULL;
+		return new_free (ptr);
 	if (ptr && *ptr)
 	{
 		if (*ptr == src)
 			return *ptr;
-		if (xalloc_size (*ptr) > strlen (src))
+		if (alloc_size (*ptr) > strlen (src))
 			return strcpy (*ptr, src);
-		xfree (ptr);
+		new_free (ptr);
 	}
-	*ptr = xmalloc (strlen (src) + 1);
+	*ptr = new_malloc (strlen (src) + 1);
 	return strcpy (*ptr, src);
 	return *ptr;
 }
@@ -69,8 +159,7 @@ malloc_strcat (char **ptr, const char *src)
 		if (!src)
 			return *ptr;
 		msize = strlen (*ptr) + strlen (src) + 1;
-
-		*ptr = xrealloc(*ptr, msize);
+		RESIZE (*ptr, char, msize);
 		return strcat (*ptr, src);
 	}
 	return (*ptr = m_strdup (src));
@@ -80,17 +169,17 @@ char *
 malloc_str2cpy (char **ptr, const char *src1, const char *src2)
 {
 	if (!src1 && !src2)
-		return xfree (ptr), NULL;
+		return new_free (ptr);
 
 	if (*ptr)
 	{
-		if (xalloc_size (*ptr) > strlen (src1) + strlen (src2))
+		if (alloc_size (*ptr) > strlen (src1) + strlen (src2))
 			return strcat (strcpy (*ptr, src1), src2);
 
-		xfree (ptr);
+		new_free (ptr);
 	}
 
-	*ptr = xmalloc (strlen (src1) + strlen (src2) + 1);
+	*ptr = new_malloc (strlen (src1) + strlen (src2) + 1);
 	return strcat (strcpy (*ptr, src1), src2);
 }
 
@@ -98,7 +187,7 @@ char *
 m_3dup (const char *str1, const char *str2, const char *str3)
 {
 	size_t msize = strlen (str1) + strlen (str2) + strlen (str3) + 1;
-	return strcat (strcat (strcpy ((char *) xmalloc (msize), str1), str2), str3);
+	return strcat (strcat (strcpy ((char *) new_malloc (msize), str1), str2), str3);
 }
 
 char *
@@ -114,7 +203,7 @@ m_opendup (const char *str1,...)
 	while ((this_arg = va_arg (args, char *)))
 		  size += strlen (this_arg);
 
-	retval = (char *) xmalloc (size + 1);
+	retval = (char *) new_malloc (size + 1);
 
 	strcpy (retval, str1);
 	va_start (args, str1);
@@ -132,7 +221,7 @@ m_strdup (const char *str)
 
 	if (!str)
 		str = empty_string;
-	ptr = (char *) xmalloc (strlen (str) + 1);
+	ptr = (char *) new_malloc (strlen (str) + 1);
 	return strcpy (ptr, str);
 }
 
@@ -166,7 +255,7 @@ m_3cat (char **one, const char *two, const char *three)
 		len += strlen (three);
 	len += 1;
 
-	str = (char *) xmalloc (len);
+	str = (char *) new_malloc (len);
 	if (*one)
 		strcpy (str, *one);
 	if (two)
@@ -174,8 +263,42 @@ m_3cat (char **one, const char *two, const char *three)
 	if (three)
 		strcat (str, three);
 
-	xfree (one);
+	new_free (one);
 	return ((*one = str));
+}
+
+char *
+upper (char *str)
+{
+	register char *ptr = NULL;
+
+	if (str)
+	{
+		ptr = str;
+		for (; *str; str++)
+		{
+			if (islower (*str))
+				*str = toupper (*str);
+		}
+	}
+	return (ptr);
+}
+
+char *
+lower (char *str)
+{
+	register char *ptr = NULL;
+
+	if (str)
+	{
+		ptr = str;
+		for (; *str; str++)
+		{
+			if (isupper (*str))
+				*str = tolower (*str);
+		}
+	}
+	return (ptr);
 }
 
 char *
@@ -562,7 +685,7 @@ strext (char *start, char *end)
 {
 	char *ptr, *retval;
 
-	ptr = retval = (char *) xmalloc (end - start + 1);
+	ptr = retval = (char *) new_malloc (end - start + 1);
 	while (start < end)
 		*ptr++ = *start++;
 	*ptr = 0;
@@ -658,8 +781,7 @@ m_strcat_ues (char **dest, char *src, int unescape)
 	z = total_length = (*dest) ? strlen (*dest) : 0;
 	total_length += strlen (src);
 
-	*dest = xrealloc(*dest, total_length + 2);
-
+	RESIZE (*dest, char, total_length + 2);
 	if (z == 0)
 		**dest = 0;
 
@@ -714,6 +836,79 @@ scanstr (char *str, char *source)
 	return (0);
 }
 
+
+
+/* expand_twiddle: expands ~ in pathnames. */
+char *
+expand_twiddle (char *str)
+{
+	char buffer[BIG_BUFFER_SIZE + 1];
+	char *str2;
+
+	if (*str == '~')
+	{
+		str++;
+		if (*str == '/' || !*str)
+		{
+			strmcpy (buffer, my_path, BIG_BUFFER_SIZE);
+			strmcat (buffer, str, BIG_BUFFER_SIZE);
+		}
+		else
+		{
+			char *rest;
+			struct passwd *entry;
+			if ((rest = strchr (str, '/')) != NULL)
+				*rest++ = '\0';
+			if ((entry = getpwnam (str)) != NULL)
+			{
+				strmcpy (buffer, entry->pw_dir, BIG_BUFFER_SIZE);
+				if (rest)
+				{
+					strmcat (buffer, "/", BIG_BUFFER_SIZE);
+					strmcat (buffer, rest, BIG_BUFFER_SIZE);
+				}
+			}
+			else
+				return (char *) NULL;
+		}
+	}
+	else
+		strmcpy (buffer, str, BIG_BUFFER_SIZE);
+
+	/* This isnt legal! */
+	str2 = NULL;
+	malloc_strcpy (&str2, buffer);
+	return (str2);
+}
+
+/* islegal: true if c is a legal nickname char anywhere but first char */
+#define islegal(c) ((((c) >= 'A') && ((c) <= '}')) || \
+		    (((c) >= '0') && ((c) <= '9')) || \
+		     ((c) == '-') || ((c) == '_'))
+
+/*
+ * check_nickname: checks is a nickname is legal.  If the first character is
+ * bad new, null is returned.  If the first character is bad, the string is
+ * truncd down to only legal characters and returned 
+ *
+ * rewritten, with help from do_nick_name() from the server code (2.8.5),
+ * phone, april 1993.
+ */
+char *
+check_nickname (char *nick)
+{
+	char *s;
+
+	if (!nick || *nick == '-' || isdigit (*nick))
+		return NULL;
+
+	for (s = nick; *s && (s - nick) < NICKNAME_LEN; s++)
+		if (!islegal (*s) || my_isspace (*s))
+			break;
+	*s = '\0';
+
+	return *nick ? nick : NULL;
+}
 
 /*
  * sindex: much like index(), but it looks for a match of any character in
@@ -789,7 +984,26 @@ rsindex (char *string, char *start, char *group)
 	return retval;
 }
 
-
+/* is_number: returns true if the given string is a number, false otherwise */
+int 
+is_number (char *str)
+{
+	while (*str == ' ')
+		str++;
+	if (*str == '-')
+		str++;
+	if (*str)
+	{
+		for (; *str; str++)
+		{
+			if (!isdigit ((*str)))
+				return (0);
+		}
+		return 1;
+	}
+	else
+		return 0;
+}
 
 /* rfgets: exactly like fgets, cept it works backwards through a file!  */
 char *
@@ -864,7 +1078,7 @@ path_search (char *name, char *path)
 			break;
 		path = ptr;
 	}
-	xfree (&free_path);
+	new_free (&free_path);
 	return (path != NULL) ? buffer : NULL;
 }
 
@@ -906,8 +1120,6 @@ ircpanic (char *format,...)
 	if (recursion++)
 		abort ();
 
-	term_reset();
-
 	if (format)
 	{
 		va_list arglist;
@@ -916,15 +1128,12 @@ ircpanic (char *format,...)
 		va_end (arglist);
 	}
 
-	printf ("\n\n");
 
-	printf ("An unrecoverable logic error has occured.\n");
-	printf ("Please email laeos@ptw.com with the following message\n");
+	yell ("An unrecoverable logic error has occured.");
+	yell ("Please email laeos@ptw.com with the following message");
 
-	printf ("\n");
-	printf ("Panic: [%s] %s\n", xversion.v_long, buffer);
-
-	exit(0);
+	yell (" ");
+	yell ("Panic: [%s] %s", xversion.v_short, buffer);
 
 	irc_exit ("Xaric panic... Could it possibly be a bug?  Nahhhh...", NULL);
 }
@@ -933,7 +1142,7 @@ ircpanic (char *format,...)
 int 
 end_strcmp (const char *one, const char *two, int bytes)
 {
-	if (bytes < strlen (one))
+	if (bytes <= strlen (one))
 		return (strcmp (one + strlen (one) - (size_t) bytes, two));
 	else
 		return -1;
@@ -951,7 +1160,7 @@ beep_em (int beeps)
 
 
 
-static FILE *
+FILE *
 open_compression (char *executable, char *filename)
 {
 	FILE *file_pointer;
@@ -1044,7 +1253,7 @@ uzfopen (char **filename, char *path)
 
 	strcpy (filename_trying, filename_blah ? filename_blah : *filename);
 
-	xfree (&filename_blah);
+	new_free (&filename_blah);
 
 	/* Look to see if the passed filename is a full compressed filename */
 	if ((!end_strcmp (filename_trying, ".gz", 3)) ||
@@ -1058,7 +1267,7 @@ uzfopen (char **filename, char *path)
 		else
 		{
 			bitchsay ("Cannot open file %s because gunzip was not found", filename_trying);
-			xfree (filename);
+			new_free (filename);
 			return NULL;
 		}
 	}
@@ -1072,7 +1281,7 @@ uzfopen (char **filename, char *path)
 		else
 		{
 			bitchsay ("Cannot open file %s becuase uncompress was not found", filename_trying);
-			xfree (filename);
+			new_free (filename);
 			return NULL;
 		}
 	}
@@ -1113,7 +1322,7 @@ uzfopen (char **filename, char *path)
 					if (!filename_path)
 					{
 						yell ("File not found: %s", *filename);
-						xfree (filename);
+						new_free (filename);
 						return NULL;
 					}
 					/* Yep. there's a "filename.z" */
@@ -1136,13 +1345,13 @@ uzfopen (char **filename, char *path)
 		if (file_info.st_mode & S_IFDIR)
 		{
 			bitchsay ("%s is a directory", filename_trying);
-			xfree (filename);
+			new_free (filename);
 			return NULL;
 		}
 		if (file_info.st_mode & 0111)
 		{
 			bitchsay ("Cannot open %s -- executable file", filename_trying);
-			xfree (filename);
+			new_free (filename);
 			return NULL;
 		}
 	}
@@ -1161,7 +1370,7 @@ uzfopen (char **filename, char *path)
 			return open_compression (path_to_uncompress, filename_path);
 
 		bitchsay ("Cannot open compressed file %s becuase no uncompressor was found", filename_trying);
-		xfree (filename);
+		new_free (filename);
 		return NULL;
 	}
 
@@ -1171,7 +1380,7 @@ uzfopen (char **filename, char *path)
 
 	/* nope.. we just cant seem to open this file... */
 	bitchsay ("Cannot open file %s: %s", filename_path, strerror (errno));
-	xfree (filename);
+	new_free (filename);
 	return NULL;
 }
 
@@ -1338,6 +1547,28 @@ my_ctime (time_t when)
 	return chop (ctime (&when), 1);
 }
 
+char *
+ltoa (long foo)
+{
+	static char buffer[BIG_BUFFER_SIZE + 1];
+	char *pos = buffer + BIG_BUFFER_SIZE - 1;
+	unsigned long absv;
+	int negative;
+
+	absv = (foo < 0) ? (unsigned long) -foo : (unsigned long) foo;
+	negative = (foo < 0) ? 1 : 0;
+
+	buffer[BIG_BUFFER_SIZE] = 0;
+	for (; absv > 9; absv /= 10)
+		*pos-- = (absv % 10) + '0';
+	*pos = (absv) + '0';
+
+	if (negative)
+		*--pos = '-';
+
+	return pos;
+}
+
 /*
  * Formats "src" into "dest" using the given length.  If "length" is
  * negative, then the string is right-justified.  If "length" is
@@ -1436,7 +1667,7 @@ splitw (char *str, char ***to)
 	int numwords = word_count (str);
 	int counter;
 
-	*to = (char **) xmalloc (sizeof (char *) * numwords);
+	*to = (char **) new_malloc (sizeof (char *) * numwords);
 	for (counter = 0; counter < numwords; counter++)
 		(*to)[counter] = new_next_arg (str, &str);
 
@@ -1461,7 +1692,7 @@ char *
 m_2dup (const char *str1, const char *str2)
 {
 	size_t msize = strlen (str1) + strlen (str2) + 1;
-	return strcat (strcpy ((char *) xmalloc (msize), str1), str2);
+	return strcat (strcpy ((char *) new_malloc (msize), str1), str2);
 }
 
 char *
@@ -1471,6 +1702,124 @@ on_off (int var)
 		return ("On");
 	return ("Off");
 }
+
+#ifdef NEED_STRTOUL
+#ifndef ULONG_MAX
+#define ULONG_MAX (unsigned long) -1
+#endif
+
+/*
+ * Copyright (c) 1990 Regents of the University of California.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *      This product includes software developed by the University of
+ *      California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+/*
+ * Convert a string to an unsigned long integer.
+ *
+ * Ignores `locale' stuff.  Assumes that the upper and lower case
+ * alphabets and digits are each contiguous.
+ */
+unsigned long 
+strtoul (const char *nptr, char **endptr, int base)
+{
+	const char *s;
+	unsigned long acc, cutoff;
+	int c;
+	int neg, any, cutlim;
+
+	s = nptr;
+	do
+		c = *s++;
+	while (my_isspace (c));
+
+	if (c == '-')
+	{
+		neg = 1;
+		c = *s++;
+	}
+	else
+	{
+		neg = 0;
+		if (c == '+')
+			c = *s++;
+	}
+
+	if ((base == 0 || base == 16) && c == '0' && (*s == 'x' || *s == 'X'))
+	{
+		c = s[1];
+		s += 2;
+		base = 16;
+	}
+
+	if (base == 0)
+		base = c == '0' ? 8 : 10;
+
+	cutoff = ULONG_MAX / (unsigned long) base;
+	cutlim = ULONG_MAX % (unsigned long) base;
+
+	for (acc = 0, any = 0;; c = *s++)
+	{
+		if (isdigit (c))
+			c -= '0';
+		else if (isalpha (c))
+			c -= isupper (c) ? 'A' - 10 : 'a' - 10;
+		else
+			break;
+
+		if (c >= base)
+			break;
+
+		if (any < 0)
+			continue;
+
+		if (acc > cutoff || acc == cutoff && c > cutlim)
+		{
+			any = -1;
+			acc = ULONG_MAX;
+			errno = ERANGE;
+		}
+		else
+		{
+			any = 1;
+			acc *= (unsigned long) base;
+			acc += c;
+		}
+	}
+	if (neg && any > 0)
+		acc = -acc;
+	if (endptr != 0)
+		*endptr = (char *) (any ? s - 1 : nptr);
+	return (acc);
+}
+#endif
 
 extern char *
 strfill (char c, int num)
@@ -1523,9 +1872,9 @@ remove_brackets (char *name, char *args, int *arg_flag)
 			malloc_strcat (&retval, ptr);
 
 		if (args)
-			xfree (&result1);
+			new_free (&result1);
 		if (rptr)
-			xfree (&rptr);
+			new_free (&rptr);
 		rptr = retval;
 	}
 	return upper (rptr);
@@ -1544,12 +1893,42 @@ char *
 m_dupchar (int i)
 {
 	char c = (char) i;	/* blah */
-	char *ret = (char *) xmalloc (2);
+	char *ret = (char *) new_malloc (2);
 
 	ret[0] = c;
 	ret[1] = 0;
 	return ret;
 }
+
+#ifndef HAVE_VSNPRINTF
+int 
+vsnprintf (char *str, size_t size, const char *format, va_list ap)
+{
+	int ret = vsprintf (str, format, ap);
+
+	/* If the string ended up overflowing, just give up. */
+	if (ret == str && strlen (str) > size)
+		ircpanic ("Buffer overflow in vsnprintf");
+	if (ret != str && ret > size)
+		ircpanic ("Buffer overflow in vsnprintf");
+
+	return ret;
+}
+#endif
+
+#ifndef HAVE_SNPRINTF
+int 
+snprintf (char *str, size_t size, const char *format,...)
+{
+	int ret;
+	va_list args;
+
+	va_start (args, format);
+	ret = vsnprintf (str, size, format, args);
+	va_end (args);
+	return ret;
+}
+#endif
 
 char *
 strmopencat (char *dest, int maxlen,...)

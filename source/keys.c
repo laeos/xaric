@@ -1,4 +1,3 @@
-#ident "@(#)keys.c 1.12"
 /*
  * keys.c: Decides what happens when you press a key
  *
@@ -28,9 +27,6 @@
 #include "vars.h"
 #include "window.h"
 #include "tcommand.h"
-#include "util.h"
-#include "expr.h"
-#include "xmalloc.h"
 
 extern void get_line_return (char, char *);
 
@@ -65,7 +61,7 @@ init_keys_1 (void)
  * number of functions that match the name, and sets where index points
  * to to be the index of the (first) function found.
  */
-static int 
+int 
 lookup_function (char *name, int *lf_index)
 {
 	int len, cnt, i;
@@ -482,7 +478,7 @@ KeyMapNames key_names[] =
 	{"SELF_INSERT", input_add_character},
 	{"SEND_LINE", get_line_return},
 	{"SHOVE_TO_HISTORY", shove_to_history},
-	{"STOP_IRC", (KeyBinding)irc_pause},
+	{"STOP_IRC", term_pause},
 	{"SWAP_LAST_WINDOW", swap_last_window},
 	{"SWAP_NEXT_WINDOW", swap_next_window},
 	{"SWAP_PREVIOUS_WINDOW", swap_previous_window},
@@ -524,14 +520,14 @@ new_key (int map, int chr, int type, int change, char *stuff)
 	if (keys[map][chr])
 	{
 		if (keys[map][chr]->stuff)
-			xfree (&(keys[map][chr]->stuff));
-		xfree ((char **) &(keys[map][chr]));
+			new_free (&(keys[map][chr]->stuff));
+		new_free ((char **) &(keys[map][chr]));
 		keys[map][chr] = NULL;
 	}
 
 	if (type != NOTHING)
 	{
-		keys[map][chr] = (KeyMap *) xmalloc (sizeof (KeyMap));
+		keys[map][chr] = (KeyMap *) new_malloc (sizeof (KeyMap));
 		keys[map][chr]->key_index = type;
 		keys[map][chr]->changed = change;
 		if (stuff)
@@ -759,8 +755,8 @@ clear_bindings (void)
 		for (j = 0; j < charsize; j++)
 		{
 			if (keys[i][j] && keys[i][j]->stuff)
-				xfree (&(keys[i][j]->stuff));
+				new_free (&(keys[i][j]->stuff));
 			if (keys[i][j])
-				xfree ((char **) &(keys[i][j]));
+				new_free ((char **) &(keys[i][j]));
 		}
 }

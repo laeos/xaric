@@ -1,4 +1,4 @@
-#ident "@(#)vars.c 1.18"
+#ident "@(#)vars.c 1.8"
 /*
  * vars.c: All the dealing of the irc variables are handled here. 
  *
@@ -35,13 +35,17 @@
 #include "window.h"
 #include "misc.h"
 #include "hash2.h"
+#include "fset.h"
 #include "format.h"
+#include "alist.h"
 #include "tcommand.h"
-#include "util.h"
 
-#include "xformats.h"
-#include "xmalloc.h"
 
+
+char *var_settings[] =
+{
+	"OFF", "ON", "TOGGLE"
+};
 
 
 extern char *auto_str;
@@ -70,14 +74,13 @@ int save_formats (FILE *);
  * the init_variables() procedure 
  */
 
-static IrcVariable irc_variable[] =
-{
+static IrcVariable irc_variable[] = {
+	/*--start--*/
 	{"ALWAYS_SPLIT_BIGGEST", BOOL_TYPE_VAR, DEFAULT_ALWAYS_SPLIT_BIGGEST, NULL, NULL, 0, 0},
 	{"APPEND_LOG", BOOL_TYPE_VAR, 1, NULL, NULL, 0, 0},
 	{"AUTO_NSLOOKUP", BOOL_TYPE_VAR, DEFAULT_AUTO_NSLOOKUP, NULL, NULL, 0, 0},
-	{"AUTO_RECONNECT", BOOL_TYPE_VAR, 1, NULL, NULL, 0, 0},
+	{"AUTO_RECONNECT", BOOL_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"AUTO_REJOIN", INT_TYPE_VAR, DEFAULT_AUTO_REJOIN, NULL, NULL, 0, 0},
-	{"AUTO_UNBAN", INT_TYPE_VAR, 60 * 10, NULL, NULL, 0, 0},
 	{"AUTO_UNMARK_AWAY", BOOL_TYPE_VAR, DEFAULT_AUTO_UNMARK_AWAY, NULL, NULL, 0, 0},
 	{"AUTO_WHOWAS", BOOL_TYPE_VAR, DEFAULT_AUTO_WHOWAS, NULL, NULL, 0, 0},
 	{"BANTYPE", INT_TYPE_VAR, DEFAULT_BANTYPE, NULL, NULL, 0, 0},
@@ -115,7 +118,6 @@ static IrcVariable irc_variable[] =
 	{"EIGHT_BIT_CHARACTERS", BOOL_TYPE_VAR, DEFAULT_EIGHT_BIT_CHARACTERS, NULL, eight_bit_characters, 0, 0},
 	{"EXEC_PROTECTION", BOOL_TYPE_VAR, DEFAULT_EXEC_PROTECTION, NULL, exec_warning, 0, VF_NODAEMON},
 	{"FAKE_SPLIT_PATS", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
-
 	{"FLOOD_AFTER", INT_TYPE_VAR, DEFAULT_FLOOD_AFTER, NULL, NULL, 0, 0},
 	{"FLOOD_KICK", BOOL_TYPE_VAR, DEFAULT_FLOOD_KICK, NULL, NULL, 0, 0},
 	{"FLOOD_PROTECTION", BOOL_TYPE_VAR, DEFAULT_FLOOD_PROTECTION, NULL, NULL, 0, 0},
@@ -123,11 +125,7 @@ static IrcVariable irc_variable[] =
 	{"FLOOD_TIME", INT_TYPE_VAR, DEFAULT_FLOOD_TIME, NULL, NULL, 0, 0},
 	{"FLOOD_USERS", INT_TYPE_VAR, DEFAULT_FLOOD_USERS, NULL, NULL, 0, 0},
 	{"FLOOD_WARNING", BOOL_TYPE_VAR, DEFAULT_FLOOD_WARNING, NULL, NULL, 0, 0},
-
 	{"HELP", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
-	{"HELP_PAGER", BOOL_TYPE_VAR, DEFAULT_HELP_PAGER, NULL, NULL, 0, 0},
-	{"HELP_WINDOW", BOOL_TYPE_VAR, DEFAULT_HELP_WINDOW, NULL, NULL, 0, 0},
-
 	{"HIDE_PRIVATE_CHANNELS", BOOL_TYPE_VAR, DEFAULT_HIDE_PRIVATE_CHANNELS, NULL, update_all_status, 0, 0},
 	{"HIGHLIGHT_CHAR", STR_TYPE_VAR, 0, NULL, set_highlight_char, 0, 0},
 	{"HISTORY", INT_TYPE_VAR, DEFAULT_HISTORY, NULL, set_history_size, 0, VF_NODAEMON},
@@ -163,7 +161,6 @@ static IrcVariable irc_variable[] =
 	{"MSGLOG_FILE", STR_TYPE_VAR, 0, NULL, NULL, 0, 0 | VF_EXPAND_PATH},
 	{"MSGLOG_LEVEL", STR_TYPE_VAR, 0, NULL, set_msglog_level, 0, 0},
 	{"NEXT_SERVER_ON_LOCAL_KILL", BOOL_TYPE_VAR, 0, NULL, NULL, 0, 0},
-
 	{"NICKFLOOD", BOOL_TYPE_VAR, DEFAULT_NICKFLOOD, NULL, NULL, 0, 0},
 	{"NICKFLOOD_TIME", INT_TYPE_VAR, DEFAULT_NICKFLOOD_TIME, NULL, NULL, 0, 0},
 	{"NICK_COMPLETION", BOOL_TYPE_VAR, 0, NULL, NULL, 0, 0},
@@ -192,7 +189,6 @@ static IrcVariable irc_variable[] =
 	{"SHELL_FLAGS", STR_TYPE_VAR, 0, NULL, NULL, 0, VF_NODAEMON},
 	{"SHELL_LIMIT", INT_TYPE_VAR, DEFAULT_SHELL_LIMIT, NULL, NULL, 0, VF_NODAEMON},
 	{"SHOW_CHANNEL_NAMES", BOOL_TYPE_VAR, DEFAULT_SHOW_CHANNEL_NAMES, NULL, NULL, 0, 0},
-	{"SHOW_CTCP_IDLE", BOOL_TYPE_VAR, DEFAULT_SHOW_CTCP_IDLE, NULL, NULL, 0, 0},
 	{"SHOW_END_OF_MSGS", BOOL_TYPE_VAR, DEFAULT_SHOW_END_OF_MSGS, NULL, NULL, 0, 0},
 	{"SHOW_NUMERICS", BOOL_TYPE_VAR, DEFAULT_SHOW_NUMERICS, NULL, NULL, 0, 0},
 	{"SHOW_NUMERICS_STR", STR_TYPE_VAR, 0, NULL, set_numeric_string, 0, 0},
@@ -226,11 +222,11 @@ static IrcVariable irc_variable[] =
 	{"SUPPRESS_SERVER_MOTD", BOOL_TYPE_VAR, DEFAULT_SUPPRESS_SERVER_MOTD, NULL, NULL, 0, VF_NODAEMON},
 	{"TAB", BOOL_TYPE_VAR, DEFAULT_TAB, NULL, NULL, 0, 0},
 	{"TAB_MAX", INT_TYPE_VAR, DEFAULT_TAB_MAX, NULL, NULL, 0, 0},
-
 	{"UNDERLINE_VIDEO", BOOL_TYPE_VAR, DEFAULT_UNDERLINE_VIDEO, NULL, NULL, 0, 0},
 	{"USERMODE", STR_TYPE_VAR, 0, NULL, set_user_mode, 0, 0},
 	{"USER_INFORMATION", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
 	{"WINDOW_QUIET", BOOL_TYPE_VAR, 0, NULL, NULL, 0, 0},
+	/*--end--*/
 	{NULL, 0, 0, NULL, NULL, 0, 0}
 };
 
@@ -266,7 +262,7 @@ set_string_var (enum VAR_TYPES var, char *string)
 	if (string)
 		malloc_strcpy (&(irc_variable[var].string), string);
 	else
-		xfree (&(irc_variable[var].string));
+		new_free (&(irc_variable[var].string));
 }
 
 /*
@@ -301,7 +297,7 @@ init_variables ()
 	window_display = 0;
 	set_numeric_string (NULL, DEFAULT_SHOW_NUMERICS_STR, 0);
 
-	set_string_var (HELP_VAR, DEFAULT_HELP);
+	set_string_var (HELP_VAR, DEFAULT_HELP_FILE);
 
 	set_string_var (MSGLOGFILE_VAR, DEFAULT_MSGLOGFILE);
 	set_string_var (MSGLOG_LEVEL_VAR, DEFAULT_MSGLOG_LEVEL);
@@ -359,7 +355,7 @@ init_variables ()
 	   in a next_arg or similer call, and gets written to */
 	foo = m_strdup (DEFAULT_BEEP_ON_MSG);
 	set_beep_on_msg (curr_scr_win, foo, 0);
-	xfree (&foo);
+	new_free (&foo);
 
 	set_string_var (CLIENTINFO_VAR, XARIC_COMMENT);
 	set_string_var (FAKE_SPLIT_PATS_VAR, "*fuck* *shit* *suck* *dick* *penis* *cunt* *haha* *fake* *split* *ass* *hehe* *bogus* *yawn* *leet* *blow* *screw* *dumb* *fbi*");
@@ -381,6 +377,31 @@ init_variables ()
 	window_display = old_display;
 }
 
+/*
+ * do_boolean: just a handy thing.  Returns 1 if the str is not ON, OFF, or
+ * TOGGLE 
+ */
+int 
+do_boolean (str, value)
+     char *str;
+     int *value;
+{
+	upper (str);
+	if (strcmp (str, var_settings[ON]) == 0)
+		*value = 1;
+	else if (strcmp (str, var_settings[OFF]) == 0)
+		*value = 0;
+	else if (strcmp (str, "TOGGLE") == 0)
+	{
+		if (*value)
+			*value = 0;
+		else
+			*value = 1;
+	}
+	else
+		return (1);
+	return (0);
+}
 
 /*
  * set_var_value: Given the variable structure and the string representation
@@ -420,7 +441,7 @@ set_var_value (int var_index, char *value)
 			     : var_settings[OFF]);
 		}
 		else
-			put_it ("%s", convert_output_format (get_format (FORMAT_SET_FSET), "%s %s", var->name, var->integer ? var_settings[ON] : var_settings[OFF]));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SET_FSET), "%s %s", var->name, var->integer ? var_settings[ON] : var_settings[OFF]));
 		break;
 	case CHAR_TYPE_VAR:
 		if (!value)
@@ -456,7 +477,7 @@ set_var_value (int var_index, char *value)
 			}
 		}
 		else
-			put_it ("%s", convert_output_format (get_format (FORMAT_SET_FSET), "%s %c", var->name, var->integer));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SET_FSET), "%s %c", var->name, var->integer));
 		break;
 	case INT_TYPE_VAR:
 		if (value && *value && (value = next_arg (value, &rest)))
@@ -484,7 +505,7 @@ set_var_value (int var_index, char *value)
 			say ("Value of %s set to %d", var->name, var->integer);
 		}
 		else
-			put_it ("%s", convert_output_format (get_format (FORMAT_SET_FSET), "%s %d", var->name, var->integer));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_SET_FSET), "%s %d", var->name, var->integer));
 		break;
 	case STR_TYPE_VAR:
 		if (value)
@@ -510,16 +531,16 @@ set_var_value (int var_index, char *value)
 				}
 				malloc_strcpy (&(var->string), value);
 				if (temp)
-					xfree (&temp);
+					new_free (&temp);
 			}
 			else
 			{
-				put_it ("%s", convert_output_format (get_format (var->string ? FORMAT_SET_FSET : FORMAT_SET_NOVALUE_FSET), "%s %s", var->name, var->string));
+				put_it ("%s", convert_output_format (get_fset_var (var->string ? FORMAT_SET_FSET : FORMAT_SET_NOVALUE_FSET), "%s %s", var->name, var->string));
 				return;
 			}
 		}
 		else
-			xfree (&(var->string));
+			new_free (&(var->string));
 		if (var->func && !(var->int_flags & VIF_PENDING))
 		{
 			var->int_flags |= VIF_PENDING;
@@ -555,7 +576,7 @@ cmd_set (struct command *cmd, char *args)
 			char *t = NULL;
 			malloc_sprintf (&t, "%s%s%s", var, args && *args ? " " : empty_string, args && *args ? args : empty_string);
 			t_parse_command ("FSET", t);
-			xfree (&t);
+			new_free (&t);
 			return;
 		}
 		if (*var == '-')
@@ -564,7 +585,7 @@ cmd_set (struct command *cmd, char *args)
 			args = NULL;
 		}
 		upper (var);
-		bsearch_array(irc_variable, sizeof (IrcVariable), NUMBER_OF_VARIABLES, var, &cnt, (int *) &var_index);
+		find_fixed_array_item (irc_variable, sizeof (IrcVariable), NUMBER_OF_VARIABLES, var, &cnt, (int *) &var_index);
 
 		if (cnt == 1)
 			cnt = -1;
@@ -656,7 +677,7 @@ make_string_var (char *var_name)
 	char *ret = NULL;
 
 	upper (var_name);
-	if ((bsearch_array (irc_variable, sizeof (IrcVariable), NUMBER_OF_VARIABLES, var_name, &cnt, &msv_index) == NULL))
+	if ((find_fixed_array_item (irc_variable, sizeof (IrcVariable), NUMBER_OF_VARIABLES, var_name, &cnt, &msv_index) == NULL))
 		return NULL;
 	if (cnt >= 0)
 		return NULL;
@@ -726,8 +747,9 @@ set_realname (Window * win, char *value, int unused)
 static void 
 set_numeric_string (Window * win, char *value, int unused)
 {
-
-	malloc_strcpy(&line_thing, convert_output_format(value ? value : DEFAULT_SHOW_NUMERICS_STR, NULL, NULL));
+	malloc_strcpy(&line_thing, 
+			convert_output_format(value ? value : DEFAULT_SHOW_NUMERICS_STR,
+				NULL, NULL));
 }
 
 static void 
@@ -741,7 +763,7 @@ clear_sets (void)
 {
 	int i = 0;
 	for (i = 0; irc_variable[i].name; i++)
-		xfree (&irc_variable->string);
+		new_free (&irc_variable->string);
 }
 
 static void 

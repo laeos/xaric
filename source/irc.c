@@ -1,39 +1,31 @@
-#ident "@(#)irc.c 1.22"
+#ident "@(#)irc.c 1.12"
 /*
- * irc.c - where it all starts!
- *
  * ircII: a new irc client.  I like it.  I hope you will too!
  *
  * Written By Michael Sandrof
  * Copyright(c) 1990 
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
- *
- * Modified for Xaric by Rex Feany <laeos@laeos.net>
- * 
- * This file is a part of Xaric, an irc client
- * You can find Xaric at <http://www.laeos.net/projects/xaric/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
  */
+
+/*
+ * INTERNAL_VERSION is the number that the special alias $V returns.
+ * Make sure you are prepared for floods, pestilence, hordes of locusts,
+ * and all sorts of HELL to break loose if you change this number.
+ * Its format is actually YYYYMMDD, for the _release_ date of the
+ * client..
+ */
+const char internal_version[] = "19971106";
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include <stdio.h>
+#include "xaric_version.h"
+
+char irc_lib[] = "/usr/local/share/xaric";
+
+#include "irc.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
@@ -42,12 +34,12 @@
 #endif
 #include <stdarg.h>
 
-#include "irc.h"
 #include "status.h"
 #include "dcc.h"
 #include "names.h"
 #include "vars.h"
 #include "input.h"
+#include "alias.h"
 #include "output.h"
 #include "ircterm.h"
 #include "exec.h"
@@ -64,34 +56,23 @@
 #include "exec.h"
 #include "notify.h"
 #include "numbers.h"
-#include "xdebug.h"
+#include "debug.h"
 #include "newio.h"
 #include "timer.h"
 #include "whowas.h"
 #include "misc.h"
 #include "tcommand.h"
-#include "util.h"
-
-#include "xversion.h"
-#include "xmalloc.h"
-
-
-
-
-
-/* XXX should be settable with configure 
- * Where we keep our files */
-char irc_lib[] = "/usr/local/share/xaric";
 
 
 int irc_port = IRC_PORT,	/* port of ircd */
   strip_ansi_in_echo, current_on_hook = -1,	/* used in the send_text()
 						 * routine */
+  use_flow_control = USE_FLOW_CONTROL,	/* true: ^Q/^S used for flow
+					 * cntl */
   current_numeric,		/* this is negative of the
 				 * current numeric! */
   bflag = 1, key_pressed = 0, waiting_out = 0,	/* used by /WAIT command */
   waiting_in = 0,		/* used by /WAIT command */
-  need_redraw,			/* someone wants redraw, but couldn't do it themsevles. */
   who_mask = 0;			/* keeps track of which /who
 				 * switchs are set */
 
@@ -109,6 +90,7 @@ char *LocalHostName = NULL;
 extern char *last_away_nick;
 
 extern int split_watch;
+char empty_string[] = "";
 
 char *invite_channel = NULL,	/* last channel of an INVITE */
  *ircrc_file = NULL,		/* full path .ircrc file */
@@ -143,13 +125,10 @@ fd_set readables, writables;
 int child_dead = 0;
 
 
-
-
 /*
  * Signal handlers 
  */
 static RETSIGTYPE cntl_c (int);
-static RETSIGTYPE sig_continue (int);
 static RETSIGTYPE coredump (int);
 static RETSIGTYPE sig_refresh_screen (int);
 static RETSIGTYPE nothing (int);
@@ -175,10 +154,11 @@ static char switch_help[] =
    -r file\tload file as list of servers\n\
    -n nickname\tnickname to use\n\
    -a\t\tadds default servers and command line servers to server list\n\
-   -d <flag>\tturns on debugging (if compiled in see /help xdebug)\n\
+   -d <flag>\tturns on debugging (if compiled in, see /help debug)\n\
    -v\t\ttells you about the client's version\n\
    -l <file>\tloads <file> in place of your .ircrc\n\
    -L <file>\tloads <file> in place of your .ircrc and expands $ expandos\n";
+
 
 
 
@@ -220,25 +200,14 @@ irc_exit (char *reason, char *formated)
 }
 
 
-/* pause xaric */
-void
-irc_pause (void)
-{
-	term_reset();
-	kill(getpid(), SIGSTOP);
-}
+
+
+
 
 /* sig_refresh_screen: the signal-callable version of refresh_screen */
 static RETSIGTYPE 
 sig_refresh_screen (int unused)
 {
-	refresh_screen (0, NULL);
-}
-
-static RETSIGTYPE
-sig_continue (int unused)
-{
-	term_cont();
 	refresh_screen (0, NULL);
 }
 
@@ -298,6 +267,28 @@ cntl_c (int unused)
 }
 
 
+void 
+display_name (int j)
+{
+	int i = strip_ansi_in_echo;
+	strip_ansi_in_echo = 0;
+
+	put_it (empty_string);
+
+	put_it("%s",convert_output_format("%g***%n", NULL));
+	put_it("%s",convert_output_format("%g***%C $0-", "%s", xversion.v_tex));
+	put_it("%s",convert_output_format("%g***%n", NULL));
+	put_it("%s",convert_output_format("%g***%n Xaric is free software, covered by the GNU General Public License,", NULL));
+	put_it("%s",convert_output_format("%g***%n and you are welcome to change it and/or distribute copies of it", NULL));
+	put_it("%s",convert_output_format("%g***%n under certain conditions.", NULL));
+	put_it("%s",convert_output_format("%g***%n Type \"/help copying\" to see the conditions.", NULL));
+	put_it("%s",convert_output_format("%g***%n", NULL));
+	put_it("%s",convert_output_format("%g***%n There is absolutely no warranty for Xaric.", NULL));
+	put_it("%s",convert_output_format("%g***%n Type \"/help warranty\" for details.", NULL));
+	put_it("%s",convert_output_format("%g***%n", NULL));
+
+	strip_ansi_in_echo = i;
+}
 
 /*
  * parse_args: parse command line arguments for irc, and sets all initial
@@ -355,8 +346,7 @@ parse_args (char *argv[], int argc)
 
 			case 'v':	/* Output ircII version */
 				{
-					puts(xversion.v_gnu);
-					putc('\n', stdout);
+					printf ("xaric version %s (%s)\n\r", xversion.v_short, internal_version);
 					exit (0);
 				}
 
@@ -381,7 +371,7 @@ parse_args (char *argv[], int argc)
 				}
 			case 'f':	/* Use flow control */
 				{
-					set_use_flow_control(ON);
+					use_flow_control = 1;
 					if (argv[ac][2])
 						fprintf (stderr, "Ignoring junk after -f\n");
 					break;
@@ -389,7 +379,7 @@ parse_args (char *argv[], int argc)
 
 			case 'F':	/* dont use flow control */
 				{
-					set_use_flow_control(OFF);
+					use_flow_control = 0;
 					if (argv[ac][2])
 						fprintf (stderr, "Ignoring junk after -F\n");
 					break;
@@ -499,30 +489,27 @@ parse_args (char *argv[], int argc)
 					strmcpy (nickname, what, NICKNAME_LEN);
 					break;
 				}
-
 #ifdef XARIC_DEBUG
-			case 'd':
+			case 'd':	/* set server debug */
 				{
 					char *what;
-
-					if (argv[ac][2])
+					if (argv[ac][2]) {
 						what = &argv[ac][2];
-					else if (argv[ac + 1] && argv[ac + 1][0] != '-')
-					{
-						what = argv[ac + 1];
-						ac++;
-					}
-					else {
-						fprintf (stderr, "Missing argument for -d\n");
+					} else if (argv[ac + 1] && argv[ac + 1][0] != '-') {
+								what = argv[ac + 1];
+								ac++;
+					} else {
+						fprintf(stderr, "Missing argument for -d\n");
 						exit (1);
 					}
-					if ( xd_parse(what) ) {
+
+					if (xd_parse(what)) {
 						fprintf(stderr, "Bad arguments to -d\n");
 						exit (1);
 					}
 					break;
 				}
-#endif
+#endif /* XARIC_DEBUG */
 
 			case 'z':
 				{
@@ -606,7 +593,7 @@ parse_args (char *argv[], int argc)
 	}
 
 	set_string_var (LOAD_PATH_VAR, irc_path);
-	xfree (&irc_path);
+	new_free (&irc_path);
 
 	if ((entry = getpwuid (getuid ())))
 	{
@@ -685,7 +672,7 @@ parse_args (char *argv[], int argc)
 	if (!nickname || !*nickname)
 		strmcpy (nickname, username, sizeof (nickname));
 
-	if (!is_nick (nickname))
+	if (!check_nickname (nickname))
 	{
 		fprintf (stderr, "Illegal nickname %s\n", nickname);
 		fprintf (stderr, "Please restart IRC II with a valid nickname\n");
@@ -693,7 +680,7 @@ parse_args (char *argv[], int argc)
 	}
 	if (ircrc_file == NULL)
 	{
-		ircrc_file = (char *) xmalloc (strlen (my_path) + strlen (IRCRC_NAME) + 10);
+		ircrc_file = (char *) new_malloc (strlen (my_path) + strlen (IRCRC_NAME) + 10);
 		strcpy (ircrc_file, my_path);
 		strcat (ircrc_file, "/");
 		strcat (ircrc_file, IRCRC_NAME);
@@ -711,7 +698,7 @@ parse_args (char *argv[], int argc)
 #ifdef DEFAULT_SERVER
 		malloc_strcpy (&ptr, DEFAULT_SERVER);
 		build_server_list (ptr);
-		xfree (&ptr);
+		new_free (&ptr);
 #else
 		ircpanic ("DEFAULT_SERVER not defined -- no server list");
 #endif
@@ -775,8 +762,8 @@ get_line_return (char unused, char *not_used)
 		stuff->done = 1;
 		set_input (stuff->saved_input);
 		set_input_prompt (curr_scr_win, stuff->saved_prompt, 0);
-		xfree (&(stuff->saved_input));
-		xfree (&(stuff->saved_prompt));
+		new_free (&(stuff->saved_input));
+		new_free (&(stuff->saved_prompt));
 		stuff->next->prev = NULL;
 		GetLineStack = stuff->next;
 	}
@@ -808,7 +795,7 @@ get_line (char *prompt, int new_input, void (*func) (char, char *))
 		ircpanic ("Illegal call to get_line\n");
 
 	/* initialize the new item. */
-	stuff = (GetLine *) xmalloc (sizeof (GetLine));
+	stuff = (GetLine *) new_malloc (sizeof (GetLine));
 	stuff->done = 0;
 	stuff->func = func;
 	stuff->recursive_call = (new_input == -1) ? 0 : 1;
@@ -851,9 +838,9 @@ get_line (char *prompt, int new_input, void (*func) (char, char *))
 	 * interesting items in stuff and removed it from the list.
 	 * Noone but us has a pointer to it, so we free it here.
 	 */
-	xfree (&stuff->saved_input);
-	xfree (&stuff->saved_prompt);
-	xfree ((char **) &stuff);
+	new_free (&stuff->saved_input);
+	new_free (&stuff->saved_prompt);
+	new_free ((char **) &stuff);
 }
 
 /* This simply waits for a key to be pressed before it unrecurses.
@@ -901,10 +888,14 @@ io (const char *what)
 
 	level++;
 
+
+
 	if (level != old_level) {
-		DEBUG(XD_COMM, 5, "Moving from io level [%d] to level [%d] from [%s]", old_level, level, what);
+		DEBUG(XD_COMM, 5, "Moving from io level [%d] to level [%d] from\
+				[%s]", old_level, level, what);
 		old_level = level;
 	}
+
 
 	if (level && (level - last_warn == 5))
 	{
@@ -960,9 +951,13 @@ io (const char *what)
 	set_dcc_bits (&rd, &wd);
 	set_server_bits (&rd, &wd);
 	set_process_bits (&rd);
-	set_socket_read (&rd, &wd);
 
-	clock_timeout.tv_sec = (60 - now % 60) + (now - idle_time);
+	clock_timeout.tv_sec = (60 - now % 60);
+
+	/* if the time changes, now - idle_time can be negative,
+	 * and cause all kinds of problems */
+	if (now > idle_time)
+		clock_timeout.tv_sec += now - idle_time;
 
 	if (!timeptr)
 		timeptr = &clock_timeout;
@@ -1005,7 +1000,6 @@ io (const char *what)
 			do_processes (&rd);
 			do_screens (&rd);
 			dcc_check_idle ();
-			scan_sockets (&rd, &wd);
 			set_current_screen (old_current_screen);
 			break;
 		}
@@ -1048,6 +1042,7 @@ io (const char *what)
 		check_server_connect (from_server);
 	}
 
+	/* (set in term.c) -- we should redraw the screen here */
 	if (need_redraw)
 		refresh_screen (0, NULL);
 
@@ -1063,12 +1058,10 @@ main (int argc, char *argv[], char *envp[])
 	time (&start_time);
 	time (&idle_time);
 
-	if (isatty (0))
-	{
+
+	if (isatty (0)) {
 		printf ("Process [%d] connected to tty [%s]\n", getpid (), ttyname (0));
-	}
-	else
-	{
+	} else {
 		fprintf (stderr, "Woops I need a tty!\n");
 		exit (1);
 	}
@@ -1094,7 +1087,7 @@ main (int argc, char *argv[], char *envp[])
 		exit (1);
 	}
 
-	my_signal (SIGCONT, sig_continue, 0);
+	my_signal (SIGCONT, term_cont, 0);
 	my_signal (SIGWINCH, sig_refresh_screen, 0);
 
 	init_variables ();
@@ -1108,7 +1101,7 @@ main (int argc, char *argv[], char *envp[])
 	global_all_off[0] = ALL_OFF;
 	global_all_off[1] = '\0';
 
-	display_intro();
+	display_name (-1);
 	if (bflag)
 		load_scripts ();
 

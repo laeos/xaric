@@ -1,4 +1,3 @@
-#ident "@(#)whowas.c 1.11"
 /*
  * whowas.c   a linked list buffer of people who have left your channel 
  * mainly used for ban prot and stats stuff.
@@ -26,6 +25,7 @@
 #include "hook.h"
 #include "input.h"
 #include "names.h"
+#include "alias.h"
 #include "output.h"
 #include "numbers.h"
 #include "status.h"
@@ -37,9 +37,7 @@
 #include "hash.h"
 #include "hash2.h"
 #include "whowas.h"
-
-#include "xformats.h"
-#include "xmalloc.h"
+#include "fset.h"
 
 WhowasWrapList whowas_userlist_list =
 {0};
@@ -55,24 +53,24 @@ static int whowas_reg_count = 0;
 static int whowas_chan_count = 0;
 
 extern WhowasList *
-check_whowas_buffer (char *nick, char *userhost, char *channel, int unlnk)
+check_whowas_buffer (char *nick, char *userhost, char *channel, int unlink)
 {
 	WhowasList *tmp = NULL;
-	if (!(tmp = find_userhost_channel (userhost, channel, unlnk, &whowas_userlist_list)))
-		tmp = find_userhost_channel (userhost, channel, unlnk, &whowas_reg_list);
+	if (!(tmp = find_userhost_channel (userhost, channel, unlink, &whowas_userlist_list)))
+		tmp = find_userhost_channel (userhost, channel, unlink, &whowas_reg_list);
 	return tmp;
 }
 
 
 extern WhowasList *
-check_whowas_nick_buffer (char *nick, char *channel, int unlnk)
+check_whowas_nick_buffer (char *nick, char *channel, int unlink)
 {
 	WhowasList *tmp = NULL, *last = NULL;
 	for (tmp = next_userhost (&whowas_userlist_list, NULL); tmp; tmp = next_userhost (&whowas_userlist_list, tmp))
 	{
 		if (!my_stricmp (tmp->nicklist->nick, nick) && !my_stricmp (tmp->channel, channel))
 		{
-			if (unlnk)
+			if (unlink)
 			{
 				last = find_userhost_channel (tmp->nicklist->host, tmp->channel, 1, &whowas_userlist_list);
 				tmp = NULL;
@@ -84,7 +82,7 @@ check_whowas_nick_buffer (char *nick, char *channel, int unlnk)
 	{
 		if (!my_stricmp (tmp->nicklist->nick, nick) && !my_stricmp (tmp->channel, channel))
 		{
-			if (unlnk)
+			if (unlink)
 			{
 				last = find_userhost_channel (tmp->nicklist->host, tmp->channel, 1, &whowas_reg_list);
 				tmp = NULL;
@@ -96,10 +94,10 @@ check_whowas_nick_buffer (char *nick, char *channel, int unlnk)
 }
 
 extern WhowasList *
-check_whosplitin_buffer (char *nick, char *userhost, char *channel, int unlnk)
+check_whosplitin_buffer (char *nick, char *userhost, char *channel, int unlink)
 {
 	WhowasList *tmp = NULL;
-	tmp = find_userhost_channel (userhost, channel, unlnk, &whowas_splitin_list);
+	tmp = find_userhost_channel (userhost, channel, unlink, &whowas_splitin_list);
 	return tmp;
 }
 
@@ -116,7 +114,7 @@ add_to_whowas_buffer (NickList * nicklist, char *channel, char *server1, char *s
 			remove_oldest_whowas (&whowas_reg_list, 0,
 				   (whowas_reg_max + 1) - whowas_reg_count);
 	}
-	new = (WhowasList *) xmalloc (sizeof (WhowasList));
+	new = (WhowasList *) new_malloc (sizeof (WhowasList));
 	new->has_ops = nicklist->chanop;
 	new->nicklist = (NickList *) nicklist;
 	malloc_strcpy (&(new->channel), channel);
@@ -132,10 +130,10 @@ add_to_whosplitin_buffer (NickList * nicklist, char *channel, char *server1, cha
 {
 	WhowasList *new;
 
-	new = (WhowasList *) xmalloc (sizeof (WhowasList));
+	new = (WhowasList *) new_malloc (sizeof (WhowasList));
 	new->has_ops = nicklist->chanop;
 
-	new->nicklist = (NickList *) xmalloc (sizeof (NickList));	/*nicklist; */
+	new->nicklist = (NickList *) new_malloc (sizeof (NickList));	/*nicklist; */
 	new->nicklist->nick = m_strdup (nicklist->nick);
 	new->nicklist->host = m_strdup (nicklist->host);
 
@@ -171,7 +169,7 @@ clean_whowas_list (void)
 /* BELOW THIS MARK IS THE CHANNEL WHOWAS STUFF */
 
 extern WhowasChanList *
-check_whowas_chan_buffer (char *channel, int unlnk)
+check_whowas_chan_buffer (char *channel, int unlink)
 {
 	WhowasChanList *tmp, *last = NULL;
 
@@ -179,7 +177,7 @@ check_whowas_chan_buffer (char *channel, int unlnk)
 	{
 		if (!my_stricmp (tmp->channellist->channel, channel))
 		{
-			if (unlnk)
+			if (unlink)
 			{
 				if (last)
 					last->next = tmp->next;
@@ -206,7 +204,7 @@ add_to_whowas_chan_buffer (ChannelList * channel)
 			remove_oldest_chan_whowas (&whowas_chan_list, 0,
 				 (whowas_chan_max + 1) - whowas_chan_count);
 	}
-	new = (WhowasChanList *) xmalloc (sizeof (WhowasChanList));
+	new = (WhowasChanList *) new_malloc (sizeof (WhowasChanList));
 
 	new->channellist = channel;
 	new->time = time (NULL);
@@ -236,12 +234,12 @@ remove_oldest_chan_whowas (WhowasChanList ** list, time_t timet, int count)
 		while (*list && ((*list)->time + timet) <= t)
 		{
 			tmp = *list;
-			xfree (&(tmp->channellist->channel));
-			xfree (&(tmp->channellist->topic));
+			new_free (&(tmp->channellist->channel));
+			new_free (&(tmp->channellist->topic));
 			tmp->channellist->bans = NULL;
-			xfree ((char **) &(tmp->channellist));
+			new_free ((char **) &(tmp->channellist));
 			*list = tmp->next;
-			xfree ((char **) &tmp);
+			new_free ((char **) &tmp);
 			total++;
 		}
 	}
@@ -250,12 +248,12 @@ remove_oldest_chan_whowas (WhowasChanList ** list, time_t timet, int count)
 		while (*list && count)
 		{
 			tmp = *list;
-			xfree (&(tmp->channellist->channel));
-			xfree (&(tmp->channellist->topic));
+			new_free (&(tmp->channellist->channel));
+			new_free (&(tmp->channellist->topic));
 			tmp->channellist->bans = NULL;
-			xfree ((char **) &(tmp->channellist));
+			new_free ((char **) &(tmp->channellist));
 			*list = tmp->next;
-			xfree ((char **) &tmp);
+			new_free ((char **) &tmp);
 			total++;
 			count--;
 		}
@@ -287,6 +285,6 @@ show_wholeft (char *channel)
 #endif
 	hook = show_wholeft_hashtable (&whowas_userlist_list, ltime, &count, &hook, "Splitin");
 	hook = show_wholeft_hashtable (&whowas_reg_list, ltime, &count, &hook, "Splitin");
-	if (count && hook && get_format (FORMAT_WHOLEFT_FOOTER_FSET))
-		put_it ("%s", convert_output_format (get_format (FORMAT_WHOLEFT_FOOTER_FSET), NULL));
+	if (count && hook && get_fset_var (FORMAT_WHOLEFT_FOOTER_FSET))
+		put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOLEFT_FOOTER_FSET), NULL));
 }

@@ -1,4 +1,3 @@
-#ident "@(#)log.c 1.9"
 /*
  * log.c: handles the irc session logging functions 
  *
@@ -23,9 +22,6 @@
 #include "screen.h"
 #include "output.h"
 #include "ircaux.h"
-#include "util.h"
-#include "xmalloc.h"
-
 
 FILE *irclog_fp;
 extern char *stripansicodes (char *);
@@ -61,7 +57,7 @@ do_log (int flag, char *logfile, FILE ** fp)
 				say ("Couldn't open logfile %s: %s", logfile, strerror (errno));
 				*fp = NULL;
 			}
-			xfree (&logfile);
+			new_free (&logfile);
 		}
 	}
 	else
@@ -110,7 +106,7 @@ set_log_file (Window * win, char *filename, int unused)
 		else
 			expanded = expand_twiddle (get_string_var (LOGFILE_VAR));
 		set_string_var (LOGFILE_VAR, expanded);
-		xfree (&expanded);
+		new_free (&expanded);
 		if (irclog_fp)
 		{
 			logger (curr_scr_win, NULL, 0);

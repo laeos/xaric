@@ -1,4 +1,4 @@
-#ident "@(#)network.c 1.8"
+#ident "@(#)network.c 1.4"
 /*
  * network.c -- handles stuff dealing with connecting and name resolving
  *
@@ -14,7 +14,6 @@
 #include "irc.h"
 #include "ircaux.h"
 #include "vars.h"
-#include "util.h"
 
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h>

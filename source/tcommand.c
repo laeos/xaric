@@ -1,4 +1,4 @@
-#ident "@(#)tcommand.c 1.10"
+#ident "@(#)tcommand.c 1.5"
 /*
  * tcommand.c : new implementation of command,searching,aliases for Xaric.
  * (c) 1998 Rex Feany <laeos@ptw.com> 
@@ -34,9 +34,7 @@
 #include "tcommand.h"
 #include "output.h"
 #include "input.h"
-#include "util.h"
 #include "misc.h"
-#include "xmalloc.h"
 
 struct tnode *t_commands;
 
@@ -147,7 +145,7 @@ command_completion (char unused, char *not_used)
 	}
 	else
 		term_beep ();
-	xfree (&line);
+	new_free (&line);
 }
 
 /* -- alias / binding type support --------------------------------------- */

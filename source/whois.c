@@ -1,4 +1,4 @@
-#ident "@(#)whois.c 1.12"
+#ident "$Id$"
 /*
  * whois.c: Some tricky routines for querying the server for information
  * about a nickname using WHOIS.... all the time hiding this from the user.  
@@ -35,12 +35,9 @@
 #include "ctcp.h"
 #include "misc.h"
 #include "status.h"
-#include "xmalloc.h"
 #include "whowas.h"
 #include "struct.h"
-#include "util.h"
-
-#include "xformats.h"
+#include "fset.h"
 
 char whois_nick[] = "#WHOIS#";
 
@@ -121,9 +118,9 @@ clean_whois_queue (void)
 	while (whois_queue_head (from_server))
 	{
 		thing = remove_from_whois_queue (from_server);
-		xfree (&thing->nick);
-		xfree (&thing->text);
-		xfree ((char **) &thing);
+		new_free (&thing->nick);
+		new_free (&thing->text);
+		new_free ((char **) &thing);
 	}
 	ignore_whois_crap = 0;
 	eat_away = 0;
@@ -143,9 +140,9 @@ ison_returned (char *from, char **ArgList)
 	{
 		thing = remove_from_whois_queue (from_server);
 		thing->func (thing->nick, ArgList[0] ? ArgList[0] : empty_string);
-		xfree (&thing->nick);
-		xfree (&thing->text);
-		xfree ((char **) &thing);
+		new_free (&thing->nick);
+		new_free (&thing->text);
+		new_free ((char **) &thing);
 	}
 	else
 		ison_now (NULL, ArgList[0] ? ArgList[0] : empty_string);
@@ -287,9 +284,9 @@ userhost_returned (char *from, char **ArgList)
 			if (!ishere)
 				malloc_strcpy (&whois_stuff->away, empty_string);
 			else
-				xfree (&whois_stuff->away);
+				new_free (&whois_stuff->away);
 			thing->func (whois_stuff, tnick, thing->text);
-			xfree (&whois_stuff->away);
+			new_free (&whois_stuff->away);
 		}
 		else
 		{
@@ -309,9 +306,9 @@ userhost_returned (char *from, char **ArgList)
 	}
 	if (thing)
 	{
-	      out_free:xfree (&thing->nick);
-		xfree (&thing->text);
-		xfree ((char **) &thing);
+	      out_free:new_free (&thing->nick);
+		new_free (&thing->text);
+		new_free ((char **) &thing);
 	}
 }
 
@@ -353,7 +350,7 @@ whois_name (char *from, char **ArgList)
 		malloc_strcpy (&whois_stuff->host, host);
 		malloc_strcpy (&whois_stuff->name, name);
 		malloc_strcpy (&whois_stuff->channel, channel);
-		xfree (&whois_stuff->away);
+		new_free (&whois_stuff->away);
 		whois_stuff->oper = 0;
 		whois_stuff->chop = 0;
 		whois_stuff->not_on = 0;
@@ -373,9 +370,9 @@ whois_name (char *from, char **ArgList)
 		if (do_hook (current_numeric, "%s %s %s %s %s %s", from, nick,
 			     user, nsl ? nsl : host, channel, name))
 		{
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_HEADER_FSET), NULL));
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_NICK_FSET), "%s %s %s %s", nick, user, nsl ? nsl : host, country (host)));
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_NAME_FSET), "%s", name));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_HEADER_FSET), NULL));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_NICK_FSET), "%s %s %s %s", nick, user, nsl ? nsl : host, country (host)));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_NAME_FSET), "%s", name));
 		}
 	}
 }
@@ -412,7 +409,7 @@ whowas_name (char *from, char **ArgList)
 		malloc_strcpy (&whois_stuff->host, host);
 		malloc_strcpy (&whois_stuff->name, name);
 		malloc_strcpy (&whois_stuff->channel, channel);
-		xfree (&whois_stuff->away);
+		new_free (&whois_stuff->away);
 		whois_stuff->oper = 0;
 		whois_stuff->chop = 0;
 		whois_stuff->not_on = 1;
@@ -425,9 +422,9 @@ whowas_name (char *from, char **ArgList)
 		if (do_hook (current_numeric, "%s %s %s %s %s %s", from, nick,
 			     user, host, channel, name))
 		{
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOWAS_HEADER_FSET), NULL));
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOWAS_NICK_FSET), "%s %s %s", nick, user, host));
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_NAME_FSET), "%s", name));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOWAS_HEADER_FSET), NULL));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOWAS_NICK_FSET), "%s %s %s", nick, user, host));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_NAME_FSET), "%s", name));
 		}
 	}
 	set_lastlog_msg_level (lastlog_level);
@@ -457,7 +454,7 @@ whois_channels (char *from, char **ArgList)
 	{
 		message_from (NULL, LOG_CRAP);
 		if (do_hook (current_numeric, "%s %s", from, line))
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_CHANNELS_FSET), "%s", line));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_CHANNELS_FSET), "%s", line));
 	}
 }
 
@@ -504,7 +501,7 @@ whois_server (char *from, char **ArgList)
 	{
 		message_from (NULL, LOG_CRAP);
 		if (do_hook (current_numeric, "%s %s %s", from, server, line))
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_SERVER_FSET), "%s %s", server, line));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_SERVER_FSET), "%s %s", server, line));
 	}
 }
 
@@ -530,7 +527,7 @@ whois_oper (char *from, char **ArgList)
 		{
 			message_from (NULL, LOG_CRAP);
 			if (do_hook (current_numeric, "%s %s %s", from, nick, ArgList[1]))
-				put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_OPER_FSET), "%s %s", nick, " (is \002NOT\002 an IRC warrior)"));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_OPER_FSET), "%s %s", nick, " (is \002NOT\002 an IRC warrior)"));
 		}
 
 	}
@@ -556,7 +553,7 @@ whois_lastcom (char *from, char **ArgList)
 			hours = secs / 3600;
 			minutes = (secs - (hours * 3600)) / 60;
 			seconds = secs % 60;
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_IDLE_FSET), "%d %d %d %s", hours, minutes, seconds, ArgList[2] ? ArgList[2] : empty_string));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_IDLE_FSET), "%d %d %d %s", hours, minutes, seconds, ArgList[2] ? ArgList[2] : empty_string));
 		}
 	}
 }
@@ -582,17 +579,17 @@ end_of_whois (char *from, char **ArgList)
 			thing = remove_from_whois_queue (from_server);
 			whois_stuff->not_on = 0;
 			thing->func (whois_stuff, thing->nick, thing->text);
-			xfree (&whois_stuff->channels);
-			xfree (&thing->nick);
-			xfree (&thing->text);
-			xfree ((char **) &thing);
+			new_free (&whois_stuff->channels);
+			new_free (&thing->nick);
+			new_free (&thing->text);
+			new_free ((char **) &thing);
 			ignore_whois_crap = 0;
 			return;
 		}
 		PasteArgs (ArgList, 0);
 		message_from (NULL, LOG_CRAP);
-		if (do_hook (current_numeric, "%s %s", from, ArgList[0]) && get_format (FORMAT_WHOIS_FOOTER_FSET))
-			put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_FOOTER_FSET), NULL));
+		if (do_hook (current_numeric, "%s %s", from, ArgList[0]) && get_fset_var (FORMAT_WHOIS_FOOTER_FSET))
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_FOOTER_FSET), NULL));
 	}
 }
 
@@ -638,10 +635,10 @@ no_such_nickname (char *from, char **ArgList)
 			thing = remove_from_whois_queue (from_server);
 			whois_stuff->not_on = 0;
 			thing->func (whois_stuff, thing->nick, thing->text);
-			xfree (&whois_stuff->channels);
-			xfree (&thing->nick);
-			xfree (&thing->text);
-			xfree ((char **) &thing);
+			new_free (&whois_stuff->channels);
+			new_free (&thing->nick);
+			new_free (&thing->text);
+			new_free ((char **) &thing);
 			ignore_whois_crap = 0;
 			return;
 		}
@@ -672,10 +669,10 @@ no_such_nickname (char *from, char **ArgList)
 		{
 			/* take it off all together */
 			thing = remove_from_whois_queue (from_server);
-			xfree (&whois_stuff->channels);
-			xfree (&thing->nick);
-			xfree (&thing->text);
-			xfree ((char **) &thing);
+			new_free (&whois_stuff->channels);
+			new_free (&thing->nick);
+			new_free (&thing->text);
+			new_free ((char **) &thing);
 			ignore_whois_crap = 0;
 		}
 		return;
@@ -689,7 +686,7 @@ no_such_nickname (char *from, char **ArgList)
 			send_to_server ("WHOWAS %s", nick);
 	}
 	else if (do_hook (current_numeric, "%s %s %s", from, nick, ArgList[1]))
-		put_it ("%s", convert_output_format (get_format (FORMAT_NONICK_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, from, ArgList[1]));
+		put_it ("%s", convert_output_format (get_fset_var (FORMAT_NONICK_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, from, ArgList[1]));
 }
 
 /*
@@ -716,7 +713,7 @@ user_is_away (char *from, char **ArgList)
 		{
 			message_from (NULL, LOG_CRAP);
 			if (do_hook (current_numeric, "%s %s", who, message))
-				put_it ("%s", convert_output_format (get_format (FORMAT_WHOIS_AWAY_FSET), "%s %s", who, message));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_WHOIS_AWAY_FSET), "%s %s", who, message));
 		}
 	}
 }
@@ -738,7 +735,7 @@ whois_ignore_msgs (WhoisStuff * stuff, char *nick, char *text)
 
 	if (stuff)
 	{
-		ptr = (char *) xmalloc (strlen (stuff->user) +
+		ptr = (char *) new_malloc (strlen (stuff->user) +
 					   strlen (stuff->host) + 2);
 		strcpy (ptr, stuff->user);
 		strcat (ptr, "@");
@@ -760,12 +757,12 @@ whois_ignore_msgs (WhoisStuff * stuff, char *nick, char *text)
 					char *msg = NULL;
 
 					t = time (NULL);
-					put_it ("%s", convert_output_format (get_format (FORMAT_IGNORE_MSG_AWAY_FSET), "%s %s %s", update_clock (GET_TIME), stuff->nick, msg));
+					put_it ("%s", convert_output_format (get_fset_var (FORMAT_IGNORE_MSG_AWAY_FSET), "%s %s %s", update_clock (GET_TIME), stuff->nick, msg));
 					beep_em (get_int_var (BEEP_WHEN_AWAY_VAR));
 				}
 				else
 				{
-					put_it ("%s", convert_output_format (get_format (FORMAT_IGNORE_MSG_FSET), "%s %s %s", update_clock (GET_TIME), stuff->nick, text));
+					put_it ("%s", convert_output_format (get_fset_var (FORMAT_IGNORE_MSG_FSET), "%s %s %s", update_clock (GET_TIME), stuff->nick, text));
 					beep_em (get_int_var (BEEP_ON_MSG_VAR));
 				}
 			}
@@ -778,7 +775,7 @@ whois_ignore_msgs (WhoisStuff * stuff, char *nick, char *text)
 		else if (get_int_var (SEND_IGNORE_MSG_VAR))
 			send_to_server ("NOTICE %s :%s is ignoring you.",
 				   nick, get_server_nickname (from_server));
-		xfree (&ptr);
+		new_free (&ptr);
 	}
 }
 
@@ -805,7 +802,7 @@ whois_ignore_notices (WhoisStuff * stuff, char *nick, char *text)
 
 	if (stuff)
 	{
-		ptr = (char *) xmalloc (strlen (stuff->user) +
+		ptr = (char *) new_malloc (strlen (stuff->user) +
 					   strlen (stuff->host) + 2);
 		strcpy (ptr, stuff->user);
 		strcat (ptr, "@");
@@ -820,11 +817,11 @@ whois_ignore_notices (WhoisStuff * stuff, char *nick, char *text)
 				return;
 			}
 			if (do_hook (NOTICE_LIST, "%s %s", stuff->nick, text))
-				put_it ("%s", convert_output_format (get_format (FORMAT_IGNORE_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), stuff->nick, text));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_IGNORE_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), stuff->nick, text));
 			set_lastlog_msg_level (level);
 			sed = 0;
 		}
-		xfree (&ptr);
+		new_free (&ptr);
 	}
 }
 
@@ -839,7 +836,7 @@ whois_ignore_invites (WhoisStuff * stuff, char *nick, char *text)
 
 	if (stuff)
 	{
-		ptr = (char *) xmalloc (strlen (stuff->user) +
+		ptr = (char *) new_malloc (strlen (stuff->user) +
 					   strlen (stuff->host) + 2);
 		strcpy (ptr, stuff->user);
 		strcat (ptr, "@");
@@ -849,7 +846,7 @@ whois_ignore_invites (WhoisStuff * stuff, char *nick, char *text)
 			WhowasChanList *w_chan = NULL;
 			ChannelList *chan = NULL;
 			if (do_hook (INVITE_LIST, "%s %s", stuff->nick, text))
-				put_it ("%s", convert_output_format (get_format (FORMAT_IGNORE_INVITE_FSET), "%s %s", stuff->nick, text));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_IGNORE_INVITE_FSET), "%s %s", stuff->nick, text));
 			malloc_strcpy (&invite_channel, text);
 			if (!(chan = lookup_channel (invite_channel, from_server, 0)))
 			{
@@ -857,12 +854,12 @@ whois_ignore_invites (WhoisStuff * stuff, char *nick, char *text)
 					chan = w_chan->channellist;
 			}
 			if (chan && get_int_var (AUTO_REJOIN_VAR))
-				send_to_server ("JOIN %s%s%s", invite_channel, chan->key ? space_string : empty_string, chan->key ? chan->key : empty_string);
+				send_to_server ("JOIN %s%s%s", invite_channel, chan->key ? " " : empty_string, chan->key ? chan->key : empty_string);
 		}
 		else if (get_int_var (SEND_IGNORE_MSG_VAR))
 			send_to_server ("NOTICE %s :%s is ignoring you.",
 				   nick, get_server_nickname (from_server));
-		xfree (&ptr);
+		new_free (&ptr);
 	}
 }
 
@@ -880,7 +877,7 @@ whois_ignore_walls (WhoisStuff * stuff, char *nick, char *text)
 	message_from (stuff->nick, LOG_WALL);
 	if (stuff)
 	{
-		ptr = (char *) xmalloc (strlen (stuff->user) +
+		ptr = (char *) new_malloc (strlen (stuff->user) +
 					   strlen (stuff->host) + 2);
 		strcpy (ptr, stuff->user);
 		strcat (ptr, "@");
@@ -888,11 +885,11 @@ whois_ignore_walls (WhoisStuff * stuff, char *nick, char *text)
 		if (is_ignored (ptr, IGNORE_WALLS) != IGNORED)
 		{
 			if (do_hook (WALL_LIST, "%s %s", stuff->nick, text))
-				put_it ("%s", convert_output_format (get_format (FORMAT_IGNORE_WALL_FSET), "%s %s %s", update_clock (GET_TIME), stuff->nick, text));
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_IGNORE_WALL_FSET), "%s %s %s", update_clock (GET_TIME), stuff->nick, text));
 			if (beep_on_level & LOG_WALL)
 				beep_em (1);
 		}
-		xfree (&ptr);
+		new_free (&ptr);
 	}
 	set_lastlog_msg_level (level);
 }
@@ -964,7 +961,7 @@ typed_add_to_whois_queue (int type, char *nick, void (*func) (WhoisStuff *, char
 
 	if (strchr (nick, '*') == NULL)
 	{
-		new = (WhoisQueue *) xmalloc (sizeof (WhoisQueue));
+		new = (WhoisQueue *) new_malloc (sizeof (WhoisQueue));
 		memset (new, 0, sizeof (WhoisQueue));
 		new->func = func;
 		new->type = type;
@@ -1022,7 +1019,7 @@ userhost_cmd_returned (WhoisStuff * stuff, char *nick, char *text)
 	strcat (args, stuff->oper ? " + " : " - ");
 	strcat (args, stuff->away ? "+ " : "- ");
 	strcat (args, stuff->user ? stuff->user : empty_string);
-	strcat (args, space_string);
+	strcat (args, space);
 	strcat (args, stuff->host ? stuff->host : empty_string);
 	parse_line ("USERHOST", text, args, 0, 0);
 }

@@ -1,4 +1,4 @@
-#ident "@(#)ctcp.c 1.17"
+#ident "@(#)ctcp.c 1.8"
 /*
  * ctcp.c:handles the client-to-client protocol(ctcp). 
  *
@@ -42,12 +42,11 @@
 #include "window.h"
 #include "misc.h"
 #include "hash2.h"
+#include "fset.h"
 #include "tcommand.h"
-#include "util.h"
 
-#include "xformats.h"
-#include "xversion.h"
-#include "xmalloc.h"
+#include "xaric_version.h"
+
 
 void split_CTCP (char *, char *, char *);
 extern char *mircansi (char *);
@@ -223,14 +222,14 @@ CTCP_HANDLER (do_atmosphere)
 	{
 		message_from (to, LOG_ACTION);
 		if (is_current_channel (to, from_server, 0))
-			put_it ("%s", convert_output_format (get_format (FORMAT_ACTION_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr1));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_ACTION_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr1));
 		else
-			put_it ("%s", convert_output_format (get_format (FORMAT_ACTION_OTHER_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr1));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_ACTION_OTHER_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr1));
 	}
 	else
 	{
 		message_from (from, LOG_ACTION);
-		put_it ("%s", convert_output_format (get_format (FORMAT_ACTION_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr1));
+		put_it ("%s", convert_output_format (get_fset_var (FORMAT_ACTION_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr1));
 	}
 
 	message_from (NULL, LOG_CRAP);
@@ -336,9 +335,9 @@ CTCP_HANDLER (do_version)
 		the_unix = un.sysname;
 	}
 #endif
-	malloc_strcpy (&version_reply, stripansicodes (convert_output_format (get_format (FORMAT_VERSION_FSET), "%s %s %s", xversion.v_short, the_unix, the_version)));
+	malloc_strcpy (&version_reply, stripansicodes (convert_output_format (get_fset_var (FORMAT_VERSION_FSET), "%s %s %s %s", xversion.v_short, internal_version, the_unix, the_version)));
 	send_ctcp (CTCP_NOTICE, from, CTCP_VERSION, "%s (%s)", version_reply, get_string_var (CLIENTINFO_VAR));
-	xfree (&version_reply);
+	new_free (&version_reply);
 	return NULL;
 }
 
@@ -595,7 +594,7 @@ do_ctcp (char *from, char *to, char *str)
 			if (get_int_var (NO_CTCP_FLOOD_VAR) && (time (NULL) - server_list[from_server].ctcp_last_reply_time < get_int_var (CTCP_DELAY_VAR)) /* && ctcp_cmd[i].id !=CTCP_DCC */ )
 			{
 				if (get_int_var (FLOOD_WARNING_VAR))
-					put_it ("%s", convert_output_format (get_format (FORMAT_FLOOD_FSET), "%s %s %s %s %s", update_clock (GET_TIME), ctcp_command, from, FromUserHost, to));
+					put_it ("%s", convert_output_format (get_fset_var (FORMAT_FLOOD_FSET), "%s %s %s %s %s", update_clock (GET_TIME), ctcp_command, from, FromUserHost, to));
 				time (&server_list[from_server].ctcp_last_reply_time);
 				allow_ctcp_reply = 0;
 				continue;
@@ -612,7 +611,7 @@ do_ctcp (char *from, char *to, char *str)
 			if (do_hook (CTCP_LIST, "%s %s %s %s", from, to, ctcp_command, ctcp_argument))
 			{
 				if (allow_ctcp_reply && get_int_var (CTCP_VERBOSE_VAR))
-					put_it ("%s", convert_output_format (get_format (FORMAT_CTCP_UNKNOWN_FSET),
+					put_it ("%s", convert_output_format (get_fset_var (FORMAT_CTCP_UNKNOWN_FSET),
 									     "%s %s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ctcp_command, *ctcp_argument ? ctcp_argument : empty_string));
 			}
 			allow_ctcp_reply = 0;
@@ -644,7 +643,7 @@ do_ctcp (char *from, char *to, char *str)
 				message_from (from, LOG_CTCP);
 
 				if (get_int_var (CTCP_VERBOSE_VAR))
-					put_it ("%s", convert_output_format (get_format (FORMAT_CTCP_FSET),
+					put_it ("%s", convert_output_format (get_fset_var (FORMAT_CTCP_FSET),
 									     "%s %s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ctcp_command, *ctcp_argument ? ctcp_argument : empty_string));
 				/* Reset the window level/logging */
 				message_from (NULL, LOG_CRAP);
@@ -652,7 +651,7 @@ do_ctcp (char *from, char *to, char *str)
 			}
 		}
 
-		xfree (&ptr);
+		new_free (&ptr);
 	}
 
 	if (in_ctcp_flag == 1)
@@ -694,7 +693,7 @@ do_notice_ctcp (char *from, char *to, char *str)
 
 	tbuf = stripansi (str);
 	strmcpy (local_ctcp_buffer, tbuf, IRCD_BUFFER_SIZE - 2);
-	xfree (&tbuf);
+	new_free (&tbuf);
 
 	for (;; strmcat (local_ctcp_buffer, last, IRCD_BUFFER_SIZE - 2))
 	{
@@ -739,7 +738,7 @@ do_notice_ctcp (char *from, char *to, char *str)
 			if ((ptr = ctcp_cmd[i].repl (ctcp_cmd + i, from, to, ctcp_argument)))
 			{
 				strmcat (local_ctcp_buffer, ptr, BIG_BUFFER_SIZE);
-				xfree (&ptr);
+				new_free (&ptr);
 				continue;
 			}
 		}
@@ -750,7 +749,7 @@ do_notice_ctcp (char *from, char *to, char *str)
 			lastlog_level = set_lastlog_msg_level (LOG_CTCP);
 			message_from (from, LOG_CTCP);
 
-			put_it ("%s", convert_output_format (get_format (FORMAT_CTCP_REPLY_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, ctcp_command, ctcp_argument));
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_CTCP_REPLY_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, ctcp_command, ctcp_argument));
 			/* Reset the window level/logging */
 			message_from (NULL, LOG_CTCP);
 			set_lastlog_msg_level (lastlog_level);
@@ -872,7 +871,7 @@ ctcp_unquote_it (char *str, int *len)
 	char c;
 	int i, new_size = 0;
 
-	buffer = (char *) xmalloc ((sizeof (char) * *len) + 1);
+	buffer = (char *) new_malloc ((sizeof (char) * *len) + 1);
 	ptr = buffer;
 	i = 0;
 	while (i < *len)

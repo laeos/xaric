@@ -1,4 +1,4 @@
-#ident "@(#)output.c 1.10"
+#ident "@(#)output.c 1.6"
 /*
  * output.c: handles a variety of tasks dealing with the output from the irc
  * program 
@@ -14,29 +14,24 @@
 #include "config.h"
 #endif
 
-#include "irc.h"
-#include <sys/stat.h>
-
+#include <stdio.h>
 #include <stdarg.h>
 
-#include "output.h"
-#include "vars.h"
-#include "input.h"
 #include "ircaux.h"
 #include "ircterm.h"
-#include "lastlog.h"
-#include "window.h"
-#include "screen.h"
-#include "server.h"
-#include "hook.h"
-#include "ctcp.h"
-#include "log.h"
+#include "fset.h"
 #include "misc.h"
+#include "output.h"
+#include "hook.h"
+#include "log.h"
+#include "input.h"
+#include "screen.h"
+#include "window.h"
 
-int in_help = 0;
+/* need redraw? */
+extern int need_redraw;
 
 /* make this buffer *much* bigger than needed */
-
 #define LARGE_BIG_BUFFER_SIZE BIG_BUFFER_SIZE
 
 static char putbuf[LARGE_BIG_BUFFER_SIZE + 1];
@@ -59,16 +54,6 @@ charset_lat1 (void)
 {
 	fwrite ("\033(B", 3, 1, stdout);	/* switch to Latin-1 (ISO 8859-1) */
 }
-
-/* currently not used. */
-
-void 
-charset_graf (void)
-{
-	fwrite ("\033(0", 3, 1, stdout);	/* switch to DEC VT100 pseudographics */
-}
-
-
 
 /* Now that you can send ansi sequences, this is much less inportant.. */
 static void 
@@ -142,13 +127,15 @@ put_echo (char *str)
 void 
 put_it (const char *format,...)
 {
-	if (window_display && format)
-	{
+	if (window_display && format) {
 		va_list args;
-		memset (putbuf, 0, 200);
+
+		putbuf[0] = '\0';
+
 		va_start (args, format);
 		vsnprintf (putbuf, LARGE_BIG_BUFFER_SIZE, format, args);
 		va_end (args);
+
 		if (*putbuf)
 			put_echo (putbuf);
 	}
@@ -158,30 +145,19 @@ put_it (const char *format,...)
  * before actually putting things out.
  */
 void 
-say (const char *format,...)
+say (const char *format, ...)
 {
 	int len = 0;
 
-	if (window_display && format)
-	{
+	if (window_display && format) {
 		va_list args;
+
+		len = snprintf(putbuf, LARGE_BIG_BUFFER_SIZE, "%s ", line_thing);
+
 		va_start (args, format);
-
-		len = strlen (line_thing);
-
-		vsnprintf (&(putbuf[len + 1]), LARGE_BIG_BUFFER_SIZE, format, args);
+		vsnprintf (&(putbuf[len]), LARGE_BIG_BUFFER_SIZE-len, format, args);
 		va_end (args);
-		strcpy (putbuf, line_thing);
-		putbuf[len] = ' ';
 
-		if (strip_ansi_in_echo)
-		{
-			register char *ptr;
-			for (ptr = putbuf + 4; *ptr; ptr++)
-				if (*ptr < 31 && *ptr > 13)
-					if (*ptr != 15 && *ptr != 22)
-						*ptr = (*ptr & 127) | 64;
-		}
 		put_echo (putbuf);
 	}
 }
@@ -190,22 +166,16 @@ void
 bitchsay (const char *format,...)
 {
 	int len;
-	if (window_display && format)
-	{
+
+	if (window_display && format) {
 		va_list args;
+
+		len = snprintf (putbuf, LARGE_BIG_BUFFER_SIZE, "%s \002%s\002: ", line_thing, version);
+
 		va_start (args, format);
-		sprintf (putbuf, "%s \002%s\002: ", line_thing, version);
-		len = strlen (putbuf);
-		vsnprintf (&(putbuf[len]), LARGE_BIG_BUFFER_SIZE, format, args);
+		vsnprintf (&(putbuf[len]), LARGE_BIG_BUFFER_SIZE-len, format, args);
 		va_end (args);
-		if (strip_ansi_in_echo)
-		{
-			register char *ptr;
-			for (ptr = putbuf + len; *ptr; ptr++)
-				if (*ptr < 31 && *ptr > 13)
-					if (*ptr != 15 && *ptr != 22)
-						*ptr = (*ptr & 127) | 64;
-		}
+
 		put_echo (putbuf);
 	}
 }
@@ -213,13 +183,14 @@ bitchsay (const char *format,...)
 void 
 yell (const char *format,...)
 {
-	if (format)
-	{
+	if (format) {
 		va_list args;
-		va_start (args, format);
+
 		*putbuf = 0;
+		va_start (args, format);
 		vsnprintf (putbuf, LARGE_BIG_BUFFER_SIZE, format, args);
 		va_end (args);
+
 		if (*putbuf)
 			do_hook (YELL_LIST, "%s", putbuf);
 		put_echo (putbuf);
@@ -227,22 +198,50 @@ yell (const char *format,...)
 }
 
 void 
-log_put_it (const char *topic, const char *format,...)
+log_put_it (const char *topic, const char *format, ...)
 {
-	if (format)
-	{
+	if (format) {
 		va_list args;
 		va_start (args, format);
 		vsnprintf (putbuf, LARGE_BIG_BUFFER_SIZE, format, args);
 		va_end (args);
 
-		in_help = 1;
 		message_from (NULL, LOG_CURRENT);
 		if (window_display)
 			put_echo (putbuf);
 		message_from (NULL, LOG_CRAP);
-		in_help = 0;
 	}
 }
 
+/** 
+ * put_fmt - print a formatted string.
+ * @fmt: format identifier
+ * @arg: printf-like format for arguments
+ *
+ * Converts the format to a printable string, and then prints it!
+ **/
+void
+put_fmt(xformat fmt, const char *arg, ...)
+{
+	const char *fmts = get_format(fmt);
+
+	/*
+	 * XXX This is really horrable. Sometime, convert_output_format
+	 * needs to be replaced with a better interface. 
+	 */
+
+	if (fmts) {
+		char str[BIG_BUFFER_SIZE];
+		va_list ma;
+
+		str[0] = '\0';
+		if (arg) {
+			va_start(ma, arg);
+			vsnprintf(str, BIG_BUFFER_SIZE, arg, ma);
+			va_end(ma);
+			str[BIG_BUFFER_SIZE-1] = '\0';
+		}
+		put_it("%s", convert_output_format(fmts, "%s", str));
+	}
+}
 

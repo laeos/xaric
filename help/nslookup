@@ -1,2 +1,0 @@
-%gUsage%n: %W/%nnslookup %Y<%nhostname%Y>%n
-- Returns the IP adress and IP number for %Y<%nhostname%Y>%n

@@ -1,3 +1,0 @@
-%gUsage%n: %W/%nsquit %Y<%nserver1%Y>%n %R[%nserver2%R]%n
-%Y*%n Requires irc operator status
-- Disconnects %Y<%nserver1%Y>%n from current server or %R[%nserver2%R]%n

@@ -23,6 +23,8 @@
  *
  */
 
+#include "tst.h"
+#include "fset.h"
 
 /* Some random IRC limits */
 #define CHANNEL_MAX	200
@@ -74,6 +76,8 @@ char *upper (char *str);
 /* Convert string to all lowercase, in place. */
 char *lower (char *str);
 
+/* terminate string at first occurence of any of chars */
+char * terminate (char *string, char *chars);
 
 /* in bsearch.c: find elements in an array. will do partial matches 
  * cnt will be set to:
@@ -84,6 +88,15 @@ char *lower (char *str);
  */
 
 void *bsearch_array (void *list, size_t size, int howmany, const char *name, int *cnt, int *loc);
+
+/* in xscandir.c */
+int xscandir(char *dir, char *prefix, char **ret);
+
+/* in xdlist.c */
+int display_list(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt);
+int display_list_l(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt, int longest);
+int display_list_c(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt, int count);
+int display_list_cl(TST_ARRAY *list, const char * (*fcn)(void *), enum FSET_TYPES fmt, int count, int longest);
 
 
 

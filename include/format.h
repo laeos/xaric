@@ -107,6 +107,9 @@
 #define DEF_FORMAT_DCC_CHAT      "%Y=%B$1%Y= %n$3-"
 
 
+#define DEF_FORMAT_SCANDIR_LIST_HEADER	"%g***%n File matches:"
+#define DEF_FORMAT_SCANDIR_LIST_LINE	"%g>>>%n $0-"
+#define DEF_FORMAT_SCANDIR_LIST_FOOTER	NULL
 
 #define DEF_FORMAT_OPER "%C$1 %K[%c$2%K]%n is now %Wan%w %GIRC%n whore"
 

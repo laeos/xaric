@@ -1,0 +1,2 @@
+%gUsage%n: %W/%nmodelock %Y<%Bchannel%Y>%n +%G|%n-%Y<%ninstampkl #%Y>%n
+- Locks %Y<%Bchannel%Y>%n with +%G|%n-%Y<%nmodes%Y>%n

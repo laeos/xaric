@@ -18,14 +18,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)Makefile 1.17
+# @(#)Makefile 1.19
 #
 
 ifndef REALLY_INCLUDE
 all clean distclean:
 	@echo "Doh, wrong directory. Lets try again"
-	make -C .. $@
-endif
+	$(MAKE) -C .. $@
+else
 
 # source files
 source-src-lcl =	\
@@ -47,7 +47,6 @@ source-src-lcl =	\
 	functions.c	\
 	funny.c		\
 	hash.c		\
-	help.c		\
 	history.c	\
 	hook.c		\
 	ignore.c	\
@@ -87,10 +86,13 @@ source-src-lcl =	\
 	util.c		\
 	xversion.c	\
 	xdebug.c	\
+	xscandir.c	\
+	xdlist.c	\
 	xintro.c	\
 	xmalloc.c	
 
 include source/tst/Makefile
+include source/cmd/Makefile
 
 
 # prebuilt object files
@@ -100,3 +102,4 @@ source-obj-lcl =
 source-src =  $(addprefix source/, $(sort $(source-src-lcl)))
 source-obj =  $(addprefix source/, $(sort $(source-obj-lcl)))
 
+endif

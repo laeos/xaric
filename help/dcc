@@ -1,0 +1,30 @@
+%gUsage%n: %W/%ndcc %Y<<%Pcommand%Y>%n %R[%narguments%R]%Y>%n
+- Chat, Close, Get, Raw, ReGet, Rename, ReSend, Send
+%Y<%Pcommand%Y>%n switches:
+auto         %Y<%non%G|%noff%Y>%n     overwrite    %Y<%non%G|%noff%Y>%n
+paths        %Y<%non%G|%noff%Y>%n     quiet        %Y<%non%G|%noff%Y>%n
+DCC CHAT
+%gUsage%n: %W/%ndcc chat %Y<%Cnick%Y>%n
+- Starts a Direct-Client-to-Client chat to %Y<%Cnick%Y>%n
+DCC CLOSE
+%gUsage%n: %W/%ndcc close %Y<%ntype%Y>%n %Y<%Cnick%Y>%n %R[%narguments%R]%n
+- Close %Y<%ntype%Y>%n connection from %Y<%Cnick%Y>%n with %R[%narguments%R]%n
+DCC GET
+%gUsage%n: %W/%ndcc get %Y<%Cnick%Y>%n %R[%nfile%r(%ns%r)%R]%n
+- Starts to receive %R[%nfile%r(%ns%r)%R]%n from %Y<%Cnick%Y>%n
+DCC RAW
+%gUsage%n: %W/%ndcc raw %Y<%Cnick%Y>%n %Y<%nhost%Y>%n
+- This is used in conjunction with $connect() and $listen() for sending data
+over a raw irc connection
+DCC REGET
+%gUsage%n: %W/%ndcc reget %Y<%Cnick%Y>%n %R[%nfile%r(%ns%r)%R]%n
+- Will reget %R[%nfile%r(%ns%r)%R]%n and restore a broken connection from %Y<%Cnick%Y>%n
+DCC RENAME
+%gUsage%n: %W/%ndcc rename %Y<%Cnick%Y>%n %Y<%nnew filename%Y>%n
+- Rename a filename being sent from %Y<%Cnick%Y>%n to %Y<%nnew filename%Y>%n
+DCC RESEND
+%gUsage%n: %W/%ndcc resend %Y<%Cnick%Y>%n %Y<%nfile%Y>%n
+- Starts a DCC send and restore a broken connection of %Y<%nfile%Y>%n to %Y<%Cnick%Y>%n
+DCC SEND
+%gUsage%n: %W/%ndcc send %Y<%Cnick%Y>%n %Y<%nfile%Y>%n
+- DCC Sends %Y<%nfile%Y>%n to %Y<%Cnick%Y>%n

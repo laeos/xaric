@@ -1,0 +1,231 @@
+%gUsage%n: %W/%nset %Y<%Pcommand%Y>%n %R[%nvalue%R]%n
+- Set %Y<%Pcommand%Y>%p with the value of %R[%nvalue%R]%n
+%Y<%Pcommands%Y>%n:
+ANNOY_KICK		AOP		AUTO_CK		AUTOKICK_ON_VERSION
+AUTO_NSLOOKUP	AUTO_UMARK_AWAY AUTO_WHO_ON_JOIN
+AUTO_WHOWAS	BEEP_WHEN_AWAY	BITCHX_HELP	CDCC_FLOOD_AFTER
+CDCC_FLOOD_RATE	CDCC_SECURITY	CLOAK		CTCP_DELAY
+CTCP_FLOOD_PROTECTION		CTOOLZ_DIR	DCC_AUTOGET
+DCC_DLDIR		DCC_GET_LIMIT	DCC_SEND_LIMIT	DCC_QUEUE_LIMIT
+FLOOD_AFTER	FLOOD_KICK	FLOOD_PROTECTION
+FLOOD_RATE		FLOOD_USERS	FLOOD_WARNING	HACKPASS
+HARD_UH_NOTIFY	IDENT_HACK	IDLE_CHECK	KICK_OPS
+KILL_LOGFILE	LLOOK		LLOOK_DELAY	LONG_MSG
+MAX_AUTOGET_SIZE	MAX_DEOPS	MAX_IDLEKICKS	MIRCS
+MODE_STRIPPER	MSGCOUNT	MSGLOG		MSGLOGFILE
+NAMES_ON_JOIN	NEXT_SERVER_ON_LOCAL_KILL	NO_CTCP_FLOOD
+NUM_BANMODES	NUM_OPMODES	PING_TYPE	PROTECT_CHANNELS
+PUBLOGSTR		REASONFILE	REASON_TYPE	SAVEFILE
+SCRIPT_HELP	SEND_AWAY_MSG	SEND_IGNORE_MSG	SHITLIST_REASON
+SHOW_FAKES		SHOW_SERVER_CRAP		SHOW_SERVER_KILLS
+SHOW_TOOMANY	SHOW_UNAUTHS	SHOW_WHO_HOPCOUNT
+USE_FAKE_HOST	VERBOSE_CTCP	WARN_OF_IGNORES
+_CDCC_CLOSE_IDLE_SEND_TIME		_CDCC_MINSPEED_TIME
+%RIGNORE_TIME        CPU_SAVER_AFTER CPU_SAVER_EVERY AUTO_COMP_CHAR
+AUTO_UNBAN         APPEND_LOG      DCC_FAST
+See CSET for commands which can be set through SET and have a 
+global channel effect instead of one channel effect via CSET
+SET ANNOY_KICK
+%gUsage%n: %W/%nset annoy_kick
+- Sorry, no help is available for this command yet
+SET APPEND_LOG
+%gUsage%n: %W/%nset append_log
+- Should we append to the away log or overwrite when we open it.
+SET AOP
+%gUsage%n: %W/%nset aop
+- Sorry, no help is available for this command yet
+SET AUTO_CK
+%gUsage%n: %W/%nset auto_ck
+- Sorry, no help is available for this command yet
+SET AUTOKICK_ON_VERSION
+%gUsage%n: %W/%nset autokick_on_version %Y<%non%G|%noff%Y>%n
+- Set this to %Y<%non%G|%noff%Y>%n whether to kick the nick who CTCP VERSION you
+SET AUTO_NSLOOKUP
+%gUsage%n: %W/%nset auto_nslookup
+- Sorry, no help is available for this command yet
+SET AUTO_UMARK_AWAY
+%gUsage%n: %W/%nset auto_umark_away
+- Sorry, no help is available for this command yet
+SET AUTO_WHO_ON_JOIN
+%gUsage%n: %W/%nset auto_who_on_join
+- Sorry, no help is available for this command yet
+SET AUTO_WHOWAS
+%gUsage%n: %W/%nset auto_whowas
+- Sorry, no help is available for this command yet
+SET BEEP_WHEN_AWAY
+%gUsage%n: %W/%nset beep_when_away
+- Sorry, no help is available for this command yet
+SET BITCHX_HELP
+%gUsage%n: %W/%nset bitchx_help %Y<%nlocation%Y>%n
+- Sets the %Y<%nlocation%Y>%n of BitchX.help file
+SET CTCP_DELAY
+%gUsage%n: %W/%nset ctcp_delay
+- Sorry, no help is available for this command yet
+SET CTCP_FLOOD_PROTECTION
+%gUsage%n: %W/%nset ctcp_flood_protection
+- Sorry, no help is available for this command yet
+SET CTOOLZ_DIR
+%gUsage%n: %W/%nset ctoolz_dir
+- Sorry, no help is available for this command yet
+SET DCC_AUTOGET
+%gUsage%n: %W/%nset dcc_autoget
+- Sorry, no help is available for this command yet
+SET DCC_DLDIR
+%gUsage%n: %W/%nset dcc_dldir
+- Sorry, no help is available for this command yet
+SET DCC_GET_LIMIT
+%gUsage%n: %W/%nset dcc_get_limit
+- Sorry, no help is available for this command yet
+SET DCC_SEND_LIMIT
+%gUsage%n: %W/%nset dcc_send_limit
+- Sorry, no help is available for this command yet
+SET DCC_QUEUE_LIMIT
+%gUsage%n: %W/%nset dcc_queue_limit
+- Sorry, no help is available for this command yet
+SET FLOOD_AFTER
+%gUsage%n: %W/%nset flood_after
+- Sorry, no help is available for this command yet
+SET FLOOD_KICK
+%gUsage%n: %W/%nset flood_kick
+- Sorry, no help is available for this command yet
+SET FLOOD_PROTECTION
+%gUsage%n: %W/%nset flood_protection
+- Sorry, no help is available for this command yet
+SET FLOOD_RATE
+%gUsage%n: %W/%nset flood_rate
+- Sorry, no help is available for this command yet
+SET FLOOD_USERS
+%gUsage%n: %W/%nset flood_users
+- Sorry, no help is available for this command yet
+SET FLOOD_WARNING
+%gUsage%n: %W/%nset flood_warning
+- Sorry, no help is available for this command yet
+SET HACKPASS
+%gUsage%n: %W/%nset hackpass
+- Sorry, no help is available for this command yet
+SET HARD_UH_NOTIFY
+%gUsage%n: %W/%nset hard_uh_notify %Y<%non%G|%noff%Y>%n
+- Sorry, no help is available for this command yet
+SET IDENT_HACK
+%gUsage%n: %W/%nset ident_hack
+- Sorry, no help is available for this command yet
+SET IDLE_CHECK
+%gUsage%n: %W/%nset idle_check
+- Sorry, no help is available for this command yet
+SET KICK_OPS
+%gUsage%n: %W/%nset kick_ops
+- Sorry, no help is available for this command yet
+SET KILL_LOGFILE
+%gUsage%n: %W/%nset kill_logfile
+- Sorry, no help is available for this command yet
+SET LLOOK
+%gUsage%n: %W/%nset llook
+- Sorry, no help is available for this command yet
+SET LLOOK_DELAY
+%gUsage%n: %W/%nset llook_delay
+- Sorry, no help is available for this command yet
+SET LONG_MSG
+%gUsage%n: %W/%nset long_msg
+- Sorry, no help is available for this command yet
+SET MAX_AUTOGET_SIZE
+%gUsage%n: %W/%nset max_autoget_size
+- Sorry, no help is available for this command yet
+SET MAX_DEOPS
+%gUsage%n: %W/%nset max_deops
+- Sorry, no help is available for this command yet
+SET MAX_IDLEKICKS
+%gUsage%n: %W/%nset max_idlekicks
+- Sorry, no help is available for this command yet
+SET MIRCS
+%gUsage%n: %W/%nset mircs
+- Sorry, no help is available for this command yet
+SET MODE_STRIPPER
+%gUsage%n: %W/%nset mode_stripper
+- Sorry, no help is available for this command yet
+SET MSGCOUNT
+%gUsage%n: %W/%nset msgcount
+- Sorry, no help is available for this command yet
+SET MSGLOG
+%gUsage%n: %W/%nset msglog
+- Sorry, no help is available for this command yet
+SET MSGLOGFILE
+%gUsage%n: %W/%nset msglogfile
+- Sorry, no help is available for this command yet
+SET NAMES_ON_JOIN
+%gUsage%n: %W/%nset names_on_join
+- Sorry, no help is available for this command yet
+SET NEXT_SERVER_ON_LOCAL_KILL
+%gUsage%n: %W/%nset next_server_on_local_kill
+- Sorry, no help is available for this command yet
+SET NO_CTCP_FLOOD
+%gUsage%n: %W/%nset no_ctcp_flood
+- Sorry, no help is available for this command yet
+SET NUM_BANMODES
+%gUsage%n: %W/%nset num_banmodes
+- Sorry, no help is available for this command yet
+SET NUM_OPMODES
+%gUsage%n: %W/%nset num_opmodes
+- Sorry, no help is available for this command yet
+SET PING_TYPE
+%gUsage%n: %W/%nset ping_type
+- Sorry, no help is available for this command yet
+SET PROTECT_CHANNELS
+%gUsage%n: %W/%nset protect_channels
+- Sorry, no help is available for this command yet
+SET PUBLOGSTR
+%gUsage%n: %W/%nset publogstr
+- Sorry, no help is available for this command yet
+SET REASONFILE
+%gUsage%n: %W/%nset reason_file
+- Sorry, no help is available for this command yet
+SET REASON_TYPE
+%gUsage%n: %W/%nset reason_type
+- Sorry, no help is available for this command yet
+SET SAVEFILE
+%gUsage%n: %W/%nset savefile
+- Sorry, no help is available for this command yet
+SET SCRIPT_HELP
+%gUsage%n: %W/%nset script_help
+- Sorry, no help is available for this command yet
+SET SEND_AWAY_MSG
+%gUsage%n: %W/%nset send_away_msg
+- Sorry, no help is available for this command yet
+SET SEND_IGNORE_MSG
+%gUsage%n: %W/%nset send_ignore_msg
+- Sorry, no help is available for this command yet
+SET SHITLIST_REASON
+%gUsage%n: %W/%nset shitlist_reason
+- Sorry, no help is available for this command yet
+SET SHOW_FAKES
+%gUsage%n: %W/%nset show_fakes
+- Sorry, no help is available for this command yet
+SET SHOW_SERVER_CRAP
+%gUsage%n: %W/%nset show_server_crap
+- Sorry, no help is available for this command yet
+SET SHOW_SERVER_KILLS
+%gUsage%n: %W/%nset show_server_kills
+- Sorry, no help is available for this command yet
+SET SHOW_TOOMANY
+%gUsage%n: %W/%nset show_toomany
+- Sorry, no help is available for this command yet
+SET SHOW_UNAUTHS
+%gUsage%n: %W/%nset show_unauths
+- Sorry, no help is available for this command yet
+SET SHOW_WHO_HOPCOUNT
+%gUsage%n: %W/%nset show_who_hopcount
+- Sorry, no help is available for this command yet
+SET USE_FAKE_HOST
+%gUsage%n: %W/%nset use_fake_host
+- Sorry, no help is available for this command yet
+SET VERBOSE_CTCP
+%gUsage%n: %W/%nset verbose_ctcp
+- Sorry, no help is available for this command yet
+SET WARN_OF_IGNORES
+%gUsage%n: %W/%nset warn_of_ignores
+- Sorry, no help is available for this command yet
+SET _CDCC_CLOSE_IDLE_SEND_TIME
+%gUsage%n: %W/%nset _cdcc_close_idle_send_time
+- Sorry, no help is available for this command yet
+SET _CDCC_MINSPEED_TIME
+%gUsage%n: %W/%nset _cdcc_minspeed_time
+- Sorry, no help is available for this command yet

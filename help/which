@@ -1,0 +1,2 @@
+%gUsage%n: %W/%nwhich %Y<%nfile%Y>%n
+- Determines which %Y<%nfile%Y>%n was loaded with the /load command

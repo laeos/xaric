@@ -1,0 +1,3 @@
+%gUsage%n: %W/%nflush
+- Flushes all iRC server output
+- Attempts to find ports on %Y<%nhostname%Y>%n on %R[%Y<%nlowport%Y>%n %Y<%nhighport%Y>%R]%n

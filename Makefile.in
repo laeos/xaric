@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)Makefile.in 1.16
+# @(#)Makefile.in 1.19
 #
 
 
@@ -43,8 +43,6 @@ infodir = @infodir@
 mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
-
-DESTDIR =
 
 pkgdatadir = $(datadir)/xaric
 pkglibdir = $(libdir)/xaric
@@ -91,7 +89,7 @@ REALLY_INCLUDE := 1
 TARIGNORE=config.log,config.cache,config.status,SCCS,.depend,BitKeeper,CVS,ChangeSet,\\.cvsignore,\\.[oa]\\$ 
 
 # Header files that get generated automagicly
-AUTOHDR= include/xformats_gen.h
+AUTOHDR= include/xbuild.h include/xformats_gen.h
 
 # Sections
 SECTIONS = source extra
@@ -106,8 +104,8 @@ all:  xaric
 #      section-obj = obj1.o obj2.o obj3.o # extra objects, not compiled from .c source
 #      section-src = srcfile.c srcfile3.c 
 #
-include source/Makefile
-include extra/Makefile
+include ${srcdir}/source/Makefile
+include ${srcdir}/extra/Makefile
 
 # and our dependancy info
 -include .depend
@@ -135,18 +133,19 @@ install: installxaric installhelp installman
 	@echo "run 'make installdata' if you want the default datafiles installed"
 
 installxaric:
-	$(SHTOOL) mkdir -p $(bindir)
+	$(SHTOOL) mkdir -f -p -m 755  $(bindir)
 	$(SHTOOL) install -c xaric $(bindir)
 
 installhelp:
-	$(SHTOOL) mkdir -p $(INSTALL_HELP)
+	$(SHTOOL) mkdir -f -p -m 755 $(INSTALL_HELP)
 	cd help; tar -cf - . | ( cd $(INSTALL_HELP); tar -xf - )
 
 installman:
-	cd doc; for i in xaric.1; do $(SHTOOL) install -c $i $(mandir); done
+	
+	for i in xaric.1; do $(SHTOOL) install -c doc/$$i $(mandir); done
 
 installdata:
-	cd doc; for i in servers; do $(SHTOOL) install -c $i $(pkgdatadir); done
+	for i in servers; do $(SHTOOL) install -c doc/$$i $(pkgdatadir); done
  
 # rebuild makefile and configure
 ${srcdir}/configure: configure.in aclocal.m4 acinclude.m4
@@ -170,12 +169,13 @@ config.status: configure
 
 
 # generate array indexes automagicly
-
-
-
-
 include/xformats_gen.h: source/fset.c
-	cat source/fset.c | $(SED) -n -e "/\*--start--\*/,/\*--end--\*/ { s/.*\"\([^\"]\+\)\".*/\1_FSET,/; s/\/\*[^*]*\*\///; p; }" > include/xformats_gen.h
+	cat $< | $(SED) -n -e "/\*--start--\*/,/\*--end--\*/ { s/.*\"\([^\"]\+\)\".*/\1_FSET,/; s/\/\*[^*]*\*\///; p; }" > $@
+
+# Supply some more information to the build
+include/xbuild.h: Makefile
+	@echo \#define XARIC_DATA_PATH \"$(pkgdatadir)\" >> .ver
+	@mv .ver $@
 
 # include/variables_gen.h: engine/variables.c
 #      cat engine/variables.c | $(SED) -n -e "/\*--start--\*/,/\*--end--\*/ { s/.*\"\([^\"]\+\)\".*/\1_VAR,/; s/\/\*[^*]*\*\///; p; }" > include/variables_gen.h
@@ -220,11 +220,4 @@ release:
 revision:
 	@$(SHTOOL) version -lc -n xaric -p XARIC  -ir $(XARIC_VERS)
 patch:
-	@$(SHTOOL) version -lc -n xaric -p XARIC  -iP $(XARIC_VERS)
-alpha:
-	@$(SHTOOL) version -lc -n xaric -p XARIC  -ia $(XARIC_VERS)
-beta:
-	@$(SHTOOL) version -lc -n xaric -p XARIC  -ib $(XARIC_VERS)
-snap:
-	@$(SHTOOL) version -lc -n xaric -p XARIC  -is $(XARIC_VERS)
-
+	@$(SHTOOL) version -lc -n xaric -p XARIC  -il $(XARIC_VERS)

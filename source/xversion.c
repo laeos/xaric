@@ -1,32 +1,46 @@
 /*
-**  source/xversion.c -- Version Information
-**  [automatically generated and maintained by shtool]
+**  ./xversion.c -- Version Information for xaric (syntax: C/C++)
+**  [automatically generated and maintained by GNU shtool]
 */
 
-#ifdef _AS_HEADER
+#ifdef ___XVERSION_C_AS_HEADER_
 
-#ifndef _SOURCE_XVERSION_C
-#define _SOURCE_XVERSION_C
-#define XARIC_VERSION 0x010202
-extern const int  XARIC_Version;
-extern const char XARIC_VersionStr[];
-extern const char XARIC_Hello[];
-extern const char XARIC_GNUVersion[];
-extern const char XARIC_WhatID[];
-extern const char XARIC_RCSIdentID[];
-extern const char XARIC_WebID[];
-extern const char XARIC_PlainID[];
-#endif /* _SOURCE_XVERSION_C */
+#ifndef ___XVERSION_C_
+#define ___XVERSION_C_
 
-#else
+#define XARICVERSION 0x00A203
 
-const int  XARIC_Version      = 0x010202;
-const char XARIC_VersionStr[] = "0.10.2 (08-Aug-2000)";
-const char XARIC_Hello[]      = "This is xaric, Version 0.10.2 (08-Aug-2000)";
-const char XARIC_GNUVersion[] = "xaric Version 0.10.2";
-const char XARIC_WhatID[]     = "@(#)xaric Version 0.10.2 (08-Aug-2000)";
-const char XARIC_RCSIdentID[] = "$Id$";
-const char XARIC_WebID[]      = "xaric/0.10.2";
-const char XARIC_PlainID[]    = "0.10.2";
+typedef struct {
+    const int   v_hex;
+    const char *v_short;
+    const char *v_long;
+    const char *v_tex;
+    const char *v_gnu;
+    const char *v_web;
+    const char *v_sccs;
+    const char *v_rcs;
+} XARICversion_t;
 
-#endif
+extern XARICversion_t XARICversion;
+
+#endif /* ___XVERSION_C_ */
+
+#else /* ___XVERSION_C_AS_HEADER_ */
+
+#define ___XVERSION_C_AS_HEADER_
+#include "./xversion.c"
+#undef  ___XVERSION_C_AS_HEADER_
+
+XARICversion_t XARICversion = {
+    0x00A203,
+    "0.10.3",
+    "0.10.3 (27-Aug-2000)",
+    "This is xaric, Version 0.10.3 (27-Aug-2000)",
+    "xaric 0.10.3 (27-Aug-2000)",
+    "xaric/0.10.3",
+    "@(#)xaric 0.10.3 (27-Aug-2000)",
+    "$Id$"
+};
+
+#endif /* ___XVERSION_C_AS_HEADER_ */
+

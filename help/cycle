@@ -1,0 +1,2 @@
+%gUsage%n: %W/%ncycle %R[%Bchannel%R]%n
+- Leaves current channel or %R[%Bchannel%R]%n and immediately rejoins

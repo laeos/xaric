@@ -6,8 +6,6 @@
 
 Module		Switches	Description
 --------------------------------------------
-
-
 EXPR				Expression handling
 			1	Print expanded result
 

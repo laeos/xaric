@@ -1,0 +1,5 @@
+%gUsage%n: %W/%ntrace <argument> <server>
+- Without a specified server it shows the current connections on
+- local server
+- Arguments: -s -u -o   trace for servers, users, ircops
+See %W/%nhelp trace for furthur details

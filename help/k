@@ -1,0 +1,2 @@
+%gUsage%n: %W/%nk %Y<%Cnick%Y>%n %R[%nreason%R]%n
+- Kicks %Y<%Cnick%Y>%n for %R[%nreason%R]%n on current channel

@@ -1,0 +1,2 @@
+%gUsage%n: %W/%nmotd %R[%nserver%R]%n
+- Shows MOTD on current server %R[%nserver%R]%n

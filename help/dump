@@ -1,0 +1,5 @@
+%gUsage%n: %W/%ndump %Y<%ntype%Y>%n
+- Dumps %Y<%ntype%Y>%n to screen
+%Y<%ntype%Y>%n:
+%YAlias%n          %YAll  %n          %YBind %n
+%YFile %n          %YOn   %n          %YVar  %n

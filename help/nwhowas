@@ -1,0 +1,3 @@
+%gUsage%n: %W/%nnwhowas
+- Displays internal whowas info for all channels. This information expires
+after 20 minutes for users on internal list, 10 minutes for others

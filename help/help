@@ -1,0 +1,3 @@
+%WUsage%n: %W/%nBHelp %Y<%nTopic%G|%nIndex%Y>%n
+%YTopic%n - This gives help on %Y<%nTopic%Y>%n
+%YIndex%n - This shows the list of commands supplied in xaric 

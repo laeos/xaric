@@ -1,0 +1,2 @@
+%gUsage%n: %W/%nvoice %R[%Bchannel%R]%n %Y<%Cnick%Y>%n
+- Gives voice status to %Y<%Cnick%Y>%n on %R[%Bchannel%R]%n or current channel

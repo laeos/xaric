@@ -1,0 +1,2 @@
+%gUsage%n: %W/%nunvoice %R[%Bchannel%R]%n %Y<%Cnick%Y>%n
+- Removes voice status from %Y<%Cnick%Y>%n on %R[%Bchannel%R]%n or current channel

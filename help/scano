@@ -1,0 +1,2 @@
+%gUsage%n: %W/%nscano %R[%Bchannel%R]%n
+- Scans %R[%Bchannel%R]%n or current channel for nicks with ops

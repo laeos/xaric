@@ -1,4 +1,4 @@
-#ident "@(#)util.c 1.2"
+#ident "@(#)util.c 1.3"
 /*
  * util.c - various utility functions
  * Copyright (c) 2000 Rex Feany (laeos@xaric.org)
@@ -229,4 +229,22 @@ lower (char *str)
 		}
 	}
 	return (ptr);
+}
+
+
+/* Given a string, remove stuff at the end */
+char *
+terminate (char *string, char *chars) 
+{
+	char *ptr;
+
+	if (!string || !chars)
+		return "";
+	while (*chars)
+	{
+		if ((ptr = strrchr(string, *chars)) != NULL)
+			*ptr = '\0';
+		chars++;
+	}
+	return string;
 }

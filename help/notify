@@ -1,0 +1,4 @@
+%gUsage%n: %W/%nnotify %Y<%Cnick%Y>%n
+- Adds %Y<%Cnick%Y>%n to notify list
+%gUsage%n: %W/%nnotify -%Y<%Cnick%Y>%n
+- Removes %Y<%Cnick%Y>%n from notify list

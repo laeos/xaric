@@ -1,0 +1,2 @@
+%gUsage%n: %W/%ntlock %Y<%Bchannel%Y>%n %R[%non%G|%noff%R]%n
+- [Un]Locks %Y<%Bchannel%Y>%n with the current topic

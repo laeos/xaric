@@ -1,4 +1,4 @@
-#ident "@(#)vars.c 1.15"
+#ident "@(#)vars.c 1.16"
 /*
  * vars.c: All the dealing of the irc variables are handled here. 
  *
@@ -125,6 +125,9 @@ static IrcVariable irc_variable[] =
 	{"FLOOD_WARNING", BOOL_TYPE_VAR, DEFAULT_FLOOD_WARNING, NULL, NULL, 0, 0},
 
 	{"HELP", STR_TYPE_VAR, 0, NULL, NULL, 0, 0},
+	{"HELP_PAGER", BOOL_TYPE_VAR, DEFAULT_HELP_PAGER, NULL, NULL, 0, 0},
+	{"HELP_WINDOW", BOOL_TYPE_VAR, DEFAULT_HELP_WINDOW, NULL, NULL, 0, 0},
+
 	{"HIDE_PRIVATE_CHANNELS", BOOL_TYPE_VAR, DEFAULT_HIDE_PRIVATE_CHANNELS, NULL, update_all_status, 0, 0},
 	{"HIGHLIGHT_CHAR", STR_TYPE_VAR, 0, NULL, set_highlight_char, 0, 0},
 	{"HISTORY", INT_TYPE_VAR, DEFAULT_HISTORY, NULL, set_history_size, 0, VF_NODAEMON},
@@ -298,7 +301,7 @@ init_variables ()
 	window_display = 0;
 	line_thing = m_strdup(three_stars);
 
-	set_string_var (HELP_VAR, DEFAULT_HELP_FILE);
+	set_string_var (HELP_VAR, DEFAULT_HELP);
 
 	set_string_var (MSGLOGFILE_VAR, DEFAULT_MSGLOGFILE);
 	set_string_var (MSGLOG_LEVEL_VAR, DEFAULT_MSGLOG_LEVEL);

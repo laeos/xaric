@@ -1,0 +1,3 @@
+%gUsage%n: %W/%nlastlog -file filename%G|%n-clear%G|%n-max #%G|%n
+-liternal pat%G|%n-beep%G|%nlevel
+- Shows more than a few pages back

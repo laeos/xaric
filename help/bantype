@@ -1,0 +1,2 @@
+%gUsage%n: %W/%nbantype %Y<%nNormal%G|%nBetter%G|%nHost%G|%nDomain%G|%nScrew%Y>%n
+- When a ban is done on a nick, it uses %Y<%nbantype%Y>%n 

@@ -1,0 +1,3 @@
+%gUsage%n: %W/%nban %Y<%Cnick%G|%Cnick%G!%nuser%y@%nhostname%Y>%n
+- Ban %Y<%Cnick%G|%Cnick%G!%nuser%y@%nhostname%Y>%n from current channel
+%GHint%n: Even works if %Y<%Cnick%Y>%n has left current channel

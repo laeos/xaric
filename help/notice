@@ -1,0 +1,2 @@
+%gUsage%n: %W/%nnotice %Y<%Cnick%G|%Bchannel%Y> %Y<%ntext%Y>%n
+- Sends a notice to %Y<%Cnick%G|%Bchannel%Y> with %Y<%ntext%Y>%n

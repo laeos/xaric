@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)cmd_hostname.c 1.8"
 /*
  * cmd_hostname.c : virtual host support 
  *

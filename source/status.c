@@ -1,3 +1,4 @@
+#ident "@(#)status.c 1.11"
 /*
  * status.c: handles the status line updating, etc for IRCII 
  *
@@ -25,15 +26,16 @@
 #include "screen.h"
 #include "output.h"
 #include "names.h"
+#include "dcc.h"
 #include "ircaux.h"
 #include "misc.h"
 #include "hash2.h"
 #include "fset.h"
+#include "util.h"
+#include "xaric_version.h"
 
 #define MY_BUFFER 150
 
-extern char *DCC_get_current_transfer (void);
-extern char *ltoa (long);
 
 static char *convert_format (char *, int);
 static char *status_nickname (Window *);
@@ -105,7 +107,6 @@ static char *status_format[2];
 char *
 update_clock (int flag)
 {
-	extern time_t start_time;
 	static char time_str[61];
 	static int min = -1, hour = -1;
 	time_t t;
@@ -962,13 +963,12 @@ status_version (Window * window)
 	if ((connected_to_server) && !get_int_var (SHOW_STATUS_ALL_VAR)
 	    && (window->screen->current_window != window))
 		return (empty_string);
-	return ((char *) irc_version);
+	return ((char *) XARIC_PlainID);
 }
 
 static char *
 status_dcccount (Window * window)
 {
-	extern int get_count_stat, send_count_stat;
 	static char my_buffer[MY_BUFFER + 1];
 
 	if (dcccount_format)

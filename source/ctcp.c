@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)ctcp.c 1.13"
 /*
  * ctcp.c:handles the client-to-client protocol(ctcp). 
  *
@@ -44,6 +44,8 @@
 #include "hash2.h"
 #include "fset.h"
 #include "tcommand.h"
+#include "util.h"
+#include "xaric_version.h"
 
 void split_CTCP (char *, char *, char *);
 extern char *mircansi (char *);
@@ -332,7 +334,7 @@ CTCP_HANDLER (do_version)
 		the_unix = un.sysname;
 	}
 #endif
-	malloc_strcpy (&version_reply, stripansicodes (convert_output_format (get_fset_var (FORMAT_VERSION_FSET), "%s %s %s %s", irc_version, internal_version, the_unix, the_version)));
+	malloc_strcpy (&version_reply, stripansicodes (convert_output_format (get_fset_var (FORMAT_VERSION_FSET), "%s %s %s", XARIC_PlainID, the_unix, the_version)));
 	send_ctcp (CTCP_NOTICE, from, CTCP_VERSION, "%s (%s)", version_reply, get_string_var (CLIENTINFO_VAR));
 	new_free (&version_reply);
 	return NULL;

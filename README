@@ -1,0 +1,38 @@
+__   __          _      
+\ \ / /         (_)     
+ \ V / __ _ _ __ _  ___ 
+  > < / _` | '__| |/ __|
+ / . \ (_| | |  | | (__ 
+/_/ \_\__,_|_|  |_|\___|	version 0.10.0
+                        
+
+Introduction
+------------
+
+	Xaric is an irc client very similar to ircII, BotchX, or ircII EPIC.
+	There are some pretty major differences though, such as the lack of 
+	scripting, and color support.
+
+Supported Architectures
+-----------------------
+
+	I have successfully compiled xaric 0.10.0 on the following:
+
+		Linux/glibc2
+		OpenBSD 2.5
+		OpenBSD 2.6 
+		BSDI 3.1
+
+New Versions
+------------
+
+	New versions can always be found at <ftp://ftp.xaric.org/pub/xaric> 
+	or <http://www.laeos.net/projects/xaric/>.
+
+Bug Reports
+-----------
+
+	Like any other piece of software, xaric is not perfect. If you 
+	encounter a bug, I am very interested in squashing it. Please
+	send me the details via email to <laeos@laeos.net>.
+

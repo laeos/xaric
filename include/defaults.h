@@ -257,10 +257,6 @@
 /* File in home directory to contain specific stuff */
 #define IRCRC_NAME ".ircrc"
 
-/* Define this to include code that should help
-   in debugging Xaric problems */
-#define K_DEBUG 1
- 
 
 #define EXEC_COMMAND
 

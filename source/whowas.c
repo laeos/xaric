@@ -1,3 +1,4 @@
+#ident "@(#)whowas.c 1.9"
 /*
  * whowas.c   a linked list buffer of people who have left your channel 
  * mainly used for ban prot and stats stuff.
@@ -25,7 +26,6 @@
 #include "hook.h"
 #include "input.h"
 #include "names.h"
-#include "alias.h"
 #include "output.h"
 #include "numbers.h"
 #include "status.h"
@@ -53,24 +53,24 @@ static int whowas_reg_count = 0;
 static int whowas_chan_count = 0;
 
 extern WhowasList *
-check_whowas_buffer (char *nick, char *userhost, char *channel, int unlink)
+check_whowas_buffer (char *nick, char *userhost, char *channel, int unlnk)
 {
 	WhowasList *tmp = NULL;
-	if (!(tmp = find_userhost_channel (userhost, channel, unlink, &whowas_userlist_list)))
-		tmp = find_userhost_channel (userhost, channel, unlink, &whowas_reg_list);
+	if (!(tmp = find_userhost_channel (userhost, channel, unlnk, &whowas_userlist_list)))
+		tmp = find_userhost_channel (userhost, channel, unlnk, &whowas_reg_list);
 	return tmp;
 }
 
 
 extern WhowasList *
-check_whowas_nick_buffer (char *nick, char *channel, int unlink)
+check_whowas_nick_buffer (char *nick, char *channel, int unlnk)
 {
 	WhowasList *tmp = NULL, *last = NULL;
 	for (tmp = next_userhost (&whowas_userlist_list, NULL); tmp; tmp = next_userhost (&whowas_userlist_list, tmp))
 	{
 		if (!my_stricmp (tmp->nicklist->nick, nick) && !my_stricmp (tmp->channel, channel))
 		{
-			if (unlink)
+			if (unlnk)
 			{
 				last = find_userhost_channel (tmp->nicklist->host, tmp->channel, 1, &whowas_userlist_list);
 				tmp = NULL;
@@ -82,7 +82,7 @@ check_whowas_nick_buffer (char *nick, char *channel, int unlink)
 	{
 		if (!my_stricmp (tmp->nicklist->nick, nick) && !my_stricmp (tmp->channel, channel))
 		{
-			if (unlink)
+			if (unlnk)
 			{
 				last = find_userhost_channel (tmp->nicklist->host, tmp->channel, 1, &whowas_reg_list);
 				tmp = NULL;
@@ -94,10 +94,10 @@ check_whowas_nick_buffer (char *nick, char *channel, int unlink)
 }
 
 extern WhowasList *
-check_whosplitin_buffer (char *nick, char *userhost, char *channel, int unlink)
+check_whosplitin_buffer (char *nick, char *userhost, char *channel, int unlnk)
 {
 	WhowasList *tmp = NULL;
-	tmp = find_userhost_channel (userhost, channel, unlink, &whowas_splitin_list);
+	tmp = find_userhost_channel (userhost, channel, unlnk, &whowas_splitin_list);
 	return tmp;
 }
 
@@ -169,7 +169,7 @@ clean_whowas_list (void)
 /* BELOW THIS MARK IS THE CHANNEL WHOWAS STUFF */
 
 extern WhowasChanList *
-check_whowas_chan_buffer (char *channel, int unlink)
+check_whowas_chan_buffer (char *channel, int unlnk)
 {
 	WhowasChanList *tmp, *last = NULL;
 
@@ -177,7 +177,7 @@ check_whowas_chan_buffer (char *channel, int unlink)
 	{
 		if (!my_stricmp (tmp->channellist->channel, channel))
 		{
-			if (unlink)
+			if (unlnk)
 			{
 				if (last)
 					last->next = tmp->next;

@@ -59,6 +59,17 @@ extern LastMsg last_sent_ctcp[1];
 
 
 
+	irc_server *add_server(irc_server **serv1, char *channel, char *arg, int hops, char *thetime);
+	int find_server(irc_server *serv1, char *channel);
+	void parse_364 (char *, char *, char *);
+	void parse_365(char *channel, char *args, char *subargs);
+	char * rights (char *string, int num);
+	int numchar (char *string, char c);
+	void add_to_irc_map(char *server1, char *distance);
+	void show_server_map(void);
+	void *do_nslookup_blah(void *arg);
+	void do_nslookup_thread(void *arg);
+
 	void	update_stats(int, char *, NickList *, ChannelList *, int);
 	int	check_split(char *, char *, char *);
 	void	userage	(char *, char *);

@@ -1,3 +1,4 @@
+#ident "@(#)hash.c 1.8"
 /************
  *  hash.c  *
  ************
@@ -38,6 +39,7 @@
 #include "hash.h"
 #include "hash2.h"
 #include "tcommand.h"
+
 
 /*
  * hash_nickname: for now, does a simple hash of the 
@@ -155,7 +157,7 @@ remove_gen_link_from_list (List * tmp, List * prev, HashEntry * location)
 }
 
 List *
-find_name_in_genericlist (char *name, HashEntry * list, unsigned int size, int remove)
+find_name_in_genericlist (char *name, HashEntry * list, unsigned int size, int rem)
 {
 	HashEntry *location;
 	register List *tmp, *prev = NULL;
@@ -171,7 +173,7 @@ find_name_in_genericlist (char *name, HashEntry * list, unsigned int size, int r
 	{
 		if (!my_stricmp (name, tmp->name))
 		{
-			if (remove != REMOVE_FROM_LIST)
+			if (rem != REMOVE_FROM_LIST)
 				move_gen_link_to_top (tmp, prev, location);
 			else
 			{
@@ -213,7 +215,7 @@ add_nicklist_to_channellist (NickList * nptr, ChannelList * cptr)
 }
 
 NickList *
-find_nicklist_in_channellist (char *nick, ChannelList * cptr, int remove)
+find_nicklist_in_channellist (char *nick, ChannelList * cptr, int rem)
 {
 	HashEntry *location;
 	register NickList *tmp, *prev = NULL;
@@ -229,7 +231,7 @@ find_nicklist_in_channellist (char *nick, ChannelList * cptr, int remove)
 	{
 		if (!my_stricmp (nick, tmp->nick))
 		{
-			if (remove != REMOVE_FROM_LIST)
+			if (rem != REMOVE_FROM_LIST)
 				move_link_to_top (tmp, prev, location);
 			else
 			{
@@ -277,24 +279,24 @@ next_nicklist (ChannelList * cptr, NickList * nptr)
 	}
 	else if (!nptr->next)
 	{
-		int hvalue;
+		int my_hvalue;
 		/* hit end of chain, go to next bucket */
-		hvalue = hash_nickname (nptr->nick, NICKLIST_HASHSIZE) + 1;
-		if (hvalue >= NICKLIST_HASHSIZE)
+		my_hvalue = hash_nickname (nptr->nick, NICKLIST_HASHSIZE) + 1;
+		if (my_hvalue >= NICKLIST_HASHSIZE)
 		{
 			/* end of list */
 			return NULL;
 		}
 		else
 		{
-			while ((NickList *) cptr->NickListTable[hvalue].list == NULL)
+			while ((NickList *) cptr->NickListTable[my_hvalue].list == NULL)
 			{
-				hvalue++;
-				if (hvalue >= NICKLIST_HASHSIZE)
+				my_hvalue++;
+				if (my_hvalue >= NICKLIST_HASHSIZE)
 					return NULL;
 			}
 			/* return head of next filled bucket */
-			return (NickList *) cptr->NickListTable[hvalue].list;
+			return (NickList *) cptr->NickListTable[my_hvalue].list;
 		}
 	}
 	else
@@ -328,24 +330,24 @@ next_namelist (HashEntry * cptr, List * nptr, unsigned int size)
 	}
 	else if (!nptr->next)
 	{
-		int hvalue;
+		int my_hvalue;
 		/* hit end of chain, go to next bucket */
-		hvalue = hash_nickname (nptr->name, size) + 1;
-		if (hvalue >= size)
+		my_hvalue = hash_nickname (nptr->name, size) + 1;
+		if (my_hvalue >= size)
 		{
 			/* end of list */
 			return NULL;
 		}
 		else
 		{
-			while ((List *) cptr[hvalue].list == NULL)
+			while ((List *) cptr[my_hvalue].list == NULL)
 			{
-				hvalue++;
-				if (hvalue >= size)
+				my_hvalue++;
+				if (my_hvalue >= size)
 					return NULL;
 			}
 			/* return head of next filled bucket */
-			return (List *) cptr[hvalue].list;
+			return (List *) cptr[my_hvalue].list;
 		}
 	}
 	else
@@ -389,7 +391,7 @@ show_nicklist_hashtable (ChannelList * cptr)
 	}
 }
 
-void 
+static void 
 show_whowas_debug_hashtable (WhowasWrapList * cptr)
 {
 	int count, count2;
@@ -419,10 +421,6 @@ cmd_show_hash (struct command *cmd, char *args)
 	char *c;
 	ChannelList *chan = NULL;
 
-	extern int from_server;
-	extern WhowasWrapList whowas_userlist_list;
-	extern WhowasWrapList whowas_reg_list;
-	extern WhowasWrapList whowas_splitin_list;
 
 	if (args && *args)
 		c = next_arg (args, &args);
@@ -539,7 +537,7 @@ add_whowas_userhost_channel (WhowasList * wptr, WhowasWrapList * list)
 }
 
 WhowasList *
-find_userhost_channel (char *host, char *channel, int remove, WhowasWrapList * wptr)
+find_userhost_channel (char *host, char *channel, int rem, WhowasWrapList * wptr)
 {
 	HashEntry *location;
 	register WhowasList *tmp, *prev = NULL;
@@ -556,7 +554,7 @@ find_userhost_channel (char *host, char *channel, int remove, WhowasWrapList * w
 	{
 		if (!my_stricmp (host, tmp->nicklist->host) && !my_stricmp (channel, tmp->channel))
 		{
-			if (remove != REMOVE_FROM_LIST)
+			if (rem != REMOVE_FROM_LIST)
 				move_link_to_top_whowas (tmp, prev, location);
 			else
 			{
@@ -606,24 +604,24 @@ next_userhost (WhowasWrapList * cptr, WhowasList * nptr)
 	}
 	else if (!nptr->next)
 	{
-		int hvalue;
+		int my_hvalue;
 		/* hit end of chain, go to next bucket */
-		hvalue = hash_userhost_channel (nptr->nicklist->host, nptr->channel, WHOWASLIST_HASHSIZE) + 1;
-		if (hvalue >= WHOWASLIST_HASHSIZE)
+		my_hvalue = hash_userhost_channel (nptr->nicklist->host, nptr->channel, WHOWASLIST_HASHSIZE) + 1;
+		if (my_hvalue >= WHOWASLIST_HASHSIZE)
 		{
 			/* end of list */
 			return NULL;
 		}
 		else
 		{
-			while ((WhowasList *) cptr->NickListTable[hvalue].list == NULL)
+			while ((WhowasList *) cptr->NickListTable[my_hvalue].list == NULL)
 			{
-				hvalue++;
-				if (hvalue >= WHOWASLIST_HASHSIZE)
+				my_hvalue++;
+				if (my_hvalue >= WHOWASLIST_HASHSIZE)
 					return NULL;
 			}
 			/* return head of next filled bucket */
-			return (WhowasList *) cptr->NickListTable[hvalue].list;
+			return (WhowasList *) cptr->NickListTable[my_hvalue].list;
 		}
 	}
 	else
@@ -775,7 +773,7 @@ add_name_to_floodlist (char *name, char *channel, HashEntry * list, unsigned int
 }
 
 Flooding *
-find_name_in_floodlist (char *name, HashEntry * list, unsigned int size, int remove)
+find_name_in_floodlist (char *name, HashEntry * list, unsigned int size, int rem)
 {
 	HashEntry *location;
 	register Flooding *tmp, *prev = NULL;
@@ -791,7 +789,7 @@ find_name_in_floodlist (char *name, HashEntry * list, unsigned int size, int rem
 	{
 		if (!my_stricmp (name, tmp->name))
 		{
-			if (remove != REMOVE_FROM_LIST)
+			if (rem != REMOVE_FROM_LIST)
 				move_gen_link_to_top ((List *) tmp, (List *) prev, location);
 			else
 			{

@@ -34,9 +34,6 @@
 /* Define if `sys_siglist' is declared by <signal.h>.  */
 #undef SYS_SIGLIST_DECLARED
 
-/* Define if you can safely include both <sys/time.h> and <time.h>.  */
-#undef TIME_WITH_SYS_TIME
-
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
 
@@ -47,12 +44,10 @@
 #undef HAVE_KILLPG
 #undef HAVE_PTHREADS
 #undef HAVE_SETENV
-#undef HAVE_SNPRINTF
 #undef HAVE_STRERROR
 #undef HAVE_SUN_LEN
 #undef HAVE_SYSCONF
 #undef HAVE_UNAME
-#undef HAVE_VSNPRINTF
 #undef NEED_STRTOUL
 #undef NO_STRUCT_LINGER
 #undef SYS_ERRLIST_DECLARED
@@ -60,8 +55,9 @@
 #undef UNSIGNED_INT32
 #undef UNSIGNED_LONG32
 #undef USING_CURSES
-#undef PACKAGE
-#undef VERSION
+#undef XARIC_DEBUG
+#undef HAVE_INET_ATON
+#undef HAVE_VSNPRINTF
 
 /* The number of bytes in a unsigned int.  */
 #undef SIZEOF_UNSIGNED_INT
@@ -69,35 +65,44 @@
 /* The number of bytes in a unsigned long.  */
 #undef SIZEOF_UNSIGNED_LONG
 
+/* Define if you have the <ctype.h> header file.  */
+#undef HAVE_CTYPE_H
+
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
+
+/* Define if you have the <errno.h> header file.  */
+#undef HAVE_ERRNO_H
 
 /* Define if you have the <fcntl.h> header file.  */
 #undef HAVE_FCNTL_H
 
-/* Define if you have the <ndir.h> header file.  */
-#undef HAVE_NDIR_H
-
 /* Define if you have the <netdb.h> header file.  */
 #undef HAVE_NETDB_H
 
-/* Define if you have the <sys/dir.h> header file.  */
-#undef HAVE_SYS_DIR_H
+/* Define if you have the <signal.h> header file.  */
+#undef HAVE_SIGNAL_H
 
-/* Define if you have the <sys/fcntl.h> header file.  */
-#undef HAVE_SYS_FCNTL_H
+/* Define if you have the <stdarg.h> header file.  */
+#undef HAVE_STDARG_H
 
-/* Define if you have the <sys/file.h> header file.  */
-#undef HAVE_SYS_FILE_H
+/* Define if you have the <stdio.h> header file.  */
+#undef HAVE_STDIO_H
 
-/* Define if you have the <sys/ndir.h> header file.  */
-#undef HAVE_SYS_NDIR_H
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
+
+/* Define if you have the <string.h> header file.  */
+#undef HAVE_STRING_H
 
 /* Define if you have the <sys/ptem.h> header file.  */
 #undef HAVE_SYS_PTEM_H
 
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/socket.h> header file.  */
+#undef HAVE_SYS_SOCKET_H
 
 /* Define if you have the <sys/syslimits.h> header file.  */
 #undef HAVE_SYS_SYSLIMITS_H
@@ -114,8 +119,17 @@
 /* Define if you have the <sys/twg_config.h> header file.  */
 #undef HAVE_SYS_TWG_CONFIG_H
 
+/* Define if you have the <sys/types.h> header file.  */
+#undef HAVE_SYS_TYPES_H
+
 /* Define if you have the <sys/un.h> header file.  */
 #undef HAVE_SYS_UN_H
 
+/* Define if you have the <sys/wait.h> header file.  */
+#undef HAVE_SYS_WAIT_H
+
 /* Define if you have the <termcap.h> header file.  */
 #undef HAVE_TERMCAP_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H

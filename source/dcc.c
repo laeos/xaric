@@ -1,3 +1,4 @@
+#ident "@(#)dcc.c 1.9"
 /*
  * dcc.c: Things dealing client to client connections. 
  *
@@ -17,19 +18,19 @@
 #include "config.h"
 #endif
 
-#include "irc.h"
+#include <float.h>
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <stdio.h>
 
 
+#include "irc.h"
 #include "ctcp.h"
 #include "dcc.h"
 #include "hook.h"
 #include "ircaux.h"
 #include "lastlog.h"
 #include "newio.h"
-#include "output.h"
 #include "parse.h"
 #include "server.h"
 #include "status.h"
@@ -41,10 +42,15 @@
 #include "misc.h"
 #include "screen.h"
 #include "hash2.h"
+
+
+#include "output.h"
 #include "fset.h"
 #include "tcommand.h"
+#include "util.h"
 
-#include <float.h>
+
+
 
 
 static off_t filesize = 0;
@@ -609,7 +615,7 @@ dcc_open (DCC_list * Client)
 	}
 	message_from (NULL, LOG_CRAP);
 }
-void 
+static void 
 add_userhost_to_dcc (WhoisStuff * stuff, char *nick, char *args)
 {
 	DCC_list *Client;
@@ -766,7 +772,7 @@ dcc_raw_connect (char *host, u_short port)
 	return m_strdup (ltoa (Client->read));
 }
 
-void 
+static void 
 real_dcc_filesend (char *filename, char *real_file, char *user, int type, int portnum)
 {
 	DCC_list *Client;
@@ -1741,12 +1747,6 @@ dcc_raw_transmit (char *user, char *text, char *type)
 }
 
 extern void 
-dcc_chat_transmit_quiet (char *user, char *text, char *type)
-{
-	dcc_message_transmit (user, text, NULL, DCC_CHAT, 0, type, 0);
-}
-
-extern void 
 dcc_chat_crash_transmit (char *user, char *text)
 {
 	char buffer[20000];
@@ -1785,7 +1785,7 @@ dcc_send_raw (char *command, char *args)
  * dcc_list() to show the start time.
  */
 char *
-dcc_time (time_t time)
+dcc_time (time_t the_time)
 {
 	struct tm *btime;
 	char *buf = NULL;
@@ -1795,7 +1795,7 @@ dcc_time (time_t time)
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
 
-	btime = localtime (&time);
+	btime = localtime (&the_time);
 	if (time)
 		malloc_sprintf (&buf, "%-2.2d:%-2.2d:%-2.2d %s %-2.2d %d", btime->tm_hour,
 			btime->tm_min, btime->tm_sec, months[btime->tm_mon],
@@ -1826,7 +1826,7 @@ dcc_list (char *command, char *args)
 	{
 		char completed[9];
 		char size[9];
-		char *stime = NULL;
+		char *st = NULL;
 
 		if (Client->filesize)
 		{
@@ -1838,7 +1838,7 @@ dcc_list (char *command, char *args)
 			sprintf (completed, "%ldK", (unsigned long) (Client->bytes_sent ? Client->bytes_sent : Client->bytes_read) / 1024);
 			strcpy (size, empty_string);
 		}
-		stime = Client->starttime.tv_sec ? dcc_time (Client->starttime.tv_sec) : "";
+		st = Client->starttime.tv_sec ? dcc_time (Client->starttime.tv_sec) : "";
 		flags = Client->flags;
 
 		if (!dcc_paths)
@@ -1856,10 +1856,10 @@ dcc_list (char *command, char *args)
 			flags & DCC_ACTIVE ? "Active" :
 			flags & DCC_WAIT ? "Waiting" :
 			flags & DCC_OFFER ? "Offered" : "Unknown",
-			stime, size, completed, filename);
+			st, size, completed, filename);
 
-		if (stime && *stime)
-			new_free (&stime);
+		if (st && *st)
+			new_free (&st);
 		count++;
 	}
 }
@@ -2089,7 +2089,7 @@ output_reject_ctcp (char *notused, char *nicklist)
 }
 
 /* added by Patch */
-void 
+static void 
 dcc_close_client_num (unsigned int closenum)
 {
 	DCC_list *Client, *next;
@@ -2135,7 +2135,7 @@ dcc_close_client_num (unsigned int closenum)
 }
 
 /* added by Patch */
-void
+static void
 dcc_close_all (void)
 {
 	DCC_list *Client, *next;
@@ -2170,7 +2170,7 @@ dcc_close_all (void)
 }
 
 /* added by Patch */
-void
+static void
 dcc_close_type_all (char *typestr)
 {
 	DCC_list *Client, *next;
@@ -2213,7 +2213,7 @@ dcc_close_type_all (char *typestr)
 }
 
 /* added by Patch */
-void
+static void
 dcc_close_nick_all (char *nickstr)
 {
 	DCC_list *Client, *next;
@@ -2255,7 +2255,7 @@ dcc_close_nick_all (char *nickstr)
 }
 
 /* added by Patch */
-void
+static void
 dcc_close_type_nick_all (char *typestr, char *nickstr)
 {
 	DCC_list *Client, *next;
@@ -2298,7 +2298,7 @@ dcc_close_type_nick_all (char *typestr, char *nickstr)
 }
 
 /* added by Patch */
-void 
+static void 
 dcc_close_filename (char *filename, char *user, char *Type, int CType)
 {
 	DCC_list *Client;
@@ -2330,7 +2330,7 @@ dcc_close_filename (char *filename, char *user, char *Type, int CType)
 }
 
 /* completely rewritten by Patch */
-void 
+static void 
 dcc_close (char *command, char *args)
 {
 	char *Type;

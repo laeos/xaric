@@ -19,6 +19,8 @@
 	char	*do_history(char *, char *);
 	void	history(char *, char *, char *, char *);
 	void	shove_to_history(char, char *);
+	void	get_history (int);
+	
 	
 /* used by get_from_history */
 #define NEXT 0

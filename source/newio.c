@@ -1,3 +1,4 @@
+#ident "@(#)newio.c 1.7"
 /*
  * newio.c: This is some handy stuff to deal with file descriptors in a way
  * much like stdio's FILE pointers 

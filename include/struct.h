@@ -365,7 +365,6 @@ typedef	struct	ScreenStru
 	WaitPrompt	*promptlist;
 
 
-
 	int	meta_hit[10];
 	int	quote_hit;			/* true if a key bound to
 						 * QUOTE_CHARACTER has been
@@ -374,7 +373,6 @@ typedef	struct	ScreenStru
 	unsigned char	digraph_first;
 
 
-	char	*tty_name;
 	int	co;
 	int	li;
 

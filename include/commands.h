@@ -24,6 +24,8 @@ extern	char	*recv_nick;
 	void	parse_text(char, char *);
 	int	check_wait_command(char *);
 	void	ExecuteTimers(void);
+	void load (char *command, char *args, char *subargs, char *helparg);
+	
 
 		
 #define AWAY_ONE 0

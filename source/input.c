@@ -1,3 +1,4 @@
+#ident "@(#)input.c 1.9"
 /*
  * input.c: does the actual input line stuff... keeps the appropriate stuff
  * on the input line, handles insert/delete of characters/words... the whole
@@ -16,7 +17,6 @@
 
 #include "irc.h"
 
-#include "alias.h"
 #include "commands.h"
 #include "exec.h"
 #include "history.h"
@@ -39,6 +39,8 @@
 #include "hash2.h"
 #include "fset.h"
 #include "tcommand.h"
+#include "expr.h"
+#include "util.h"
 
 
 #include <sys/ioctl.h>
@@ -51,6 +53,7 @@ static char *input_lastmsg = NULL;
 extern NickTab *getnextnick (char *, char *, char *);
 extern int extended_handled;
 extern char *getchannick (char *, char *);
+extern char *last_split_server;
 
 NickTab *tabkey_array = NULL;
 
@@ -902,8 +905,8 @@ input_msgreply (char dumb, char *dumber)
 	new_free (&t);
 }
 
-
-void 
+#if 0 /* somebody please remove me if i am not needed XXX */
+static void 
 add_autonick_input (char *nick, char *line)
 {
 	char *tmp1 = NULL;
@@ -919,6 +922,7 @@ add_autonick_input (char *nick, char *line)
 	}
 	update_input (UPDATE_ALL);
 }
+#endif
 
 extern void 
 send_line (char dumb, char *dumber)
@@ -1325,7 +1329,6 @@ window_swap10 (char dumb, char *dumber)
 extern void 
 change_to_split (char dumb, char *dumber)
 {
-	extern char *last_split_server;
 	if (!last_split_server)
 		return;
 	t_parse_command ("SERVER", last_split_server);
@@ -1562,7 +1565,7 @@ getchannick (char *oldnick, char *nick)
 }
 
 void 
-addtabkey (char *nick, char *type)
+addtabkey (char *nick, char *mytype)
 {
 	NickTab *tmp, *new;
 
@@ -1572,8 +1575,8 @@ addtabkey (char *nick, char *type)
 	{
 		new = (NickTab *) new_malloc (sizeof (NickTab));
 		malloc_strcpy (&new->nick, nick);
-		if (type)
-			malloc_strcpy (&new->type, type);
+		if (mytype)
+			malloc_strcpy (&new->type, mytype);
 	}
 	/*
 	 * most recent nick is at the top of the list 

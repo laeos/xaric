@@ -1,3 +1,4 @@
+#ident "@(#)reg.c 1.7"
 /*
  * The original was spagetti. I have replaced Michael's code with some of
  * my own which is a thousand times more readable and can also handle '%',

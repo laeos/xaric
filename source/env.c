@@ -1,3 +1,4 @@
+#ident "@(#)env.c 1.7"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

@@ -1,3 +1,4 @@
+#ident "@(#)screen.c 1.8"
 /*
  * screen.c
  *
@@ -32,11 +33,11 @@
 #include "exec.h"
 #include "newio.h"
 #include "misc.h"
+#include "util.h"
 
 
 Window *to_window;
 Screen *current_screen;
-Screen *main_screen;
 Screen *last_input_screen;
 
 int extended_handled = 0;
@@ -95,7 +96,6 @@ void
 add_to_screen (unsigned char *buffer)
 {
 	Window *tmp = NULL;
-	int i = 0;
 
 	if (!get_int_var (DISPLAY_ANSI_VAR))
 		strcpy (buffer, stripansicodes (buffer));
@@ -1194,7 +1194,6 @@ create_new_screen (void)
 	new->fpin = stdin;
 	new->alive = 1;
 	new->promptlist = NULL;
-	new->tty_name = NULL;
 	new->li = 24;
 	new->co = 79;
 	last_input_screen = new;

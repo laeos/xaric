@@ -1,3 +1,4 @@
+#ident "@(#)hook.c 1.8"
 /*
  * hook.c: Does those naughty hook functions. 
  *
@@ -8,16 +9,25 @@
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  */
 
+
+/*
+ * XXX This file is one big mess of things ifdef'ed out. nothign in here is used, currently.
+ * 
+ * please oh please fix me someone, im hurt!
+ * 
+ */
+
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "irc.h"
+#include <stdarg.h>
 
+#include "irc.h"
 #include "hook.h"
 #include "vars.h"
 #include "ircaux.h"
-#include "alias.h"
 #include "list.h"
 #include "window.h"
 #include "server.h"
@@ -26,7 +36,9 @@
 #include "parse.h"
 #include "fset.h"
 #include "misc.h"
-#include <stdarg.h>
+#include "util.h"
+#include "expr.h"
+
 
 #define SILENT	0
 #define QUIET	1
@@ -41,9 +53,9 @@
  * NOISY means you are notified when an action occur plus you see the action
  * in the display and the default actions still occurs 
  */
-static char *noise_level[] =
+/* static char *noise_level[] = 
 {"SILENT", "QUIET", "NORMAL", "NOISY"};
-
+*/
 #define	HS_NOGENERIC	0x1000
 #define HF_NORECURSE	0x0002
 #define HF_GLOBAL	0x0004
@@ -168,6 +180,7 @@ HookFunc hook_functions[] =
 	{"YELL", NULL, 1, 0, 0}
 };
 
+#if 0
 static char *
 fill_it_out (char *str, int params)
 {
@@ -200,7 +213,7 @@ fill_it_out (char *str, int params)
 	return (free_ptr);
 }
 
-
+#endif 
 /*
  * This crap here is used so we can use the list manip stuff.  Maybe 
  * we should fix the problem instead of using nasty hacks like this.
@@ -247,6 +260,7 @@ Add_Remove_Check (Hook * Item, char *Name)
 	return 0;
 }
 
+#if 0
 
 static void 
 add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int server, int sernum, int flexible)
@@ -420,6 +434,7 @@ show_list (int which)
 		show_hook (list, hook_functions[which].name);
 	return (cnt);
 }
+#endif
 
 /*
  * do_hook: This is what gets called whenever a MSG, INVITES, WALL, (you get
@@ -800,7 +815,7 @@ save_hooks (FILE * fp, int do_all)
 /*
  * find_hook: returns the numerical value for a specified hook name
  */
-int 
+static int 
 find_hook (char *name)
 {
 	int which = INVALID_HOOKNUM, i, len, cnt;

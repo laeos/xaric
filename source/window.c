@@ -1,3 +1,4 @@
+#ident "@(#)window.c 1.10"
 /*
  * window.c: Handles the Main Window stuff for irc.  This includes proper
  * scrolling, saving of screen memory, refreshing, clearing, etc. 
@@ -29,6 +30,7 @@
 #include "hook.h"
 #include "dcc.h"
 #include "misc.h"
+#include "util.h"
 #include "tcommand.h"
 
 /* Resize relatively or absolutely? */
@@ -89,7 +91,6 @@ new_window (void)
 
 	{
 		set_current_screen (create_new_screen ());
-		main_screen = current_screen;
 		no_screens = 0;
 	}
 
@@ -1496,23 +1497,23 @@ set_query_nick (char *nick, char *host, char *cmd)
 	}
 	if (curr_scr_win->query_nick)
 	{
-		char *nick;
+		char *snick;
 
-		nick = curr_scr_win->query_nick;
+		snick = curr_scr_win->query_nick;
 /* next_in_comma_list() */
-		while (nick)
+		while (snick)
 		{
 			if (!curr_scr_win->nicks)
 				continue;
-			if ((ptr = (char *) strchr (nick, ',')) != NULL)
+			if ((ptr = (char *) strchr (snick, ',')) != NULL)
 				*(ptr++) = 0;
-			if ((tmp = (NickList *) remove_from_list ((List **) & (curr_scr_win->nicks), nick)) != NULL)
+			if ((tmp = (NickList *) remove_from_list ((List **) & (curr_scr_win->nicks), snick)) != NULL)
 			{
 				new_free (&tmp->nick);
 				new_free (&tmp->host);	/* CDE why was this not done */
 				new_free ((char **) &tmp);
 			}
-			nick = ptr;
+			snick = ptr;
 		}
 		new_free (&curr_scr_win->query_nick);
 		new_free (&curr_scr_win->query_host);
@@ -1586,7 +1587,7 @@ set_current_channel_by_refnum (unsigned int refnum, char *channel)
 	if ((tmp = get_window_by_refnum (refnum)) == NULL)
 		tmp = curr_scr_win;
 	if (channel)
-		if (strcmp (channel, zero) == 0)
+		if (strcmp (channel, zero_string) == 0)
 			channel = NULL;
 	malloc_strcpy (&tmp->current_channel, channel);
 	new_free (&tmp->waiting_channel);
@@ -2342,7 +2343,7 @@ window_channel (Window * window, char **args, char *usage)
 		}
 	}
 	else
-		set_current_channel_by_refnum (0, zero);
+		set_current_channel_by_refnum (0, zero_string);
 
 	return window;
 }
@@ -2831,7 +2832,7 @@ window_notify (Window * window, char **args, char *usage)
 {
 	window->miscflags ^= WINDOW_NOTIFY;
 	say ("Notification when hidden set to %s",
-	     window->miscflags & WINDOW_NOTIFY ? on : off);
+	     window->miscflags & WINDOW_NOTIFY ? on_string : off_string);
 	return window;
 }
 

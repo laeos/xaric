@@ -1,3 +1,4 @@
+#ident "@(#)list.c 1.8"
 /*
  * list.c: some generic linked list managing stuff 
  *

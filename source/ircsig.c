@@ -1,3 +1,4 @@
+#ident "@(#)ircsig.c 1.7"
 /*
  * ircsig.c: has a `my_signal()' that uses sigaction().
  *

@@ -1,3 +1,4 @@
+#ident "@(#)history.c 1.8"
 /*
  * history.c: stuff to handle command line history 
  *
@@ -22,6 +23,7 @@
 #include "output.h"
 #include "input.h"
 #include "tcommand.h"
+#include "util.h"
 
 static char *history_match (char *);
 static void add_to_history_list (int, char *);
@@ -65,17 +67,17 @@ static History *tmp = NULL;
  * there. 
  */
 static char *
-history_match (char *match)
+history_match (char *pat)
 {
 	char *ptr;
 	char *match_str = NULL;
 
-	if (*(match + strlen (match) - 1) == '*')
-		malloc_strcpy (&match_str, match);
+	if (*(pat + strlen (pat) - 1) == '*')
+		malloc_strcpy (&match_str, pat);
 	else
 	{
-		match_str = (char *) new_malloc (strlen (match) + 2);
-		strcpy (match_str, match);
+		match_str = (char *) new_malloc (strlen (pat) + 2);
+		strcpy (match_str, pat);
 		strcat (match_str, "*");
 	}
 	if (get_int_var (HISTORY_VAR))
@@ -279,7 +281,7 @@ cmd_history (struct command *cmd, char *args)
 {
 	int cnt, max;
 	char *value;
-	History *tmp;
+	History *xtmp;
 
 	if (get_int_var (HISTORY_VAR))
 	{
@@ -291,9 +293,9 @@ cmd_history (struct command *cmd, char *args)
 		}
 		else
 			max = get_int_var (HISTORY_VAR);
-		for (tmp = command_history_tail, cnt = 0; tmp && (cnt < max);
-		     tmp = tmp->prev, cnt++)
-			put_it ("%d: %s", tmp->number, tmp->stuff);
+		for (xtmp = command_history_tail, cnt = 0; xtmp && (cnt < max);
+		     xtmp = xtmp->prev, cnt++)
+			put_it ("%d: %s", xtmp->number, xtmp->stuff);
 	}
 }
 
@@ -306,7 +308,7 @@ cmd_history (struct command *cmd, char *args)
 char *
 do_history (char *com, char *rest)
 {
-	History *tmp;
+	History *xtmp;
 	int hist_num;
 	char *ptr, *ret = NULL;
 	static char *last_com = NULL;
@@ -337,14 +339,14 @@ do_history (char *com, char *rest)
 
 	hist_num = my_atol (com);
 
-	for (tmp = command_history_head; tmp; tmp = tmp->next)
+	for (xtmp = command_history_head; xtmp; xtmp = xtmp->next)
 	{
-		if (tmp->number == hist_num)
+		if (xtmp->number == hist_num)
 		{
 			if (rest && *rest)
-				ret = m_sprintf ("%s %s", tmp->stuff, rest);
+				ret = m_sprintf ("%s %s", xtmp->stuff, rest);
 			else
-				malloc_strcpy (&ret, tmp->stuff);
+				malloc_strcpy (&ret, xtmp->stuff);
 			return (ret);
 		}
 	}

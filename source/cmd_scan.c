@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)cmd_scan.c 1.10"
 /*
  * cmd_hostname.c : the /scan command
  *
@@ -32,16 +32,13 @@
 
 #include "irc.h"
 #include "ircaux.h"
-#include "whois.h"
 #include "output.h"
 #include "status.h"
 #include "hash2.h"
 #include "misc.h"
-#include "screen.h"
 #include "tcommand.h"
 #include "fset.h"
-
-
+#include "util.h"
 
 
 void
@@ -114,7 +111,7 @@ cmd_scan (struct command *cmd, char *args)
 	else
 		s = get_fset_var (FORMAT_NAMES_FSET);
 
-	put_it ("%s", convert_output_format (s, "%s %s %d %s", update_clock (GET_TIME), chan->channel, count, space));
+	put_it ("%s", convert_output_format (s, "%s %s %d %s", update_clock (GET_TIME), chan->channel, count, space_string));
 	if (count)
 	{
 		count = 0;
@@ -134,7 +131,7 @@ cmd_scan (struct command *cmd, char *args)
 				malloc_strcat (&buffer, convert_output_format (get_fset_var (FORMAT_NAMES_OPCOLOR_FSET), "%c %s", '*', nick->nick));
 			else
 				continue;
-			malloc_strcat (&buffer, space);
+			malloc_strcat (&buffer, space_string);
 			if (count++ == 4)
 			{
 				if (get_fset_var (FORMAT_NAMES_BANNER_FSET))

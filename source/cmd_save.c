@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)cmd_save.c 1.9"
 /*
  * cmd_save.c : save Xaric settings 
  *
@@ -31,7 +31,6 @@
 #include <stdio.h>
 
 #include "irc.h"
-#include "irc_std.h"
 #include "ircaux.h"
 #include "output.h"
 #include "misc.h"
@@ -40,8 +39,10 @@
 #include "vars.h"
 #include "fset.h"
 #include "notify.h"
-#include "tcommand.h"
 #include "keys.h"
+#include "tcommand.h"
+#include "util.h"
+
 
 #define SFLAG_BIND      0x0001
 #define SFLAG_ON        0x0002

@@ -1,4 +1,4 @@
-
+#ident "@(#)files.c 1.8"
 
 /*
  * files.c -- allows you to read/write files. Wow.
@@ -13,6 +13,8 @@
 
 #include "irc.h"
 #include "ircaux.h"
+#include "files.h"
+#include "util.h"
 
 /* Here's the plan.
  *  You want to open a file.. you can READ it or you can WRITE it.
@@ -46,24 +48,24 @@ typedef struct FILE___ File;
 
 static File *FtopEntry = NULL;
 
-File *
+static File *
 new_file (void)
 {
 	File *tmp = FtopEntry;
-	File *tmpfile = (File *) new_malloc (sizeof (File));
+	File *tmpf = (File *) new_malloc (sizeof (File));
 
 	if (FtopEntry == NULL)
-		FtopEntry = tmpfile;
+		FtopEntry = tmpf;
 	else
 	{
 		while (tmp->next)
 			tmp = tmp->next;
-		tmp->next = tmpfile;
+		tmp->next = tmpf;
 	}
-	return tmpfile;
+	return tmpf;
 }
 
-void 
+static void 
 remove_file (File * file)
 {
 	File *tmp = FtopEntry;
@@ -146,7 +148,7 @@ open_file_for_bwrite (char *filename)
 		return -1;
 }
 
-File *
+static File *
 lookup_file (int fd)
 {
 	File *ptr = FtopEntry;

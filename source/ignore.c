@@ -1,4 +1,4 @@
-
+#ident "@(#)ignore.c 1.8"
 /*
  * ignore.c: handles the ingore command for irc 
  *
@@ -24,6 +24,7 @@
 #include "vars.h"
 #include "output.h"
 #include "tcommand.h"
+#include "util.h"
 
 int ignore_usernames = 0;
 char *highlight_char = NULL;
@@ -43,7 +44,7 @@ static Ignore *new_ignore = NULL;
 #define IGNORE_CGREP -2
 
 
-void 
+static void 
 add_channel_grep (char *channel, char *what, int flag)
 {
 	Ignore *new;
@@ -621,7 +622,7 @@ ignore_type (char *type, int len)
 	return ret;
 }
 
-int 
+static int 
 ignore_exception (Ignore * old, char *args)
 {
 	Ignore *new = NULL;
@@ -868,7 +869,7 @@ cut_n_fix_glob (char *nickuserhost)
 	return final_stuff;
 }
 
-void 
+static void 
 tremove_ignore (char *stuff, char *line)
 {
 	int count = 0;

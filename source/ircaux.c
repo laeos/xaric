@@ -1,3 +1,4 @@
+#ident "@(#)ircaux.c 1.11"
 /*
  * ircaux.c: some extra routines... not specific to irc... that I needed 
  *
@@ -13,11 +14,11 @@
 #endif
 
 #include "irc.h"
-#include "alias.h"
 #include "log.h"
 #include "misc.h"
 #include "vars.h"
 #include "screen.h"
+#include "util.h"
 
 #include <pwd.h>
 
@@ -26,6 +27,8 @@
 #include "ircaux.h"
 #include "output.h"
 #include "ircterm.h"
+#include "expr.h"
+#include "xaric_version.h"
 
 
 /*
@@ -263,40 +266,6 @@ m_3cat (char **one, const char *two, const char *three)
 
 	new_free (one);
 	return ((*one = str));
-}
-
-char *
-upper (char *str)
-{
-	register char *ptr = NULL;
-
-	if (str)
-	{
-		ptr = str;
-		for (; *str; str++)
-		{
-			if (islower (*str))
-				*str = toupper (*str);
-		}
-	}
-	return (ptr);
-}
-
-char *
-lower (char *str)
-{
-	register char *ptr = NULL;
-
-	if (str)
-	{
-		ptr = str;
-		for (; *str; str++)
-		{
-			if (isupper (*str))
-				*str = tolower (*str);
-		}
-	}
-	return (ptr);
 }
 
 char *
@@ -835,79 +804,6 @@ scanstr (char *str, char *source)
 }
 
 
-
-/* expand_twiddle: expands ~ in pathnames. */
-char *
-expand_twiddle (char *str)
-{
-	char buffer[BIG_BUFFER_SIZE + 1];
-	char *str2;
-
-	if (*str == '~')
-	{
-		str++;
-		if (*str == '/' || !*str)
-		{
-			strmcpy (buffer, my_path, BIG_BUFFER_SIZE);
-			strmcat (buffer, str, BIG_BUFFER_SIZE);
-		}
-		else
-		{
-			char *rest;
-			struct passwd *entry;
-			if ((rest = strchr (str, '/')) != NULL)
-				*rest++ = '\0';
-			if ((entry = getpwnam (str)) != NULL)
-			{
-				strmcpy (buffer, entry->pw_dir, BIG_BUFFER_SIZE);
-				if (rest)
-				{
-					strmcat (buffer, "/", BIG_BUFFER_SIZE);
-					strmcat (buffer, rest, BIG_BUFFER_SIZE);
-				}
-			}
-			else
-				return (char *) NULL;
-		}
-	}
-	else
-		strmcpy (buffer, str, BIG_BUFFER_SIZE);
-
-	/* This isnt legal! */
-	str2 = NULL;
-	malloc_strcpy (&str2, buffer);
-	return (str2);
-}
-
-/* islegal: true if c is a legal nickname char anywhere but first char */
-#define islegal(c) ((((c) >= 'A') && ((c) <= '}')) || \
-		    (((c) >= '0') && ((c) <= '9')) || \
-		     ((c) == '-') || ((c) == '_'))
-
-/*
- * check_nickname: checks is a nickname is legal.  If the first character is
- * bad new, null is returned.  If the first character is bad, the string is
- * truncd down to only legal characters and returned 
- *
- * rewritten, with help from do_nick_name() from the server code (2.8.5),
- * phone, april 1993.
- */
-char *
-check_nickname (char *nick)
-{
-	char *s;
-
-	if (!nick || *nick == '-' || isdigit (*nick))
-		return NULL;
-
-	for (s = nick; *s && (s - nick) < NICKNAME_LEN; s++)
-		if (!islegal (*s) || my_isspace (*s))
-			break;
-	*s = '\0';
-
-	return *nick ? nick : NULL;
-}
-
 /*
  * sindex: much like index(), but it looks for a match of any character in
  * the group, and returns that position.  If the first character is a ^, then
@@ -982,26 +878,7 @@ rsindex (char *string, char *start, char *group)
 	return retval;
 }
 
-/* is_number: returns true if the given string is a number, false otherwise */
-int 
-is_number (char *str)
-{
-	while (*str == ' ')
-		str++;
-	if (*str == '-')
-		str++;
-	if (*str)
-	{
-		for (; *str; str++)
-		{
-			if (!isdigit ((*str)))
-				return (0);
-		}
-		return 1;
-	}
-	else
-		return 0;
-}
+
 
 /* rfgets: exactly like fgets, cept it works backwards through a file!  */
 char *
@@ -1131,7 +1008,7 @@ ircpanic (char *format,...)
 	yell ("Please email laeos@ptw.com with the following message");
 
 	yell (" ");
-	yell ("Panic: [%s] %s", irc_version, buffer);
+	yell ("Panic: [%s] %s", XARIC_VersionStr, buffer);
 
 #ifdef K_DEBUG
 	yell ("Context dump: [%s(%d) %s]", cx_file, cx_line, cx_function ? cx_function : "");
@@ -1161,7 +1038,7 @@ beep_em (int beeps)
 
 
 
-FILE *
+static FILE *
 open_compression (char *executable, char *filename)
 {
 	FILE *file_pointer;
@@ -1550,28 +1427,6 @@ my_ctime (time_t when)
 	return chop (ctime (&when), 1);
 }
 
-char *
-ltoa (long foo)
-{
-	static char buffer[BIG_BUFFER_SIZE + 1];
-	char *pos = buffer + BIG_BUFFER_SIZE - 1;
-	unsigned long absv;
-	int negative;
-
-	absv = (foo < 0) ? (unsigned long) -foo : (unsigned long) foo;
-	negative = (foo < 0) ? 1 : 0;
-
-	buffer[BIG_BUFFER_SIZE] = 0;
-	for (; absv > 9; absv /= 10)
-		*pos-- = (absv % 10) + '0';
-	*pos = (absv) + '0';
-
-	if (negative)
-		*--pos = '-';
-
-	return pos;
-}
-
 /*
  * Formats "src" into "dest" using the given length.  If "length" is
  * negative, then the string is right-justified.  If "length" is
@@ -1902,36 +1757,6 @@ m_dupchar (int i)
 	ret[1] = 0;
 	return ret;
 }
-
-#ifndef HAVE_VSNPRINTF
-int 
-vsnprintf (char *str, size_t size, const char *format, va_list ap)
-{
-	int ret = vsprintf (str, format, ap);
-
-	/* If the string ended up overflowing, just give up. */
-	if (ret == str && strlen (str) > size)
-		ircpanic ("Buffer overflow in vsnprintf");
-	if (ret != str && ret > size)
-		ircpanic ("Buffer overflow in vsnprintf");
-
-	return ret;
-}
-#endif
-
-#ifndef HAVE_SNPRINTF
-int 
-snprintf (char *str, size_t size, const char *format,...)
-{
-	int ret;
-	va_list args;
-
-	va_start (args, format);
-	ret = vsnprintf (str, size, format, args);
-	va_end (args);
-	return ret;
-}
-#endif
 
 char *
 strmopencat (char *dest, int maxlen,...)

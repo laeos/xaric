@@ -79,8 +79,14 @@ DCC_list	*dcc_searchlist(char *, char *, int, int, char *, char *, int);
 	void	dcc_bot_transmit(char *, char *, char *);
 	void	dcc_raw_transmit(char *, char *, char *);
 	int	dcc_activeraw(char *);
+	char *DCC_get_current_transfer(void);
+
 		                	                        
 	extern	DCC_list *ClientList;
+	extern	unsigned int send_count_stat;
+	extern	unsigned int get_count_stat;
+
+
 
 	void	dcc_ftpopen(char *, char *);
 	int	dcc_ftpcommand(char *, char *);

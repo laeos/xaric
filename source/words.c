@@ -1,3 +1,4 @@
+#ident "@(#)words.c 1.8"
 /*
  * words.c -- right now it just holds the stuff i wrote to replace
  * that beastie arg_number().  Eventually, i may move all of the
@@ -13,8 +14,8 @@
 #include "config.h"
 #endif
 
-#include "irc.h"
 #include "ircaux.h"
+#include "util.h"
 
 /*
  * search() looks for a character forward or backward from mark 

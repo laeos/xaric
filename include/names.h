@@ -35,6 +35,12 @@
 #define	GOTMODE		0x02
 #define GOTBANS		0x04
 
+	void add_userhost_to_channel(char *channel, char *nick, int server, char *userhost);
+	char *compress_modes(int server, char *channel, char *modes);
+	char * fetch_userhost (int server, char *nick);
+	void handle_nickflood (char *old_nick, char *new_nick, register NickList * nick, register ChannelList * chan, time_t current_time, int flood_time);
+
+
 	void	add_to_join_list(char *, int, int);
 	void	remove_from_join_list(char *, int);
 	char	*get_chan_from_join_list(int);
@@ -75,5 +81,6 @@ ChannelList *	add_to_channel(char *, char *, int, int, int, char *, char *, char
 	char	*recreate_mode(ChannelList *);	
 	int	get_channel_voice(char *, int);
 	char	*get_channel_key(char *, int);
+	
 
 #endif /* __names_h_ */

@@ -1,3 +1,4 @@
+#ident "@(#)server.c 1.10"
 /*
  * server.c: Things dealing with server connections, etc. 
  *
@@ -34,6 +35,7 @@
 #include "misc.h"
 #include "status.h"
 #include "fset.h"
+#include "util.h"
 
 static void add_to_server_buffer (int, char *);
 static char *set_umode (int du_index);
@@ -1451,7 +1453,7 @@ register_server (int ssn_index, char *nick)
 	send_to_server ("USER %s %s %s :%s", username,
 			(send_umode && *send_umode) ? send_umode :
 			(LocalHostName ? LocalHostName : hostname),
-			username, *realname ? realname : space);
+			username, *realname ? realname : space_string);
 	change_server_nickname (ssn_index, nick);
 	from_server = old_from_server;
 }
@@ -1604,7 +1606,7 @@ create_server_list (void)
 			if (server_list[i].itsname)
 			{
 				strcat (buffer, server_list[i].itsname);
-				strcat (buffer, space);
+				strcat (buffer, space_string);
 			}
 			else
 				yell ("Warning: server_list[%d].itsname is null and it shouldnt be", i);
@@ -1645,7 +1647,7 @@ change_server_nickname (int ssn_index, char *nick)
 
 	if (nick)
 	{
-		if ((nick = check_nickname (nick)) != NULL)
+		if ( is_nick (nick) )
 		{
 			if (from_server != -1)
 			{

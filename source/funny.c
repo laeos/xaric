@@ -1,3 +1,4 @@
+#ident "@(#)funny.c 1.9"
 /*
  * funny.c: Well, I put some stuff here and called it funny.  So sue me. 
  *
@@ -205,7 +206,7 @@ funny_list (char *from, char **ArgList)
 	}
 }
 
-void 
+static void 
 print_funny_names (char *line)
 {
 	char *t;

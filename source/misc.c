@@ -1,3 +1,4 @@
+#ident "%W%"
 /* 
  *  Copyright Colten Edwards (c) 1996
  */
@@ -53,6 +54,7 @@
 #include "parse.h"
 #include "whowas.h"
 #include "hash2.h"
+#include "util.h"
 #include "fset.h"
 
 
@@ -497,7 +499,7 @@ clear_link (irc_server ** serv1)
 }
 
 irc_server *
-add_server (irc_server ** serv1, char *channel, char *arg, int hops, char *time)
+add_server (irc_server ** serv1, char *channel, char *arg, int hops, char *thetime)
 {
 	irc_server *serv2;
 	serv2 = (irc_server *) new_malloc (sizeof (irc_server));
@@ -505,7 +507,7 @@ add_server (irc_server ** serv1, char *channel, char *arg, int hops, char *time)
 	malloc_strcpy (&serv2->name, channel);
 	malloc_strcpy (&serv2->link, arg);
 	serv2->hopcount = hops;
-	serv2->time = m_strdup (time);
+	serv2->time = m_strdup (thetime);
 	*serv1 = serv2;
 	return serv2;
 }
@@ -524,10 +526,10 @@ find_server (irc_server * serv1, char *channel)
 }
 
 void 
-add_split_server (char *name, char *link, int hops)
+add_split_server (char *name, char *lnk, int hops)
 {
 	irc_server *temp;
-	temp = add_server (&split_link, name, link, hops, update_clock (GET_TIME));
+	temp = add_server (&split_link, name, lnk, hops, update_clock (GET_TIME));
 	temp->status = SPLIT;
 }
 
@@ -645,7 +647,7 @@ error_not_opped (char *channel)
 	say ("You're not opped on %s", channel);
 }
 
-int 
+static int 
 freadln (FILE * stream, char *lin)
 {
 	char *p;
@@ -708,23 +710,23 @@ numchar (char *string, char c)
 }
 
 char *
-cluster (char *hostname)
+cluster (char *thehost)
 {
 	static char result[BIG_BUFFER_SIZE + 1];
 	char temphost[BIG_BUFFER_SIZE + 1];
 	char *host;
 
-	if (!hostname)
+	if (!thehost)
 		return NULL;
 	host = temphost;
 	*result = 0;
 	memset (result, 0, sizeof (result));
 	memset (temphost, 0, sizeof (temphost));
-	if (strchr (hostname, '@'))
+	if (strchr (thehost, '@'))
 	{
-		if (*hostname == '~')
-			hostname++;
-		strcpy (result, hostname);
+		if (*thehost == '~')
+			thehost++;
+		strcpy (result, thehost);
 		*strchr (result, '@') = '\0';
 		if (strlen (result) > 9)
 		{
@@ -732,11 +734,11 @@ cluster (char *hostname)
 			result[9] = '\0';
 		}
 		strcat (result, "@");
-		if (!(hostname = strchr (hostname, '@')))
+		if (!(thehost = strchr (thehost, '@')))
 			return NULL;
-		hostname++;
+		thehost++;
 	}
-	strcpy (host, hostname);
+	strcpy (host, thehost);
 
 	if (*host && isdigit (*(host + strlen (host) - 1)))
 	{
@@ -851,9 +853,9 @@ convert_output_format (const char *format, const char *str,...)
 				{
 				case 's':
 					{
-						char *s = (char *) va_arg (args, char *);
-						if (s)
-							strcat (buffer2, s);
+						char *foo = (char *) va_arg (args, char *);
+						if (foo)
+							strcat (buffer2, foo);
 						break;
 					}
 				case 'd':
@@ -1230,13 +1232,13 @@ check_server_connect (int server)
 {
 	if ((from_server == -1) || (!in_timed_server && server_list[from_server].last_msg + 50 < time (NULL)))
 	{
-		add_timer ("", 10, 1, timed_server, m_strdup ("0"), NULL);
+		add_timer (empty_string, 10, 1, timed_server, m_strdup ("0"), NULL);
 		in_timed_server++;
 	}
 }
 
 char *
-country (char *hostname)
+country (char *thehost)
 {
 	typedef struct _domain
 	{
@@ -1255,7 +1257,7 @@ country (char *hostname)
 		{"AM", "Armenia"},
 		{"AN", "Netherlands Antilles"},
 		{"AO", "Angola"},
-		{"AQ", "Antarctica (pHEAR)"},
+		{"AQ", "Antarctica"},
 		{"AR", "Argentina"},
 		{"AS", "American Samoa"},
 		{"AT", "Austria"},
@@ -1408,7 +1410,7 @@ country (char *hostname)
 		{"NO", "Norway"},
 		{"NP", "Nepal"},
 		{"NR", "Nauru"},
-		{"NT", "Neutral Zone (pHEAR)"},
+		{"NT", "Neutral Zone"},
 		{"NU", "Niue"},
 		{"NZ", "New Zealand"},
 		{"OM", "Oman"},
@@ -1505,12 +1507,15 @@ country (char *hostname)
 	static char unknown[] = "unknown";
 	char *p;
 	int i = 0;
-	if (!hostname || !*hostname || isdigit (hostname[strlen (hostname) - 1]))
+	if (!thehost || !*thehost) 
 		return unknown;
-	if ((p = strrchr (hostname, '.')))
+	if (isdigit (thehost[strlen (thehost) - 1])) 
+		return "IP Address";
+
+	if ((p = strrchr (thehost, '.')))
 		p++;
 	else
-		p = hostname;
+		p = thehost;
 	for (i = 0; domain[i].code; i++)
 		if (!my_stricmp (p, domain[i].code))
 			return domain[i].country;
@@ -1539,7 +1544,7 @@ do_nslookup (char *host)
 		temp = gethostbyname (host);
 		alarm (0);
 	}
-	if (do_hook (NSLOOKUP_LIST, "%s %s %s", host, temp ? temp->h_name : "", temp ? (char *) inet_ntoa (*(struct in_addr *) temp->h_addr) : ""))
+	if (do_hook (NSLOOKUP_LIST, "%s %s %s", host, temp ? temp->h_name : empty_string, temp ? (char *) inet_ntoa (*(struct in_addr *) temp->h_addr) : empty_string))
 	{
 		if (!temp)
 			bitchsay ("Error looking up %s", host);
@@ -1587,7 +1592,7 @@ do_nslookup_blah (void *arg)
 	{
 		temp = gethostbyname (host);
 	}
-	if (do_hook (NSLOOKUP_LIST, "%s %s %s", host, temp ? temp->h_name : "", temp ? (char *) inet_ntoa (*(struct in_addr *) temp->h_addr) : ""))
+	if (do_hook (NSLOOKUP_LIST, "%s %s %s", host, temp ? temp->h_name : empty_string, temp ? (char *) inet_ntoa (*(struct in_addr *) temp->h_addr) : empty_string))
 	{
 		if (!temp)
 			bitchsay ("Error looking up %s", host);

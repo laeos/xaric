@@ -1,3 +1,4 @@
+#ident "@(#)timer.c 1.8"
 /*
  * timer.c -- handles timers in ircII
  * Copyright 1993, 1996 Matthew Green
@@ -22,6 +23,7 @@
 #include "output.h"
 #include "commands.h"
 #include "misc.h"
+#include "util.h"
 #include "vars.h"
 #include "fset.h"
 #include "tcommand.h"
@@ -212,7 +214,7 @@ show_timer (char *command)
 		if (tmp->callback)
 			continue;
 #endif
-		put_it ("%s", convert_output_format (get_fset_var (FORMAT_TIMER_FSET), "%s %l %d %s", tmp->ref, time_left, tmp->events, tmp->callback ? "(internal callback)" : (tmp->command ? tmp->command : "")));
+		put_it ("%s", convert_output_format (get_fset_var (FORMAT_TIMER_FSET), "%s %l %d %s", tmp->ref, time_left, tmp->events, tmp->callback ? "(internal callback)" : (tmp->command ? tmp->command : empty_string)));
 	}
 }
 

@@ -1,5 +1,4 @@
-
-
+#ident "@(#)names.c 1.10"
 /*
  * names.c: This here is used to maintain a list of all the people currently
  * on your channel.  Seems to work 
@@ -39,9 +38,12 @@
 #include "status.h"
 #include "hash2.h"
 #include "fset.h"
+#include "util.h"
 
 extern int in_on_who;
 extern ChannelList default_statchan;
+extern char *last_split_server;
+extern char *last_split_from;
 
 static char mode_str[] = "iklmnpsta";
 
@@ -92,7 +94,7 @@ clear_channel (ChannelList * chan)
 }
 
 extern ChannelList *
-lookup_channel (char *channel, int server, int unlink)
+lookup_channel (char *channel, int server, int unlnk)
 {
 	register ChannelList *chan = NULL, *last = NULL;
 	if (server == -1)
@@ -111,7 +113,7 @@ lookup_channel (char *channel, int server, int unlink)
 	{
 		if (chan->server == server && !my_stricmp (chan->channel, channel))
 		{
-			if (unlink == CHAN_UNLINK)
+			if (unlnk == CHAN_UNLINK)
 			{
 				if (last)
 					last->next = chan->next;
@@ -912,7 +914,7 @@ compress_modes (int server, char *channel, char *modes)
  * commands and convert that mode string into a one byte bit map of modes 
  */
 static int 
-decifer_mode (char *from, register char *mode_string, ChannelList ** channel, unsigned long *mode, char *chop, char *voice, char **key)
+decifer_mode (char *from, register char *mode_string, ChannelList ** channel, unsigned long *mode, char *chopp, char *voice, char **key)
 {
 
 	char *limit = 0;
@@ -958,7 +960,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 				limit_set = 1;
 				if (!(limit = next_arg (rest, &rest)))
 					limit = empty_string;
-				else if (!strncmp (limit, zero, 1))
+				else if (!strncmp (limit, zero_string, 1))
 					limit_reset = 1, limit_set = 0, add = 0;
 			}
 			else
@@ -990,7 +992,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 				{
 					if (add && add != (*channel)->chop && !in_join_list ((*channel)->channel, from_server))
 					{
-						*chop = (*channel)->chop = add;
+						*chopp = (*channel)->chop = add;
 						flush_mode_all (*channel);
 					}
 					else
@@ -1002,7 +1004,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 								tmp->sent_reop = tmp->sent_deop = 0;
 						}
 					}
-					*chop = add;
+					*chopp = add;
 					(*channel)->chop = add;
 				}
 				ThisNick = find_nicklist_in_channellist (from, *channel, 0);
@@ -1196,8 +1198,6 @@ remove_from_channel (char *channel, char *nick, int server, int netsplit, char *
 {
 	ChannelList *chan;
 	NickList *tmp = NULL;
-	extern char *last_split_server;
-	extern char *last_split_from;
 	char buf[BIG_BUFFER_SIZE + 1];
 	char *server1 = NULL, *server2 = NULL;
 	context;
@@ -1732,7 +1732,7 @@ in_join_list (char *chan, int server)
 	return 0;
 }
 
-void 
+static void 
 show_channel_sync (struct joinlist *tmp, char *chan)
 {
 	struct timeval tv;

@@ -1,0 +1,169 @@
+# Makefile.in - Xaric makefile template
+# Copyright (c) 2000 Rex Feany (laeos@xaric.org)
+#
+# This file is a part of Xaric, a silly IRC client.
+# You can find Xaric at http://www.xaric.org/.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# @(#)Makefile.in 1.9
+#
+
+
+.EXPORT_ALL_VARIABLES:
+
+O_OBJS	:=	# Object files, to link together in the final binary
+MX_OBJS	:=	# Each object gets compiled and linked to a single module
+MT_OBJS	:=	# Objects NOT linked but used in modules (for moduels that 
+		# take more then one object file
+M_OBJS	:=	# modules linked from MT_OBJS
+
+
+# Paths
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ 
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+
+XARIC_VERS = source/xaric_vers.c
+
+# Programs
+SHTOOL	:= $(srcdir)/shtool
+RM	:= rm -f
+SHELL	:= @SHELL@
+CC 	:= @CC@
+CFLAGS 	:= @CFLAGS@ @DEFS@ -Iinclude -Isource
+CPP 	:= @CPP@
+LDFLAGS := @LDFLAGS@
+LIBS	:= @LIBS@
+
+VERSION=`$(SHTOOL) version -d short $(XARIC_VERS)`
+
+# things that we should ignore when building the distribution tar
+TARIGNORE=config.log,config.cache,config.status,SCCS,BitKeeper,CVS,ChangeSet,\\.cvsignore,\\.[oa]\\$ 
+
+# include data from the subdirectories
+include source/module.mk
+
+MIX_OBJS := $(MX_OBJS:.o.so)
+MIX_OBJS += $(M_OBJS:.o.so)
+
+all:  xaric addon
+
+xaric:	$(O_OBJS) Makefile
+	$(CC) -o xaric $(CFLAGS) $(O_OBJS) $(LIBS)
+
+addon: $(MIX_OBJS)
+
+install-xaric:
+	$(SHTOOL) mkdir -p $(bindir)
+	$(SHTOOL) install -c xaric $(bindir)
+
+install-addon:
+	$(SHTOOL) mkdir -p $(sharedstatedir)/addons
+	@for i in $(srcdir)/modules/*; do \
+		echo "$(SHTOOL) install -c $$i $(sharedstatedir)/addons"; \
+		$(SHTOOL) install -c $$i $(sharedstatedir)/addons; \
+	done
+
+${srcdir}/configure: configure.in aclocal.m4 acinclude.m4
+	cd ${srcdir} && $(AUTOCONF)
+
+${srcdir}/include/config.h.in: ${srcdir}/include/stamp-h.in
+
+${srcdir}/include/stamp-h.in: configure.in aclocal.m4 acinclude.m4 acconfig.h include/config.h.in
+	cd ${srcdir} && autoheader
+	echo timestamp > ${srcdir}/include/stamp-h.in
+
+config.h: stamp-h
+stamp-h: config.h.in config.status
+	./config.status
+
+Makefile: Makefile.in config.status
+	./config.status
+
+config.status: configure
+	./config.status --recheck
+
+clean:
+	$(RM) $(O_OBJS) $(MX_OBJS) $(MT_OBJS)
+
+distclean: clean
+	$(RM) Makefile config.status config.log include/config.h 
+	$(RM) config.cache modules/*.so $(M_OBJS)
+	$(RM) xaric
+
+dist:
+	@echo "Building distribution for Xaric v$(VERSION)"
+	@$(RM) include/config.h # sorta broken but i can't seem to make it work in the ignore string :(
+	@$(SHTOOL) tarball -o xaric-$(VERSION).tar.gz -c 'gzip -9' -e '$(TARIGNORE)' .
+	@echo "Done."
+
+.c.o:
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
+
+.o.so:
+	$(LD) -shared -o $@ $<
+
+update-tools:
+	@$(RM) shtool
+	$(MAKE) shtool
+
+shtool:
+	shtoolize -o shtool echo version mkdir install tarball
+
+newversion:
+	@$(SHTOOL) version -lc -n xaric -p XARIC  -iv $(XARIC_VERS)
+revision:
+	@$(SHTOOL) version -lc -n xaric -p XARIC  -ir $(XARIC_VERS)
+patch:
+	@$(SHTOOL) version -lc -n xaric -p XARIC  -iP $(XARIC_VERS)
+alpha:
+	@$(SHTOOL) version -lc -n xaric -p XARIC  -ia $(XARIC_VERS)
+beta:
+	@$(SHTOOL) version -lc -n xaric -p XARIC  -ib $(XARIC_VERS)
+snap:
+	@$(SHTOOL) version -lc -n xaric -p XARIC  -is $(XARIC_VERS)
+

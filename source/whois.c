@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)whois.c 1.10"
 /*
  * whois.c: Some tricky routines for querying the server for information
  * about a nickname using WHOIS.... all the time hiding this from the user.  
@@ -37,6 +37,7 @@
 #include "status.h"
 #include "whowas.h"
 #include "struct.h"
+#include "util.h"
 #include "fset.h"
 
 char whois_nick[] = "#WHOIS#";
@@ -854,7 +855,7 @@ whois_ignore_invites (WhoisStuff * stuff, char *nick, char *text)
 					chan = w_chan->channellist;
 			}
 			if (chan && get_int_var (AUTO_REJOIN_VAR))
-				send_to_server ("JOIN %s%s%s", invite_channel, chan->key ? " " : empty_string, chan->key ? chan->key : empty_string);
+				send_to_server ("JOIN %s%s%s", invite_channel, chan->key ? space_string : empty_string, chan->key ? chan->key : empty_string);
 		}
 		else if (get_int_var (SEND_IGNORE_MSG_VAR))
 			send_to_server ("NOTICE %s :%s is ignoring you.",
@@ -1019,7 +1020,7 @@ userhost_cmd_returned (WhoisStuff * stuff, char *nick, char *text)
 	strcat (args, stuff->oper ? " + " : " - ");
 	strcat (args, stuff->away ? "+ " : "- ");
 	strcat (args, stuff->user ? stuff->user : empty_string);
-	strcat (args, space);
+	strcat (args, space_string);
 	strcat (args, stuff->host ? stuff->host : empty_string);
 	parse_line ("USERHOST", text, args, 0, 0);
 }

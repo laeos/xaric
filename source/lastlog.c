@@ -1,3 +1,4 @@
+#ident "@(#)lastlog.c 1.8"
 /*
  * lastlog.c: handles the lastlog features of irc. 
  *
@@ -22,6 +23,7 @@
 #include "output.h"
 #include "misc.h"
 #include "hook.h"
+#include "util.h"
 #include "status.h"
 #include "fset.h"
 #include "tcommand.h"
@@ -93,7 +95,7 @@ bits_to_lastlog_level (unsigned long level)
 			if (level & p)
 			{
 				strmcat (buffer, levels[i], 280);
-				strmcat (buffer, " ", 280);
+				strmcat (buffer, space_string, 280);
 			}
 		}
 	}
@@ -233,10 +235,10 @@ set_lastlog_size (Window * win_unused, char *unused, int size)
 void
 cmd_lastlog (struct command *cmd, char *args)
 {
-	int cnt, from = 0, p, i, level = 0, msg_level, len, mask = 0, header = 1,
+	int cnt, from = 0, p, i, level = 0, msglvl, len, mask = 0, header = 1,
 	  lines = 0;
 	Lastlog *start_pos;
-	char *match = NULL, *arg;
+	char *mat = NULL, *arg;
 	char *blah = NULL;
 	FILE *fp = NULL;
 
@@ -264,26 +266,26 @@ cmd_lastlog (struct command *cmd, char *args)
 			}
 			else if (!my_strnicmp (arg, "LITERAL", len))
 			{
-				if (match)
+				if (mat)
 				{
 					say ("Second -LITERAL argument ignored");
 					(void) new_next_arg (args, &args);
 					continue;
 				}
-				if ((match = new_next_arg (args, &args)) != NULL)
+				if ((mat = new_next_arg (args, &args)) != NULL)
 					continue;
 				say ("Need pattern for -LITERAL");
 				return;
 			}
 			else if (!my_strnicmp (arg, "BEEP", len))
 			{
-				if (match)
+				if (mat)
 				{
 					say ("-BEEP is exclusive; ignored");
 					continue;
 				}
 				else
-					match = "\007";
+					mat = "\007";
 			}
 #if 0
 			else if (!my_strnicmp (arg, "CLEAR", len))
@@ -333,13 +335,13 @@ cmd_lastlog (struct command *cmd, char *args)
 		{
 			if (level == 0)
 			{
-				if (match || isdigit (*arg))
+				if (mat || isdigit (*arg))
 				{
 					cnt = atoi (arg);
 					level++;
 				}
 				else
-					match = arg;
+					mat = arg;
 			}
 			else if (level == 1)
 			{
@@ -358,7 +360,7 @@ cmd_lastlog (struct command *cmd, char *args)
 			i++;
 
 	level = curr_scr_win->lastlog_level;
-	msg_level = set_lastlog_msg_level (0);
+	msglvl = set_lastlog_msg_level (0);
 	if (start_pos == NULL)
 		start_pos = curr_scr_win->lastlog_tail;
 	else
@@ -369,14 +371,14 @@ cmd_lastlog (struct command *cmd, char *args)
 	if (header && !fp)
 		say ("Lastlog:");
 
-	if (match)
+	if (mat)
 	{
 #ifdef __GNUC__
 
-		blah = (char *) alloca (strlen (match) + 4);
-		sprintf (blah, "*%s*", match);
+		blah = (char *) alloca (strlen (mat) + 4);
+		sprintf (blah, "*%s*", mat);
 #else
-		malloc_sprintf (&blah, "*%s*", match);
+		malloc_sprintf (&blah, "*%s*", mat);
 #endif
 	}
 	for (i = 0; (i < cnt) && start_pos; start_pos = start_pos->prev)
@@ -384,7 +386,7 @@ cmd_lastlog (struct command *cmd, char *args)
 		if (!mask || (mask & start_pos->level))
 		{
 			i++;
-			if (!match || wild_match (blah, start_pos->msg))
+			if (!mat || wild_match (blah, start_pos->msg))
 			{
 				if (!fp)
 				{
@@ -408,7 +410,7 @@ cmd_lastlog (struct command *cmd, char *args)
 	strip_ansi_in_echo = 1;
 	curr_scr_win->lastlog_level = level;
 	message_from (NULL, LOG_CRAP);
-	set_lastlog_msg_level (msg_level);
+	set_lastlog_msg_level (msglvl);
 }
 
 /*

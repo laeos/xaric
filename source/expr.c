@@ -1,23 +1,97 @@
+#ident "@(#)expr.c 1.1"
 /*
+ * This file is a combination of what was left of alias.c and expr.c
+ *
+ * alias.c Handles command aliases for irc.c 
+ * Written By Michael Sandrof
+ * Copyright(c) 1990, 1995 Michael Sandroff and others 
+ *
  * expr.c -- The expression mode parser and the textual mode parser
  * #included by alias.c -- DO NOT DELETE
- *
  * Copyright 1990 Michael Sandrof
  * Copyright 1997 EPIC Software Labs
- * See the COPYRIGHT file for more info
+ *
+ * Modified for xaric by Rex Feany <laeos@laeos.net>
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#include <stdio.h>
+#include <sys/stat.h>
+
+
+#include "irc.h"
+#include "expr.h"
+#include "history.h"
+#include "ircaux.h"
+#include "output.h"
+#include "vars.h"
+#include "fset.h"
+#include "input.h"
+#include "util.h"
+
+
+#define LEFT_BRACE '{'
+#define RIGHT_BRACE '}'
+#define LEFT_BRACKET '['
+#define RIGHT_BRACKET ']'
+#define LEFT_PAREN '('
+#define RIGHT_PAREN ')'
+#define DOUBLE_QUOTE '"'
+
+
+
+/* alias_illegals: characters that are illegal in alias names */
+static char alias_illegals[] = " #+-*/\\()={}[]<>!@$%^~`,?;:|'\"";
+
+static char *alias_string = NULL;
 
 /* Function decls */
+static char *get_variable_with_args (char *str, char *args, int *args_flag);
 static void TruncateAndQuote (char **, char *, int, char *, char);
-char *alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *args_flag);
 static void do_alias_string (char, char *);
 
-char *alias_string = NULL;
+
+static char *
+get_variable_with_args (char *str, char *args, int *args_flag)
+{
+	char *ret = NULL;
+	char *name = NULL;
+
+	name = remove_brackets (str, args, args_flag);
+
+	if ((strlen (str) == 1) && (ret = built_in_alias (*str)))
+	{
+		new_free (&name);
+		return ret;
+	}
+	else if ((ret = make_string_var (str)))
+		;
+	else if ((ret = make_fstring_var (str)))
+		;
+	else
+		ret = getenv (str);
+
+	new_free (&name);
+	return m_strdup (ret);
+}
 
 
 /**************************** TEXT MODE PARSER *****************************/
@@ -53,12 +127,7 @@ expand_alias (char *string, char *args, int *args_flag, char **more_text)
 	}
 	quote_temp[1] = 0;
 
-#ifdef __GNUC__
-	stuff = alloca (strlen (string) + 1);
-	strcpy (stuff, string);
-#else
 	malloc_strcpy (&stuff, string);
-#endif
 	free_stuff = stuff;
 
 	ptr = stuff;
@@ -158,9 +227,7 @@ expand_alias (char *string, char *args, int *args_flag, char **more_text)
 	if (stuff)
 		m_strcat_ues (&buffer, stuff, unescape);
 
-#ifndef __GNUC__
 	new_free (&free_stuff);
-#endif
 	if (get_int_var (DEBUG_VAR) & DEBUG_EXPANSIONS)
 		yell ("Expanded [%s] to [%s]", string, buffer);
 
@@ -185,7 +252,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 {
 	char *tmp, *tmp2, c, pad_char = 0;
 
-	int upper, lower, length;
+	int uper, lwer, length;
 
 	length = 0;
 	if ((c = *ptr) == LEFT_BRACKET)
@@ -295,7 +362,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				if (c == '~')
 				{
 					/* double check to make sure $~ still works */
-					lower = upper = EOS;
+					lwer = uper = EOS;
 					ptr++;
 				}
 				else if (c == '-')
@@ -306,24 +373,24 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 					 * stripped spaces on $-0, which is
 					 * not correct.
 					 */
-					lower = SOS;
+					lwer = SOS;
 					ptr++;
-					upper = parse_number (&ptr);
-					if (upper == -1)
+					uper = parse_number (&ptr);
+					if (uper == -1)
 						return empty_string;	/* error */
 				}
 				else
 				{
-					lower = parse_number (&ptr);
+					lwer = parse_number (&ptr);
 					if (*ptr == '-')
 					{
 						ptr++;
-						upper = parse_number (&ptr);
-						if (upper == -1)
-							upper = EOS;
+						uper = parse_number (&ptr);
+						if (uper == -1)
+							uper = EOS;
 					}
 					else
-						upper = lower;
+						uper = lwer;
 				}
 
 				/*
@@ -338,7 +405,7 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 				if (!args)
 					tmp2 = m_strdup (empty_string);
 				else
-					tmp2 = extract2 (args, lower, upper);
+					tmp2 = extract2 (args, lwer, uper);
 
 				TruncateAndQuote (buffer, tmp2, length, quote_em, pad_char);
 				new_free (&tmp2);
@@ -346,8 +413,10 @@ alias_special_char (char **buffer, char *ptr, char *args, char *quote_em, int *a
 			}
 			else
 			{
-				char *rest, c = (char) 0;
+				char *rest;
 				int function_call = 0;
+
+				c = (char)0;
 
 				/*
 				 * Why use ptr+1?  Cause try to maintain backward compatability
@@ -468,7 +537,7 @@ do_alias_string (char unused, char *not_used)
  * of bracket expected is passed as a parameter. Returns NULL on error.
  */
 char *
-my_next_expr (char **args, char type, int whine)
+my_next_expr (char **args, char typ, int whine)
 {
 	char *ptr, *ptr2, *ptr3;
 
@@ -477,16 +546,16 @@ my_next_expr (char **args, char type, int whine)
 	ptr2 = *args;
 	if (!*ptr2)
 		return 0;
-	if (*ptr2 != type)
+	if (*ptr2 != typ)
 	{
 		if (whine)
 			say ("Expression syntax");
 		return 0;
 	}			/* { */
-	ptr = MatchingBracket (ptr2 + 1, type, (type == '(') ? ')' : '}');
+	ptr = MatchingBracket (ptr2 + 1, typ, (typ == '(') ? ')' : '}');
 	if (!ptr)
 	{
-		say ("Unmatched '%c'", type);
+		say ("Unmatched '%c'", typ);
 		return 0;
 	}
 	*ptr = '\0';
@@ -509,13 +578,13 @@ my_next_expr (char **args, char type, int whine)
 }
 
 extern char *
-next_expr_failok (char **args, char type)
+next_expr_failok (char **args, char typ)
 {
-	return my_next_expr (args, type, 0);
+	return my_next_expr (args, typ, 0);
 }
 
 extern char *
-next_expr (char **args, char type)
+next_expr (char **args, char typ)
 {
-	return my_next_expr (args, type, 1);
+	return my_next_expr (args, typ, 1);
 }

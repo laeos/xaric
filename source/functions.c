@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)functions.c 1.13"
 /*
  * functions.c -- Built-in functions for ircII
  *
@@ -14,7 +14,6 @@
 
 
 #include "irc.h"
-#include "alias.h"
 #include "dcc.h"
 #include "commands.h"
 #include "files.h"
@@ -37,6 +36,9 @@
 #include "numbers.h"
 #include "ignore.h"
 #include "hash2.h"
+#include "expr.h"
+#include "util.h"
+#include "xaric_version.h"
 
 #include <sys/stat.h>
 
@@ -61,7 +63,6 @@ static char *alias_chanop (void);
 static char *alias_modes (void);
 static char *alias_buffer (void);
 static char *alias_time (void);
-static char *alias_version (void);
 static char *alias_currdir (void);
 static char *alias_current_numeric (void);
 static char *alias_show_userhost (void);
@@ -108,7 +109,6 @@ static BuiltIns built_in[] =
 	{'S', alias_server},
 	{'T', alias_target},
 	{'U', alias_buffer},
-	{'V', alias_version},
 	{'W', alias_currdir},
 	{'X', alias_show_userhost},
 	{'Y', alias_show_realname},
@@ -210,7 +210,7 @@ alias_show_realname (void)
 static char *
 alias_version_str (void)
 {
-	return m_strdup (irc_version);
+	return m_strdup (XARIC_VersionStr);
 }
 static char *
 alias_invite (void)
@@ -221,11 +221,6 @@ static char *
 alias_oper (void)
 {
 	return m_strdup (get_server_operator (from_server) ? get_string_var (STATUS_OPER_VAR) : empty_string);
-}
-static char *
-alias_version (void)
-{
-	return m_strdup (internal_version);
 }
 static char *
 alias_online (void)

@@ -54,4 +54,6 @@ void show_whowas(void);
 void show_wholeft(char *);
 
 extern WhowasWrapList whowas_splitin_list;
+extern WhowasWrapList whowas_userlist_list;
+extern WhowasWrapList whowas_reg_list;
 #endif

@@ -1,3 +1,4 @@
+#ident "@(#)parse.c 1.9"
 /*
  * parse.c: handles messages from the server.   Believe it or not.  I
  * certainly wouldn't if I were you. 
@@ -43,6 +44,7 @@
 #include "timer.h"
 #include "hash2.h"
 #include "fset.h"
+#include "util.h"
 #include "tcommand.h"
 
 #define space ' '

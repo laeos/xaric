@@ -1,3 +1,4 @@
+#ident "@(#)vars.c 1.11"
 /*
  * vars.c: All the dealing of the irc variables are handled here. 
  *
@@ -36,15 +37,9 @@
 #include "hash2.h"
 #include "fset.h"
 #include "format.h"
-#include "alist.h"
 #include "tcommand.h"
+#include "util.h"
 
-
-
-char *var_settings[] =
-{
-	"OFF", "ON", "TOGGLE"
-};
 
 
 extern char *auto_str;
@@ -67,7 +62,6 @@ static void set_user_mode (Window *, char *, int);
 static void reinit_screen (Window *, char *, int);
 static void reinit_status (Window *, char *, int);
 int save_formats (FILE *);
-void create_fsets (void);
 
 /*
  * irc_variable: all the irc variables used.  Note that the integer and
@@ -379,37 +373,11 @@ init_variables ()
 	set_notify_level (curr_scr_win, irc_variable[NOTIFY_LEVEL_VAR].string, 0);
 	set_msglog_level (curr_scr_win, irc_variable[MSGLOG_LEVEL_VAR].string, 0);
 
-	create_fsets ();
 	set_input_prompt (curr_scr_win, DEFAULT_INPUT_PROMPT, 0);
 	build_status (curr_scr_win, NULL, 0);
 	window_display = old_display;
 }
 
-/*
- * do_boolean: just a handy thing.  Returns 1 if the str is not ON, OFF, or
- * TOGGLE 
- */
-int 
-do_boolean (str, value)
-     char *str;
-     int *value;
-{
-	upper (str);
-	if (strcmp (str, var_settings[ON]) == 0)
-		*value = 1;
-	else if (strcmp (str, var_settings[OFF]) == 0)
-		*value = 0;
-	else if (strcmp (str, "TOGGLE") == 0)
-	{
-		if (*value)
-			*value = 0;
-		else
-			*value = 1;
-	}
-	else
-		return (1);
-	return (0);
-}
 
 /*
  * set_var_value: Given the variable structure and the string representation
@@ -593,7 +561,7 @@ cmd_set (struct command *cmd, char *args)
 			args = NULL;
 		}
 		upper (var);
-		find_fixed_array_item (irc_variable, sizeof (IrcVariable), NUMBER_OF_VARIABLES, var, &cnt, (int *) &var_index);
+		bsearch_array(irc_variable, sizeof (IrcVariable), NUMBER_OF_VARIABLES, var, &cnt, (int *) &var_index);
 
 		if (cnt == 1)
 			cnt = -1;
@@ -628,7 +596,6 @@ cmd_set (struct command *cmd, char *args)
 	}
 	else
 	{
-		int var_index;
 		for (var_index = 0; var_index < NUMBER_OF_VARIABLES; var_index++)
 			set_var_value (var_index, empty_string);
 	}
@@ -686,7 +653,7 @@ make_string_var (char *var_name)
 	char *ret = NULL;
 
 	upper (var_name);
-	if ((find_fixed_array_item (irc_variable, sizeof (IrcVariable), NUMBER_OF_VARIABLES, var_name, &cnt, &msv_index) == NULL))
+	if ((bsearch_array (irc_variable, sizeof (IrcVariable), NUMBER_OF_VARIABLES, var_name, &cnt, &msv_index) == NULL))
 		return NULL;
 	if (cnt >= 0)
 		return NULL;

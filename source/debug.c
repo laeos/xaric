@@ -1,4 +1,4 @@
-
+#ident "@(#)debug.c 1.8"
 /*
  * debug.c -- controll the values of x_debug.
  *
@@ -16,6 +16,7 @@
 #include "output.h"
 #include "misc.h"
 #include "tcommand.h"
+#include "util.h"
 
 unsigned long x_debug = 0;
 
@@ -47,7 +48,7 @@ void
 cmd_debug (struct command *cmd, char *args)
 {
 	int cnt;
-	int remove = 0;
+	int rem = 0;
 	char *this_arg;
 
 	if (!args || !*args)
@@ -74,7 +75,7 @@ cmd_debug (struct command *cmd, char *args)
 	{
 		this_arg = upper (next_arg (args, &args));
 		if (*this_arg == '-')
-			remove = 1, this_arg++;
+			rem = 1, this_arg++;
 		else if (*this_arg == '+')
 			this_arg++;
 
@@ -82,7 +83,7 @@ cmd_debug (struct command *cmd, char *args)
 		{
 			if (!strcmp (this_arg, opts[cnt].command))
 			{
-				if (remove)
+				if (rem)
 					x_debug &= ~opts[cnt].flag;
 				else
 					x_debug |= opts[cnt].flag;

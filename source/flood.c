@@ -1,4 +1,4 @@
-
+#ident "@(#)flood.c 1.8"
 /*
  * flood.c: handle channel flooding. 
  *
@@ -17,7 +17,6 @@
 
 #include "irc.h"
 
-#include "alias.h"
 #include "hook.h"
 #include "ircaux.h"
 #include "ignore.h"
@@ -133,7 +132,7 @@ cmd_no_flood (struct command *cmd, char *args)
 	}
 }
 
-int 
+static int 
 get_flood_rate (int type, ChannelList * channel)
 {
 	int flood_rate = get_int_var (FLOOD_RATE_VAR);
@@ -174,7 +173,7 @@ get_flood_rate (int type, ChannelList * channel)
 	return flood_rate;
 }
 
-int 
+static int 
 get_flood_count (int type, ChannelList * channel)
 {
 	int flood_count = get_int_var (FLOOD_AFTER_VAR);
@@ -215,7 +214,7 @@ get_flood_count (int type, ChannelList * channel)
 	return flood_count;
 }
 
-int 
+static int 
 set_flood (int type, time_t flood_time, int reset, NickList * tmpnick)
 {
 	if (!tmpnick)
@@ -351,7 +350,7 @@ is_other_flood (ChannelList * channel, NickList * tmpnick, int type, int *t_floo
 	return 0;
 }
 
-char *
+static char *
 get_ignore_types (unsigned int type)
 {
 	int x = 0;

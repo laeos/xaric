@@ -1,7 +1,7 @@
-
+#ident "@(#)help.c 1.8"
 /*
  * help.c -- Xaric help system
- * (c) 1997 Rex Feany (rfeany@qnet.com) 
+ * (c) 1997,1998,1999,2000 Rex Feany (laeos@laeos.net) 
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * $Id$
  *
  */
 

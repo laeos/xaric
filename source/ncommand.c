@@ -1,4 +1,4 @@
-#ident "$Id: ncommand.c,v 1.4 1999/12/02 03:30:51 laeos Exp $"
+#ident "%W%"
 /*
  * ncommand.c : new commands for Xaric
  * (c) 1998 Rex Feany <laeos@ptw.com> 
@@ -51,9 +51,7 @@
 #include "input.h"
 #include "ignore.h"
 #include "keys.h"
-#include "alist.h"
 #include "names.h"
-#include "alias.h"
 #include "history.h"
 #include "funny.h"
 #include "ctcp.h"
@@ -69,7 +67,8 @@
 #include "hash2.h"
 #include "fset.h"
 #include "notice.h"
-
+#include "xaric_version.h"
+#include "util.h"
 
 #include "tcommand.h"
 
@@ -103,7 +102,7 @@ extern NickTab *tabkey_array;
 /* -- These are all the commands ------------------------ */
 
 
-void
+static void
 cmd_abort (struct command *cmd, char *args)
 {
 	char *filename = next_arg (args, &args);
@@ -114,7 +113,7 @@ cmd_abort (struct command *cmd, char *args)
 	abort ();
 }
 
-void
+static void
 cmd_about (struct command *cmd, char *args)
 {
 	int i = strip_ansi_in_echo;
@@ -123,15 +122,15 @@ cmd_about (struct command *cmd, char *args)
 
 	charset_ibmpc ();
 	put_it (empty_string);
-	put_it ("\t[36mX a r i c");
-	put_it ("\t[35mv%s brought to you by Laeos, Korndawg, and Hawky", irc_version);
-	put_it ("\t[35m<http://www.laeos.net/xaric>");
+	put_it ("\t[36m %s", XARIC_Hello);
+	put_it ("\t[35mbrought to you by Laeos, Korndawg, and Hawky");
+	put_it ("\t[35m<http://www.laeos.net/projects/xaric>");
 	put_it (empty_string);
 	charset_lat1 ();
 	strip_ansi_in_echo = i;
 }
 
-void
+static void
 cmd_alias (struct command *cmd, char *args)
 {
 	char *str;
@@ -160,7 +159,7 @@ cmd_alias (struct command *cmd, char *args)
 
 }
 
-void
+static void
 cmd_away (struct command *cmd, char *args)
 {
 	int len;
@@ -216,7 +215,7 @@ read_away_log (char *stuff, char *line)
 	update_input (UPDATE_ALL);
 }
 
-void
+static void
 cmd_back (struct command *cmd, char *args)
 {
 	char *tmp = NULL;
@@ -273,7 +272,7 @@ cmd_back (struct command *cmd, char *args)
 }
 
 
-void
+static void
 cmd_chwall (struct command *cmd, char *args)
 {
 	char *channel = NULL;
@@ -302,12 +301,12 @@ cmd_chwall (struct command *cmd, char *args)
 			if (*nick == '-')
 			{
 				malloc_strcat (&exclude, nick + 1);
-				malloc_strcat (&exclude, " ");
+				malloc_strcat (&exclude, space_string);
 			}
 			else
 			{
 				malloc_strcat (&include, nick + 1);
-				malloc_strcat (&include, " ");
+				malloc_strcat (&include, space_string);
 			}
 		}
 		if (!args || !*args)
@@ -369,13 +368,13 @@ cmd_chwall (struct command *cmd, char *args)
 	new_free (&exclude);
 }
 
-void
+static void
 cmd_clear_tab (struct command *cmd, char *args)
 {
 	clear_array (&tabkey_array);
 }
 
-void
+static void
 cmd_ctcp_version (struct command *cmd, char *args)
 {
 	char *person;
@@ -384,7 +383,7 @@ cmd_ctcp_version (struct command *cmd, char *args)
 	if ((person = next_arg (args, &args)) == NULL || !strcmp (person, "*"))
 	{
 		if ((person = get_current_channel_by_refnum (0)) == NULL)
-			person = zero;
+			person = zero_string;
 	}
 	if ((type = in_ctcp ()) == -1)
 		say ("You may not use the CTCP command in an ON CTCP_REPLY!");
@@ -396,7 +395,7 @@ cmd_ctcp_version (struct command *cmd, char *args)
 	}
 }
 
-void
+static void
 cmd_ctcp (struct command *cmd, char *args)
 {
 	char *to;
@@ -431,7 +430,7 @@ cmd_ctcp (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_clear (struct command *cmd, char *args)
 {
 	char *arg;
@@ -461,7 +460,7 @@ cmd_clear (struct command *cmd, char *args)
 
 extern char *channel_key (char *);
 
-void
+static void
 cmd_cycle (struct command *cmd, char *args)
 {
 	char *to = NULL;
@@ -474,7 +473,7 @@ cmd_cycle (struct command *cmd, char *args)
 	if (!(chan = prepare_command (&server, to, NO_OP)))
 		return;
 	my_send_to_server (server, "PART %s", chan->channel);
-	my_send_to_server (server, "JOIN %s%s%s", chan->channel, chan->key ? " " : "", chan->key ? chan->key : "");
+	my_send_to_server (server, "JOIN %s%s%s", chan->channel, chan->key ? space_string : empty_string, chan->key ? chan->key : empty_string);
 }
 
 static void
@@ -488,7 +487,7 @@ handle_dcc_chat (WhoisStuff * stuff, char *nick, char *args)
 	dcc_chat (NULL, nick);
 }
 
-void
+static void
 cmd_dcc_chat (struct command *cmd, char *args)
 {
 	char *nick = next_arg (args, &args);
@@ -505,7 +504,7 @@ cmd_dcc_chat (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_dcc (struct command *cmd, char *args)
 {
 	if (*args)
@@ -514,7 +513,7 @@ cmd_dcc (struct command *cmd, char *args)
 		dcc_glist (NULL, NULL);
 }
 
-void
+static void
 cmd_describe (struct command *cmd, char *args)
 {
 	char *target;
@@ -542,7 +541,7 @@ cmd_describe (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_disconnect (struct command *cmd, char *args)
 {
 	char *server;
@@ -601,7 +600,7 @@ cmd_disconnect (struct command *cmd, char *args)
 		put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "You are not connected to a server. Use /SERVER to connect."));
 }
 
-void
+static void
 cmd_echo (struct command *cmd, char *args)
 {
 	unsigned int display;
@@ -683,7 +682,7 @@ cmd_echo (struct command *cmd, char *args)
 		malloc_strcpy (&stuff, line_thing);
 		if (*stuff)
 		{
-			m_3cat (&stuff, space, args);
+			m_3cat (&stuff, space_string, args);
 			args = stuff;
 		}
 	}
@@ -726,7 +725,7 @@ cmd_echo (struct command *cmd, char *args)
 	to_window = old_to_window;
 }
 
-void
+static void
 cmd_flush (struct command *cmd, char *args)
 {
 	if (get_int_var (HOLD_MODE_VAR))
@@ -737,7 +736,7 @@ cmd_flush (struct command *cmd, char *args)
 }
 
 
-void
+static void
 cmd_join (struct command *cmd, char *args)
 {
 	char *chan;
@@ -781,7 +780,7 @@ cmd_join (struct command *cmd, char *args)
 			}
 			else
 			{
-				send_to_server ("JOIN %s%s%s", buffer, args ? " " : empty_string, args ? args : empty_string);
+				send_to_server ("JOIN %s%s%s", buffer, args ? space_string : empty_string, args ? args : empty_string);
 				if (!is_bound (buffer, curr_scr_win->server))
 					malloc_strcpy (&curr_scr_win->waiting_channel, buffer);
 			}
@@ -792,7 +791,7 @@ cmd_join (struct command *cmd, char *args)
 	message_from (NULL, LOG_CRAP);
 }
 
-void
+static void
 cmd_linklook (struct command *cmd, char *args)
 {
 	struct server_split *serv = server_last;
@@ -823,7 +822,7 @@ cmd_linklook (struct command *cmd, char *args)
 		bitchsay ("No split servers found");
 }
 
-void
+static void
 cmd_map (struct command *cmd, char *args)
 {
 	if (server_list[from_server].link_look == 0)
@@ -836,7 +835,7 @@ cmd_map (struct command *cmd, char *args)
 		bitchsay ("Wait until previous %s is done", server_list[from_server].link_look == 2 ? "MAP" : "LLOOK");
 }
 
-void
+static void
 cmd_me (struct command *cmd, char *args)
 {
 	if (args && *args)
@@ -874,7 +873,7 @@ cmd_me (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_names (struct command *cmd, char *args)
 {
 	char *channel = NULL;
@@ -890,7 +889,7 @@ cmd_names (struct command *cmd, char *args)
 	my_send_to_server (server, "NAMES %s", chan->channel);
 }
 
-void
+static void
 cmd_nick (struct command *cmd, char *args)
 {
 	char *nick;
@@ -903,8 +902,7 @@ cmd_nick (struct command *cmd, char *args)
 
 		return;
 	}
-	if (!(nick = check_nickname (nick)))
-	{
+	if (!is_nick (nick)) {
 		bitchsay ("Nickname specified is illegal.");
 		return;
 	}
@@ -927,7 +925,7 @@ userhost_nsl (WhoisStuff * stuff, char *nick, char *args)
 #endif
 }
 
-void
+static void
 cmd_nslookup (struct command *cmd, char *args)
 {
 	char *host;
@@ -949,13 +947,13 @@ cmd_nslookup (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_nwhowas (struct command *cmd, char *args)
 {
 	show_whowas ();
 }
 
-void
+static void
 cmd_part (struct command *cmd, char *args)
 {
 	char *channel = NULL;
@@ -980,7 +978,7 @@ cmd_part (struct command *cmd, char *args)
 	}
 }
 
-void
+static void
 cmd_ping (struct command *cmd, char *args)
 {
 	struct timeval tp;
@@ -991,7 +989,7 @@ cmd_ping (struct command *cmd, char *args)
 	if ((to = next_arg (args, &args)) == NULL || !strcmp (to, "*"))
 	{
 		if ((to = get_current_channel_by_refnum (0)) == NULL)
-			to = zero;
+			to = zero_string;
 	}
 
 	if (in_ctcp () == -1)
@@ -1005,7 +1003,7 @@ cmd_ping (struct command *cmd, char *args)
 
 }
 
-void
+static void
 cmd_privmsg (struct command *cmd, char *args)
 {
 	char *nick;
@@ -1044,7 +1042,7 @@ real_quit (char *dummy, char *ptr)
 	bitchsay ("Excelllaaant!!");
 }
 
-void
+static void
 cmd_query (struct command *xcmd, char *args)
 {
 	char *nick, *rest;
@@ -1110,7 +1108,7 @@ cmd_query (struct command *xcmd, char *args)
 	message_from (NULL, LOG_CRAP);
 }
 
-void
+static void
 cmd_quit (struct command *cmd, char *args)
 {
 	int old_server = from_server;
@@ -1123,7 +1121,7 @@ cmd_quit (struct command *cmd, char *args)
 	else
 		Reason = get_signoffreason (get_server_nickname (from_server));
 	if (!Reason || !*Reason)
-		Reason = (char *) irc_version;
+		Reason = (char *) XARIC_WebID;
 
 	for (Client = ClientList; Client; Client = Client->next)
 	{
@@ -1142,14 +1140,14 @@ cmd_quit (struct command *cmd, char *args)
 	}
 }
 
-void
+static void
 cmd_quote (struct command *cmd, char *args)
 {
 	if (!in_on_who && !doing_privmsg && args && *args)
 		send_to_server ("%s", args);
 }
 
-void
+static void
 cmd_reconnect (struct command *cmd, char *args)
 {
 	char scommnd[6];
@@ -1170,13 +1168,13 @@ cmd_reconnect (struct command *cmd, char *args)
 	t_parse_command ("SERVER", scommnd);
 }
 
-void
+static void
 cmd_reset (struct command *cmd, char *args)
 {
 	refresh_screen (0, NULL);
 }
 
-void
+static void
 cmd_generic_ch (struct command *cmd, char *args)
 {
 	char *name = cmd->rname ? cmd->rname : cmd->name;
@@ -1197,14 +1195,14 @@ cmd_generic_ch (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_generic (struct command *cmd, char *args)
 {
 	char *name = cmd->rname ? cmd->rname : cmd->name;
-	send_to_server ("%s %s", name, args ? args : "");
+	send_to_server ("%s %s", name, args ? args : empty_string);
 }
 
-void
+static void
 cmd_hook (struct command *cmd, char *args)
 {
 	if (args && *args)
@@ -1213,7 +1211,7 @@ cmd_hook (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_send_text (struct command *cmd, char *args)
 {
 	char *tmp;
@@ -1240,7 +1238,7 @@ cmd_send_text (struct command *cmd, char *args)
 		send_text (tmp, args, NULL, 1, 1);
 }
 
-void
+static void
 cmd_server (struct command *cmd, char *args)
 {
 	char *server = NULL;
@@ -1341,7 +1339,7 @@ cmd_server (struct command *cmd, char *args)
 	}
 }
 
-void
+static void
 cmd_setenv (struct command *cmd, char *args)
 {
 	char *env_var;
@@ -1352,7 +1350,7 @@ cmd_setenv (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_sping (struct command *cmd, char *args)
 {
 	char *servern = next_arg (args, &args);
@@ -1382,7 +1380,7 @@ cmd_sping (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_squit (struct command *cmd, char *args)
 {
 	char *srv1 = next_arg (args, &args);
@@ -1404,7 +1402,7 @@ cmd_squit (struct command *cmd, char *args)
 		userage (cmd->name, cmd->qhelp);
 }
 
-void
+static void
 cmd_stats (struct command *cmd, char *args)
 {
 	char *flags = NULL, *serv = NULL;
@@ -1464,7 +1462,7 @@ cmd_stats (struct command *cmd, char *args)
 	send_to_server ("%s %s %s", cmd->name, new_flag, serv);
 }
 
-void
+static void
 cmd_showidle (struct command *cmd, char *args)
 {
 	ChannelList *tmp;
@@ -1488,7 +1486,7 @@ cmd_showidle (struct command *cmd, char *args)
 	}
 }
 
-void
+static void
 cmd_topic (struct command *cmd, char *args)
 {
 	char *arg = NULL;
@@ -1516,8 +1514,8 @@ cmd_topic (struct command *cmd, char *args)
 		else
 		{
 			char *p = NULL;
-			p = m_sprintf ("%s%s%s", arg, arg ? space : empty_string, args ? args : empty_string);
-			my_send_to_server (server, "TOPIC %s :%s%s%s", chan->channel, arg, args ? space : empty_string, args ? args : empty_string);
+			p = m_sprintf ("%s%s%s", arg, arg ? space_string : empty_string, args ? args : empty_string);
+			my_send_to_server (server, "TOPIC %s :%s%s%s", chan->channel, arg, args ? space_string : empty_string, args ? args : empty_string);
 			new_free (&p);
 		}
 	}
@@ -1525,7 +1523,7 @@ cmd_topic (struct command *cmd, char *args)
 		my_send_to_server (server, "TOPIC %s", chan->channel);
 }
 
-void
+static void
 cmd_trace (struct command *cmd, char *args)
 {
 	char *flags = NULL, *serv = NULL;
@@ -1557,15 +1555,15 @@ cmd_trace (struct command *cmd, char *args)
 			serv = next_arg (args, &args);
 	}
 	if (server_list[from_server].trace_flags & TRACE_OPER)
-		bitchsay ("Tracing server %s%sfor Operators", serv ? serv : empty_string, serv ? " " : empty_string);
+		bitchsay ("Tracing server %s%sfor Operators", serv ? serv : empty_string, serv ? space_string : empty_string);
 	if (server_list[from_server].trace_flags & TRACE_USER)
-		bitchsay ("Tracing server %s%sfor Users", serv ? serv : empty_string, serv ? " " : empty_string);
+		bitchsay ("Tracing server %s%sfor Users", serv ? serv : empty_string, serv ? space_string : empty_string);
 	if (server_list[from_server].trace_flags & TRACE_SERVER)
-		bitchsay ("Tracing server %s%sfor servers", serv ? serv : empty_string, serv ? " " : empty_string);
-	send_to_server ("%s%s%s", cmd->name, serv ? " " : empty_string, serv ? serv : empty_string);
+		bitchsay ("Tracing server %s%sfor servers", serv ? serv : empty_string, serv ? space_string : empty_string);
+	send_to_server ("%s%s%s", cmd->name, serv ? space_string : empty_string, serv ? serv : empty_string);
 }
 
-void
+static void
 cmd_unalias (struct command *cmd, char *args)
 {
 	char *c;
@@ -1660,11 +1658,11 @@ userhost_ignore (WhoisStuff * stuff, char *nick1, char *args)
 	return;
 }
 
-void
+static void
 cmd_doig (struct command *cmd, char *args)
 {
 	char *nick;
-	static char ignore_type[6];
+	static char ignore_t[6];
 	int got_ignore_type = 0;
 	int need_time = 0;
 
@@ -1681,7 +1679,7 @@ cmd_doig (struct command *cmd, char *args)
 		if (*nick == '-' || *nick == '+')
 		{
 			if (!my_stricmp (nick, "-USER") || !my_stricmp (nick, "+HOST") || !my_stricmp (nick, "+USER") || !my_stricmp (nick, "-HOST"))
-				strcpy (ignore_type, nick);
+				strcpy (ignore_t, nick);
 			if (!args || !*args)
 				goto bad_ignore;
 			++got_ignore_type;
@@ -1690,20 +1688,20 @@ cmd_doig (struct command *cmd, char *args)
 		else if (!got_ignore_type)
 		{
 			if (!my_strnicmp (cmd->name, "IGH", 3))
-				strcpy (ignore_type, "+HOST");
+				strcpy (ignore_t, "+HOST");
 			else if (!my_strnicmp (cmd->name, "IG", 2))
-				strcpy (ignore_type, "+USER");
+				strcpy (ignore_t, "+USER");
 			if (!my_strnicmp (cmd->name, "UNIGH", 5))
-				strcpy (ignore_type, "-HOST");
+				strcpy (ignore_t, "-HOST");
 			else if (!my_strnicmp (cmd->name, "UNIG", 4))
-				strcpy (ignore_type, "-USER");
+				strcpy (ignore_t, "-USER");
 			if (toupper (cmd->name[strlen (cmd->name) - 1]) == 'T')
 				need_time++;
 		}
 		if (need_time)
-			add_to_userhost_queue (nick, userhost_ignore, "%s %d", ignore_type, get_int_var (IGNORE_TIME_VAR) * 60);
+			add_to_userhost_queue (nick, userhost_ignore, "%s %d", ignore_t, get_int_var (IGNORE_TIME_VAR) * 60);
 		else
-			add_to_userhost_queue (nick, userhost_ignore, "%s", ignore_type);
+			add_to_userhost_queue (nick, userhost_ignore, "%s", ignore_t);
 	}
 	return;
       bad_ignore:
@@ -1718,17 +1716,17 @@ ison_now (char *notused, char *nicklist)
 		put_it ("%s Currently online: %s", line_thing, nicklist);
 }
 
-void
+static void
 cmd_ison (struct command *cmd, char *args)
 {
-	if (!args[strspn (args, space)])
+	if (!args[strspn (args, space_string)])
 		args = get_server_nickname (from_server);
 	add_ison_to_whois (args, ison_now);
 }
 
 extern void display_name (int);
 
-void
+static void
 cmd_info (struct command *cmd, char *args)
 {
 	display_name (0);
@@ -1736,7 +1734,7 @@ cmd_info (struct command *cmd, char *args)
 	send_to_server ("%s %s", cmd->name, args);
 }
 
-void
+static void
 cmd_invite (struct command *cmd, char *args)
 {
 	char *inick;
@@ -1760,7 +1758,7 @@ cmd_invite (struct command *cmd, char *args)
 
 			if (!chan)
 				return;
-			my_send_to_server (server, "INVITE %s %s%s%s", inick, chan->channel, chan->key ? " " : "", chan->key ? chan->key : "");
+			my_send_to_server (server, "INVITE %s %s%s%s", inick, chan->channel, chan->key ? space_string : empty_string, chan->key ? chan->key : empty_string);
 		}
 	}
 	else
@@ -1768,7 +1766,7 @@ cmd_invite (struct command *cmd, char *args)
 	return;
 }
 
-void
+static void
 cmd_ircii_version (struct command *cmd, char *args)
 {
 	char *host;
@@ -1777,12 +1775,12 @@ cmd_ircii_version (struct command *cmd, char *args)
 		send_to_server ("%s %s", cmd->name, host);
 	else
 	{
-		bitchsay ("Client: %s (internal version %s)", irc_version, internal_version);
+		bitchsay ("Client: %s", XARIC_WebID);
 		send_to_server ("%s", cmd->name);
 	}
 }
 
-void
+static void
 cmd_userhost (struct command *cmd, char *args)
 {
 	int n = 0, total = 0, userhost_cmd = 0;
@@ -1810,7 +1808,7 @@ cmd_userhost (struct command *cmd, char *args)
 		else
 		{
 			if (n++)
-				strmcat (buffer, space, BIG_BUFFER_SIZE);
+				strmcat (buffer, space_string, BIG_BUFFER_SIZE);
 			else
 				*buffer = '\0';
 			strmcat (buffer, nick, BIG_BUFFER_SIZE);
@@ -1848,7 +1846,7 @@ cmd_userhost (struct command *cmd, char *args)
 		add_to_whois_queue (get_server_nickname (from_server), USERHOST_USERHOST, "%s", get_server_nickname (from_server));
 }
 
-void
+static void
 cmd_users (struct command *cmd, char *args)
 {
 	ChannelList *chan;
@@ -2019,7 +2017,9 @@ cmd_users (struct command *cmd, char *args)
 }
 
 
-void cmd_oper_stuff (struct command *cmd, char *args)
+/* Takes zero or one arg. if cmd->data is set, we require an argument. */
+static void 
+cmd_oper_stuff1 (struct command *cmd, char *args)
 {
 	char *use = cmd->rname ? cmd->rname : cmd->name;
 
@@ -2041,7 +2041,35 @@ void cmd_oper_stuff (struct command *cmd, char *args)
 	message_from (NULL, LOG_CRAP);
 }
 
-void
+/* Takes 1 or 2 args. if data is set, we require 2. */
+static void 
+cmd_oper_stuff2 (struct command *cmd, char *args)
+{
+	char *use = cmd->rname ? cmd->rname : cmd->name;
+	char *a1, *a2;
+
+	if (!get_server_operator (current_screen->current_window->server)) {
+		yell ("You arn't worthy enough to use /%s!", cmd->name);
+		return;
+	}
+
+	if ( (a1 = next_arg(args, &args)) ) {
+		a2 = next_arg(args, &args);
+		if ( a2 || !cmd->data ) {
+
+			message_from (NULL, LOG_WALLOP);
+			if (!in_on_who)
+				send_to_server ("%s :%s", use, args);
+
+			message_from (NULL, LOG_CRAP);
+			return;
+		}
+	}
+
+	userage(cmd->name, cmd->qhelp);
+}
+
+static void
 cmd_whois_lm (struct command *cmd, char *args)
 {
 	if (recv_nick)
@@ -2051,7 +2079,7 @@ cmd_whois_lm (struct command *cmd, char *args)
 	return;
 }
 
-void
+static void
 cmd_whois_i (struct command *cmd, char *args)
 {
 	char *channel = NULL;
@@ -2066,7 +2094,7 @@ cmd_whois_i (struct command *cmd, char *args)
 				get_server_nickname (from_server));
 }
 
-void
+static void
 cmd_whois (struct command *cmd, char *args)
 {
 	if (args && *args)
@@ -2075,13 +2103,13 @@ cmd_whois (struct command *cmd, char *args)
 		send_to_server ("WHOIS %s", get_server_nickname (from_server));
 }
 
-void
+static void
 cmd_wholeft (struct command *cmd, char *args)
 {
 	show_wholeft (NULL);
 }
 
-void
+static void
 cmd_whowas (struct command *cmd, char *args)
 {
 	char *stuff = NULL;
@@ -2099,52 +2127,6 @@ cmd_whowas (struct command *cmd, char *args)
 }
 
 
-/* 
- * Commands in other files
- *
- */
-
-void cmd_help (struct command *, char *);	/* in help.c */
-void cmd_window (struct command *, char *);	/* in window.c */
-void cmd_awaylog (struct command *, char *);	/* in lastlog.c */
-void cmd_lastlog (struct command *, char *);	/* in lastlog.c */
-void cmd_parsekey (struct command *cmd, char *args);	/* in keys.c */
-void cmd_bind (struct command *cmd, char *args);	/* in keys.c */
-void cmd_rbind (struct command *cmd, char *args);	/* in keys.c */
-void cmd_type (struct command *cmd, char *args);	/* in keys.c */
-void cmd_debug (struct command *cmd, char *args);	/* in debug.c */
-void cmd_set (struct command *cmd, char *args);		/* in vars.c */
-void cmd_remove_log (struct command *cmd, char *args);	/* in readlog.c */
-void cmd_readlog (struct command *cmd, char *args);	/* in readlog.c */
-void cmd_exec (struct command *cmd, char *args);	/* in exec.c */
-void cmd_history (struct command *cmd, char *args);	/* in history.c */
-void cmd_notify (struct command *cmd, char *args);	/* in notify.c */
-void cmd_timer (struct command *cmd, char *args);	/* in timer.c */
-void cmd_ignore (struct command *cmd, char *args);	/* in ignore.c */
-void cmd_tignore (struct command *cmd, char *args);	/* in ignore.c */
-void cmd_no_flood (struct command *cmd, char *args);	/* in flood.c */
-void cmd_who (struct command *cmd, char *args);		/* in cmd_who.c */
-void cmd_hostname (struct command *cmd, char *args);	/* in cmd_hostname.c */
-void cmd_scan (struct command *cmd, char *args);	/* in cmd_scan.c */
-void cmd_show_hash (struct command *cmd, char *args);	/* in hash.c */
-void cmd_chat (struct command *cmd, char *args);	/* in dcc.c */
-void cmd_fset (struct command *cmd, char *args);	/* in fset.c */
-void cmd_save (struct command *cmd, char *args);	/* in save.c */
-void cmd_deop (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_deoper (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_op (struct command *cmd, char *args);		/* in cmd_modes.c */
-void cmd_oper (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_umode (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_unkey (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_kick (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_kill (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_unban (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_kickban (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_ban (struct command *cmd, char *args);		/* in cmd_modes.c */
-void cmd_tban (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_banstat (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_bantype (struct command *cmd, char *args);	/* in cmd_modes.c */
-void cmd_orig_nick (struct command *cmd, char *args);	/* in cmd_orignick.c */
 
 
 struct command xaric_cmds[] =
@@ -2153,6 +2135,7 @@ struct command xaric_cmds[] =
 	{"ABOUT", NULL, NULL, cmd_about, "- Info about Xaric"},
 	{"ADMIN", NULL, NULL, cmd_generic, "%R[%nserver%R]%n\n- Shows the iRC Administration information on current server or %R[%nserver%R]%n"},
 	{"ALIAS", NULL, NULL, cmd_alias, "- Make one command operate like another"},
+	{"AKILL", NULL, empty_string, cmd_oper_stuff2, "- Address mask kill? Requires oper status."},
 	{"AWAY", NULL, NULL, cmd_away, "%R[%nreason%R]%n\n- Sets you away on server if %R[%nreason%R]%n else sets you back"},
 	{"AWAYLOG", NULL, NULL, cmd_awaylog, "%R[%nALL|MSGS|NOTICES|...%R]%n\n- D isplays or changes what you want logged in your lastlog. This is a comma separated list"},
 	{"B", NULL, NULL, cmd_ban, "See %YBAN%n"},
@@ -2168,8 +2151,8 @@ struct command xaric_cmds[] =
 	{"CL", NULL, NULL, cmd_clear, "- Clears the screen"},
 	{"CLEAR", NULL, NULL, cmd_clear, "- Clears the screen"},
 	{"CLEARTAB", NULL, NULL, cmd_clear_tab, "- Clears the nicks in the tabkey list"},
-	{"CLOSE", NULL, NULL, cmd_oper_stuff, "Requires irc operator status. Close any connections from clients who have not fully registered yet."},   
-	{"CONNECT", NULL, NULL, cmd_oper_stuff, "%Y<%nserver1%Y>%n %Y<%nport%Y>%n %R[%nserver2%R]%n\n%Y*%n Requires irc operator status"},
+	{"CLOSE", NULL, NULL, cmd_oper_stuff1, "Requires irc operator status. Close any connections from clients who have not fully registered yet."},   
+	{"CONNECT", NULL, NULL, cmd_oper_stuff1, "%Y<%nserver1%Y>%n %Y<%nport%Y>%n %R[%nserver2%R]%n\n%Y*%n Requires irc operator status"},
 	{"CTCP", NULL, NULL, cmd_ctcp, "%Y<%Cnick%Y>%n %Y<%nrequest%Y>%n\n- CTCP sends %Y<%Cnick%Y>%n with %Y<%nrequest%Y>%n"},
 	{"CYCLE", NULL, NULL, cmd_cycle, "%R[%Bchannel%R]%n\n- Leaves current channel or %R[%Bchannel%R]%n and immediately rejoins"},
 	{"D", NULL, NULL, cmd_describe, "See %YDESCRIBE%n"},
@@ -2192,12 +2175,13 @@ struct command xaric_cmds[] =
 	{"EXIT", NULL, NULL, cmd_quit, "- Quits IRC"},
 	{"FLUSH", NULL, NULL, cmd_flush, "- Flush ALL server output"},
 	{"FSET", NULL, NULL, cmd_fset, NULL},
+	{"GLOBOPS", NULL, empty_string, cmd_oper_stuff1, "\n%Y<%Cmessage%Y>%n Requires irc operator status. Sends a message to global operators.%n"},
 	{"HASH", NULL, NULL, cmd_generic, "- Shows some stats about ircd's internal hashes."},
 	{"HELP", NULL, NULL, cmd_help, "%Y<%nindex%Y|%ncommand%Y>%n\n- Show an index of commands or get help on a specific command"},
 	{"HISTORY", NULL, NULL, cmd_history, "- Shows recently typed commands"},
 	{"HOSTNAME", NULL, NULL, cmd_hostname, "%Y<%nhostname%Y>%n\n- Shows list of possible hostnames with option to change it on virtual hosts"},
 	{"HOOK", NULL, NULL, cmd_hook, "- View / delete / add a hook"},
-	{"HTM", NULL, NULL, cmd_oper_stuff, "- manipulate ircd's High Traffic Mode. Requires irc operator status"},
+	{"HTM", NULL, NULL, cmd_oper_stuff1, "- manipulate ircd's High Traffic Mode. Requires irc operator status"},
 	{"I", NULL, NULL, cmd_invite, "- See %YINVITE%n"},
 	{"IG", NULL, NULL, cmd_doig, "+%G|%n-%Y<%Cnick%Y>%n\n- Ignores ALL except crap and public of nick!host matching %Y<%Cnick%Y>%n"},
 	{"IGH", NULL, NULL, cmd_doig, "+%G|%n-%Y<%Cnick%Y>%n\n- Ignores ALL except crap and public of hostname matching %Y<%Cnick%Y>%n"},
@@ -2213,13 +2197,14 @@ struct command xaric_cmds[] =
 	{"KB", NULL, NULL, cmd_kickban, "%Y<%Cnick%Y>%n %R[%nreason%R]%n\n- Deops, kicks and bans %Y<%Cnick%Y>%n for %R[%nreason%R]%n"},
 	{"KICK", NULL, NULL, cmd_kick, "%Y[<%Bchannel%G|%Y*>]%n %Y<%Cnick%Y>%n %R[%nreason%R]%n"},
 	{"KILL", NULL, NULL, cmd_kill, "%Y<%Cnick%Y>%n %R[%nreason%R]%n\n%Y*%n Requires irc operator status\n- Kills %Y<%Cnick%Y>%n for %R[%nreason%R]%n"},
+	{"KLINE", NULL, empty_string, cmd_oper_stuff2, "%Y<%Cnick%Y> <%Creason%Y>%n\n%Y*%n Requires irc operator status."},
 	{"L", NULL, NULL, cmd_part, "- See %YLEAVE"},
 	{"LASTLOG", NULL, NULL, cmd_lastlog, "-file filename%G|%n-clear%G|%n-max #%G|%n-liternal pat%G|%n-beep%G|%nlevel"},
 	{"LEAVE", NULL, NULL, cmd_part, "%Y<%Bchannel%Y>%n\n- Leaves current channel or %Y<%Bchannel%Y>%n"},
 	{"LINKS", NULL, NULL, cmd_generic, "- Shows servers and links to other servers"},
 	{"LIST", NULL, NULL, cmd_generic, "- Lists all channels"},
 	{"LLOOK", NULL, NULL, cmd_linklook, "%Y*%n Requires set %YLLOOK%n %RON%n\n- Lists all the servers which are current split from the IRC network"},
-	{"LOCOPS", NULL, empty_string, cmd_oper_stuff, "\n%Y<%Cmessage%Y>%n Requires irc operator status. Sends a message to all local operators.%n"},
+	{"LOCOPS", NULL, empty_string, cmd_oper_stuff1, "\n%Y<%Cmessage%Y>%n Requires irc operator status. Sends a message to all local operators.%n"},
 	{"LUSERS", NULL, NULL, cmd_generic, "- Shows stats on current server"},
 	{"M", "PRIVMSG", NULL, cmd_privmsg, "See %YMSG%n"},
 	{"MAP", NULL, NULL, cmd_map, "- Displays a map of the current servers"},
@@ -2241,7 +2226,7 @@ struct command xaric_cmds[] =
 	{"NWHOWAS", NULL, NULL, cmd_nwhowas, "- Displays internal whowas info for all channels. This information expires after 20 minutes for users on internal list, 10 minutes for others"},
 	{"OP", NULL, NULL, cmd_op, "%Y<%Cnick%Y>%n\n- Gives %Y<%Cnick%Y>%n +o"},
 	{"OPER", NULL, NULL, cmd_oper, "%Y*%n Requires irc operator status\n%Y<%Cnick%Y>%n %R[%npassword%R]%n"},
-	{"OPERWALL", NULL, empty_string, cmd_oper_stuff, "\n%Y<%Cmessage%Y>%n Requires irc operator status. Sends a message to operators.%n"},
+	{"OPERWALL", NULL, empty_string, cmd_oper_stuff1, "\n%Y<%Cmessage%Y>%n Requires irc operator status. Sends a message to operators.%n"},
 	{"ORIGNICK", NULL, NULL, cmd_orig_nick, "- Trys to regain old nick"},
 	{"PART", NULL, NULL, cmd_part, "- Leaves %Y<%nchannel%Y>%n"},
 	{"PARTALL", NULL, NULL, cmd_part, "- Leaves all channels"},
@@ -2253,9 +2238,9 @@ struct command xaric_cmds[] =
 	{"READLOG", NULL, NULL, cmd_readlog, "- Displays current away log"},
 	{"REMLOG", NULL, NULL, cmd_remove_log, "- Removes logfile"},
 	{"RECONNECT", NULL, NULL, cmd_reconnect, "- Reconnects you to current server"},
-	{"REHASH", NULL, NULL, cmd_oper_stuff, "%Y*%n Requires irc operator status\n- Rehashs ircd.conf for new configuration"},
+	{"REHASH", NULL, NULL, cmd_oper_stuff1, "%Y*%n Requires irc operator status\n- Rehashs ircd.conf for new configuration"},
 	{"RESET", NULL, NULL, cmd_reset, "- Fixes flashed terminals"},
-	{"RESTART", NULL, NULL, cmd_oper_stuff, "%Y*%n Requires irc operator status\n- Restarts server"},
+	{"RESTART", NULL, NULL, cmd_oper_stuff1, "%Y*%n Requires irc operator status\n- Restarts server"},
 	{"QUIT", NULL, NULL, cmd_quit, "- Quit IRC"},
 	{"QUOTE", NULL, NULL, cmd_quote, "%Y<%ntext%Y>%n\n- Sends text directly to the server"},
 	{"SAVEIRC", NULL, NULL, cmd_save, "- Saves ~/.ircrc"},
@@ -2300,7 +2285,7 @@ struct command xaric_cmds[] =
 	{"VERSION", NULL, NULL, cmd_ircii_version, "- Gives server and client version (a la ircII)"},
 	{"VOICE", "Voice", NULL, cmd_op, "- Gives someone voice (+v) on the channel"},
 	{"WALL", NULL, NULL, cmd_chwall, "- Send a message to all channel ops"},
-	{"WALLOPS", NULL, empty_string, cmd_oper_stuff, NULL},
+	{"WALLOPS", NULL, empty_string, cmd_oper_stuff1, NULL},
 	{"WALLCHOPS", NULL, NULL, cmd_chwall, "- Send a message to all channel ops"},
 	{"WHOIS", NULL, NULL, cmd_whois, "- Get info on a person"},
 	{"WHOLEFT", NULL, NULL, cmd_wholeft, "- Shows who left?"},

@@ -1,3 +1,4 @@
+#ident "@(#)commands.c 1.9"
 /*
  * commands.c: This is really a mishmash of function and such that deal with IRCII
  * commands (both normal and keybinding commands) 
@@ -36,9 +37,7 @@
 #include "input.h"
 #include "ignore.h"
 #include "keys.h"
-#include "alist.h"
 #include "names.h"
-#include "alias.h"
 #include "history.h"
 #include "funny.h"
 #include "ctcp.h"
@@ -55,6 +54,8 @@
 #include "fset.h"
 #include "notice.h"
 #include "tcommand.h"
+#include "util.h"
+#include "expr.h"
 
 
 
@@ -191,7 +192,7 @@ send_text (char *nick_list, char *text, char *command, int hook, int log)
 			send_to_server ("%s", text);
 		else if (*current_nick == '/')
 		{
-			line = m_opendup (current_nick, space, text, NULL);
+			line = m_opendup (current_nick, space_string, text, NULL);
 			parse_command (line, 0, empty_string);
 			new_free (&line);
 		}
@@ -558,12 +559,12 @@ BUILT_IN_COMMAND (load)
 	int paste_level = 0;
 	char *start, *current_row = NULL, buffer[BIG_BUFFER_SIZE + 1];
 	int no_semicolon = 1;
-	char *irc_path;
+	char *my_irc_path;
 	int display;
 	int ack = 0;
 
-	irc_path = get_string_var (LOAD_PATH_VAR);
-	if (!irc_path)
+	my_irc_path = get_string_var (LOAD_PATH_VAR);
+	if (!my_irc_path)
 	{
 		bitchsay ("LOAD_PATH has not been set");
 		return;
@@ -596,7 +597,7 @@ BUILT_IN_COMMAND (load)
 		}
 		else if ((expanded = expand_twiddle (filename)))
 		{
-			if (!(fp = uzfopen (&expanded, irc_path)))
+			if (!(fp = uzfopen (&expanded, my_irc_path)))
 			{
 				/* uzfopen emits an error if the file
 				 * is not found, so we dont have to. */

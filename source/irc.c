@@ -1,30 +1,39 @@
-#ident "$Id$"
+#ident "@(#)irc.c 1.15"
 /*
+ * irc.c - where it all starts!
+ *
  * ircII: a new irc client.  I like it.  I hope you will too!
  *
  * Written By Michael Sandrof
  * Copyright(c) 1990 
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
+ *
+ * Modified for Xaric by Rex Feany <laeos@laeos.net>
+ * 
+ * This file is a part of Xaric, an irc client
+ * You can find Xaric at <http://www.laeos.net/projects/xaric/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
-
-/*
- * INTERNAL_VERSION is the number that the special alias $V returns.
- * Make sure you are prepared for floods, pestilence, hordes of locusts,
- * and all sorts of HELL to break loose if you change this number.
- * Its format is actually YYYYMMDD, for the _release_ date of the
- * client..
- */
-const char internal_version[] = "19971106";
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-const char irc_version[] = VERSION;
-char irc_lib[] = "/usr/local/share/xaric";
-
-#include "irc.h"
-
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
@@ -33,12 +42,12 @@ char irc_lib[] = "/usr/local/share/xaric";
 #endif
 #include <stdarg.h>
 
+#include "irc.h"
 #include "status.h"
 #include "dcc.h"
 #include "names.h"
 #include "vars.h"
 #include "input.h"
-#include "alias.h"
 #include "output.h"
 #include "ircterm.h"
 #include "exec.h"
@@ -61,17 +70,27 @@ char irc_lib[] = "/usr/local/share/xaric";
 #include "whowas.h"
 #include "misc.h"
 #include "tcommand.h"
+#include "xaric_version.h"
+#include "util.h"
+
+
+
+
+
+
+/* XXX should be settable with configure 
+ * Where we keep our files */
+char irc_lib[] = "/usr/local/share/xaric";
 
 
 int irc_port = IRC_PORT,	/* port of ircd */
   strip_ansi_in_echo, current_on_hook = -1,	/* used in the send_text()
 						 * routine */
-  use_flow_control = USE_FLOW_CONTROL,	/* true: ^Q/^S used for flow
-					 * cntl */
   current_numeric,		/* this is negative of the
 				 * current numeric! */
   bflag = 1, key_pressed = 0, waiting_out = 0,	/* used by /WAIT command */
   waiting_in = 0,		/* used by /WAIT command */
+  need_redraw,			/* someone wants redraw, but couldn't do it themsevles. */
   who_mask = 0;			/* keeps track of which /who
 				 * switchs are set */
 
@@ -89,7 +108,6 @@ char *LocalHostName = NULL;
 extern char *last_away_nick;
 
 extern int split_watch;
-char empty_string[] = "";
 char three_stars[] = "***";
 
 char *invite_channel = NULL,	/* last channel of an INVITE */
@@ -120,8 +138,8 @@ int away_set = 0;		/* set if there is an away
 				 * message anywhere */
 int quick_startup = 0;		/* set if we ignore .ircrc */
 
-#ifdef K_DEBUG
-int cx_line = 0;
+#ifdef XARIC_DEBUG
+int  cx_line = 0;
 char cx_file[BIG_BUFFER_SIZE / 4];	/* debug file info */
 char cx_function[BIG_BUFFER_SIZE / 4];
 #endif
@@ -131,10 +149,13 @@ fd_set readables, writables;
 int child_dead = 0;
 
 
+
+
 /*
  * Signal handlers 
  */
 static RETSIGTYPE cntl_c (int);
+static RETSIGTYPE sig_continue (int);
 static RETSIGTYPE coredump (int);
 static RETSIGTYPE sig_refresh_screen (int);
 static RETSIGTYPE nothing (int);
@@ -164,7 +185,6 @@ static char switch_help[] =
    -v\t\ttells you about the client's version\n\
    -l <file>\tloads <file> in place of your .ircrc\n\
    -L <file>\tloads <file> in place of your .ircrc and expands $ expandos\n";
-
 
 
 
@@ -206,14 +226,25 @@ irc_exit (char *reason, char *formated)
 }
 
 
-
-
-
+/* pause xaric */
+void
+irc_pause (void)
+{
+	term_reset();
+	kill(getpid(), SIGSTOP);
+}
 
 /* sig_refresh_screen: the signal-callable version of refresh_screen */
 static RETSIGTYPE 
 sig_refresh_screen (int unused)
 {
+	refresh_screen (0, NULL);
+}
+
+static RETSIGTYPE
+sig_continue (int unused)
+{
+	term_cont();
 	refresh_screen (0, NULL);
 }
 
@@ -253,7 +284,7 @@ coredump (int sig)
 	printf ("\n\r\n\rXaric has been terminated by signal %i\n\r", sig);
 	printf ("Please inform Laeos <laeos@ptw.com> of this\n\r");
 	printf ("with as much detail as possible about what you were doing when it happened.\n\r");
-	printf ("Please include the version of Xaric (%s) and type of system in the report.\n\r", irc_version);
+	printf ("Please include the version of Xaric (%s) and type of system in the report.\n\r", XARIC_VersionStr);
 	fflush (stdout);
 	irc_exit ("Wow! A bug?", NULL);
 }
@@ -282,7 +313,7 @@ display_name (int j)
 
 	put_it (empty_string);
 	put_it ("%s", convert_output_format ("%G-%R*%G- %RX %Ca r i c %G-%R*%G-", NULL));
-	put_it ("[31mv%s brought to you by Laeos, Hawky, and Korndawg", irc_version);
+	put_it ("[31mv%s brought to you by Laeos, Hawky, and Korndawg", XARIC_WebID);
 	put_it (empty_string);
 
 	charset_lat1 ();
@@ -345,7 +376,8 @@ parse_args (char *argv[], int argc)
 
 			case 'v':	/* Output ircII version */
 				{
-					printf ("xaric version %s (%s)\n\r", irc_version, internal_version);
+					puts(XARIC_GNUVersion);
+					putc('\n', stdout);
 					exit (0);
 				}
 
@@ -370,7 +402,7 @@ parse_args (char *argv[], int argc)
 				}
 			case 'f':	/* Use flow control */
 				{
-					use_flow_control = 1;
+					set_use_flow_control(ON);
 					if (argv[ac][2])
 						fprintf (stderr, "Ignoring junk after -f\n");
 					break;
@@ -378,7 +410,7 @@ parse_args (char *argv[], int argc)
 
 			case 'F':	/* dont use flow control */
 				{
-					use_flow_control = 0;
+					set_use_flow_control(OFF);
 					if (argv[ac][2])
 						fprintf (stderr, "Ignoring junk after -F\n");
 					break;
@@ -658,7 +690,7 @@ parse_args (char *argv[], int argc)
 	if (!nickname || !*nickname)
 		strmcpy (nickname, username, sizeof (nickname));
 
-	if (!check_nickname (nickname))
+	if (!is_nick (nickname))
 	{
 		fprintf (stderr, "Illegal nickname %s\n", nickname);
 		fprintf (stderr, "Please restart IRC II with a valid nickname\n");
@@ -1026,7 +1058,6 @@ io (const char *what)
 		check_server_connect (from_server);
 	}
 
-	/* (set in term.c) -- we should redraw the screen here */
 	if (need_redraw)
 		refresh_screen (0, NULL);
 
@@ -1043,7 +1074,7 @@ main (int argc, char *argv[], char *envp[])
 	time (&idle_time);
 
 
-#ifdef K_DEBUG
+#ifdef XARIC_DEBUG
 	*cx_file = 0;
 	cx_line = 0;
 	*cx_function = 0;
@@ -1080,7 +1111,7 @@ main (int argc, char *argv[], char *envp[])
 		exit (1);
 	}
 
-	my_signal (SIGCONT, term_cont, 0);
+	my_signal (SIGCONT, sig_continue, 0);
 	my_signal (SIGWINCH, sig_refresh_screen, 0);
 
 	init_variables ();

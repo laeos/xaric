@@ -1,4 +1,4 @@
-#ident "$Id: numbers.c,v 1.2 1999/12/02 06:38:34 laeos Exp $"
+#ident "%W%"
 /*
  * numbers.c:handles all those strange numeric response dished out by that
  * wacky, nutty program we call ircd 
@@ -39,6 +39,7 @@
 #include "struct.h"
 #include "timer.h"
 #include "fset.h"
+#include "util.h"
 
 static void channel_topic (char *, char **, int);
 static void not_valid_channel (char *, char **);
@@ -268,7 +269,7 @@ display_msg (char *from, char **ArgList)
 		numeric_banner (),
 		strlen (rest) ? rest : empty_string,
 /*                strlen(rest) && ptr ? ":"      : empty_string, */
-		strlen (rest) ? space : empty_string,
+		strlen (rest) ? space_string : empty_string,
 		ptr ? ptr : empty_string,
 		drem ? "(from " : empty_string,
 		drem ? from : empty_string,
@@ -686,7 +687,7 @@ numbered_command (char *from, int comm, char **ArgList)
 				flag = do_hook (current_numeric, "%s %s %s", from, ArgList[0], ArgList[1]);
 			message_from (NULL, LOG_CRAP);
 			malloc_strcpy (&tmp, ArgList[0]);
-			chan = strtok (tmp, " ");
+			chan = strtok (tmp, space_string);
 
 			/* do we really need this check? -laeos */
 			if (!in_join_list (chan, from_server))
@@ -995,7 +996,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			for (i = 0; ArgList[i]; i++)
 			{
 				if (i)
-					strcat (ArgSpace, " ");
+					strcat (ArgSpace, space_string);
 				strcat (ArgSpace, ArgList[i]);
 			}
 			if (do_message_from)
@@ -1063,7 +1064,7 @@ numbered_command (char *from, int comm, char **ArgList)
 				server_list[from_server].stats_flags = 0;
 			break;
 		case 221:	/* #define RPL_UMODEIS          221 */
-			put_it ("%s Your user mode is [%s]", numeric_banner (), ArgList ? ArgList[0] : " ");
+			put_it ("%s Your user mode is [%s]", numeric_banner (), ArgList ? ArgList[0] : space_string);
 			break;
 
 		case 272:	/* ENDOFSILENCE */

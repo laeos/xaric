@@ -1,3 +1,4 @@
+#ident "%W%"
 /*
  * notice.c: special stuff for parsing NOTICEs
  *
@@ -37,6 +38,7 @@
 #include "hash2.h"
 #include "input.h"
 #include "fset.h"
+#include "util.h"
 
 extern char *FromUserHost;
 static void parse_server_notice (char *, char *);

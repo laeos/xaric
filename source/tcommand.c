@@ -1,5 +1,4 @@
-
-#ident "$Id$"
+#ident "@(#)tcommand.c 1.9"
 /*
  * tcommand.c : new implementation of command,searching,aliases for Xaric.
  * (c) 1998 Rex Feany <laeos@ptw.com> 
@@ -35,6 +34,7 @@
 #include "tcommand.h"
 #include "output.h"
 #include "input.h"
+#include "util.h"
 #include "misc.h"
 
 struct tnode *t_commands;

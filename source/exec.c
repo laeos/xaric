@@ -1,3 +1,4 @@
+#ident "@(#)exec.c 1.9"
 /*
  * exec.c: handles exec'd process for IRCII 
  *
@@ -36,6 +37,7 @@
 #include "misc.h"
 #include "newio.h"
 #include "tcommand.h"
+#include "util.h"
 
 #include <sys/wait.h>
 
@@ -75,7 +77,6 @@ Process;
 
 static Process **process_list = NULL;
 static int process_list_size = 0;
-static int wait_index = -1;
 
 /*
  * A nice array of the possible signals.  Used by the coredump trapping
@@ -423,7 +424,6 @@ static int
 delete_process (int process)
 {
 	int flag;
-	List *cmd, *next;
 
 	if (process_list)
 	{

@@ -1,3 +1,4 @@
+#ident "@(#)readlog.c 1.9"
 /* 
  * Copyright Colten Edwards 1996
  */
@@ -19,6 +20,7 @@
 #include "output.h"
 #include "misc.h"
 #include "tcommand.h"
+#include "util.h"
 
 FILE *msg_fp = NULL;
 
@@ -156,7 +158,7 @@ show_log (Window * window, char *name)
 	return (1);
 }
 
-void 
+static void 
 remove_away_log (char *stuff, char *line)
 {
 	if ((line && toupper (*line) == 'Y'))

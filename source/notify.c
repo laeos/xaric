@@ -1,3 +1,4 @@
+#ident "@(#)notify.c 1.8"
 /*
  * notify.c: a few handy routines to notify you when people enter and leave irc 
  *

@@ -1,3 +1,4 @@
+#ident "@(#)log.c 1.8"
 /*
  * log.c: handles the irc session logging functions 
  *
@@ -22,6 +23,7 @@
 #include "screen.h"
 #include "output.h"
 #include "ircaux.h"
+#include "util.h"
 
 FILE *irclog_fp;
 extern char *stripansicodes (char *);

@@ -171,15 +171,11 @@ NUMBER_OF_VARIABLES
 
 
 
-
-
-
 	char	*get_string_var(enum VAR_TYPES);
 	int	get_int_var(enum VAR_TYPES);
 	void	set_string_var(enum VAR_TYPES, char *);
 	void	set_int_var(enum VAR_TYPES, unsigned int);
 	void	init_variables(void);
-	int	do_boolean(char *, int *);
 	void	set_var_value(int, char *);
 	void	save_variables (FILE * fp, int do_all);
 	char	*make_string_var(char *);
@@ -187,17 +183,9 @@ NUMBER_OF_VARIABLES
 	void	clear_sets(void);
 	void	set_highlight_char(Window *, char *, int);
 
-extern	char	*var_settings[];
-
 
 	/* in keys.c */
 	void	clear_bindings(void);
-
-
-/* var_settings indexes  also used in display.c for highlights */
-#define OFF 0
-#define ON 1
-#define TOGGLE 2
 
 /* the types of IrcVariables */
 #define BOOL_TYPE_VAR	0

@@ -1,3 +1,4 @@
+#ident "@(#)keys.c 1.11"
 /*
  * keys.c: Decides what happens when you press a key
  *
@@ -27,6 +28,8 @@
 #include "vars.h"
 #include "window.h"
 #include "tcommand.h"
+#include "util.h"
+#include "expr.h"
 
 extern void get_line_return (char, char *);
 
@@ -61,7 +64,7 @@ init_keys_1 (void)
  * number of functions that match the name, and sets where index points
  * to to be the index of the (first) function found.
  */
-int 
+static int 
 lookup_function (char *name, int *lf_index)
 {
 	int len, cnt, i;
@@ -478,7 +481,7 @@ KeyMapNames key_names[] =
 	{"SELF_INSERT", input_add_character},
 	{"SEND_LINE", get_line_return},
 	{"SHOVE_TO_HISTORY", shove_to_history},
-	{"STOP_IRC", term_pause},
+	{"STOP_IRC", (KeyBinding)irc_pause},
 	{"SWAP_LAST_WINDOW", swap_last_window},
 	{"SWAP_NEXT_WINDOW", swap_next_window},
 	{"SWAP_PREVIOUS_WINDOW", swap_previous_window},

@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)output.c 1.10"
 /*
  * output.c: handles a variety of tasks dealing with the output from the irc
  * program 
@@ -71,7 +71,7 @@ charset_graf (void)
 
 
 /* Now that you can send ansi sequences, this is much less inportant.. */
-void 
+static void 
 unflash (void)
 {
 #ifdef HARD_UNFLASH
@@ -93,7 +93,6 @@ unflash (void)
 void 
 refresh_screen (unsigned char dumb, char *dumber)
 {
-	extern int need_redraw;
 	term_clear_screen ();
 	unflash ();
 	if (term_resize ())

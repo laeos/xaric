@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)cmd_who.c 1.10"
 /*
  * cmd_hostname.c : the who command 
  *
@@ -37,6 +37,7 @@
 #include "misc.h"
 #include "screen.h"
 #include "tcommand.h"
+#include "util.h"
 
 void oh_my_wait (void);		/* in command.c for now XXX */
 

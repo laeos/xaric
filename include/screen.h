@@ -57,7 +57,6 @@
 		
 extern	Window	*to_window;
 extern	Screen	*current_screen;
-extern	Screen	*main_screen;
 extern	Screen	*last_input_screen;
 extern	Screen	*screen_list;
 

@@ -3,9 +3,8 @@
 
 #include "defaults.h"
 
-#define XARIC_COMMENT   "\002is there no end in sight?\002"
+#define XARIC_COMMENT   "\002sporks are good.\002"
 
-#define MODULE_ID(x) static char rcs_id[] = x
 
 /*
  * Here you can set the in-line quote character, normally backslash, to
@@ -14,12 +13,9 @@
  */
 #define QUOTE_CHAR '\\'
 
-extern const char irc_version[];
-extern const char internal_version[];
 extern char	*line_thing;
-extern char	space[];
 
-#ifdef K_DEBUG
+#ifdef XARIC_DEBUG
 extern char	cx_file[];
 extern char	cx_function[];
 extern int	cx_line;
@@ -32,8 +28,6 @@ extern int	cx_line;
 #define STRING_CHANNEL '+'
 #define MULTI_CHANNEL '#'
 #define LOCAL_CHANNEL '&'
-
-#define is_channel(x)  ( (x) && ((*(x) == MULTI_CHANNEL) || (*(x) == LOCAL_CHANNEL)))
 
 #include "defaults.h"
 #include <stdio.h>
@@ -138,11 +132,6 @@ extern int	cx_line;
  * declared in irc.c 
  */
 
-
-
-
-
-
 extern	char	*cut_buffer;
 extern	char	oper_command;
 extern	int	irc_port;
@@ -150,12 +139,6 @@ extern	int	current_on_hook;
 extern	int	use_flow_control;
 extern	char	*joined_nick;
 extern	char	*public_nick;
-extern	char	empty_string[];
-extern	char	zero[];
-extern	char	one[];
-extern	char	on[];
-extern	char	off[];
-extern	char	space[];
 
 extern  char	*convertstring;
 extern	char	nickname[];
@@ -185,8 +168,10 @@ extern	char	*cannot_open;
 extern	char	global_all_off[];
 extern	int	use_input;
 extern	time_t	idle_time;
+extern	time_t	start_time;
 extern	int	waiting_out;
 extern	int	waiting_in;
+extern 	int	need_redraw;
 extern	char	wait_nick[];
 extern	char	whois_nick[];
 extern	char	lame_wait_nick[];
@@ -201,7 +186,6 @@ extern ChannelList *statchan_list;
 extern	char	MyHostName[];
 extern	struct	in_addr MyHostAddr;
 extern	struct	in_addr LocalHostAddr;
-extern	int	cpu_saver;
 extern	struct	in_addr	local_ip_address;
 
 
@@ -223,6 +207,7 @@ void get_line(char *prompt, int new_input, void (*func)(char, char *));
 char get_a_char(void);
 void io(const char *what);
 void irc_exit(char *reason, char *formatted);
+void irc_pause(void);
 
 char	*getenv(const char *);
 

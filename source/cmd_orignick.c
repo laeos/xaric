@@ -1,5 +1,4 @@
-
-#ident "$Id$"
+#ident "@(#)cmd_orignick.c 1.8"
 /*
  * cmd_hostname.c : virtual host support 
  *
@@ -31,23 +30,32 @@
 
 #include <stdio.h>
 
-#include "irc.h"
 #include "ircaux.h"
-#include "output.h"
-#include "list.h"
-#include "whois.h"
 #include "misc.h"
-#include "input.h"
 #include "vars.h"
 #include "server.h"
-#include "window.h"
-#include "struct.h"
 #include "screen.h"
+#include "input.h"
+#include "cmd_orignick.h"
+#include "timer.h"
+#include "output.h"
 #include "tcommand.h"
+#include "util.h"
 
+
+/* The nick we should have */
 static char *org_nick;
 
-void change_orig_nick(void)
+/* Prototypes */
+static void change_orig_nick (void);
+static int delay_gain_nick(void *);
+
+
+
+
+
+static void 
+change_orig_nick(void)
 {
 	change_server_nickname(from_server, org_nick);
 	bitchsay("Regained nick [%s]", org_nick);
@@ -56,7 +64,6 @@ void change_orig_nick(void)
 	update_input(UPDATE_ALL);
 }
 
-static int delay_gain_nick(void *);
 
 static void gain_nick (WhoisStuff *stuff, char *nick, char *args)
 {
@@ -105,7 +112,8 @@ void cmd_orig_nick(struct command *cmd, char *args)
 	else {
 		if (nick && org_nick && !my_stricmp(nick, org_nick))
 			bitchsay("Already attempting that nick %s", nick);
-		else if ((nick = check_nickname(nick))) {
+
+		else if (is_nick(nick)) {
 			malloc_strcpy(&org_nick, nick);
 			add_to_userhost_queue(org_nick, gain_nick, "%s", org_nick);
 			bitchsay("Trying to regain nick [%s]", org_nick);

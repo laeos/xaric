@@ -1,4 +1,4 @@
-#ident "$Id$"
+#ident "@(#)cmd_modes.c 1.9"
 /*
  * cmd_modes.c : commands that have to do with modes?!
  *
@@ -33,16 +33,12 @@
 
 #include "irc.h"
 #include "ircaux.h"
-#include "whois.h"
 #include "output.h"
 #include "status.h"
-#include "misc.h"
 #include "tcommand.h"
 #include "list.h"
 #include "hook.h"
 #include "ignore.h"
-#include "ircaux.h"
-#include "output.h"
 #include "screen.h"
 #include "server.h"
 #include "struct.h"
@@ -53,6 +49,8 @@
 #include "misc.h"
 #include "hash2.h"
 #include "fset.h"
+
+#include "util.h"
 
 
 static char *mode_buf = NULL;
@@ -66,7 +64,7 @@ static char plus_mode[20] = "\0";
 
 
 static void 
-add_mode_buffer (char *buffer, int mode_str_len)
+add_mode_buffer (char *buffer, int mode_str_len_p)
 {
 	malloc_strcat (&mode_buf, buffer);
 	mode_len += len;
@@ -141,10 +139,10 @@ add_mode (ChannelList * chan, char *mode, int plus, char *nick, char *reason, in
 }
 
 static char *
-screw (char *user)
+screw (char *who)
 {
 	char *p;
-	for (p = user; p && *p;)
+	for (p = who; p && *p;)
 	{
 		switch (*p)
 		{
@@ -162,16 +160,16 @@ screw (char *user)
 				p++;
 		}
 	}
-	return user;
+	return who;
 }
 
 static char *
-ban_it (char *nick, char *user, char *host)
+ban_it (char *nick, char *u, char *host)
 {
 	static char banstr[BIG_BUFFER_SIZE + 1];
 	char *tmpstr = NULL;
-	char *t = user;
-	char *t1 = user;
+	char *t = u;
+	char *t1 = u;
 
 	*banstr = 0;
 	while (strlen (t1) > 9)
@@ -263,7 +261,7 @@ userhost_unban (WhoisStuff * stuff, char *nick1, char *args)
 	from_server = old_server;
 }
 
-void 
+static void 
 userhost_ban (WhoisStuff * stuff, char *nick1, char *args)
 {
 	char *temp;
@@ -273,7 +271,7 @@ userhost_ban (WhoisStuff * stuff, char *nick1, char *args)
 	char *ob = "-o+b";
 	char *b = "+b";
 
-	char *host = NULL, *nick = NULL, *user = NULL;
+	char *host = NULL, *nick = NULL, *u = NULL;
 	WhowasList *whowas = NULL;
 
 
@@ -286,15 +284,15 @@ userhost_ban (WhoisStuff * stuff, char *nick1, char *args)
 		if (nick1 && channel && (whowas = check_whowas_nick_buffer (nick1, channel, 0)))
 		{
 			nick = whowas->nicklist->nick;
-			user = m_strdup (clear_server_flags (whowas->nicklist->host));
+			u = m_strdup (clear_server_flags (whowas->nicklist->host));
 
-			if (strcmp (user, "<UNKNOWN>") == 0)
+			if (strcmp (u, "<UNKNOWN>") == 0)
 			{
 				bitchsay ("No match for the ban of %s", nick1);
-				new_free (&user);
+				new_free (&u);
 				return;
 			}
-			host = strchr (user, '@');
+			host = strchr (u, '@');
 			*host++ = 0;
 			bitchsay ("Using WhoWas info for ban of %s ", nick1);
 		}
@@ -307,21 +305,21 @@ userhost_ban (WhoisStuff * stuff, char *nick1, char *args)
 	else
 	{
 		nick = stuff->nick;
-		user = m_strdup (clear_server_flags (stuff->user));
+		u = m_strdup (clear_server_flags (stuff->user));
 		host = stuff->host;
 	}
 
 	if (!(my_stricmp (nick, get_server_nickname (from_server))))
 	{
 		bitchsay ("Try to kick yourself again!!");
-		new_free (&user);
+		new_free (&u);
 		return;
 	}
 
-	send_to_server ("MODE %s %s %s", channel, stuff->channel ? ob : b, ban_it (nick, user, host));
+	send_to_server ("MODE %s %s %s", channel, stuff->channel ? ob : b, ban_it (nick, u, host));
 	send_to_server ("KICK %s %s :%s", channel, nick, args ? args : get_reason (nick));
 
-	new_free (&user);
+	new_free (&u);
 }
 
 void
@@ -484,7 +482,7 @@ cmd_kickban (struct command *cmd, char *args)
 	{
 		if (my_stricmp (spec, nicks->nick) == 0)
 		{
-			char *user, *host;
+			char *u, *host;
 			char *t = NULL;
 
 			/* hrm */
@@ -492,11 +490,11 @@ cmd_kickban (struct command *cmd, char *args)
 				break;
 
 			malloc_strcpy (&t, nicks->host);
-			user = clear_server_flags (t);
-			host = strchr (user, '@');
+			u = clear_server_flags (t);
+			host = strchr (u, '@');
 			*host++ = 0;
 
-			send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, user, host));
+			send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, u, host));
 			send_to_server ("KICK %s %s :%s", chan->channel, nicks->nick,
 				    rest ? rest : get_reason (nicks->nick));
 			count++;
@@ -543,18 +541,18 @@ cmd_ban (struct command *cmd, char *args)
 	{
 		if (!my_stricmp (spec, nicks->nick))
 		{
-			char *t = NULL, *host, *user;
+			char *t = NULL, *host, *u;
 
 			malloc_strcpy (&t, nicks->host);
-			user = clear_server_flags (t);
-			host = strchr (user, '@');
+			u = clear_server_flags (t);
+			host = strchr (u, '@');
 			if (host)
 			{
 				*host++ = 0;
-				send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, user, host));
+				send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, u, host));
 			}
 			else
-				send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, user, "*"));
+				send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, u, "*"));
 
 			new_free (&t);
 			found++;

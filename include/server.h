@@ -107,6 +107,7 @@ typedef	unsigned	short	ServerType;
 	int	find_server_group(char *, int);
 	char *	find_server_group_name(int);
 	void	add_to_server_list(char *, int, char *, char *, int);
+	void	remove_from_server_list (int i);
 	void	build_server_list(char *);
 	int	connect_to_server(char *, int, int);
 	void	get_connected(int);

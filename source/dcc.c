@@ -7,6 +7,10 @@
  *
  * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
  * Heavily modified Colten Edwards 1996-97
+ *
+ * needs to be rewritten
+ * it really sucks.
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -184,8 +188,8 @@ DCC_list *
 dcc_searchlist (char *name, char *user, int type, int flag, char *othername, char *userhost, int active)
 {
 	register DCC_list **Client = NULL, *NewClient = NULL;
-
 	int dcc_num = 0;
+
 	if (user && *user == '#' && my_atol (user + 1))
 	{
 		/* we got a number so find that instead */
@@ -204,6 +208,8 @@ dcc_searchlist (char *name, char *user, int type, int flag, char *othername, cha
 	{
 		for (Client = (&ClientList); *Client; Client = (&(**Client).next))
 		{
+			if ( (**Client).flags & DCC_DELETE ) 
+				continue; /* ignore deleted clients */
 			/* 
 			 * The following things have to be true:
 			 * -> The types have to be the same
@@ -228,7 +234,7 @@ dcc_searchlist (char *name, char *user, int type, int flag, char *othername, cha
 			  ((active == 1) && ((**Client).flags & DCC_ACTIVE))
 				   )
 				)
-				return *Client;
+				return *Client; 
 		}
 	}
 	if (!flag)
@@ -1078,13 +1084,21 @@ register_dcc_offer (char *user, char *type, char *description, char *address, ch
 	char *c = NULL;
 	u_long TempLong;
 	unsigned TempInt;
-	int do_auto = 0;	/* used in dcc chat collisions */
 	long packets = 0;
 
 	if ((c = strrchr (description, '/')))
 		description = c + 1;
 	if ('.' == *description)
 		*description = '_';
+
+	TempInt = (unsigned) strtoul (port, NULL, 10);
+
+	if (TempInt < 1024)
+	{
+		put_it ("%s", convert_output_format ("$G $RDCC%n Priveleged port attempt [$0]", "%d", TempInt));
+		message_from (NULL, LOG_CRAP);
+		return;
+	}
 
 	message_from (NULL, LOG_DCC);
 	if (size && *size)
@@ -1116,11 +1130,9 @@ register_dcc_offer (char *user, char *type, char *description, char *address, ch
 
 	if (Client->flags & DCC_WAIT)
 	{
-		Client->flags |= DCC_DELETE;
 		if (DCC_CHAT == CType)
 		{
 			Client = dcc_searchlist (description, user, CType, 1, NULL, NULL, -1);
-			do_auto = 1;
 		}
 		else
 		{
@@ -1141,16 +1153,8 @@ register_dcc_offer (char *user, char *type, char *description, char *address, ch
 
 	TempLong = strtoul (address, NULL, 10);
 	Client->remote.s_addr = htonl (TempLong);
-	TempInt = (unsigned) strtoul (port, NULL, 10);
 	Client->remport = htons (TempInt);
 
-	if (TempInt < 1024)
-	{
-		put_it ("%s", convert_output_format ("$G %RDCC%n $0 ($1) request from $2 rejected", "%s %s %s", type, description, user));
-		Client->flags |= DCC_DELETE;
-		message_from (NULL, LOG_CRAP);
-		return;
-	}
 	if (userhost)
 		Client->userhost = m_strdup (userhost);
 
@@ -1189,7 +1193,6 @@ register_dcc_offer (char *user, char *type, char *description, char *address, ch
 				say ("WARNING: Fake dcc handshake detected! [%x]", Client->remote.s_addr);
 				say ("Unless you know where this dcc request is coming from");
 				say ("It is recommended you ignore it!");
-				do_auto = 0;
 			}
 			if (compare3 == Client->remote.s_addr || compare4 == Client->remote.s_addr)
 			{
@@ -1317,15 +1320,18 @@ process_incoming_chat (DCC_list * Client)
 			char userhost[BIG_BUFFER_SIZE + 1];
 			char equal_nickname[NICKNAME_LEN + 4];
 			int tmplen = strlen (tmp) - 1;
+			char *foo;
+			
+			tmp[tmplen] = '\0';
+
+			foo = strchr(tmp, '\r');	/* mIRC etc are broken */
+			if ( foo ) *foo = '\0';
 
 			new_free (&Client->buffer);
-			tmp[tmplen] = '\0';
-			if (tmp[tmplen] == '\r')	/* mIRC et al are broken */
-				tmp[tmplen--] = '\0';
 
 			Client->bytes_read += bytesread;
 			message_from (Client->user, LOG_DCC);
-			say("process, message from %s", Client->user);
+
 			malloc_strcpy (&buf, tmp);
 
 			{
@@ -1690,7 +1696,7 @@ dcc_message_transmit (char *user, char *text, char *text_display, int type, int 
 	}
 	lastlog_level = set_lastlog_msg_level (LOG_DCC);
 	message_from (Client->user, LOG_DCC);
-	say("user is %s", Client->user);
+
 #if 0
 	/*
 	 * Check for CTCPs... whee.
@@ -2580,7 +2586,10 @@ cmd_chat (struct command *cmd, char *args)
 			}
 		}
 		else
+		{
 			bitchsay ("Error occurred");
+			new_free(&last_chat_req);
+		}
 	}
 	else
 		userage (cmd->name, cmd->qhelp);

@@ -1,3 +1,14 @@
+Wed Oct 20 14:24:21 1999 Rex Feany <laeos@ptw.com>
+
+	* Branched off the perl stuff in the CVS tree,
+	  worry about it later
+	* Changed ctl-e to default to END_OF_LINE.
+	* added acconfig.h ... where did it go??
+	* bumped up the version to 0.9e
+	* removed the annoying dcc debug messages i left in 0.9d
+	* fixed dcc, so that stuff from mirc/pirch have the linefeeds
+	  removed (was broken before)
+
 Fri Aug 06 12:59:04 1999 Rex Feany <laeos@ptw.com>
 
 	* Added /orignick, should work like the bitchx version
@@ -5,6 +16,7 @@ Fri Aug 06 12:59:04 1999 Rex Feany <laeos@ptw.com>
 	  right now, ./configure --enable-perlinterp turns it on.
 	  the /eval command works, and I got it to stop crashing
 	  all the time.
+	* released v0.9d to the world
 
 Mon Jul 26 09:00:03 1999 Rex Feany <laeos@ptw.com>
 

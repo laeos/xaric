@@ -1,4 +1,4 @@
-#ident "$Id: numbers.c,v 1.9 1998/10/16 01:44:41 laeos Exp $"
+#ident "$Id: numbers.c,v 1.1.1.3 1999/10/20 20:33:43 laeos Exp $"
 /*
  * numbers.c:handles all those strange numeric response dished out by that
  * wacky, nutty program we call ircd 

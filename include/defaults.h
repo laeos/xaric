@@ -25,7 +25,7 @@
  */
 
 #ifndef DEFAULT_SERVER
-#define DEFAULT_SERVER	    "los-angeles.ca.us.undernet.org:6665"
+#define DEFAULT_SERVER	    "irc.core.com:6667"
 #endif
 
 
@@ -126,7 +126,7 @@
  * proper compilation.
  */
 
-#define DEFAULT_SIGNOFF_REASON "xaric... mmm perl..."
+#define DEFAULT_SIGNOFF_REASON "Somewhere in DOWNTOWN BURBANK a prostitute is OVERCOOKING a LAMB CHOP!!"
 #define DEFAULT_BANTYPE 2
 #define DEFAULT_SHOW_CTCP_IDLE 1
 #define DEFAULT_PING_TYPE 1

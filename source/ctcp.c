@@ -246,6 +246,8 @@ CTCP_HANDLER (do_dcc)
 	char *port;
 	char *size;
 	char *extra_flags;
+
+	say("starting do dcc");
 	if (my_stricmp (to, get_server_nickname (from_server)))
 		return NULL;
 

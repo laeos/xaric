@@ -562,7 +562,7 @@ init_keys_2 (void)
 	snew_key (0, 1, BEGINNING_OF_LINE);	/* ^A */
 	snew_key (0, 2, BOLD);	/* ^B */
 	snew_key (0, 4, DELETE_CHARACTER);	/* ^D */
-	snew_key (0, 5, CHANGE_TO_SPLIT);	/* ^E */
+	snew_key (0, 5, END_OF_LINE);	/* ^E */
 	snew_key (0, 6, WHOLEFT);	/* ^F */
 	snew_key (0, 8, BACKSPACE);	/* ^H (delete) */
 #if 0

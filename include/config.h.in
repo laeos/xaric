@@ -62,7 +62,6 @@
 #undef USING_CURSES
 #undef PACKAGE
 #undef VERSION
-#undef HAVE_PERL_INTERP
 
 /* The number of bytes in a unsigned int.  */
 #undef SIZEOF_UNSIGNED_INT

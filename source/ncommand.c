@@ -1,4 +1,4 @@
-#ident "$Id: ncommand.c,v 1.3 1998/10/14 22:52:01 laeos Exp $"
+#ident "$Id: ncommand.c,v 1.2 1999/10/20 23:02:18 laeos Exp $"
 /*
  * ncommand.c : new commands for Xaric
  * (c) 1998 Rex Feany <laeos@ptw.com> 
@@ -2098,20 +2098,6 @@ cmd_whowas (struct command *cmd, char *args)
 	new_free (&stuff);
 }
 
-#ifdef HAVE_PERL_INTERP
-void perl_eval(char *);
-
-void
-cmd_eval (struct command *cmd, char *args)
-{
-	if (args && *args)
-		perl_eval(args);
-	else
-		userage (cmd->name, cmd->qhelp);
-}
-#endif
-
-
 
 /* 
  * Commands in other files
@@ -2201,9 +2187,6 @@ struct command xaric_cmds[] =
 	{"DNS", NULL, NULL, cmd_nslookup, "%Y<%nnick|hostname%y>%n\n- Attempts to nslookup on nick or hostname"},
 	{"DOP", NULL, NULL, cmd_deop, "- See deop"},
 	{"ECHO", NULL, NULL, cmd_echo, NULL},
-#ifdef HAVE_PERL_INTERP
-	{"EVAL", NULL, NULL, cmd_eval, "- Run some perl code"},
-#endif
 	{"EXEC", NULL, NULL, cmd_exec, "%Y<%ncommand%Y>%n\n- Executes %Y<%ncommand%Y>%n with the shell set from %PSHELL%n"},
 	{"EXIT", NULL, NULL, cmd_quit, "- Quits IRC"},
 	{"FLUSH", NULL, NULL, cmd_flush, "- Flush ALL server output"},

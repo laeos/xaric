@@ -62,9 +62,6 @@ char irc_lib[] = "/usr/local/share/xaric";
 #include "misc.h"
 #include "tcommand.h"
 
-#ifdef HAVE_PERL_INTERP
-void perl_init(void);
-#endif
 
 int irc_port = IRC_PORT,	/* port of ircd */
   strip_ansi_in_echo, current_on_hook = -1,	/* used in the send_text()
@@ -1100,10 +1097,6 @@ main (int argc, char *argv[], char *envp[])
 	display_name (-1);
 	if (bflag)
 		load_scripts ();
-
-#ifdef HAVE_PERL_INTERP
-	perl_init();
-#endif
 
 	get_connected (0);
 

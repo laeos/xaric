@@ -1,4 +1,4 @@
-#ident "@(#)iflist.c 1.3"
+#ident "@(#)iflist.c 1.5"
 /*
  * iflist.c - figure out interface information
  * Copyright (C) 2000 Rex Feany <laeos@laeos.net>
@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <net/if.h>
@@ -235,7 +236,7 @@ iface_find (const char *host)
  * updates that list. Normally this doesn't need to
  * be called.
  **/
-void
+const struct iflist *
 iflist_update (void)
 {
 	struct iflist *ifl = iflist_get();
@@ -246,4 +247,6 @@ iflist_update (void)
 
 	if (ift)
 		iflist_free(ift);
+
+	return iflist;
 }

@@ -92,9 +92,6 @@
 /* define if you have uname() */
 #undef HAVE_UNAME
 
-/* define if you have inet_aton */
-#undef HAVE_INET_ATON
-
 /* define if you do *not* have struct linger */
 #undef NO_STRUCT_LINGER
 

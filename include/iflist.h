@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * @(#)iflist.h 1.1
+ * @(#)iflist.h 1.2
  *
  */
 
@@ -43,6 +43,6 @@ typedef void (*iface_cb)(void *data, struct iflist *list);
 
 int ifaces(iface_cb callback, void *data);
 const struct iflist * iface_find (const char *host);
-void iflist_update (void);
+const struct iflist * iflist_update (void);
 
 #endif	/* iflist_h__ */

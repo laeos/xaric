@@ -22,6 +22,9 @@
 #include <sys/rusage.h>
 #endif
 
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 
 #include "irc.h"
 #include "server.h"

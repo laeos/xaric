@@ -68,8 +68,6 @@ static Window *get_previous_window (void);
 static void revamp_window_levels (Window * window);
 void clear_window (Window * window);
 static void resize_window_display (Window * window);
-Screen *create_new_screen (void);
-void repaint_window (Window *, int, int);
 
 /*
  * new_window: This creates a new window on the screen.  It does so by either
@@ -859,9 +857,9 @@ recalculate_windows (void)
 	if (!curr_scr_win)
 	{
 		current_screen->window_list->top = 0;
-		current_screen->window_list->display_size = LI - 2;
-		current_screen->window_list->bottom = LI - 2;
-		old_li = LI;
+		current_screen->window_list->display_size = term_rows - 2;
+		current_screen->window_list->bottom = term_rows - 2;
+		old_li = term_rows;
 		return;
 	}
 
@@ -879,7 +877,7 @@ recalculate_windows (void)
 		window_count++;
 	}
 
-	excess_li = LI - old_li - split;
+	excess_li = term_rows - old_li - split;
 
 	for (tmp = current_screen->window_list; tmp; tmp = tmp->next)
 	{
@@ -1994,8 +1992,8 @@ set_scroll (Window * win, char *unused, int value)
 void 
 set_continued_lines (Window * win, char *value, int unused)
 {
-	if (value && ((int) strlen (value) > (CO / 2)))
-		value[CO / 2] = '\0';
+	if (value && ((int) strlen (value) > (term_cols / 2)))
+		value[term_cols / 2] = '\0';
 }
 
 /* current_refnum: returns the reference number for the current window */
@@ -2357,7 +2355,7 @@ window_describe (Window * window, char **args, char *usage)
 	     window->held_displayed, window->display_size,
 	     window->cursor, window->distance_from_display);
 
-	say ("\tCO, LI are [%d %d]", CO, LI);
+	say ("\tCO, LI are [%d %d]", term_cols, term_rows);
 	say ("\tCurrent channel: %s",
 	     window->current_channel ?
 	     window->current_channel : "<None>");

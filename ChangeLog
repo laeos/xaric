@@ -1,3 +1,27 @@
+2001-Feb-17	Rex Feany	<laeos@laeos.net>
+	* Fixed compile warnings in screen.c
+	* Removed attempting_to_connect that was not
+	  used anywhere.
+	* Released 0.11.3
+
+2001-Feb-15	Rex Feany	<laeos@laeos.net>
+	* Fix compile problem on FreeBSD
+	* Removed inet_aton replacement, wasn't 
+	  used anywhere.
+
+2000-Dec-27	Rex Feany	<laeos@laeos.net>
+	* Applied patch from Chuck V. (mullein), 
+	  added missing assert.h includes in misc.c/output.c
+	* Bumped version to 0.11.3
+	* Replaced term.c with ircterm.c, cleaned up, 
+	  reindented, renamed global variables. 
+	  This required several changes in other source files,
+	  mostly changing CO to term_cols.
+
+2000-Dec-17	Rex Feany	<laeos@laeos.net>
+	* Don't link with librep yet.
+	* Cleanup in irc.c. New command line parser.
+	* Released 0.11.2
 
 2000-Dec-5 	Rex Feany	<laeos@laeos.net>
 

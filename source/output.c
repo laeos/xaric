@@ -1,4 +1,4 @@
-#ident "@(#)output.c 1.8"
+#ident "@(#)output.c 1.9"
 /*
  * output.c: handles a variety of tasks dealing with the output from the irc
  * program 
@@ -16,6 +16,10 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 
 #include "ircaux.h"
 #include "ircterm.h"

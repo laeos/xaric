@@ -209,25 +209,25 @@ update_input (int update)
 	else
 		term_echo (1);
 
-	if ((li != LI) || (co != CO))
+	if ((li != term_rows) || (co != term_cols))
 	{
 		/* resized?  Keep it simple and reset everything */
-		input_line = LI - 1;
-		zone = CO - (WIDTH * 2) + 4;
+		input_line = term_rows - 1;
+		zone = term_cols - (WIDTH * 2) + 4;
 		lower_mark = WIDTH;
-		upper_mark = CO - WIDTH;
+		upper_mark = term_cols - WIDTH;
 		cursor = current_screen->buffer_min_pos;
 		current_screen->buffer_pos = current_screen->buffer_min_pos;
 		str_start = 0;
-		li = LI;
-		co = CO;
+		li = term_rows;
+		co = term_cols;
 	}
 	old_start = str_start;
 	ansi_count = count_ansi (current_screen->input_buffer, zone);
 	if (old_ansi != ansi_count || current_screen->buffer_pos - ansi_count > zone)
 	{
 		lower_mark = WIDTH;
-		upper_mark = CO - WIDTH;
+		upper_mark = term_cols - WIDTH;
 		str_start = 0;
 	}
 	ansi_count = count_ansi (&(current_screen->input_buffer[str_start]), zone);
@@ -271,17 +271,17 @@ update_input (int update)
 			int echo;
 
 			echo = term_echo (1);
-			if (MIN_POS > (CO - WIDTH))
-				len = CO - WIDTH - 1 /* + ansi_count */ ;
+			if (MIN_POS > (term_cols - WIDTH))
+				len = term_cols - WIDTH - 1 /* + ansi_count */ ;
 			else
 				len = MIN_POS;
 			cnt = /*term_puts */ safe_puts (&(INPUT_BUFFER[str_start]), len);
 			term_echo (echo);
 			cnt += /*term_puts */ safe_puts (&(current_screen->input_buffer[
-				  str_start + len]), CO - len + ansi_count);
+				  str_start + len]), term_cols - len + ansi_count);
 		}
 		else
-			cnt = /*term_puts */ safe_puts (&(INPUT_BUFFER[str_start]), CO);
+			cnt = /*term_puts */ safe_puts (&(INPUT_BUFFER[str_start]), term_cols);
 		term_clear_to_eol ();
 		term_move_cursor (cursor, input_line);
 	}
@@ -289,7 +289,7 @@ update_input (int update)
 	{
 		term_move_cursor (cursor, input_line);
 		cnt = cursor;
-		max = CO - (current_screen->buffer_pos - str_start) + ansi_count;
+		max = term_cols - (current_screen->buffer_pos - str_start) + ansi_count;
 		if ((len = strlen (&(THIS_CHAR))) > max)
 			len = max;
 		cnt += /*term_puts */ safe_puts (&(THIS_CHAR), len);
@@ -467,11 +467,11 @@ input_delete_character (char unused, char *not_used)
 			update_input (UPDATE_FROM_CURSOR);
 		else
 		{
-			pos = str_start + CO - 1;
+			pos = str_start + term_cols - 1;
 			pos += count_ansi (&(current_screen->input_buffer[str_start]), zone);
 			if (pos < strlen (INPUT_BUFFER))
 			{
-				term_move_cursor (CO - 1, input_line);
+				term_move_cursor (term_cols - 1, input_line);
 				term_putchar (INPUT_BUFFER[pos]);
 				term_move_cursor (cursor, input_line);
 			}
@@ -502,11 +502,11 @@ input_backspace (char key, char *blah)
 			if (term_delete ())
 				update_input (UPDATE_FROM_CURSOR);
 			{
-				pos = str_start + CO - 1;
+				pos = str_start + term_cols - 1;
 				pos += count_ansi (&(current_screen->input_buffer[str_start]), zone);
 				if (pos < strlen (INPUT_BUFFER))
 				{
-					term_move_cursor (CO - 1, input_line);
+					term_move_cursor (term_cols - 1, input_line);
 					term_putchar (INPUT_BUFFER[pos]);
 				}
 				update_input (UPDATE_JUST_CURSOR);

@@ -23,6 +23,8 @@ NUMBER_OF_VARIABLES
 
 
 
+#define get_bool_var get_int_var
+#define get_char_var get_int_var
 
 
 	char	*get_string_var(enum VAR_TYPES);

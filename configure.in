@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
-# @(#)configure.in 1.6
+# @(#)configure.in 1.7
 #
 
 dnl ---------------------------------------------------------------
@@ -352,7 +352,6 @@ AC_CHECK_FUNC(gettimeofday, AC_DEFINE(HAVE_GETTIMEOFDAY),)
 AC_CHECK_FUNC(sysconf, AC_DEFINE(HAVE_SYSCONF),)
 AC_CHECK_FUNC(uname, AC_DEFINE(HAVE_UNAME),)
 AC_CHECK_FUNC(killpg, AC_DEFINE(HAVE_KILLPG),)
-AC_CHECK_FUNC(inet_aton, AC_DEFINE(HAVE_INET_ATON),)
 AC_CHECK_FUNC(putenv,, AC_DEFINE(NEED_PUTENV))
 AC_CHECK_FUNC(getenv,, AC_DEFINE(NEED_GETENV))
 

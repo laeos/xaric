@@ -1,4 +1,4 @@
-#ident "@(#)funny.c 1.6"
+#ident "@(#)funny.c 1.7"
 /*
  * funny.c: Well, I put some stuff here and called it funny.  So sue me. 
  *
@@ -118,7 +118,7 @@ funny_print_widelist (void)
 		sprintf (buffer2, "%s(%d) ", wide_list[i]->channel,
 			 wide_list[i]->users);
 		ptr = strchr (buffer1, '\0');
-		if (strlen (buffer1) + strlen (buffer2) > CO - 5)
+		if (strlen (buffer1) + strlen (buffer2) > term_cols - 5)
 		{
 			if (do_hook (WIDELIST_LIST, "%s", buffer1))
 				put_it ("%s", convert_output_format (get_fset_var (FORMAT_WIDELIST_FSET), "%s %s", update_clock (GET_TIME), buffer1));

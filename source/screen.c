@@ -1,4 +1,4 @@
-#ident "@(#)screen.c 1.6"
+#ident "@(#)screen.c 1.7"
 /*
  * screen.c
  *
@@ -401,7 +401,7 @@ split_up_line (const unsigned char *str)
 					for (i = 0; i < len; i++)
 					{
 						buffer[pos++] = ' ';
-						if (col++ >= CO)
+						if (col++ >= term_cols)
 							break;
 					}
 				}
@@ -499,11 +499,11 @@ split_up_line (const unsigned char *str)
 		 *  2. Start the new line with the "continued line" string
 		 *  3. Put back the stuff already parsed after the break.
 		 */
-		if (col >= CO || newline)
+		if (col >= term_cols || newline)
 		{
 			/* one big long line, no word breaks */
 			if (word_break == 0)
-				word_break = CO - 1;	/*
+				word_break = term_cols - 1;	/*
 							 * MHacker came up with a
 							 * possible solution here
 							 */ ;
@@ -543,7 +543,7 @@ split_up_line (const unsigned char *str)
 			 * do the /SET INDENT until we know how the first
 			 * line is layed out.
 			 */
-			if (!*cont && do_indent && (indent < CO / 3) && (strlen (cont_ptr) < indent))
+			if (!*cont && do_indent && (indent < term_cols / 3) && (strlen (cont_ptr) < indent))
 			{
 				cont = alloca (indent + 10);
 				sprintf (cont, "%-*s", indent, cont_ptr);

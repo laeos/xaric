@@ -56,7 +56,6 @@ extern WhoisQueue *WQ_tail;
 
 int primary_server = -1;
 int from_server = -1;
-int attempting_to_connect = 0;
 int never_connected = 1;	/* true until first connection
 				 * is made */
 int connected_to_server = 0;	/* true when connection is
@@ -783,7 +782,6 @@ connect_to_server_by_refnum (int refnum, int c_server)
 		return -1;	/* XXXX */
 	}
 
-	attempting_to_connect++;
 	sname = server_list[refnum].name;
 	sport = server_list[refnum].port;
 
@@ -799,7 +797,6 @@ connect_to_server_by_refnum (int refnum, int c_server)
 
 		if (conn)
 		{
-			attempting_to_connect--;
 			return -1;
 		}
 		server_list[refnum].flags &= ~LOGGED_IN;
@@ -1778,7 +1775,7 @@ fudge_nickname (int servnum)
 /*
  * -- Callback function
  */
-void 
+static void 
 nickname_sendline (char *data, char *nick)
 {
 	int new_server;

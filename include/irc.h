@@ -175,6 +175,8 @@ extern	int	current_numeric;
 extern	int	quick_startup;
 extern 	fd_set	readables, writables;
 extern	int	strip_ansi_in_echo;
+extern	int	need_redraw;
+extern	char *	prog_name;
 
 extern ChannelList *statchan_list;
 extern	char	MyHostName[];

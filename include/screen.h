@@ -54,6 +54,12 @@
 	void	add_to_screen(unsigned char *);
 	void	do_screens(fd_set *);
 	unsigned	char	**split_up_line(const unsigned char *);
+	void repaint_window (Window * w, int start_line, int end_line);
+	Screen * create_new_screen (void);
+	void set_screens (fd_set * rd, fd_set * wd);
+
+
+
 		
 extern	Window	*to_window;
 extern	Screen	*current_screen;

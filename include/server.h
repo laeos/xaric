@@ -126,7 +126,6 @@ typedef	unsigned	short	ServerType;
 extern	int	save_chan_from;	/* to keep the channel list if all servers
 				 * are lost */
 
-extern	int	attempting_to_connect;
 extern	int	number_of_servers;
 extern	int	connected_to_server;
 extern	int	never_connected;

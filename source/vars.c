@@ -1,4 +1,4 @@
-#ident "@(#)vars.c 1.11"
+#ident "@(#)vars.c 1.12"
 /*
  * vars.c: All the dealing of the irc variables are handled here. 
  *
@@ -732,7 +732,7 @@ eight_bit_characters (Window * win, char *unused, int value)
 {
 	if (value == ON && !term_eight_bit ())
 		say ("Warning!  Your terminal says it does not support eight bit characters");
-	set_term_eight_bit (value);
+	term_set_eight_bit (value);
 }
 
 static void 

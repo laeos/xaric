@@ -25,9 +25,6 @@
 /* define if you have uname() */
 #undef HAVE_UNAME
 
-/* define if you have inet_aton */
-#undef HAVE_INET_ATON
-
 /* define if you have vsnprintf */
 #undef HAVE_VSNPRINTF
 

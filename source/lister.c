@@ -1,4 +1,4 @@
-#ident "@(#)lister.c 1.1"
+#ident "@(#)lister.c 1.2"
 /*
  * lister.c - display a list of things
  * Copyright (C) 2000 Rex Feany <laeos@laeos.net>
@@ -123,7 +123,7 @@ display_list_cl(ARRAY *list, const char * (*fcn)(void *),
 	longest += 1;
 
 	/* the avaliable length in the column */
-	cols = CO - get_format_len(fmt) - EXTRA_END_SPACE;
+	cols = term_cols - get_format_len(fmt) - EXTRA_END_SPACE;
 
 	/* We can't (and shouldn't be) printing entries that are longer then
 	 * the screen length.  this is for printing small lists! */

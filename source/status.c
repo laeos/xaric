@@ -1,4 +1,4 @@
-#ident "@(#)status.c 1.8"
+#ident "@(#)status.c 1.9"
 /*
  * status.c: handles the status line updating, etc for IRCII 
  *
@@ -416,7 +416,7 @@ fix_status_buffer (char *buffer, int ansi)
 		/*
 		 * Dont allow more than CO printable characters
 		 */
-		if (pr_lhs + pr_rhs >= CO + len)
+		if (pr_lhs + pr_rhs >= term_cols + len)
 		{
 			buffer[i] = 0;
 			break;
@@ -432,16 +432,16 @@ fix_status_buffer (char *buffer, int ansi)
 		/*
 		 * now we put it back.
 		 */
-		if (pr_lhs + pr_rhs < CO)
+		if (pr_lhs + pr_rhs < term_cols)
 			sprintf (buffer + start_rhs, "%*s%s",
-				 CO - 1 - pr_lhs - pr_rhs, empty_string,
+				 term_cols - 1 - pr_lhs - pr_rhs, empty_string,
 				 rhs_buffer);
 		else
 			strcpy (buffer + start_rhs, rhs_buffer);
 	}
 	else
 	{
-		int chars = CO - pr_lhs - 1;
+		int chars = term_cols - pr_lhs - 1;
 		int count;
 		char c;
 		if (get_int_var (STATUS_NO_REPEAT_VAR))

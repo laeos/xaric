@@ -48,7 +48,7 @@
  * may have to rebind them in IRCII.  Set it to 0 for IRCII to take over the
  * tty's flow control.
  */
-#define USE_FLOW_CONTROL 1
+#define DEFAULT_USE_FLOW_CONTROL 1
 
 /*
  * Uncomment the following if the gecos field of your /etc/passwd has other

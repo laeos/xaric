@@ -1,4 +1,4 @@
-#ident "@(#)irc.c 1.20"
+#ident "@(#)irc.c 1.21"
 /*
  * Original from ircII: a new irc client.  I like it.  I hope you will too!
  * Written By Michael Sandrof
@@ -113,8 +113,9 @@ int irc_port = IRC_PORT,	/* port of ircd */
   waiting_in = 0,		/* used by /WAIT command */
   who_mask = 0,			/* keeps track of which /who
 				 * switchs are set */
-  away_set = 0;			/* set if there is an away
+  away_set = 0,			/* set if there is an away
 				 * message anywhere */
+  need_redraw = 0;		/* set whenever the terminal is reset */
 
 static int
   load_ircrc = 1,		/* load ircrc file? */
@@ -217,11 +218,11 @@ parse_args (int argc, char *argv[])
 				break;
 
 			case 'f': /* Use flow control */
-				set_flow_control(ON);
+				term_set_flow_control(ON);
 				break;
 
 			case 'F': /* dont use flow control */
-				set_flow_control(OFF);
+				term_set_flow_control(OFF);
 				break;
 
 			case 'l': /* Load some file instead of ~/.ircrc */

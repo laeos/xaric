@@ -1,60 +1,72 @@
+#ifndef ircterm_h__
+#define ircterm_h__
 /*
- * term.h: header file for term.c 
+ * ircterm.h - terminal handling stuffs
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * Written By Michael Sandrof
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * Copyright(c) 1990 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * See the COPYRIGHT file, or do a HELP IRCII COPYRIGHT 
+ * %W%
  *
- * @(#)$Id$
  */
 
-#ifndef _TERM_H_
-# define _TERM_H_
+/* The termcap variables.  */
+extern const char *tc_CM, *tc_CE, *tc_CL, *tc_CR, *tc_NL, *tc_AL, *tc_DL, *tc_CS, 
+	*tc_DC, *tc_IC, *tc_IM, *tc_EI, *tc_SO, *tc_SE, *tc_US, *tc_UE, 
+	*tc_MD, *tc_ME, *tc_SF, *tc_SR, *tc_ND, *tc_LE, *tc_BL, *tc_BS;
 
-#include "irc_std.h"
+/* Current width/height */
+extern int term_cols, term_rows;
 
-extern	int	need_redraw;
+#define tputs_x(s)			(tputs(s, 0, term_putchar_raw))
+#define term_underline_on()		(tputs_x(tc_US))
+#define term_underline_off()		(tputs_x(tc_UE))
+#define term_standout_on()		(tputs_x(tc_SO))
+#define term_standout_off()		(tputs_x(tc_SE))
+#define term_clear_screen()		(tputs_x(tc_CL))
+#define term_move_cursor(c, r)		(tputs_x(tgoto(tc_CM, (c), (r))))
+#define term_cr()			(tputs_x(tc_CR))
+#define term_newline()			(tputs_x(tc_NL))
+#define	term_bold_on()			(tputs_x(tc_MD))
+#define	term_bold_off()			(tputs_x(tc_ME))
+#define term_cursor_right()		(tputs_x(tc_ND))
+#define term_clear_to_eol()		(tputs_x(tc_CE))
 
-extern	char	*CM, *DO, *CE, *CL, *CR, *NL, *SO, *SE, *US, *UE, *MD, *ME, *BL;
-extern	int	CO, LI, SG; 
-extern int putchar_x(int);
+void term_putchar (unsigned char c);
+int  term_putchar_raw (int c);
+void term_reset (void);
+int term_init(void);
+int term_resize(void);
+void term_reset(void);
+void term_continue(void);
+void term_pause(void);
+int term_echo(int flag);
+void term_putchar(unsigned char c);
+int term_puts(char *str, int len);
+int term_putchar_raw(int c);
+void term_flush(void);
+void term_beep(void);
+void term_set_flow_control(int value);
+int term_eight_bit(void);
+void term_set_eight_bit(int value);
 
-#define tputs_x(s)			(tputs(s, 0, putchar_x))
-#define term_underline_on()		(tputs_x(US))
-#define term_underline_off()		(tputs_x(UE))
-#define term_standout_on()		(tputs_x(SO))
-#define term_standout_off()		(tputs_x(SE))
-#define term_clear_screen()		(tputs_x(CL))
-#define term_move_cursor(c, r)		(tputs_x(tgoto(CM, (c), (r))))
-#define term_cr()			(tputs_x(CR))
-#define term_newline()			(tputs_x(NL))
-#define	term_bold_on()			(tputs_x(MD))
-#define	term_bold_off()			(tputs_x(ME))
+/* strange function pointers, filled in at runtime */
+int (*term_scroll) (int, int, int);     /* best scroll available */
+int (*term_insert) (char);              /* best insert available */
+int (*term_delete) (void);              /* best delete available */
+int (*term_cursor_left) (void);         /* best left available */
 
-extern	void	term_continue 	(void);
-extern 	void 	term_beep 	(void);
-extern	int	term_echo 	(int);
-extern	int	term_init 	(void);
-extern	int	term_resize 	(void);
-extern	void	term_pause 	(char, char *);
-extern	void	term_putchar 	(unsigned char);
-extern	int	term_puts 	(char *, int);
-extern	void	term_flush 	(void);
-extern	int	(*term_scroll) 	(int, int, int);
-extern	int	(*term_insert) 	(char);
-extern	int	(*term_delete) 	(void);
-extern	int	(*term_cursor_right) (void);
-extern	int	(*term_cursor_left) (void);
-extern	int	(*term_clear_to_eol) (void);
-extern	void	term_space_erase (int);
-extern	void	term_reset 	(void);
 
-extern  void    copy_window_size (int *, int *);
-extern	int	term_eight_bit 	(void);
-extern	void	set_term_eight_bit (int);
-extern	void	set_flow_control (int);
 
-#endif /* _TERM_H_ */
-
+#endif /* ircterm_h__ */

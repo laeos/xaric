@@ -725,11 +725,11 @@ static int cparse_recurse = -1;
 char *
 convert_output_format(const char *format, const char *str, ...)
 {
-	static unsigned char buffer[10 * BIG_BUFFER_SIZE + 1];
+	static char buffer[10 * BIG_BUFFER_SIZE + 1];
 	char buffer2[2 * BIG_BUFFER_SIZE + 1];
 	enum color_attributes this_color = BLACK;
-	register unsigned char *t;
-	register unsigned char *s;
+	register char *t;
+	register char *s;
 	char *copy = NULL;
 	char *tmpc = NULL;
 	char *p;
@@ -939,7 +939,7 @@ convert_output_format(const char *format, const char *str, ...)
 				strcat(s, new_str);
 			new_free(&new_str);
 			while (*s) {
-				if (*s == 255)
+				if (*s == -1)
 					*s = ' ';
 				s++;
 			}

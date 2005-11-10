@@ -1139,7 +1139,7 @@ edit_char (u_char key)
 	/* were we waiting for a keypress? */
 	if (current_screen->promptlist && current_screen->promptlist->type == WAIT_PROMPT_KEY)
 	{
-		unsigned char key_[2] = "\0";
+		char key_[2] = "\0";
 		key_[0] = key;
 		oldprompt = current_screen->promptlist;
 

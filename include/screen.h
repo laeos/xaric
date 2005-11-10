@@ -28,7 +28,7 @@
 
 	void	clear_window(Window *);
 	void	recalculate_window_positions(void);
-	int	output_line(register unsigned char *);
+	int	output_line(register char *);
 	void	recalculate_windows(void);
 	Window	*create_additional_screen(void);
 	void	scroll_window(Window *);
@@ -47,13 +47,13 @@
 	void	scrollback_end(char, char *);
 	void	scrollback_start(char, char *);
 	void	kill_screen(Screen *);
-	int	rite(Window *, const unsigned char *);
+	int	rite(Window *, const char *);
 	ShrinkInfo	resize_display(Window *);
 	void	redraw_window(Window *, int);
 	void	redraw_all_windows(void);
-	void	add_to_screen(unsigned char *);
+	void	add_to_screen(char *);
 	void	do_screens(fd_set *);
-	unsigned	char	**split_up_line(const unsigned char *);
+	char	**split_up_line(const char *);
 	void repaint_window (Window * w, int start_line, int end_line);
 	Screen * create_new_screen (void);
 	void set_screens (fd_set * rd, fd_set * wd);

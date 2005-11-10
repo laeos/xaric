@@ -374,9 +374,8 @@ set_dcc_bits (fd_set * rd, fd_set * wd)
 static void 
 dcc_got_connected (DCC_list * client)
 {
-	struct sockaddr_in remaddr =
-	{0};
-	int rl = sizeof (remaddr);
+	struct sockaddr_in remaddr = {0};
+	size_t rl = sizeof (remaddr);
 
 	if (getpeername (client->read, (struct sockaddr *) &remaddr, &rl) != -1)
 	{
@@ -672,7 +671,7 @@ dcc_raw_listen (int port)
 	char *PortName;
 	struct sockaddr_in locaddr;
 	char *RetName = NULL;
-	int size;
+	size_t size;
 	int lastlog_level;
 
 	lastlog_level = set_lastlog_msg_level (LOG_DCC);
@@ -1241,7 +1240,6 @@ static void
 process_incoming_chat (DCC_list * Client)
 {
 	struct sockaddr_in remaddr;
-	int sra;
 	char tmp[MAX_DCC_BLOCK_SIZE + 1];
 	char *s = NULL, *bufptr = NULL;
 	char *buf = NULL;
@@ -1251,7 +1249,7 @@ process_incoming_chat (DCC_list * Client)
 
 	if (Client->flags & DCC_WAIT)
 	{
-		sra = sizeof (struct sockaddr_in);
+	    	size_t sra= sizeof (struct sockaddr_in);
 		Client->write = accept (Client->read, (struct sockaddr *) &remaddr, &sra);
 		FD_CLR (Client->read, &readables);
 		close (Client->read);
@@ -1366,7 +1364,7 @@ static void
 process_incoming_listen (DCC_list * Client)
 {
 	struct sockaddr_in remaddr;
-	int sra;
+	size_t sra;
 	char FdName[10];
 	DCC_list *NewClient;
 	int new_socket;
@@ -1477,7 +1475,7 @@ static void
 process_outgoing_file (DCC_list * Client, int readwaiting)
 {
 	struct sockaddr_in remaddr;
-	int sra;
+	size_t sra;
 	char tmp[MAX_DCC_BLOCK_SIZE + 1];
 	u_32int_t bytesrecvd = 0;
 	int bytesread = 0;
@@ -1875,7 +1873,7 @@ dcc_glist (char *command, char *args)
 
 	unsigned flags;
 	unsigned count = 0;
-	int size = 0;
+	size_t size = 0;
 	double barsize = 0.0, perc = 0.0;
 	int barlen = BAR_LENGTH;
 	char spec[BIG_BUFFER_SIZE + 1];

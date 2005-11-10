@@ -44,7 +44,7 @@ int extended_handled = 0;
 /* Our list of screens */
 Screen *screen_list = NULL;
 
-static int add_to_display_list (Window *, const unsigned char *);
+static int add_to_display_list (Window *, const char *);
 Display *new_display_line (Display *);
 
 /* 
@@ -79,7 +79,7 @@ set_current_screen (Screen * screen)
 }
 
 
-static void add_to_window (Window * window, const unsigned char *str);
+static void add_to_window (Window * window, const char *str);
 static char display_highlight (int flag);
 static char display_bold (int flag);
 static char display_underline (int flag);
@@ -92,7 +92,7 @@ static void display_color (long color1, long color2);
  * should be sent to, etc 
  */
 void 
-add_to_screen (unsigned char *buffer)
+add_to_screen (char *buffer)
 {
 	Window *tmp = NULL;
 
@@ -194,12 +194,12 @@ found:
  * functions need to be able to figure out how to split things up too.
  */
 static void 
-add_to_window (Window * window, const unsigned char *str)
+add_to_window (Window * window, const char *str)
 {
 
 	if (do_hook (WINDOW_LIST, "%u %s", window->refnum, str))
 	{
-		unsigned char **lines;
+		char **lines;
 
 		add_to_log (window->log_fp, 0, str);
 		add_to_lastlog (window, str);
@@ -304,14 +304,14 @@ add_to_window (Window * window, const unsigned char *str)
  */
 #define	MAXIMUM_SPLITS	40
 #define MAX_SCREEN_BUFFER (BIG_BUFFER_SIZE * 2)
-unsigned char **
-split_up_line (const unsigned char *str)
+char **
+split_up_line (const char *str)
 {
-	static unsigned char **output = NULL;
+	static char **output = NULL;
 	static int output_size = 0;
-	unsigned char buffer[BIG_BUFFER_SIZE + 1];
-	const unsigned char *ptr;
-	unsigned char *cont_ptr, *cont = empty_str, c;
+	char buffer[BIG_BUFFER_SIZE + 1];
+	const char *ptr;
+	char *cont_ptr, *cont = empty_str, c;
 	int pos = 0,		/* Current pos in "buffer" */
 	  col = 0,		/* Current col on display */
 	  word_break = 0,	/* Last end of word */
@@ -321,7 +321,7 @@ split_up_line (const unsigned char *str)
 	  beep_max,		/* what od you think? */
 	  tab_cnt = 0, tab_max, line = 0;	/* Current pos in "output" */
 	int len;		/* Used for counting tabs */
-	unsigned char *pos_copy;	/* Used for reconstruction */
+	char *pos_copy;	/* Used for reconstruction */
 	int do_indent;
 	int newline = 0;
 	static int recursion = 0;
@@ -606,7 +606,7 @@ split_up_line (const unsigned char *str)
  * the hold_mode stuff.
  */
 static int 
-add_to_display_list (Window * window, const unsigned char *str)
+add_to_display_list (Window * window, const char *str)
 {
 	/* Add to the display list */
 
@@ -693,7 +693,7 @@ add_to_display_list (Window * window, const unsigned char *str)
  * else (i.e. status line, input line). 
  */
 int 
-rite (Window * window, const unsigned char *str)
+rite (Window * window, const char *str)
 {
 	static int high = OFF;
 	Screen *old_current_screen = current_screen;
@@ -738,9 +738,9 @@ rite (Window * window, const unsigned char *str)
  * higgledy-piggledy.  As long as you do that, everything will look ok.
  */
 int 
-output_line (register unsigned char *str)
+output_line (register char *str)
 {
-	unsigned char *ptr = str;
+	char *ptr = str;
 	int beep = 0;
 
 

@@ -364,7 +364,7 @@ char *alias_special_char (char **, char *, char *, char *, int *);
 static void 
 fix_status_buffer (char *buffer, int ansi)
 {
-	unsigned char rhs_buffer[3 * BIG_BUFFER_SIZE + 1];
+	char rhs_buffer[3 * BIG_BUFFER_SIZE + 1];
 	int in_rhs = 0, ch_lhs = 0, ch_rhs = 0, pr_lhs = 0, pr_rhs = 0,
 	  start_rhs = -1, i;
 
@@ -494,10 +494,10 @@ build_status (Window * win, char *format, int unused)
 void 
 make_status (Window * win)
 {
-	unsigned char buffer[3 * BIG_BUFFER_SIZE + 1];
+	char buffer[3 * BIG_BUFFER_SIZE + 1];
 	char *func_value[MAX_FUNCTIONS + 10] =
 	{NULL};
-	unsigned char **output;
+	char **output;
 
 	int len = 1, status_line, ansi = get_int_var (DISPLAY_ANSI_VAR);
 
@@ -520,7 +520,7 @@ make_status (Window * win)
 		else
 			len = 0;
 
-		snprintf ((char *) buffer + len, BIG_BUFFER_SIZE * 3,
+		snprintf (buffer + len, BIG_BUFFER_SIZE * 3,
 			  status_format[line],
 			  func_value[0], func_value[1], func_value[2],
 			  func_value[3], func_value[4], func_value[5],
@@ -550,7 +550,7 @@ make_status (Window * win)
 
 		{
 			Screen *old_current_screen;
-			unsigned char *st = NULL;
+			char *st = NULL;
 
 			malloc_strcpy (&win->status_line[status_line], buffer);
 			old_current_screen = current_screen;

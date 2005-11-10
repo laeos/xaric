@@ -1,38 +1,39 @@
-/* include/config.h.in.  Generated automatically from configure.in by autoheader.  */
+/* include/config.h.in.  Generated from configure.in by autoheader.  */
 
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
    */
 #undef CRAY_STACKSEG_END
 
-/* Define if using `alloca.c'. */
+/* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
-/* Define if the `getpgrp' function takes no argument. */
+/* Define to 1 if the `getpgrp' function requires zero arguments. */
 #undef GETPGRP_VOID
 
 /* Defined if you have struct addrinfo. */
 #undef HAVE_ADDRINFO_STRUCT
 
-/* Define if you have `alloca', as a function or macro. */
+/* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
-/* Define if you have <alloca.h> and it should be used (not on Ultrix). */
+/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
+   */
 #undef HAVE_ALLOCA_H
 
-/* Define if you have the <assert.h> header file. */
+/* Define to 1 if you have the <assert.h> header file. */
 #undef HAVE_ASSERT_H
 
-/* Define if you have the <ctype.h> header file. */
+/* Define to 1 if you have the <ctype.h> header file. */
 #undef HAVE_CTYPE_H
 
-/* Define if you have the <dirent.h> header file. */
+/* Define to 1 if you have the <dirent.h> header file. */
 #undef HAVE_DIRENT_H
 
-/* Define if you have the <errno.h> header file. */
+/* Define to 1 if you have the <errno.h> header file. */
 #undef HAVE_ERRNO_H
 
-/* Define if you have the <fcntl.h> header file. */
+/* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
 /* Defined if you have fpathconf(). */
@@ -50,7 +51,7 @@
 /* Defined if system has getnameinfo(). */
 #undef HAVE_GETNAMEINFO
 
-/* Define if you have the <getopt.h> header file. */
+/* Define to 1 if you have the <getopt.h> header file. */
 #undef HAVE_GETOPT_H
 
 /* Defined if system has getpass(). */
@@ -62,58 +63,58 @@
 /* Defined if you have gettimeofday. */
 #undef HAVE_GETTIMEOFDAY
 
-/* Define if you have the <inttypes.h> header file. */
+/* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Defined if system has killpg(). */
 #undef HAVE_KILLPG
 
-/* Define if you have the `pthread' library (-lpthread). */
+/* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
 
-/* Define if you have the `pthreads' library (-lpthreads). */
+/* Define to 1 if you have the `pthreads' library (-lpthreads). */
 #undef HAVE_LIBPTHREADS
 
-/* Define if you have the <memory.h> header file. */
+/* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* Define if you have the <netdb.h> header file. */
+/* Define to 1 if you have the <netdb.h> header file. */
 #undef HAVE_NETDB_H
 
-/* Define if you have the <netinet/in.h> header file. */
+/* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
 
-/* Define if you have the <net/if.h> header file. */
+/* Define to 1 if you have the <net/if.h> header file. */
 #undef HAVE_NET_IF_H
 
-/* Define if you have the <pwd.h> header file. */
+/* Define to 1 if you have the <pwd.h> header file. */
 #undef HAVE_PWD_H
 
-/* Define if you have the <signal.h> header file. */
+/* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
 
 /* Defined if struct sockaddr has sa_len field. */
 #undef HAVE_SOCKADDR_SA_LEN
 
-/* Define if you have the <stdarg.h> header file. */
+/* Define to 1 if you have the <stdarg.h> header file. */
 #undef HAVE_STDARG_H
 
-/* Define if you have the <stdint.h> header file. */
+/* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
-/* Define if you have the <stdio.h> header file. */
+/* Define to 1 if you have the <stdio.h> header file. */
 #undef HAVE_STDIO_H
 
-/* Define if you have the <stdlib.h> header file. */
+/* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
 /* Defined if strerror() exists. */
 #undef HAVE_STRERROR
 
-/* Define if you have the <strings.h> header file. */
+/* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
-/* Define if you have the <string.h> header file. */
+/* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
 /* Defined if sockaddr_un has sun_len field. */
@@ -122,52 +123,52 @@
 /* Defined if system has sysconf. */
 #undef HAVE_SYSCONF
 
-/* Define if you have the <sys/ioctl.h> header file. */
+/* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
 
-/* Define if you have the <sys/ptem.h> header file. */
+/* Define to 1 if you have the <sys/ptem.h> header file. */
 #undef HAVE_SYS_PTEM_H
 
-/* Define if you have the <sys/select.h> header file. */
+/* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
 
-/* Define if you have the <sys/socket.h> header file. */
+/* Define to 1 if you have the <sys/socket.h> header file. */
 #undef HAVE_SYS_SOCKET_H
 
-/* Define if you have the <sys/stat.h> header file. */
+/* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
-/* Define if you have the <sys/syslimits.h> header file. */
+/* Define to 1 if you have the <sys/syslimits.h> header file. */
 #undef HAVE_SYS_SYSLIMITS_H
 
-/* Define if you have the <sys/termios.h> header file. */
+/* Define to 1 if you have the <sys/termios.h> header file. */
 #undef HAVE_SYS_TERMIOS_H
 
-/* Define if you have the <sys/time.h> header file. */
+/* Define to 1 if you have the <sys/time.h> header file. */
 #undef HAVE_SYS_TIME_H
 
-/* Define if you have the <sys/ttycom.h> header file. */
+/* Define to 1 if you have the <sys/ttycom.h> header file. */
 #undef HAVE_SYS_TTYCOM_H
 
-/* Define if you have the <sys/twg_config.h> header file. */
+/* Define to 1 if you have the <sys/twg_config.h> header file. */
 #undef HAVE_SYS_TWG_CONFIG_H
 
-/* Define if you have the <sys/types.h> header file. */
+/* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define if you have the <sys/un.h> header file. */
+/* Define to 1 if you have the <sys/un.h> header file. */
 #undef HAVE_SYS_UN_H
 
-/* Define if you have the <sys/wait.h> header file. */
+/* Define to 1 if you have the <sys/wait.h> header file. */
 #undef HAVE_SYS_WAIT_H
 
-/* Define if you have the <termcap.h> header file. */
+/* Define to 1 if you have the <termcap.h> header file. */
 #undef HAVE_TERMCAP_H
 
 /* Defined if system has uname(). */
 #undef HAVE_UNAME
 
-/* Define if you have the <unistd.h> header file. */
+/* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
 /* Defined if your system has IPv4 support. */
@@ -188,6 +189,21 @@
 /* Defined if struct linger is missing. */
 #undef NO_STRUCT_LINGER
 
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 
@@ -200,12 +216,12 @@
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at run-time.
-        STACK_DIRECTION > 0 => grows toward higher addresses
-        STACK_DIRECTION < 0 => grows toward lower addresses
-        STACK_DIRECTION = 0 => direction of growth unknown */
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
 
-/* Define if you have the ANSI C header files. */
+/* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
 /* Defined if sys_errlist is declared. */
@@ -214,7 +230,7 @@
 /* Defined if sys_siglist is declared. */
 #undef SYS_SIGLIST_DECLARED
 
-/* Define if you can safely include both <sys/time.h> and <time.h>. */
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
 /* Defined if we are using curses library. */
@@ -223,7 +239,7 @@
 /* Define to enable some debug code */
 #undef XARIC_DEBUG
 
-/* Define if on AIX 3.
+/* Define to 1 if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
 #ifndef _ALL_SOURCE
@@ -236,9 +252,11 @@
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
 
-/* Define as `__inline' if that's what the C compiler calls it, or to nothing
-   if it is not supported. */
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
 #undef inline
+#endif
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef mode_t

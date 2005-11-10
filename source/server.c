@@ -205,7 +205,7 @@ do_server (fd_set * rd, fd_set * wr)
 		if (((des = server_list[i].write) != -1) && FD_ISSET (des, wr) && !(server_list[i].flags & LOGGED_IN))
 		{
 			struct sockaddr_in sa;
-			int sa_len = sizeof (struct sockaddr_in);
+			size_t sa_len = sizeof (struct sockaddr_in);
 			if (getpeername (des, (struct sockaddr *) &sa, &sa_len) != -1)
 			{
 				login_to_server (i, -1);
@@ -689,7 +689,7 @@ connect_to_server_direct (char *server_name, int port)
 {
 	int new_des;
 	struct sockaddr_in localaddr;
-	int address_len;
+	size_t address_len;
 	unsigned short this_sucks;
 
 	oper_command = 0;
@@ -774,7 +774,7 @@ connect_to_server_by_refnum (int refnum, int c_server)
 	int sport;
 	int conn;
 	struct sockaddr_in sa;
-	int sa_len = sizeof (struct sockaddr_in);
+	size_t sa_len = sizeof (struct sockaddr_in);
 
 	if (refnum == -1)
 	{

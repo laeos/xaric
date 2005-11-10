@@ -470,7 +470,7 @@ logmsg (unsigned long log_type, char *from, char *string, int flag)
 	char *filename = NULL;
 	char *expand = NULL;
 	char *type = NULL;
-	unsigned char **lines = NULL;
+	char **lines = NULL;
 
 	if (!get_string_var (MSGLOGFILE_VAR))
 		return 0;

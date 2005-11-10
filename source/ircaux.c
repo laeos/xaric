@@ -626,7 +626,7 @@ unsigned char stricmp_table[] =
 
 /* my_stricmp: case insensitive version of strcmp */
 int 
-my_stricmp (register const unsigned char *str1, register const unsigned char *str2)
+my_stricmp (register const char *str1, register const char *str2)
 {
 	while (*str1 && *str2 && (stricmp_table[(unsigned short) *str1] == stricmp_table[(unsigned short) *str2]))
 		str1++, str2++;
@@ -657,7 +657,7 @@ my_stricmp (register const unsigned char *str1, register const unsigned char *st
 
 /* my_strnicmp: case insensitive version of strncmp */
 int 
-my_strnicmp (register const unsigned char *str1, register const unsigned char *str2, register int n)
+my_strnicmp (register const char *str1, register const char *str2, register int n)
 {
 	while (n && *str1 && *str2 && (stricmp_table[(unsigned short) *str1] == stricmp_table[(unsigned short) *str2]))
 		str1++, str2++, n--;
@@ -1860,10 +1860,10 @@ next_in_comma_list (char *str, char **after)
  * ^[[m won't work anymore !!!!
  */
 void 
-FixColorAnsi (unsigned char *str)
+FixColorAnsi (char *str)
 {
-	register unsigned char *tmpstr;
-	register unsigned char *tmpstr1 = NULL;
+	register char *tmpstr;
+	register char *tmpstr1 = NULL;
 	int what = 0;
 	int numbers = 0;
 	int val = 0;

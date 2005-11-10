@@ -488,7 +488,6 @@ typedef struct	timerlist_stru
 	struct	timerlist_stru *next;
 }	TimerList;
 
-extern TimerList *PendingTimers;
 typedef struct nicktab_stru
 {
 	struct nicktab_stru *next;

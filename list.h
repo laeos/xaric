@@ -21,6 +21,7 @@ struct list {
     char *name;
 };
 
+/* TODO: last arg should be void, not char */
 typedef int (cmp_fn) (struct list *, char *);
 
 /* list.c */

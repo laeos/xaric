@@ -66,9 +66,10 @@
 #include "timer.h"
 #include "list.h"
 #include "misc.h"
-#include "hash2.h"
+#include "hash.h"
 #include "fset.h"
 #include "notice.h"
+#include "whowas.h"
 
 
 #include "tcommand.h"

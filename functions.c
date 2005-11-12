@@ -34,7 +34,7 @@
 #include "misc.h"
 #include "numbers.h"
 #include "ignore.h"
-#include "hash2.h"
+#include "hash.h"
 
 #include <sys/stat.h>
 

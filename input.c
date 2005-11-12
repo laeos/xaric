@@ -36,7 +36,7 @@
 #include "whowas.h"
 #include "window.h"
 #include "status.h"
-#include "hash2.h"
+#include "hash.h"
 #include "fset.h"
 #include "tcommand.h"
 

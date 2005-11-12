@@ -41,7 +41,7 @@
 #include "misc.h"
 #include "whowas.h"
 #include "timer.h"
-#include "hash2.h"
+#include "hash.h"
 #include "fset.h"
 #include "tcommand.h"
 

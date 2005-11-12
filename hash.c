@@ -36,8 +36,9 @@
 #include "window.h"
 #include "fset.h"
 #include "hash.h"
-#include "hash2.h"
 #include "tcommand.h"
+#include "struct.h"
+#include "whowas.h"
 
 /*
  * hash_nickname: for now, does a simple hash of the 

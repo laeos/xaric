@@ -34,7 +34,7 @@
 #include "screen.h"
 #include "status.h"
 #include "notice.h"
-#include "hash2.h"
+#include "hash.h"
 #include "input.h"
 #include "fset.h"
 

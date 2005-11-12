@@ -28,7 +28,7 @@
 #include "names.h"
 #include "ircaux.h"
 #include "misc.h"
-#include "hash2.h"
+#include "hash.h"
 #include "fset.h"
 
 #define MY_BUFFER 150

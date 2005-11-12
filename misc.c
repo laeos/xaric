@@ -55,7 +55,7 @@
 #include "flood.h"
 #include "parse.h"
 #include "whowas.h"
-#include "hash2.h"
+#include "hash.h"
 #include "fset.h"
 
 char *alias_special_char(char **, char *, char *, char *, int *);

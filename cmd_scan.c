@@ -35,7 +35,7 @@
 #include "whois.h"
 #include "output.h"
 #include "status.h"
-#include "hash2.h"
+#include "hash.h"
 #include "misc.h"
 #include "screen.h"
 #include "tcommand.h"

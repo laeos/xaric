@@ -51,7 +51,7 @@
 #include "whowas.h"
 #include "vars.h"
 #include "misc.h"
-#include "hash2.h"
+#include "hash.h"
 #include "fset.h"
 
 

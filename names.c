@@ -37,7 +37,7 @@
 #include "misc.h"
 #include "vars.h"
 #include "status.h"
-#include "hash2.h"
+#include "hash.h"
 #include "fset.h"
 
 extern int in_on_who;

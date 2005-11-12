@@ -34,7 +34,7 @@
 #include "server.h"
 #include "window.h"
 #include "misc.h"
-#include "hash2.h"
+#include "hash.h"
 #include "fset.h"
 #include "format.h"
 #include "alist.h"

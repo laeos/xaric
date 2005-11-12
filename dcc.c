@@ -41,7 +41,7 @@
 #include "hook.h"
 #include "misc.h"
 #include "screen.h"
-#include "hash2.h"
+#include "hash.h"
 #include "fset.h"
 #include "tcommand.h"
 

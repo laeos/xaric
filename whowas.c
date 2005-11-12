@@ -33,7 +33,7 @@
 #include "list.h"
 #include "misc.h"
 #include "hash.h"
-#include "hash2.h"
+#include "hash.h"
 #include "whowas.h"
 #include "fset.h"
 

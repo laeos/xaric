@@ -306,7 +306,7 @@ _wild_match (mask, string)
 			 * the NULL of n
 			 */
 			just = 0;
-			if (tolower (*m) == tolower (*n))
+			if (tolower ((int)*m) == tolower ((int)*n))
 			{
 				m++;
 				if (*n == ' ')

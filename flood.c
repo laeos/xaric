@@ -57,16 +57,16 @@ typedef struct flood_stru
 	long cnt;
 	time_t start;
 }
-Flooding;
+struct flood;
 #endif
 
 #define FLOOD_HASHSIZE 31
 
 
-HashEntry no_flood_list[FLOOD_HASHSIZE];
-HashEntry flood_list[FLOOD_HASHSIZE];
+struct hash_entry no_flood_list[FLOOD_HASHSIZE];
+struct hash_entry flood_list[FLOOD_HASHSIZE];
 
-static int remove_oldest_flood_hashlist (HashEntry *, time_t, int);
+static int remove_oldest_flood_hashlist (struct hash_entry *, time_t, int);
 
 
 
@@ -133,7 +133,7 @@ cmd_no_flood (struct command *cmd, char *args)
 }
 
 int 
-get_flood_rate (int type, ChannelList * channel)
+get_flood_rate (int type, struct channel * channel)
 {
 	int flood_rate = get_int_var (FLOOD_RATE_VAR);
 	if (channel)
@@ -174,7 +174,7 @@ get_flood_rate (int type, ChannelList * channel)
 }
 
 int 
-get_flood_count (int type, ChannelList * channel)
+get_flood_count (int type, struct channel * channel)
 {
 	int flood_count = get_int_var (FLOOD_AFTER_VAR);
 	if (channel)
@@ -215,7 +215,7 @@ get_flood_count (int type, ChannelList * channel)
 }
 
 int 
-set_flood (int type, time_t flood_time, int reset, NickList * tmpnick)
+set_flood (int type, time_t flood_time, int reset, struct nick_list * tmpnick)
 {
 	if (!tmpnick)
 		return 0;
@@ -273,7 +273,7 @@ set_flood (int type, time_t flood_time, int reset, NickList * tmpnick)
 }
 
 int 
-is_other_flood (ChannelList * channel, NickList * tmpnick, int type, int *t_flood)
+is_other_flood (struct channel * channel, struct nick_list * tmpnick, int type, int *t_flood)
 {
 	time_t diff = 0, flood_time = 0;
 	int doit = 0;
@@ -373,7 +373,7 @@ check_flooding (char *nick, int type, char *line, char *channel)
 	static int users = 0, pos = 0;
 	time_t flood_time = time (NULL), diff = 0;
 
-	Flooding *tmp;
+	struct flood *tmp;
 	int flood_rate, flood_count;
 
 
@@ -450,8 +450,8 @@ check_flooding (char *nick, int type, char *line, char *channel)
 int 
 flood_prot (char *nick, char *userhost, char *type, int ctcp_type, int ignoretime, char *channel)
 {
-	ChannelList *chan;
-	NickList *Nick;
+	struct channel *chan;
+	struct nick_list *Nick;
 	char tmp[BIG_BUFFER_SIZE + 1];
 	char *uh;
 	int old_window_display;
@@ -513,9 +513,9 @@ flood_prot (char *nick, char *userhost, char *type, int ctcp_type, int ignoretim
 }
 
 static int 
-remove_oldest_flood_hashlist (HashEntry * list, time_t timet, int count)
+remove_oldest_flood_hashlist (struct hash_entry * list, time_t timet, int count)
 {
-	Flooding *ptr;
+	struct flood *ptr;
 	register time_t t;
 	int total = 0;
 	register unsigned long x;
@@ -524,7 +524,7 @@ remove_oldest_flood_hashlist (HashEntry * list, time_t timet, int count)
 	{
 		for (x = 0; x < FLOOD_HASHSIZE; x++)
 		{
-			ptr = (Flooding *) (list + x)->list;
+			ptr = (struct flood *) (list + x)->list;
 			if (!ptr || !*ptr->name)
 				continue;
 			while (ptr)
@@ -535,7 +535,7 @@ remove_oldest_flood_hashlist (HashEntry * list, time_t timet, int count)
 					new_free (&(ptr->channel));
 					new_free ((char **) &ptr);
 					total++;
-					ptr = (Flooding *) (list + x)->list;
+					ptr = (struct flood *) (list + x)->list;
 				}
 				else
 					ptr = ptr->next;
@@ -546,8 +546,8 @@ remove_oldest_flood_hashlist (HashEntry * list, time_t timet, int count)
 	{
 		for (x = 0; x < FLOOD_HASHSIZE; x++)
 		{
-			Flooding *next = NULL;
-			ptr = (Flooding *) (list + x)->list;
+			struct flood *next = NULL;
+			ptr = (struct flood *) (list + x)->list;
 			if (!ptr || !*ptr->name)
 				continue;
 			while (ptr && count)
@@ -558,7 +558,7 @@ remove_oldest_flood_hashlist (HashEntry * list, time_t timet, int count)
 				new_free ((char **) &ptr);
 				total++;
 				count--;
-				ptr = (Flooding *) (list + x)->list;
+				ptr = (struct flood *) (list + x)->list;
 				ptr = next;
 			}
 		}

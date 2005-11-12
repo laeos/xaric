@@ -15,7 +15,7 @@
 
 	void	display_msg(char *, char **);
 	void	numbered_command(char *, int, char **);
-	int	check_sync(int, char *, char *, char *, char *, ChannelList *);
+	int	check_sync(int, char *, char *, char *, char *, struct channel *);
 
 	/* Really in notice.c */
 	void	got_initial_version(char **);

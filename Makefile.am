@@ -25,6 +25,7 @@ EXTRA_xaric_SOURCES = alloca.c freeaddrinfo.c ga_aistruct.c ga_echeck.c ga_nsear
 
 HELP_FILES= help/copying help/help help/warranty
 xaric_LDADD = @EXTRA_OBJS@ 
+xaric_CFLAGS = -Werror -Wall
 man_MANS = xaric.1
 EXTRA_DIST = $(man_MANS) $(HELP_FILES) xaric.xpm
 

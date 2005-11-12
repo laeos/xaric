@@ -177,7 +177,7 @@ extern	int	strip_ansi_in_echo;
 extern	int	need_redraw;
 extern	char *	prog_name;
 
-extern ChannelList *statchan_list;
+extern struct channel *statchan_list;
 extern	char	MyHostName[];
 extern	struct	in_addr MyHostAddr;
 extern	struct	in_addr LocalHostAddr;

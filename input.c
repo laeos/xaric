@@ -955,8 +955,8 @@ send_line (char dumb, char *dumber)
 			if (strchr (line, auto_comp_char))
 			{
 				char *p;
-				ChannelList *chan;
-				NickList *nick;
+				struct channel *chan;
+				struct nick_list *nick;
 				char *channel;
 				malloc_strcpy (&tmp, line);
 				p = strchr (tmp, auto_comp_char);
@@ -1470,9 +1470,9 @@ nick_completion (char dumb, char *dumber)
 char *
 getchannick (char *oldnick, char *nick)
 {
-	ChannelList *chan;
+	struct channel *chan;
 	char *channel, *tnick = NULL;
-	NickList *cnick;
+	struct nick_list *cnick;
 	channel = get_current_channel_by_refnum (0);
 	if (channel)
 	{
@@ -1671,8 +1671,8 @@ gettabkey (int direction, char *nick)
 NickTab *
 getnextnick (char *input_nick, char *oldnick, char *nick)
 {
-	ChannelList *chan;
-	NickList *cnick = NULL;
+	struct channel *chan;
+	struct nick_list *cnick = NULL;
 	NickTab *tmp = tabkey_array;
 	int server = from_server;
 	static NickTab sucks =

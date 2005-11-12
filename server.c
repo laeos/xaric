@@ -1121,7 +1121,7 @@ set_server_away (int ssa_index, char *message)
 		}
 		if (get_fset_var (FORMAT_AWAY_FSET) && get_int_var (SEND_AWAY_MSG_VAR))
 		{
-			ChannelList *chan;
+			struct channel *chan;
 			for (chan = server_list[ssa_index].chan_list; chan; chan = chan->next)
 			{
 				send_to_server ("PRIVMSG %s :ACTION %s", chan->channel,

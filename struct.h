@@ -152,10 +152,10 @@ typedef struct	lastlog_stru
 struct	ScreenStru;	/* ooh! */
 
 
-/* NickList: structure for the list of nicknames of people on a channel */
-typedef struct nick_stru
+/* struct nick_list: structure for the list of nicknames of people on a channel */
+struct nick_list
 {
-	struct	nick_stru	*next;	/* pointer to next nickname entry */
+	struct	nick_list	*next;	/* pointer to next nickname entry */
 	char	*nick;			/* nickname of person on channel */
 	char	*host;
 
@@ -202,7 +202,7 @@ typedef struct nick_stru
 	int	sent_deop;
 	time_t	sent_deop_time;
 	int	need_userhost;		/* on join we send a userhost for this nick */	
-}	NickList;
+};
 
 
 typedef	struct	DisplayStru
@@ -270,7 +270,7 @@ typedef	struct	WindowStru
 	char	*query_host;
 	char	*query_cmd;
 		
-	NickList *nicks;		/* List of nicks that will go to window */
+	struct nick_list *nicks;		/* List of nicks that will go to window */
 
 	/* lastlog stuff */
 	Lastlog	*lastlog_head;		/* pointer to top of lastlog list */
@@ -383,10 +383,10 @@ typedef struct chan_flags_stru {
 
 } chan_flags;
 
-/* ChannelList: structure for the list of channels you are current on */
-typedef	struct	channel_stru
+/* struct channel: structure for the list of channels you are current on */
+struct	channel
 {
-	struct	channel_stru	*next;	/* pointer to next channel entry */
+	struct	channel	*next;	/* pointer to next channel entry */
 	char	*channel;		/* channel name */
 	int	server;			/* server index for this channel */
 	u_long	mode;			/* Current mode settings for channel */
@@ -403,7 +403,7 @@ typedef	struct	channel_stru
 
 	Window	*window;		/* the window that the channel is "on" */
 
-	HashEntry	NickListTable[NICKLIST_HASHSIZE];
+	struct hash_entry	NickListTable[NICKLIST_HASHSIZE];
 
 	chan_flags	flags;
 
@@ -454,18 +454,18 @@ typedef	struct	channel_stru
 	char	*mode_buf;
 	int	mode_len;	
 
-}	ChannelList;
+};
 
-typedef struct	flood_stru
+struct flood
 {
-	struct flood_stru	*next;
+	struct flood	*next;
 	char   name[31];
 	char	*channel;
 	int	type;
 	char	flood;
 	unsigned long	cnt;
 	time_t	start;
-}	Flooding;
+};
 
 /* a structure for the timer list */
 typedef struct	timerlist_stru

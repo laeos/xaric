@@ -37,33 +37,30 @@
 #include "whowas.h"
 #include "fset.h"
 
-WhowasWrapList whowas_userlist_list =
-{0};
-WhowasWrapList whowas_reg_list =
-{0};
-WhowasWrapList whowas_splitin_list =
-{0};
+struct whowas_list_head whowas_userlist_list = {0};
+struct whowas_list_head whowas_reg_list = {0};
+struct whowas_list_head whowas_splitin_list = {0};
 
-WhowasChanList *whowas_chan_list = NULL;
+struct whowas_chan_list *whowas_chan_list = NULL;
 
 static int whowas_userlist_count = 0;
 static int whowas_reg_count = 0;
 static int whowas_chan_count = 0;
 
-extern WhowasList *
+extern struct whowas_list *
 check_whowas_buffer (char *nick, char *userhost, char *channel, int unlnk)
 {
-	WhowasList *tmp = NULL;
+	struct whowas_list *tmp = NULL;
 	if (!(tmp = find_userhost_channel (userhost, channel, unlnk, &whowas_userlist_list)))
 		tmp = find_userhost_channel (userhost, channel, unlnk, &whowas_reg_list);
 	return tmp;
 }
 
 
-extern WhowasList *
+extern struct whowas_list *
 check_whowas_nick_buffer (char *nick, char *channel, int unlnk)
 {
-	WhowasList *tmp = NULL, *last = NULL;
+	struct whowas_list *tmp = NULL, *last = NULL;
 	for (tmp = next_userhost (&whowas_userlist_list, NULL); tmp; tmp = next_userhost (&whowas_userlist_list, tmp))
 	{
 		if (!my_stricmp (tmp->nicklist->nick, nick) && !my_stricmp (tmp->channel, channel))
@@ -91,18 +88,18 @@ check_whowas_nick_buffer (char *nick, char *channel, int unlnk)
 	return (NULL);
 }
 
-extern WhowasList *
+extern struct whowas_list *
 check_whosplitin_buffer (char *nick, char *userhost, char *channel, int unlnk)
 {
-	WhowasList *tmp = NULL;
+	struct whowas_list *tmp = NULL;
 	tmp = find_userhost_channel (userhost, channel, unlnk, &whowas_splitin_list);
 	return tmp;
 }
 
 void 
-add_to_whowas_buffer (NickList * nicklist, char *channel, char *server1, char *server2)
+add_to_whowas_buffer (struct nick_list * nicklist, char *channel, char *server1, char *server2)
 {
-	WhowasList *new;
+	struct whowas_list *new;
 	if (!nicklist || !nicklist->nick)
 		return;
 
@@ -112,9 +109,9 @@ add_to_whowas_buffer (NickList * nicklist, char *channel, char *server1, char *s
 			remove_oldest_whowas (&whowas_reg_list, 0,
 				   (whowas_reg_max + 1) - whowas_reg_count);
 	}
-	new = (WhowasList *) new_malloc (sizeof (WhowasList));
+	new = (struct whowas_list *) new_malloc (sizeof (struct whowas_list));
 	new->has_ops = nicklist->chanop;
-	new->nicklist = (NickList *) nicklist;
+	new->nicklist = (struct nick_list *) nicklist;
 	malloc_strcpy (&(new->channel), channel);
 	malloc_strcpy (&(new->server1), server1);
 	malloc_strcpy (&(new->server2), server2);
@@ -124,14 +121,14 @@ add_to_whowas_buffer (NickList * nicklist, char *channel, char *server1, char *s
 }
 
 void 
-add_to_whosplitin_buffer (NickList * nicklist, char *channel, char *server1, char *server2)
+add_to_whosplitin_buffer (struct nick_list * nicklist, char *channel, char *server1, char *server2)
 {
-	WhowasList *new;
+	struct whowas_list *new;
 
-	new = (WhowasList *) new_malloc (sizeof (WhowasList));
+	new = (struct whowas_list *) new_malloc (sizeof (struct whowas_list));
 	new->has_ops = nicklist->chanop;
 
-	new->nicklist = (NickList *) new_malloc (sizeof (NickList));	/*nicklist; */
+	new->nicklist = (struct nick_list *) new_malloc (sizeof (struct nick_list));	/*nicklist; */
 	new->nicklist->nick = m_strdup (nicklist->nick);
 	new->nicklist->host = m_strdup (nicklist->host);
 
@@ -144,7 +141,7 @@ add_to_whosplitin_buffer (NickList * nicklist, char *channel, char *server1, cha
 }
 
 int 
-remove_oldest_whowas (WhowasWrapList * list, time_t timet, int count)
+remove_oldest_whowas (struct whowas_list_head * list, time_t timet, int count)
 {
 	int total = 0;
 	/* if no ..count.. then remove ..time.. links */
@@ -166,10 +163,10 @@ clean_whowas_list (void)
 
 /* BELOW THIS MARK IS THE CHANNEL WHOWAS STUFF */
 
-extern WhowasChanList *
+extern struct whowas_chan_list *
 check_whowas_chan_buffer (char *channel, int unlnk)
 {
-	WhowasChanList *tmp, *last = NULL;
+	struct whowas_chan_list *tmp, *last = NULL;
 
 	for (tmp = whowas_chan_list; tmp; tmp = tmp->next)
 	{
@@ -191,10 +188,10 @@ check_whowas_chan_buffer (char *channel, int unlnk)
 }
 
 void 
-add_to_whowas_chan_buffer (ChannelList * channel)
+add_to_whowas_chan_buffer (struct channel * channel)
 {
-	WhowasChanList *new;
-	WhowasChanList **slot;
+	struct whowas_chan_list *new;
+	struct whowas_chan_list **slot;
 
 	if (whowas_chan_count >= whowas_chan_max)
 	{
@@ -202,7 +199,7 @@ add_to_whowas_chan_buffer (ChannelList * channel)
 			remove_oldest_chan_whowas (&whowas_chan_list, 0,
 				 (whowas_chan_max + 1) - whowas_chan_count);
 	}
-	new = (WhowasChanList *) new_malloc (sizeof (WhowasChanList));
+	new = (struct whowas_chan_list *) new_malloc (sizeof (struct whowas_chan_list));
 
 	new->channellist = channel;
 	new->time = time (NULL);
@@ -219,9 +216,9 @@ add_to_whowas_chan_buffer (ChannelList * channel)
 }
 
 int 
-remove_oldest_chan_whowas (WhowasChanList ** list, time_t timet, int count)
+remove_oldest_chan_whowas (struct whowas_chan_list ** list, time_t timet, int count)
 {
-	WhowasChanList *tmp = NULL;
+	struct whowas_chan_list *tmp = NULL;
 	time_t t;
 	int total = 0;
 

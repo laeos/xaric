@@ -198,7 +198,7 @@ delete_window (Window * window)
 	 * Free off the nick list
 	 */
 	{
-		NickList *next;
+		struct nick_list *next;
 
 		while (window->nicks) {
 			next = window->nicks->next;
@@ -811,7 +811,7 @@ restart:
 
 	/* First: Are there any non-absolute windows? */
 	for (tmp = current_screen->window_list; tmp; tmp = tmp->next) 
-		if (honor_abs_sizes = !tmp->absolute_size)
+		if ((honor_abs_sizes = !tmp->absolute_size))
 			break;
 
 	/* Second: Calculate (a) old size (b) max loss (c) num windows */
@@ -1077,7 +1077,7 @@ show_window (Window * window)
 {
 	if (window->visible) {
 		set_current_window (window);
-		return;
+		return 0;
 	}
 	remove_from_invisible_list (window);
 	if (add_to_window_list (window)) {
@@ -1349,7 +1349,7 @@ void
 set_query_nick (char *nick, char *host, char *cmd)
 {
 	char *ptr;
-	NickList *tmp;
+	struct nick_list *tmp;
 
 	if (!nick && !host && cmd) {
 		curr_scr_win->query_cmd = m_strdup (cmd);
@@ -1364,7 +1364,7 @@ set_query_nick (char *nick, char *host, char *cmd)
 				continue;
 			if ((ptr = (char *) strchr (lnik, ',')) != NULL)
 				*(ptr++) = 0;
-			if ((tmp = (NickList *) remove_from_list ((struct list **) & (curr_scr_win->nicks), lnik)) != NULL) {
+			if ((tmp = (struct nick_list *) remove_from_list ((struct list **) & (curr_scr_win->nicks), lnik)) != NULL) {
 				new_free (&tmp->nick);
 				new_free (&tmp->host);	/* CDE why was this not done */
 				new_free ((char **) &tmp);
@@ -1384,7 +1384,7 @@ set_query_nick (char *nick, char *host, char *cmd)
 		while (nick) {
 			if ((ptr = (char *) strchr (nick, ',')) != NULL)
 				*(ptr++) = 0;
-			tmp = (NickList *) new_malloc (sizeof (NickList));
+			tmp = (struct nick_list *) new_malloc (sizeof (struct nick_list));
 			tmp->nick = NULL;
 			malloc_strcpy (&tmp->nick, nick);
 			malloc_strcpy (&tmp->host, host);
@@ -1984,7 +1984,7 @@ static Window *
 window_add (Window * window, char **args, char *usage)
 {
 	char *ptr;
-	NickList *new;
+	struct nick_list *new;
 	char *arg = next_arg (*args, args);
 
 	if (!arg)
@@ -1996,7 +1996,7 @@ window_add (Window * window, char **args, char *usage)
 				*ptr++ = 0;
 			if (!find_in_list ((struct list **) & window->nicks, arg, !USE_WILDCARDS)) {
 				say ("Added %s to window name list", arg);
-				new = (NickList *) new_malloc (sizeof (NickList));
+				new = (struct nick_list *) new_malloc (sizeof (struct nick_list));
 				new->nick = m_strdup (arg);
 				add_to_list ((struct list **) & (window->nicks), (struct list *) new);
 			} else
@@ -2181,7 +2181,7 @@ window_describe (Window * window, char **args, char *usage)
 	say ("\tNotify level is %s", bits_to_lastlog_level (window->notify_level));
 
 	if (window->nicks) {
-		NickList *tmp;
+		struct nick_list *tmp;
 
 		say ("\tName list:");
 		for (tmp = window->nicks; tmp; tmp = tmp->next)
@@ -2645,13 +2645,13 @@ window_remove (Window * window, char **args, char *usage)
 
 	if ((arg = next_arg (*args, args))) {
 		char *ptr;
-		NickList *new;
+		struct nick_list *new;
 
 		while (arg) {
 			if ((ptr = strchr (arg, ',')) != NULL)
 				*ptr++ = 0;
 
-			if ((new = (NickList *) remove_from_list ((struct list **) & (window->nicks), arg))) {
+			if ((new = (struct nick_list *) remove_from_list ((struct list **) & (window->nicks), arg))) {
 				say ("Removed %s from window name list", new->nick);
 				new_free (&new->nick);
 				new_free ((char **) &new);

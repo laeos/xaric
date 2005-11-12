@@ -72,7 +72,7 @@ extern int in_cparse;
 
 extern char *mircansi(char *);
 
-ChannelList default_statchan = { 0 };
+struct channel default_statchan = { 0 };
 
 extern NickTab *tabkey_array;
 
@@ -148,7 +148,7 @@ timer_unban(void *args)
 {
 	char *p = (char *) args;
 	char *channel;
-	ChannelList *chan;
+	struct channel *chan;
 	char *ban;
 	char *serv;
 	int server = from_server;
@@ -160,7 +160,7 @@ timer_unban(void *args)
 		server = from_server;
 	channel = next_arg(p, &p);
 	ban = next_arg(p, &p);
-	if ((chan = (ChannelList *) find_in_list((struct list **) & server_list[server].chan_list, channel, 0))
+	if ((chan = (struct channel *) find_in_list((struct list **) & server_list[server].chan_list, channel, 0))
 	    && ban_is_on_channel(ban, chan))
 		my_send_to_server(server, "MODE %s -b %s", channel, ban);
 	new_free(&serv);
@@ -551,7 +551,7 @@ parse_365(char *channel, char *args, char *subargs)
 }
 
 void
-log_toggle(int flag, ChannelList * chan)
+log_toggle(int flag, struct channel * chan)
 {
 	char *logfile;
 
@@ -1009,11 +1009,11 @@ matchmcommand(char *origline, int count)
 	return (0);
 }
 
-ChannelList *
+struct channel *
 prepare_command(int *active_server, char *channel, int need_op)
 {
 	int server = 0;
-	ChannelList *chan = NULL;
+	struct channel *chan = NULL;
 
 	if (!channel && !curr_scr_win->current_channel) {
 		if (need_op != 3)

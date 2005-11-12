@@ -13,7 +13,7 @@
 #ifndef __server_h_
 #define __server_h_
   
-/* for ChannelList */
+/* for struct channel */
 #include "names.h"
 #include "whois.h"
 
@@ -82,7 +82,7 @@ typedef	struct
 	int	ctcp_not_warned;	/* */
 	time_t	ctcp_last_reply_time;	/* used to limit flooding */
 	struct in_addr local_addr;	/* ip address of this connection */
-	ChannelList	*chan_list;	/* list of channels for this server */
+	struct channel	*chan_list;	/* list of channels for this server */
 	int	in_delay_notify;
 	int	link_look;
 	time_t	link_look_time;

@@ -77,9 +77,9 @@ numeric_banner (void)
 }
 
 int 
-check_sync (int comm, char *channel, char *nick, char *whom, char *bantime, ChannelList * chan)
+check_sync (int comm, char *channel, char *nick, char *whom, char *bantime, struct channel * chan)
 {
-	ChannelList *tmp = NULL;
+	struct channel *tmp = NULL;
 	BanList *new;
 
 	if (!chan)
@@ -276,7 +276,7 @@ static void
 channel_topic (char *from, char **ArgList, int what)
 {
 	char *topic, *channel;
-	ChannelList *chan;
+	struct channel *chan;
 
 	if (ArgList[1] && is_channel (ArgList[0]))
 	{
@@ -1066,7 +1066,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			{
 				time_t tme;
 				char *this_sucks;
-				ChannelList *chan = NULL;
+				struct channel *chan = NULL;
 
 				if (!ArgList[1] || !*ArgList[1])
 					break;

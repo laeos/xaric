@@ -50,8 +50,8 @@ cmd_scan (struct command *cmd, char *args)
 	const char *fmt;
 	int voice = 0, ops = 0, nops = 0, ircops = 0, all = 0;
 	char *channel = NULL;
-	ChannelList *chan;
-	NickList *nick, *snick = NULL;
+	struct channel *chan;
+	struct nick_list *nick, *snick = NULL;
 	char *s;
 	char *buffer = NULL;
 	int count = 0;

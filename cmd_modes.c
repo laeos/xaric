@@ -72,7 +72,7 @@ add_mode_buffer (char *buffer, int len)
 }
 
 static void 
-flush_mode (ChannelList * chan)
+flush_mode (struct channel * chan)
 {
 	if (mode_buf)
 		send_to_server ("%s", mode_buf);
@@ -81,7 +81,7 @@ flush_mode (ChannelList * chan)
 }
 
 void 
-flush_mode_all (ChannelList * chan)
+flush_mode_all (struct channel * chan)
 {
 	char buffer[BIG_BUFFER_SIZE + 1];
 	int len;
@@ -100,7 +100,7 @@ flush_mode_all (ChannelList * chan)
 
 
 static void 
-add_mode (ChannelList * chan, char *mode, int plus, char *nick, char *reason, int max_modes)
+add_mode (struct channel * chan, char *mode, int plus, char *nick, char *reason, int max_modes)
 {
 	char buffer[BIG_BUFFER_SIZE + 1];
 	int len;
@@ -207,11 +207,11 @@ static void
 userhost_unban (WhoisStuff * stuff, char *nick1, char *args)
 {
 	char *tmp;
-	ChannelList *chan;
+	struct channel *chan;
 	BanList *bans;
 
 	char *host = NULL;
-	WhowasList *whowas = NULL;
+	struct whowas_list *whowas = NULL;
 
 	int count = 0;
 	int old_server = from_server;
@@ -274,7 +274,7 @@ userhost_ban (WhoisStuff * stuff, char *nick1, char *args)
 	char *b = "+b";
 
 	char *host = NULL, *nick = NULL, *user = NULL;
-	WhowasList *whowas = NULL;
+	struct whowas_list *whowas = NULL;
 
 
 	channel = next_arg (args, &args);
@@ -328,7 +328,7 @@ void
 cmd_unban (struct command *cmd, char *args)
 {
 	char *to, *spec, *host;
-	ChannelList *chan;
+	struct channel *chan;
 	BanList *bans;
 	int count = 0;
 	int server = from_server;
@@ -421,7 +421,7 @@ void
 cmd_kick (struct command *cmd, char *args)
 {
 	char *to = NULL, *spec = NULL, *reason = NULL;
-	ChannelList *chan;
+	struct channel *chan;
 	int server = from_server;
 
 	if (!(to = next_arg (args, &args)))
@@ -454,8 +454,8 @@ cmd_kickban (struct command *cmd, char *args)
 {
 	char *to = NULL, *spec = NULL, *rest = NULL;
 
-	ChannelList *chan;
-	NickList *nicks;
+	struct channel *chan;
+	struct nick_list *nicks;
 	int count = 0;
 	int server = from_server;
 
@@ -512,8 +512,8 @@ void
 cmd_ban (struct command *cmd, char *args)
 {
 	char *to = NULL, *spec = NULL, *rest = NULL;
-	ChannelList *chan;
-	NickList *nicks;
+	struct channel *chan;
+	struct nick_list *nicks;
 	int server = from_server;
 	int found = 0;
 
@@ -579,7 +579,7 @@ void
 cmd_banstat (struct command *cmd, char *args)
 {
 	char *channel = NULL, *tmp = NULL, *check = NULL;
-	ChannelList *chan;
+	struct channel *chan;
 	BanList *tmpc;
 	int count = 1;
 	int server;
@@ -624,7 +624,7 @@ cmd_banstat (struct command *cmd, char *args)
 static void 
 remove_bans (char *stuff, char *line)
 {
-	ChannelList *chan;
+	struct channel *chan;
 	int count = 1;
 	BanList *tmpc, *next;
 	char *banstring = NULL;
@@ -677,7 +677,7 @@ remove_bans (char *stuff, char *line)
 void
 cmd_tban (struct command *cmd, char *args)
 {
-	ChannelList *chan;
+	struct channel *chan;
 	int count = 1;
 	BanList *tmpc;
 	int server;
@@ -746,7 +746,7 @@ cmd_deop (struct command *cmd, char *args)
 {
 	char *to = NULL, *temp;
 	int count, max;
-	ChannelList *chan;
+	struct channel *chan;
 	char buffer[BIG_BUFFER_SIZE + 1];
 	int isvoice = 0;
 	int server = from_server;
@@ -794,7 +794,7 @@ void
 cmd_op (struct command *cmd, char *args)
 {
 	char *to = NULL, *temp = NULL;
-	ChannelList *chan = NULL;
+	struct channel *chan = NULL;
 	int count, max = get_int_var (NUM_OPMODES_VAR);
 	char buffer[BIG_BUFFER_SIZE + 1];
 	int old_server = from_server;
@@ -863,7 +863,7 @@ cmd_unkey (struct command *cmd, char *args)
 {
 	char *channel = NULL;
 	int server = from_server;
-	ChannelList *chan;
+	struct channel *chan;
 
 	if (args)
 		channel = next_arg (args, &args);

@@ -38,7 +38,7 @@
 	void add_userhost_to_channel(char *channel, char *nick, int server, char *userhost);
 	char *compress_modes(int server, char *channel, char *modes);
 	char * fetch_userhost (int server, char *nick);
-	void handle_nickflood (char *old_nick, char *new_nick, register NickList * nick, register ChannelList * chan, time_t current_time, int flood_time);
+	void handle_nickflood (char *old_nick, char *new_nick, register struct nick_list * nick, register struct channel * chan, time_t current_time, int flood_time);
 
 
 	void	add_to_join_list(char *, int, int);
@@ -50,13 +50,13 @@
 	
 	int	is_channel_mode(char *, int, int);
 	int	is_chanop(char *, char *);
-	ChannelList	*lookup_channel(char *, int, int);
+	struct channel	*lookup_channel(char *, int, int);
 	char	*get_channel_mode(char *, int);
 #ifdef	INCLUDE_UNUSED_FUNCTIONS
 	void	set_channel_mode(char *, int, char *);
 #endif /* INCLUDE_UNUSED_FUNCTIONS */
-ChannelList *	add_channel(char *, int);
-ChannelList *	add_to_channel(char *, char *, int, int, int, char *, char *, char *);
+struct channel *	add_channel(char *, int);
+struct channel *	add_to_channel(char *, char *, int, int, int, char *, char *, char *);
 	void	remove_channel(char *, int);
 	void	remove_from_channel(char *, char *, int, int, char *);
 	int	is_on_channel(char *, int, char *);
@@ -67,7 +67,7 @@ ChannelList *	add_to_channel(char *, char *, int, int, int, char *, char *, char
 	char	*walk_channels(char *, int, int);
 	char	*real_channel(void);
 	void	rename_nick(char *, char *, int);
-	void	update_channel_mode(char *, char *, int, char *, ChannelList *);
+	void	update_channel_mode(char *, char *, int, char *, struct channel *);
 	void	set_channel_window(Window *, char *, int);
 	char	*create_channel_list(Window *);
 	int	get_channel_oper(char *, int);
@@ -78,7 +78,7 @@ ChannelList *	add_to_channel(char *, char *, int, int, int, char *, char *, char
 	void	remove_from_mode_list(char *, int);
 	int	chan_is_connected(char *, int);
 	int	im_on_channel(char *);
-	char	*recreate_mode(ChannelList *);	
+	char	*recreate_mode(struct channel *);	
 	int	get_channel_voice(char *, int);
 	char	*get_channel_key(char *, int);
 	

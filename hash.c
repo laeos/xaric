@@ -2,8 +2,8 @@
  *  hash.c  *
  ************
  *
- * My hash routines for hashing NickLists, and eventually ChannelList's
- * and WhowasList's
+ * My hash routines for hashing NickLists, and eventually struct channel's
+ * and struct whowas_list's
  *
  * These are not very robust, as the add/remove functions will have
  * to be written differently for each type of struct
@@ -65,12 +65,12 @@ hash_nickname (char *nick, unsigned int size)
  * to the top of the list in the specific array location
  */
 static inline void 
-move_link_to_top (NickList * tmp, NickList * prev, HashEntry * location)
+move_link_to_top (struct nick_list * tmp, struct nick_list * prev, struct hash_entry * location)
 {
 	if (prev)
 	{
-		NickList *old_list;
-		old_list = (NickList *) location->list;
+		struct nick_list *old_list;
+		old_list = (struct nick_list *) location->list;
 		location->list = (void *) tmp;
 		prev->next = tmp->next;
 		tmp->next = old_list;
@@ -82,7 +82,7 @@ move_link_to_top (NickList * tmp, NickList * prev, HashEntry * location)
  * from our chain of hashed entries.
  */
 static inline void 
-remove_link_from_list (NickList * tmp, NickList * prev, HashEntry * location)
+remove_link_from_list (struct nick_list * tmp, struct nick_list * prev, struct hash_entry * location)
 {
 	if (prev)
 	{
@@ -99,7 +99,7 @@ remove_link_from_list (NickList * tmp, NickList * prev, HashEntry * location)
 }
 
 void 
-add_name_to_genericlist (char *name, HashEntry * list, unsigned int size)
+add_name_to_genericlist (char *name, struct hash_entry * list, unsigned int size)
 {
 	struct list *nptr;
 	unsigned long hvalue = hash_nickname (name, size);
@@ -121,7 +121,7 @@ add_name_to_genericlist (char *name, HashEntry * list, unsigned int size)
  * to the top of the list in the specific array location
  */
 static inline void 
-move_gen_link_to_top (struct list * tmp, struct list * prev, HashEntry * location)
+move_gen_link_to_top (struct list * tmp, struct list * prev, struct hash_entry * location)
 {
 	if (prev)
 	{
@@ -138,7 +138,7 @@ move_gen_link_to_top (struct list * tmp, struct list * prev, HashEntry * locatio
  * from our chain of hashed entries.
  */
 static inline void 
-remove_gen_link_from_list (struct list * tmp, struct list * prev, HashEntry * location)
+remove_gen_link_from_list (struct list * tmp, struct list * prev, struct hash_entry * location)
 {
 	if (prev)
 	{
@@ -155,9 +155,9 @@ remove_gen_link_from_list (struct list * tmp, struct list * prev, HashEntry * lo
 }
 
 struct list *
-find_name_in_genericlist (char *name, HashEntry * list, unsigned int size, int remove)
+find_name_in_genericlist (char *name, struct hash_entry * list, unsigned int size, int remove)
 {
-	HashEntry *location;
+	struct hash_entry *location;
 	register struct list *tmp, *prev = NULL;
 	unsigned long hvalue = hash_nickname (name, size);
 
@@ -191,7 +191,7 @@ find_name_in_genericlist (char *name, HashEntry * list, unsigned int size, int r
  * array
  */
 void 
-add_nicklist_to_channellist (NickList * nptr, ChannelList * cptr)
+add_nicklist_to_channellist (struct nick_list * nptr, struct channel * cptr)
 {
 	unsigned long hvalue = hash_nickname (nptr->nick, NICKLIST_HASHSIZE);
 
@@ -202,7 +202,7 @@ add_nicklist_to_channellist (NickList * nptr, ChannelList * cptr)
 	 * lookups for active users, (and as a side note, makes
 	 * doing the add quite simple!)
 	 */
-	nptr->next = (NickList *) cptr->NickListTable[hvalue].list;
+	nptr->next = (struct nick_list *) cptr->NickListTable[hvalue].list;
 
 	/* assign our new linked list into array spot */
 	cptr->NickListTable[hvalue].list = (void *) nptr;
@@ -212,11 +212,11 @@ add_nicklist_to_channellist (NickList * nptr, ChannelList * cptr)
 	cptr->NickListTable[hvalue].hits++;
 }
 
-NickList *
-find_nicklist_in_channellist (char *nick, ChannelList * cptr, int remove)
+struct nick_list *
+find_nicklist_in_channellist (char *nick, struct channel * cptr, int remove)
 {
-	HashEntry *location;
-	register NickList *tmp, *prev = NULL;
+	struct hash_entry *location;
+	register struct nick_list *tmp, *prev = NULL;
 	unsigned long hvalue = hash_nickname (nick, NICKLIST_HASHSIZE);
 
 	location = &(cptr->NickListTable[hvalue]);
@@ -225,7 +225,7 @@ find_nicklist_in_channellist (char *nick, ChannelList * cptr, int remove)
 	 * as regular linked list, or as ircd likes to say...
 	 * "We found the bucket, now search the chain"
 	 */
-	for (tmp = (NickList *) location->list; tmp; prev = tmp, tmp = tmp->next)
+	for (tmp = (struct nick_list *) location->list; tmp; prev = tmp, tmp = tmp->next)
 	{
 		if (!my_stricmp (nick, tmp->nick))
 		{
@@ -252,8 +252,8 @@ find_nicklist_in_channellist (char *nick, ChannelList * cptr, int remove)
  *           next_nicklist(cptr, nptr))
  *              YourCodeOnTheNickListStruct
  */
-NickList *
-next_nicklist (ChannelList * cptr, NickList * nptr)
+struct nick_list *
+next_nicklist (struct channel * cptr, struct nick_list * nptr)
 {
 	unsigned long hvalue = 0;
 	if (!cptr)
@@ -262,13 +262,13 @@ next_nicklist (ChannelList * cptr, NickList * nptr)
 	else if (!nptr)
 	{
 		/* wants to start the walk! */
-		while ((NickList *) cptr->NickListTable[hvalue].list == NULL)
+		while ((struct nick_list *) cptr->NickListTable[hvalue].list == NULL)
 		{
 			hvalue++;
 			if (hvalue >= NICKLIST_HASHSIZE)
 				return NULL;
 		}
-		return (NickList *) cptr->NickListTable[hvalue].list;
+		return (struct nick_list *) cptr->NickListTable[hvalue].list;
 	}
 	else if (nptr->next)
 	{
@@ -287,14 +287,14 @@ next_nicklist (ChannelList * cptr, NickList * nptr)
 		}
 		else
 		{
-			while ((NickList *) cptr->NickListTable[hvalue].list == NULL)
+			while ((struct nick_list *) cptr->NickListTable[hvalue].list == NULL)
 			{
 				hvalue++;
 				if (hvalue >= NICKLIST_HASHSIZE)
 					return NULL;
 			}
 			/* return head of next filled bucket */
-			return (NickList *) cptr->NickListTable[hvalue].list;
+			return (struct nick_list *) cptr->NickListTable[hvalue].list;
 		}
 	}
 	else
@@ -304,7 +304,7 @@ next_nicklist (ChannelList * cptr, NickList * nptr)
 }
 
 struct list *
-next_namelist (HashEntry * cptr, struct list * nptr, unsigned int size)
+next_namelist (struct hash_entry * cptr, struct list * nptr, unsigned int size)
 {
 	unsigned long hvalue = 0;
 	if (!cptr)
@@ -355,21 +355,21 @@ next_namelist (HashEntry * cptr, struct list * nptr, unsigned int size)
 }
 
 void 
-clear_nicklist_hashtable (ChannelList * cptr)
+clear_nicklist_hashtable (struct channel * cptr)
 {
 	if (cptr)
 	{
 		memset ((char *) cptr->NickListTable, 0,
-			sizeof (HashEntry) * NICKLIST_HASHSIZE);
+			sizeof (struct hash_entry) * NICKLIST_HASHSIZE);
 	}
 }
 
 
 void 
-show_nicklist_hashtable (ChannelList * cptr)
+show_nicklist_hashtable (struct channel * cptr)
 {
 	int count, count2;
-	NickList *ptr;
+	struct nick_list *ptr;
 
 	for (count = 0; count < NICKLIST_HASHSIZE; count++)
 	{
@@ -380,7 +380,7 @@ show_nicklist_hashtable (ChannelList * cptr)
 		     cptr->NickListTable[count].links,
 		     cptr->NickListTable[count].hits);
 
-		for (ptr = (NickList *) cptr->NickListTable[count].list,
+		for (ptr = (struct nick_list *) cptr->NickListTable[count].list,
 		     count2 = 0; ptr; count2++, ptr = ptr->next)
 		{
 			say ("HASH_DEBUG: %d:%d  %s!%s", count, count2,
@@ -390,10 +390,10 @@ show_nicklist_hashtable (ChannelList * cptr)
 }
 
 void 
-show_whowas_debug_hashtable (WhowasWrapList * cptr)
+show_whowas_debug_hashtable (struct whowas_list_head * cptr)
 {
 	int count, count2;
-	WhowasList *ptr;
+	struct whowas_list *ptr;
 
 	for (count = 0; count < WHOWASLIST_HASHSIZE; count++)
 	{
@@ -404,7 +404,7 @@ show_whowas_debug_hashtable (WhowasWrapList * cptr)
 		     cptr->NickListTable[count].links,
 		     cptr->NickListTable[count].hits);
 
-		for (ptr = (WhowasList *) cptr->NickListTable[count].list,
+		for (ptr = (struct whowas_list *) cptr->NickListTable[count].list,
 		     count2 = 0; ptr; count2++, ptr = ptr->next)
 		{
 			say ("HASH_DEBUG: %d:%d  %10s %s!%s", count, count2,
@@ -417,19 +417,19 @@ void
 cmd_show_hash (struct command *cmd, char *args)
 {
 	char *c;
-	ChannelList *chan = NULL;
+	struct channel *chan = NULL;
 
 	extern int from_server;
-	extern WhowasWrapList whowas_userlist_list;
-	extern WhowasWrapList whowas_reg_list;
-	extern WhowasWrapList whowas_splitin_list;
+	extern struct whowas_list_head whowas_userlist_list;
+	extern struct whowas_list_head whowas_reg_list;
+	extern struct whowas_list_head whowas_splitin_list;
 
 	if (args && *args)
 		c = next_arg (args, &args);
 	else
 		c = get_current_channel_by_refnum (0);
 	if (c && from_server > -1)
-		chan = (ChannelList *) find_in_list ((struct list **) & server_list[from_server].chan_list, c, 0);
+		chan = (struct channel *) find_in_list ((struct list **) & server_list[from_server].chan_list, c, 0);
 	if (chan)
 		show_nicklist_hashtable (chan);
 	show_whowas_debug_hashtable (&whowas_userlist_list);
@@ -476,12 +476,12 @@ hash_userhost_channel (char *userhost, char *channel, unsigned int size)
  * to the top of the list in the specific array location
  */
 static inline void 
-move_link_to_top_whowas (WhowasList * tmp, WhowasList * prev, HashEntry * location)
+move_link_to_top_whowas (struct whowas_list * tmp, struct whowas_list * prev, struct hash_entry * location)
 {
 	if (prev)
 	{
-		WhowasList *old_list;
-		old_list = (WhowasList *) location->list;
+		struct whowas_list *old_list;
+		old_list = (struct whowas_list *) location->list;
 		location->list = (void *) tmp;
 		prev->next = tmp->next;
 		tmp->next = old_list;
@@ -493,7 +493,7 @@ move_link_to_top_whowas (WhowasList * tmp, WhowasList * prev, HashEntry * locati
  * from our chain of hashed entries.
  */
 static inline void 
-remove_link_from_whowaslist (WhowasList * tmp, WhowasList * prev, HashEntry * location)
+remove_link_from_whowaslist (struct whowas_list * tmp, struct whowas_list * prev, struct hash_entry * location)
 {
 	if (prev)
 	{
@@ -516,7 +516,7 @@ remove_link_from_whowaslist (WhowasList * tmp, WhowasList * prev, HashEntry * lo
  * array
  */
 void 
-add_whowas_userhost_channel (WhowasList * wptr, WhowasWrapList * list)
+add_whowas_userhost_channel (struct whowas_list * wptr, struct whowas_list_head * list)
 {
 	unsigned long hvalue = hash_userhost_channel (wptr->nicklist->host, wptr->channel, WHOWASLIST_HASHSIZE);
 
@@ -527,7 +527,7 @@ add_whowas_userhost_channel (WhowasList * wptr, WhowasWrapList * list)
 	 * lookups for active users, (and as a side note, makes
 	 * doing the add quite simple!)
 	 */
-	wptr->next = (WhowasList *) list->NickListTable[hvalue].list;
+	wptr->next = (struct whowas_list *) list->NickListTable[hvalue].list;
 
 	/* assign our new linked list into array spot */
 	list->NickListTable[hvalue].list = (void *) wptr;
@@ -538,11 +538,11 @@ add_whowas_userhost_channel (WhowasList * wptr, WhowasWrapList * list)
 	list->total_links++;
 }
 
-WhowasList *
-find_userhost_channel (char *host, char *channel, int remove, WhowasWrapList * wptr)
+struct whowas_list *
+find_userhost_channel (char *host, char *channel, int remove, struct whowas_list_head * wptr)
 {
-	HashEntry *location;
-	register WhowasList *tmp, *prev = NULL;
+	struct hash_entry *location;
+	register struct whowas_list *tmp, *prev = NULL;
 	unsigned long hvalue;
 
 	hvalue = hash_userhost_channel (host, channel, WHOWASLIST_HASHSIZE);
@@ -552,7 +552,7 @@ find_userhost_channel (char *host, char *channel, int remove, WhowasWrapList * w
 	 * as regular linked list, or as ircd likes to say...
 	 * "We found the bucket, now search the chain"
 	 */
-	for (tmp = (WhowasList *) (&(wptr->NickListTable[hvalue]))->list; tmp; prev = tmp, tmp = tmp->next)
+	for (tmp = (struct whowas_list *) (&(wptr->NickListTable[hvalue]))->list; tmp; prev = tmp, tmp = tmp->next)
 	{
 		if (!my_stricmp (host, tmp->nicklist->host) && !my_stricmp (channel, tmp->channel))
 		{
@@ -581,8 +581,8 @@ find_userhost_channel (char *host, char *channel, int remove, WhowasWrapList * w
  *           next_userhost(cptr, nptr))
  *              YourCodeOnTheWhowasListStruct
  */
-WhowasList *
-next_userhost (WhowasWrapList * cptr, WhowasList * nptr)
+struct whowas_list *
+next_userhost (struct whowas_list_head * cptr, struct whowas_list * nptr)
 {
 	unsigned long hvalue = 0;
 	if (!cptr)
@@ -591,13 +591,13 @@ next_userhost (WhowasWrapList * cptr, WhowasList * nptr)
 	else if (!nptr)
 	{
 		/* wants to start the walk! */
-		while ((WhowasList *) cptr->NickListTable[hvalue].list == NULL)
+		while ((struct whowas_list *) cptr->NickListTable[hvalue].list == NULL)
 		{
 			hvalue++;
 			if (hvalue >= WHOWASLIST_HASHSIZE)
 				return NULL;
 		}
-		return (WhowasList *) cptr->NickListTable[hvalue].list;
+		return (struct whowas_list *) cptr->NickListTable[hvalue].list;
 	}
 	else if (nptr->next)
 	{
@@ -616,14 +616,14 @@ next_userhost (WhowasWrapList * cptr, WhowasList * nptr)
 		}
 		else
 		{
-			while ((WhowasList *) cptr->NickListTable[hvalue].list == NULL)
+			while ((struct whowas_list *) cptr->NickListTable[hvalue].list == NULL)
 			{
 				hvalue++;
 				if (hvalue >= WHOWASLIST_HASHSIZE)
 					return NULL;
 			}
 			/* return head of next filled bucket */
-			return (WhowasList *) cptr->NickListTable[hvalue].list;
+			return (struct whowas_list *) cptr->NickListTable[hvalue].list;
 		}
 	}
 	else
@@ -633,10 +633,10 @@ next_userhost (WhowasWrapList * cptr, WhowasList * nptr)
 }
 
 void 
-show_whowas_hashtable (WhowasWrapList * cptr, char *list)
+show_whowas_hashtable (struct whowas_list_head * cptr, char *list)
 {
 	int count, count2 = 1;
-	WhowasList *ptr;
+	struct whowas_list *ptr;
 
 	say ("WhoWas %s Cache Stats: %lu hits  %lu  links  %lu unlinks", list, cptr->total_hits, cptr->total_links, cptr->total_unlinks);
 	for (count = 0; count < WHOWASLIST_HASHSIZE; count++)
@@ -644,23 +644,23 @@ show_whowas_hashtable (WhowasWrapList * cptr, char *list)
 
 		if (cptr->NickListTable[count].links == 0)
 			continue;
-		for (ptr = (WhowasList *) cptr->NickListTable[count].list; ptr; count2++, ptr = ptr->next)
+		for (ptr = (struct whowas_list *) cptr->NickListTable[count].list; ptr; count2++, ptr = ptr->next)
 			put_it ("%s", convert_output_format ("%K[%W$[3]0%K] %Y$[10]1 %W$2%G!%c$3", "%d %s %s %s", count2, ptr->channel, ptr->nicklist->nick, ptr->nicklist->host));
 	}
 }
 
 int 
-show_wholeft_hashtable (WhowasWrapList * cptr, time_t ltime, int *total, int *hook, char *list)
+show_wholeft_hashtable (struct whowas_list_head * cptr, time_t ltime, int *total, int *hook, char *list)
 {
 	int count, count2;
-	WhowasList *ptr;
+	struct whowas_list *ptr;
 
 	for (count = 0; count < WHOWASLIST_HASHSIZE; count++)
 	{
 
 		if (cptr->NickListTable[count].links == 0)
 			continue;
-		for (ptr = (WhowasList *) cptr->NickListTable[count].list, count2 = 1; ptr; count2++, ptr = ptr->next)
+		for (ptr = (struct whowas_list *) cptr->NickListTable[count].list, count2 = 1; ptr; count2++, ptr = ptr->next)
 		{
 			if (ptr->server1 && ptr->server2)
 			{
@@ -675,9 +675,9 @@ show_wholeft_hashtable (WhowasWrapList * cptr, time_t ltime, int *total, int *ho
 }
 
 int 
-remove_oldest_whowas_hashlist (WhowasWrapList * list, time_t timet, int count)
+remove_oldest_whowas_hashlist (struct whowas_list_head * list, time_t timet, int count)
 {
-	WhowasList *ptr;
+	struct whowas_list *ptr;
 	register time_t t;
 	int total = 0;
 	register unsigned long x;
@@ -686,7 +686,7 @@ remove_oldest_whowas_hashlist (WhowasWrapList * list, time_t timet, int count)
 		t = time (NULL);
 		for (x = 0; x < WHOWASLIST_HASHSIZE; x++)
 		{
-			ptr = (WhowasList *) (&(list->NickListTable[x]))->list;
+			ptr = (struct whowas_list *) (&(list->NickListTable[x]))->list;
 			if (!ptr || !ptr->nicklist)
 				continue;
 			while (ptr)
@@ -702,7 +702,7 @@ remove_oldest_whowas_hashlist (WhowasWrapList * list, time_t timet, int count)
 					new_free (&(ptr->server2));
 					new_free ((char **) &ptr);
 					total++;
-					ptr = (WhowasList *) (&(list->NickListTable[x]))->list;
+					ptr = (struct whowas_list *) (&(list->NickListTable[x]))->list;
 				}
 				else
 					ptr = ptr->next;
@@ -732,14 +732,14 @@ remove_oldest_whowas_hashlist (WhowasWrapList * list, time_t timet, int count)
 	return total;
 }
 
-NickList *
-sorted_nicklist (ChannelList * chan)
+struct nick_list *
+sorted_nicklist (struct channel * chan)
 {
-	NickList *tmp, *l = NULL, *list = NULL;
+	struct nick_list *tmp, *l = NULL, *list = NULL;
 	for (tmp = next_nicklist (chan, NULL); tmp; tmp = next_nicklist (chan, tmp))
 	{
-		l = (NickList *) new_malloc (sizeof (NickList));
-		memcpy (l, tmp, sizeof (NickList));
+		l = (struct nick_list *) new_malloc (sizeof (struct nick_list));
+		memcpy (l, tmp, sizeof (struct nick_list));
 		l->next = NULL;
 		add_to_list ((struct list **) & list, (struct list *) l);
 	}
@@ -747,9 +747,9 @@ sorted_nicklist (ChannelList * chan)
 }
 
 void 
-clear_sorted_nicklist (NickList ** list)
+clear_sorted_nicklist (struct nick_list ** list)
 {
-	NickList *t;
+	struct nick_list *t;
 	while (*list)
 	{
 		t = (*list)->next;
@@ -758,13 +758,13 @@ clear_sorted_nicklist (NickList ** list)
 	}
 }
 
-Flooding *
-add_name_to_floodlist (char *name, char *channel, HashEntry * list, unsigned int size)
+struct flood *
+add_name_to_floodlist (char *name, char *channel, struct hash_entry * list, unsigned int size)
 {
-	Flooding *nptr;
+	struct flood *nptr;
 	unsigned long hvalue = hash_nickname (name, size);
-	nptr = (Flooding *) new_malloc (sizeof (Flooding));
-	nptr->next = (Flooding *) list[hvalue].list;
+	nptr = (struct flood *) new_malloc (sizeof (struct flood));
+	nptr->next = (struct flood *) list[hvalue].list;
 	strmcpy (nptr->name, name, sizeof (nptr->name) - 1);
 	list[hvalue].list = (void *) nptr;
 	/* quick tally of nicks in chain in this array spot */
@@ -774,11 +774,11 @@ add_name_to_floodlist (char *name, char *channel, HashEntry * list, unsigned int
 	return nptr;
 }
 
-Flooding *
-find_name_in_floodlist (char *name, HashEntry * list, unsigned int size, int remove)
+struct flood *
+find_name_in_floodlist (char *name, struct hash_entry * list, unsigned int size, int remove)
 {
-	HashEntry *location;
-	register Flooding *tmp, *prev = NULL;
+	struct hash_entry *location;
+	register struct flood *tmp, *prev = NULL;
 	unsigned long hvalue = hash_nickname (name, size);
 
 	location = &(list[hvalue]);
@@ -787,7 +787,7 @@ find_name_in_floodlist (char *name, HashEntry * list, unsigned int size, int rem
 	 * as regular linked list, or as ircd likes to say...
 	 * "We found the bucket, now search the chain"
 	 */
-	for (tmp = (Flooding *) location->list; tmp; prev = tmp, tmp = tmp->next)
+	for (tmp = (struct flood *) location->list; tmp; prev = tmp, tmp = tmp->next)
 	{
 		if (!my_stricmp (name, tmp->name))
 		{

@@ -10,8 +10,8 @@
  * @(#)$Id$
  */
 
-#ifndef _HASH_H_
-#define _HASH_H_
+#ifndef HASH_H
+#define HASH_H
 
 #define NICKLIST_HASHSIZE 79
 #define WHOWASLIST_HASHSIZE 271
@@ -20,17 +20,12 @@
 # define REMOVE_FROM_LIST 1
 #endif
 
-
-#include "struct.h"
-
 /* hashentry: structure for all hash lists we make. 
- * quite generic, but powerful.
- */
-typedef	struct	hashentry
-{
-	void *list;		/* our linked list, generic void * */
-	int hits;		/* how many hits this spot has gotten */
-	int links;		/* how many links we have at this spot */
-}	HashEntry;
+ * quite generic, but powerful. */
+struct hash_entry {
+    void *list;			/* our linked list, generic void * */
+    int hits;			/* how many hits this spot has gotten */
+    int links;			/* how many links we have at this spot */
+};
 
-#endif
+#endif				/* HASH_H */

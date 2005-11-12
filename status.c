@@ -900,7 +900,7 @@ status_topic (Window * window)
 {
 	static char my_buffer[MY_BUFFER + 1] = "\0";
 	char tmp_buffer[MY_BUFFER + 1];
-	ChannelList *chan;
+	struct channel *chan;
 	if (window && window->current_channel && topic_format)
 	{
 		if ((chan = lookup_channel (window->current_channel, window->server, 0)))

@@ -843,8 +843,8 @@ whois_ignore_invites (WhoisStuff * stuff, char *nick, char *text)
 		strcat (ptr, stuff->host);
 		if (is_ignored (ptr, IGNORE_INVITES) != IGNORED)
 		{
-			WhowasChanList *w_chan = NULL;
-			ChannelList *chan = NULL;
+			struct whowas_chan_list *w_chan = NULL;
+			struct channel *chan = NULL;
 			if (do_hook (INVITE_LIST, "%s %s", stuff->nick, text))
 				put_it ("%s", convert_output_format (get_fset_var (FORMAT_IGNORE_INVITE_FSET), "%s %s", stuff->nick, text));
 			malloc_strcpy (&invite_channel, text);

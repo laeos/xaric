@@ -380,7 +380,7 @@ void
 funny_mode (char *from, char **ArgList)
 {
 	char *mode, *channel;
-	ChannelList *chan = NULL;
+	struct channel *chan = NULL;
 
 	if (!ArgList[0])
 		return;

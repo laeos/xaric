@@ -241,7 +241,7 @@ cmd_back (struct command *cmd, char *args)
 
 	if (server_list[curr_scr_win->server].awaytime)
 	{
-		ChannelList *chan = NULL;
+		struct channel *chan = NULL;
 		time_t current_t = time (NULL) - server_list[curr_scr_win->server].awaytime;
 		int old_server = from_server;
 		from_server = curr_scr_win->server;
@@ -291,8 +291,8 @@ cmd_chwall (struct command *cmd, char *args)
 	char *chops = NULL;
 	char *include = NULL;
 	char *exclude = NULL;
-	ChannelList *chan;
-	NickList *tmp;
+	struct channel *chan;
+	struct nick_list *tmp;
 	char buffer[BIG_BUFFER_SIZE + 1];
 
 	if (!args || (args && !*args))
@@ -479,7 +479,7 @@ cmd_cycle (struct command *cmd, char *args)
 {
 	char *to = NULL;
 	int server = from_server;
-	ChannelList *chan;
+	struct channel *chan;
 
 	if (args && args)
 		to = next_arg (args, &args);
@@ -892,7 +892,7 @@ cmd_names (struct command *cmd, char *args)
 {
 	char *channel = NULL;
 	int server = from_server;
-	ChannelList *chan;
+	struct channel *chan;
 
 	if (args)
 		channel = next_arg (args, &args);
@@ -972,7 +972,7 @@ void
 cmd_part (struct command *cmd, char *args)
 {
 	char *channel = NULL;
-	ChannelList *chan;
+	struct channel *chan;
 	int server = from_server;
 	int all = 0;
 
@@ -1480,10 +1480,10 @@ cmd_stats (struct command *cmd, char *args)
 void
 cmd_showidle (struct command *cmd, char *args)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 	char *channel = NULL;
 	int count = 0;
-	NickList *nick;
+	struct nick_list *nick;
 	time_t ltime;
 	int server;
 
@@ -1506,7 +1506,7 @@ cmd_topic (struct command *cmd, char *args)
 {
 	char *arg = NULL;
 	char *arg2;
-	ChannelList *chan;
+	struct channel *chan;
 	int server;
 
 	arg = next_arg (args, &args);
@@ -1600,7 +1600,7 @@ userhost_ignore (WhoisStuff * stuff, char *nick1, char *args)
 	int old_window_display;
 	char ignorebuf[BIG_BUFFER_SIZE + 1];
 	Ignore *igptr, *igtmp;
-	WhowasList *whowas;
+	struct whowas_list *whowas;
 
 	arg = next_arg (args, &args);
 	if (!stuff || !stuff->nick || !nick1 || !strcmp (stuff->user, "<UNKNOWN>") || my_stricmp (stuff->nick, nick1))
@@ -1750,7 +1750,7 @@ void
 cmd_invite (struct command *cmd, char *args)
 {
 	char *inick;
-	ChannelList *chan = NULL;
+	struct channel *chan = NULL;
 	int server = from_server;
 
 	if (args && *args)
@@ -1861,8 +1861,8 @@ cmd_userhost (struct command *cmd, char *args)
 void
 cmd_users (struct command *cmd, char *args)
 {
-	ChannelList *chan;
-	NickList *nicks;
+	struct channel *chan;
+	struct nick_list *nicks;
 	char *to, *spec, *rest, *temp1;
 	char modebuf[BIG_BUFFER_SIZE + 1];
 	char msgbuf[BIG_BUFFER_SIZE + 1];
@@ -2555,8 +2555,8 @@ send_text (char *nick_list, char *text, char *command, int hook, int log)
 			is_current = is_current_channel (target[i].nick_list, from_server, 0);
 			if ((channel = get_current_channel_by_refnum (0)))
 			{
-				ChannelList *chan;
-				NickList *nick = NULL;
+				struct channel *chan;
+				struct nick_list *nick = NULL;
 				if ((chan = lookup_channel (channel, from_server, 0)))
 				{
 					chan->stats_pubs++;

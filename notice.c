@@ -108,8 +108,8 @@ parse_notice (char *from, char **Args)
 	char *high, not_from_server = 1;
 	char *line;
 
-	NickList *nick = NULL;
-	ChannelList *tmpc;
+	struct nick_list *nick = NULL;
+	struct channel *tmpc;
 
 
 	PasteArgs (Args, 1);

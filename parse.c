@@ -60,6 +60,10 @@ extern char *mircansi (char *);
 extern char *compress_modes (int, char *, char *);
 #endif
 
+/* TODO: this needs to be someplace better */
+/* in cmd_orignick.c */
+void check_orig_nick(char *nick);
+
 /*
  * joined_nick: the nickname of the last person who joined the current
  * channel 
@@ -81,7 +85,7 @@ extern int sed;
 
 /* returns 1 if the ban is on the channel already, 0 if not */
 BanList *
-ban_is_on_channel (char *ban, ChannelList * chan)
+ban_is_on_channel (char *ban, struct channel * chan)
 {
 	register BanList *bans;
 	for (bans = chan->bans; bans; bans = bans->next)
@@ -193,7 +197,7 @@ BreakArgs (char *Input, char **Sender, char **OutPut, int ig_sender)
 static void 
 p_topic (char *from, char **ArgList)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 
 	if (!ArgList[1])
 	{
@@ -270,7 +274,7 @@ whoreply (char *from, char **ArgList)
 	static int last_width = -1;
 	int ok = 1, voice = 0, opped = 0;
 	char *channel, *user, *host, *server, *nick, *stat, *name;
-	ChannelList *chan = NULL;
+	struct channel *chan = NULL;
 	char buf_data[BIG_BUFFER_SIZE + 1];
 
 
@@ -369,8 +373,8 @@ p_privmsg (char *from, char **Args)
 	unsigned char ignore_type;
 	char *ptr = NULL, *to;
 	char *high;
-	ChannelList *channel = NULL;
-	NickList *tmpnick = NULL;
+	struct channel *channel = NULL;
+	struct nick_list *tmpnick = NULL;
 
 
 	if (!from)
@@ -632,8 +636,8 @@ p_channel (char *from, char **ArgList)
 {
 	char *channel;
 	char *user, *host;
-	ChannelList *chan = NULL;
-	WhowasList *whowas = NULL;
+	struct channel *chan = NULL;
+	struct whowas_list *whowas = NULL;
 	int its_me = 0;
 
 	if (!strcmp (ArgList[0], "0"))
@@ -754,8 +758,8 @@ p_invite (char *from, char **ArgList)
 	}
 	if (ArgList[0] && ArgList[1])
 	{
-		ChannelList *chan = NULL;
-		WhowasChanList *w_chan = NULL;
+		struct channel *chan = NULL;
+		struct whowas_chan_list *w_chan = NULL;
 
 		message_from (from, LOG_CRAP);
 		malloc_strcpy (&invite_channel, ArgList[1]);
@@ -843,7 +847,7 @@ static void
 p_nick (char *from, char **ArgList)
 {
 	int one_prints = 0, ign = 0, its_me = 0;
-	ChannelList *chan;
+	struct channel *chan;
 	char *line;
 
 
@@ -894,7 +898,7 @@ p_mode (char *from, char **ArgList)
 	char *line;
 	int flag;
 
-	ChannelList *chan = NULL;
+	struct channel *chan = NULL;
 	char buffer[BIG_BUFFER_SIZE + 1];
 	char *smode;
 #ifdef COMPRESS_MODES
@@ -916,7 +920,7 @@ p_mode (char *from, char **ArgList)
 		if (is_channel (channel))
 		{
 #ifdef COMPRESS_MODES
-			chan = (ChannelList *) find_in_list ((struct list **) & server_list[from_server].chan_list, channel, 0);
+			chan = (struct channel *) find_in_list ((struct list **) & server_list[from_server].chan_list, channel, 0);
 			if (get_int_var (COMPRESS_MODES_VAR))
 			{
 				tmpbuf = compress_modes (from_server, channel, line);
@@ -1040,8 +1044,8 @@ p_kick (char *from, char **ArgList)
 {
 	char *channel, *who, *comment;
 	char *chankey = NULL;
-	ChannelList *chan = NULL;
-	NickList *tmpnick = NULL;
+	struct channel *chan = NULL;
+	struct nick_list *tmpnick = NULL;
 	int t = 0;
 
 
@@ -1082,7 +1086,7 @@ p_kick (char *from, char **ArgList)
 				put_it ("%s", convert_output_format (get_format (FORMAT_KICK_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, channel, who, comment));
 			if (!itsme)
 			{
-				NickList *f_nick = NULL;
+				struct nick_list *f_nick = NULL;
 				f_nick = find_nicklist_in_channellist (who, chan, 0);
 				if (chan->chop && tmpnick && is_other_flood (chan, tmpnick, KICK_FLOOD, &t))
 				{

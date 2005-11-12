@@ -70,7 +70,7 @@ extern LastMsg last_sent_ctcp[1];
 	void *do_nslookup_blah(void *arg);
 	void do_nslookup_thread(void *arg);
 
-	void	update_stats(int, char *, NickList *, ChannelList *, int);
+	void	update_stats(int, char *, struct nick_list *, struct channel *, int);
 	int	check_split(char *, char *, char *);
 	void	userage	(char *, char *);
 	void	stats_k_grep_end(void);
@@ -82,13 +82,13 @@ extern LastMsg last_sent_ctcp[1];
 	char	*random_str(int, int);
 	int	check_serverlag(void *);
 	void	do_clones(fd_set *, fd_set *);
-ChannelList *	prepare_command(int *, char *, int);
+struct channel *	prepare_command(int *, char *, int);
 	int	rename_file(char *, char **);
 
 	char	*clear_server_flags(char *);
 
 	int	logmsg(unsigned long, char *, char *, int);
-	void	log_toggle(int, ChannelList *);
+	void	log_toggle(int, struct channel *);
 
 	char	*do_nslookup(char *);
 	char	*cluster(char *);
@@ -122,6 +122,6 @@ ChannelList *	prepare_command(int *, char *, int);
 
 
 	/* in cmd_modes.h */
-	void flush_mode_all (ChannelList * chan);
+	void flush_mode_all (struct channel * chan);
 
 #endif

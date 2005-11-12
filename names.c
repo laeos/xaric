@@ -41,19 +41,19 @@
 #include "fset.h"
 
 extern int in_on_who;
-extern ChannelList default_statchan;
+extern struct channel default_statchan;
 
 static char mode_str[] = "iklmnpsta";
 
 static void add_to_mode_list (char *, int, char *);
 static void check_mode_list_join (char *, int);
-static void show_channel (ChannelList *);
-static void clear_channel (ChannelList *);
-char *recreate_mode (ChannelList *);
+static void show_channel (struct channel *);
+static void clear_channel (struct channel *);
+char *recreate_mode (struct channel *);
 static void clear_mode_list (int);
-static int decifer_mode (char *, char *, ChannelList **, unsigned long *, char *, char *, char **);
+static int decifer_mode (char *, char *, struct channel **, unsigned long *, char *, char *, char **);
 char *channel_key (char *);
-void clear_bans (ChannelList *);
+void clear_bans (struct channel *);
 
 
 
@@ -78,9 +78,9 @@ static struct joinlist
 
 /* clear_channel: erases all entries in a nick list for the given channel */
 static void 
-clear_channel (ChannelList * chan)
+clear_channel (struct channel * chan)
 {
-	NickList *Nick, *n;
+	struct nick_list *Nick, *n;
 
 	while ((Nick = next_nicklist (chan, NULL)))
 	{
@@ -91,10 +91,10 @@ clear_channel (ChannelList * chan)
 	chan->totalnicks = 0;
 }
 
-extern ChannelList *
+extern struct channel *
 lookup_channel (char *channel, int server, int unlink)
 {
-	register ChannelList *chan = NULL, *last = NULL;
+	register struct channel *chan = NULL, *last = NULL;
 	if (server == -1)
 		server = primary_server;
 	if (server == -1)
@@ -152,8 +152,8 @@ im_on_channel (char *channel)
 void 
 add_userhost_to_channel (char *channel, char *nick, int server, char *userhost)
 {
-	NickList *new;
-	ChannelList *chan;
+	struct nick_list *new;
+	struct channel *chan;
 
 	if ((chan = lookup_channel (channel, server, 0)) != NULL)
 		if ((new = find_nicklist_in_channellist (nick, chan, 0)))
@@ -166,11 +166,11 @@ add_userhost_to_channel (char *channel, char *nick, int server, char *userhost)
  * is already in the list, then the channel gets cleaned, and ready for use
  * again.   The added channel becomes the current channel as well.
  */
-ChannelList *
+struct channel *
 add_channel (char *channel, int server)
 {
-	ChannelList *new = NULL;
-	WhowasChanList *whowaschan;
+	struct channel *new = NULL;
+	struct whowas_chan_list *whowaschan;
 
 	if ((new = lookup_channel (channel, server, CHAN_NOUNLINK)) != NULL)
 	{
@@ -188,7 +188,7 @@ add_channel (char *channel, int server)
 	{
 		if (!(whowaschan = check_whowas_chan_buffer (channel, 1)))
 		{
-			new = (ChannelList *) new_malloc (sizeof (ChannelList));
+			new = (struct channel *) new_malloc (sizeof (struct channel));
 			new->connected = 1;
 			get_time (&new->channel_create);
 			malloc_strcpy (&(new->channel), channel);
@@ -257,12 +257,12 @@ add_channel (char *channel, int server)
  * not on the channel list, nothing happens (although perhaps the channel
  * should be addded to the list?  but this should never happen) 
  */
-ChannelList *
+struct channel *
 add_to_channel (char *channel, char *nick, int server, int oper, int voice, char *userhost, char *server1, char *away)
 {
-	NickList *new = NULL;
-	ChannelList *chan = NULL;
-	WhowasList *whowas;
+	struct nick_list *new = NULL;
+	struct channel *chan = NULL;
+	struct whowas_list *whowas;
 
 	int ischop = oper;
 
@@ -289,7 +289,7 @@ add_to_channel (char *channel, char *nick, int server, int oper, int voice, char
 		{
 			if (!(whowas = check_whowas_buffer (nick, userhost ? userhost : "<UNKNOWN>", channel, 1)))
 			{
-				new = (NickList *) new_malloc (sizeof (NickList));
+				new = (struct nick_list *) new_malloc (sizeof (struct nick_list));
 
 				new->idle_time = new->kicktime =
 					new->doptime = new->nicktime =
@@ -338,7 +338,7 @@ add_to_channel (char *channel, char *nick, int server, int oper, int voice, char
 char *
 get_channel_key (char *channel, int server)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 
 	if ((tmp = lookup_channel (channel, server, 0)) != NULL)
 		return (tmp->key ? tmp->key : empty_str);
@@ -361,7 +361,7 @@ get_channel_key (char *channel, int server)
  * has one copy of the string.  -mrg, june '94.
  */
 char *
-recreate_mode (ChannelList * chan)
+recreate_mode (struct channel * chan)
 {
 	int mode_pos = 0, mode;
 	static char *s;
@@ -395,7 +395,7 @@ recreate_mode (ChannelList * chan)
 	return chan->s_mode;
 }
 #ifdef COMPRESS_MODES
-/* some structs to help along the process, NickList is way too much of a memory
+/* some structs to help along the process, struct nick_list is way too much of a memory
    hog */
 
 typedef struct _UserChanModes
@@ -442,8 +442,8 @@ compress_modes (int server, char *channel, char *modes)
 	char *tmp, *rest, nmodes[16], nargs[100];
 	UserChanModes *ucm = NULL, *tucm = NULL;
 	BanList *tbl = NULL;
-	NickList *tnl = NULL;
-	ChannelList *chan;
+	struct nick_list *tnl = NULL;
+	struct channel *chan;
 
 	/* now, modes contains the actual modes, and rest contains the arguments
 	   to those modes */
@@ -470,7 +470,7 @@ compress_modes (int server, char *channel, char *modes)
 			tmp = next_arg (rest, &rest);
 			tucm = (UserChanModes *) find_in_list ((struct list **) & ucm, tmp, 0);
 
-/*                  tnl = (NickList *)find_in_list((struct list **)&chan->nicks, tmp, 0); */
+/*                  tnl = (struct nick_list *)find_in_list((struct list **)&chan->nicks, tmp, 0); */
 			tnl = find_nicklist_in_channellist (tmp, chan, 0);
 			if (tnl && tnl->chanop)
 				isopped = 1;
@@ -517,7 +517,7 @@ compress_modes (int server, char *channel, char *modes)
 			tmp = next_arg (rest, &rest);
 			tucm = (UserChanModes *) find_in_list ((struct list **) & ucm, tmp, 0);
 
-/*                  tnl = (NickList *)find_in_list((struct list **)&chan->nicks, tmp, 0); */
+/*                  tnl = (struct nick_list *)find_in_list((struct list **)&chan->nicks, tmp, 0); */
 			tnl = find_nicklist_in_channellist (tmp, chan, 0);
 			if (tnl && tnl->voice)
 				isvoiced = 1;
@@ -901,7 +901,7 @@ compress_modes (int server, char *channel, char *modes)
  * commands and convert that mode string into a one byte bit map of modes 
  */
 static int 
-decifer_mode (char *from, register char *mode_string, ChannelList ** channel, unsigned long *mode, char *chop, char *voice, char **key)
+decifer_mode (char *from, register char *mode_string, struct channel ** channel, unsigned long *mode, char *chop, char *voice, char **key)
 {
 
 	char *limit = 0;
@@ -912,7 +912,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 	int splitter = 0;
 	char *rest, *the_key;
 
-	NickList *ThisNick = NULL;
+	struct nick_list *ThisNick = NULL;
 	BanList *new;
 	unsigned int value = 0;
 	int its_me = 0;
@@ -985,7 +985,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 					{
 						if (!add && add != (*channel)->chop && !in_join_list ((*channel)->channel, from_server))
 						{
-							register NickList *tmp;
+							register struct nick_list *tmp;
 							for (tmp = next_nicklist (*channel, NULL); tmp; tmp = next_nicklist (*channel, tmp))
 								tmp->sent_reop = tmp->sent_deop = 0;
 						}
@@ -1076,7 +1076,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 char *
 get_channel_mode (char *channel, int server)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 	if ((tmp = lookup_channel (channel, server, CHAN_NOUNLINK)))
 		return recreate_mode (tmp);
 	return empty_str;
@@ -1087,7 +1087,7 @@ get_channel_mode (char *channel, int server)
  * according the the new mode given.  
  */
 void 
-update_channel_mode (char *from, char *channel, int server, char *mode, ChannelList * tmp)
+update_channel_mode (char *from, char *channel, int server, char *mode, struct channel * tmp)
 {
 	int limit;
 	if (tmp || (channel && (tmp = lookup_channel (channel, server, CHAN_NOUNLINK))))
@@ -1104,14 +1104,14 @@ update_channel_mode (char *from, char *channel, int server, char *mode, ChannelL
 int 
 is_channel_mode (char *channel, int mode, int server_index)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 	if ((tmp = lookup_channel (channel, server_index, CHAN_NOUNLINK)))
 		return (tmp->mode & mode);
 	return 0;
 }
 
 void 
-clear_bans (ChannelList * channel)
+clear_bans (struct channel * channel)
 {
 	BanList *bans, *next;
 	if (!channel || !channel->bans)
@@ -1138,7 +1138,7 @@ clear_bans (ChannelList * channel)
 void 
 remove_channel (char *channel, int server)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 	int old_from_server = from_server;
 
 	if (channel)
@@ -1156,7 +1156,7 @@ remove_channel (char *channel, int server)
 	}
 	else
 	{
-		ChannelList *next;
+		struct channel *next;
 
 		for (tmp = server_list[server].chan_list; tmp; tmp = next)
 		{
@@ -1178,8 +1178,8 @@ remove_channel (char *channel, int server)
 void 
 remove_from_channel (char *channel, char *nick, int server, int netsplit, char *reason)
 {
-	ChannelList *chan;
-	NickList *tmp = NULL;
+	struct channel *chan;
+	struct nick_list *tmp = NULL;
 	extern char *last_split_server;
 	extern char *last_split_from;
 	char buf[BIG_BUFFER_SIZE + 1];
@@ -1235,7 +1235,7 @@ remove_from_channel (char *channel, char *nick, int server, int netsplit, char *
 }
 
 void 
-handle_nickflood (char *old_nick, char *new_nick, register NickList * nick, register ChannelList * chan, time_t current_time, int flood_time)
+handle_nickflood (char *old_nick, char *new_nick, register struct nick_list * nick, register struct channel * chan, time_t current_time, int flood_time)
 {
 	if ((!nick->bancount) || (nick->bancount && ((current_time - nick->bantime) > 3)))
 	{
@@ -1251,8 +1251,8 @@ handle_nickflood (char *old_nick, char *new_nick, register NickList * nick, regi
 void 
 rename_nick (char *old_nick, char *new_nick, int server)
 {
-	register ChannelList *chan;
-	register NickList *tmp;
+	register struct channel *chan;
+	register struct nick_list *tmp;
 	time_t current_time = time (NULL);
 	int t = 0;
 
@@ -1284,7 +1284,7 @@ rename_nick (char *old_nick, char *new_nick, int server)
 int 
 is_on_channel (char *channel, int server, char *nick)
 {
-	ChannelList *chan;
+	struct channel *chan;
 
 	if (nick && (chan = lookup_channel (channel, server, CHAN_NOUNLINK)) && chan->connected)
 		/*      if (find_nicklist_in_channellist(nick, chan, 0)) */
@@ -1295,8 +1295,8 @@ is_on_channel (char *channel, int server, char *nick)
 int 
 is_chanop (char *channel, char *nick)
 {
-	ChannelList *chan;
-	NickList *Nick;
+	struct channel *chan;
+	struct nick_list *Nick;
 
 	if (nick && (chan = lookup_channel (channel, from_server, CHAN_NOUNLINK)) /*&& chan->connected */ )
 	{
@@ -1308,9 +1308,9 @@ is_chanop (char *channel, char *nick)
 }
 
 static void 
-show_channel (ChannelList * chan)
+show_channel (struct channel * chan)
 {
-	NickList *tmp;
+	struct nick_list *tmp;
 	int buffer_len;
 	char *nicks = NULL;
 	char *s;
@@ -1348,7 +1348,7 @@ show_channel (ChannelList * chan)
 void 
 list_channels (void)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 	int server, no = 1;
 
 	if (server_list[from_server].chan_list)
@@ -1383,7 +1383,7 @@ list_channels (void)
 void 
 switch_channels (char key, char *ptr)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 
 
 	if (server_list[from_server].chan_list)
@@ -1428,7 +1428,7 @@ switch_channels (char key, char *ptr)
 char *
 real_channel (void)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 
 	if (server_list[from_server].chan_list)
 		for (tmp = server_list[from_server].chan_list; tmp; tmp = tmp->next)
@@ -1440,7 +1440,7 @@ real_channel (void)
 void 
 change_server_channels (int old, int new)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 
 
 	if (new == old)
@@ -1458,7 +1458,7 @@ change_server_channels (int old, int new)
 void 
 clear_channel_list (int server)
 {
-	ChannelList *tmp, *next;
+	struct channel *tmp, *next;
 	Window *ptr = NULL;
 
 
@@ -1486,7 +1486,7 @@ clear_channel_list (int server)
 void 
 reconnect_all_channels (int server)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 	char *mode;
 	char *channels = NULL;
 	char *keys = NULL;
@@ -1520,7 +1520,7 @@ reconnect_all_channels (int server)
 char *
 what_channel (char *nick, int server)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 
 
 	/*
@@ -1538,7 +1538,7 @@ what_channel (char *nick, int server)
 char *
 walk_channels (char *nick, int init, int server)
 {
-	static ChannelList *tmp = NULL;
+	static struct channel *tmp = NULL;
 
 
 	if (init)
@@ -1557,7 +1557,7 @@ walk_channels (char *nick, int init, int server)
 int 
 get_channel_oper (char *channel, int server)
 {
-	ChannelList *chan;
+	struct channel *chan;
 
 
 	if ((chan = lookup_channel (channel, server, CHAN_NOUNLINK)))
@@ -1569,13 +1569,13 @@ char *
 fetch_userhost (int server, char *nick)
 {
 /*
-   ChannelList *tmp = NULL;
-   NickList *user = NULL;
+   struct channel *tmp = NULL;
+   struct nick_list *user = NULL;
 
    for (tmp = channel_list; tmp; tmp = tmp->next)
    {
    if ((tmp->server == server) && 
-   ((user = (NickList *)find_in_list((struct list **)&tmp->nicks, nick, 0))))
+   ((user = (struct nick_list *)find_in_list((struct list **)&tmp->nicks, nick, 0))))
    return user->userhost;
    }
  */
@@ -1585,7 +1585,7 @@ fetch_userhost (int server, char *nick)
 int 
 get_channel_voice (char *channel, int server)
 {
-	ChannelList *chan;
+	struct channel *chan;
 
 
 	if ((chan = lookup_channel (channel, server, CHAN_NOUNLINK)))
@@ -1596,7 +1596,7 @@ get_channel_voice (char *channel, int server)
 extern void 
 set_channel_window (Window * window, char *channel, int server)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 
 
 	if (!channel || server < 0)
@@ -1614,7 +1614,7 @@ set_channel_window (Window * window, char *channel, int server)
 extern char *
 create_channel_list (Window * window)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 	char buffer[BIG_BUFFER_SIZE + 1];
 
 
@@ -1633,7 +1633,7 @@ create_channel_list (Window * window)
 extern void 
 channel_server_delete (int server)
 {
-	ChannelList *tmp;
+	struct channel *tmp;
 	int i;
 
 	for (i = server + 1; i < number_of_servers; i++)
@@ -1861,7 +1861,7 @@ clear_mode_list (int server)
 extern int 
 chan_is_connected (char *channel, int server)
 {
-	ChannelList *cp = lookup_channel (channel, server, CHAN_NOUNLINK);
+	struct channel *cp = lookup_channel (channel, server, CHAN_NOUNLINK);
 
 	if (!cp)
 		return 0;

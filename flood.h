@@ -8,7 +8,7 @@
 #define __flood_h_
 
 	int	check_flooding (char *, int, char *, char *);
-	int	is_other_flood (ChannelList *, NickList *, int, int *);
+	int	is_other_flood (struct channel *, struct nick_list *, int, int *);
 	int	flood_prot (char *, char *, char *, int, int, char *);
 	void	clean_flood_list (void);		
 
@@ -27,6 +27,6 @@
 
 #include "hash.h"
 #define FLOOD_HASHSIZE 31
-extern HashEntry no_flood_list[FLOOD_HASHSIZE];
+extern struct hash_entry no_flood_list[FLOOD_HASHSIZE];
 
 #endif /* __flood_h_ */

@@ -168,6 +168,7 @@ HookFunc hook_functions[] =
 	{"YELL", NULL, 1, 0, 0}
 };
 
+#if 0
 static char *
 fill_it_out (char *str, int params)
 {
@@ -199,6 +200,7 @@ fill_it_out (char *str, int params)
 	malloc_strcpy (&free_ptr, buffer);
 	return (free_ptr);
 }
+#endif
 
 
 /*
@@ -248,6 +250,7 @@ Add_Remove_Check (Hook * Item, char *Name)
 }
 
 
+#if 0
 static void 
 add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int server, int sernum, int flexible)
 {
@@ -283,9 +286,11 @@ add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int 
 	malloc_strcpy (&new->nick, nick);
 	malloc_strcpy (&new->stuff, stuff);
 	upper (new->nick);
-	add_to_list_ext ((struct list **) & (entry->list), (struct list *) new, (int (*)(struct list *, struct list *)) Add_Remove_Check);
+	add_to_list_ext ((struct list **) & (entry->list), (struct list *) new, (cmp_fn *)Add_Remove_Check);
 }
+#endif
 
+#if 0
 /*
  * add_hook Given an index into the hook_functions array, this adds a new
  * entry to the list as specified by the rest of the parameters.  The new
@@ -320,8 +325,9 @@ add_hook (int which, char *nick, char *stuff, int noisy, int not, int server, in
 	malloc_strcpy (&new->nick, nick);
 	malloc_strcpy (&new->stuff, stuff);
 	upper (new->nick);
-	add_to_list_ext ((struct list **) & (hook_functions[which].list), (struct list *) new, (int (*)(struct list *, struct list *)) Add_Remove_Check);
+	add_to_list_ext ((struct list **) & (hook_functions[which].list), (struct list *) new, (cmp_fn *)Add_Remove_Check);
 }
+#endif
 
 /* show_hook shows a single hook */
 extern void 
@@ -370,6 +376,7 @@ show_hook (Hook * list, char *name)
 	new_free (&text);
 }
 
+#if 0
 /*
  * show_numeric_list: If numeric is 0, then all numeric lists are displayed.
  * If numeric is non-zero, then that particular list is displayed.  The total
@@ -420,6 +427,7 @@ show_list (int which)
 		show_hook (list, hook_functions[which].name);
 	return (cnt);
 }
+#endif
 
 /*
  * do_hook: This is what gets called whenever a MSG, INVITES, WALL, (you get

@@ -18,9 +18,9 @@
 #include "list.h"
 #include "ircaux.h"
 
-static int add_list_stricmp (List *, List *);
-static int list_stricmp (List *, char *);
-static int list_match (List *, char *);
+static int add_list_stricmp(struct list *, struct list *);
+static int list_stricmp(struct list *, char *);
+static int list_match(struct list *, char *);
 
 /*
  * These have now been made more general. You used to only be able to
@@ -36,28 +36,24 @@ static int list_match (List *, char *);
  *
  */
 
-static int 
-add_list_stricmp (List * item1, List * item2)
+static int add_list_stricmp(struct list *item1, struct list *item2)
 {
-	return strcasecmp (item1->name, item2->name);
+    return strcasecmp(item1->name, item2->name);
 }
 
-static int 
-list_stricmp (List * item1, char *str)
+static int list_stricmp(struct list *item1, char *str)
 {
-	return my_stricmp (item1->name, str);
+    return my_stricmp(item1->name, str);
 }
 
-int 
-list_strnicmp (List * item1, char *str)
+int list_strnicmp(struct list *item1, char *str)
 {
-	return my_strnicmp (item1->name, str, strlen (str));
+    return my_strnicmp(item1->name, str, strlen(str));
 }
 
-static int 
-list_match (List * item1, char *str)
+static int list_match(struct list *item1, char *str)
 {
-	return wild_match (item1->name, str);
+    return wild_match(item1->name, str);
 }
 
 /*
@@ -72,78 +68,67 @@ list_match (List * item1, char *str)
  * The parameters are:  "list" which is a pointer to the head of the list. "add"
  * which is a pre-allocated element to be added to the list.  
  */
-void 
-add_to_list_ext (List ** list, List * add, int (*cmp_func) (List *, List *))
+void add_to_list_ext(struct list **list, struct list *add, cmp_fn * cmp_func)
 {
-	register List *tmp;
-	List *last;
+    struct list *tmp;
+    struct list *last;
 
-	if (!cmp_func)
-		cmp_func = add_list_stricmp;
-	last = NULL;
-	for (tmp = *list; tmp; tmp = tmp->next)
-	{
-		if (cmp_func (tmp, add) > 0)
-			break;
-		last = tmp;
-	}
-	if (last)
-		last->next = add;
-	else
-		*list = add;
-	add->next = tmp;
+    if (!cmp_func)
+	cmp_func = add_list_stricmp;
+    last = NULL;
+    for (tmp = *list; tmp; tmp = tmp->next) {
+	if (cmp_func(tmp, add) > 0)
+	    break;
+	last = tmp;
+    }
+    if (last)
+	last->next = add;
+    else
+	*list = add;
+    add->next = tmp;
 }
 
-void 
-add_to_list (List ** list, List * add)
+void add_to_list(struct list **list, struct list *add)
 {
-	add_to_list_ext (list, add, NULL);
+    add_to_list_ext(list, add, NULL);
 }
-
 
 /*
- * find_in_list: This looks up the given name in the given list.  List and
+ * find_in_list: This looks up the given name in the given list.  struct list and
  * name are as described above.  If wild is true, each name in the list is
  * used as a wild card expression to match name... otherwise, normal matching
  * is done 
  */
-List *
-find_in_list_ext (register List ** list, char *name, int wild, int (*cmp_func) (List *, char *))
+struct list *find_in_list_ext(struct list **list, char *name, int wild, cmp_fn * cmp_func)
 {
-	register List *tmp;
-	int best_match, current_match;
+    struct list *tmp;
+    int best_match, current_match;
 
-	if (!cmp_func)
-		cmp_func = wild ? list_match : list_stricmp;
-	best_match = 0;
+    if (!cmp_func)
+	cmp_func = wild ? list_match : list_stricmp;
+    best_match = 0;
 
-	if (wild)
-	{
-		register List *match = NULL;
+    if (wild) {
+	struct list *match = NULL;
 
-		for (tmp = *list; tmp; tmp = tmp->next)
-		{
-			if ((current_match = cmp_func (tmp, name)) > best_match)
-			{
-				match = tmp;
-				best_match = current_match;
-			}
-		}
-		return (match);
+	for (tmp = *list; tmp; tmp = tmp->next) {
+	    if ((current_match = cmp_func(tmp, name)) > best_match) {
+		match = tmp;
+		best_match = current_match;
+	    }
 	}
-	else
-	{
-		for (tmp = *list; tmp; tmp = tmp->next)
-			if (cmp_func (tmp, name) == 0)
-				return (tmp);
-	}
-	return NULL;
+	return (match);
+    } else {
+	for (tmp = *list; tmp; tmp = tmp->next)
+	    if (cmp_func(tmp, name) == 0)
+		return (tmp);
+    }
+    return NULL;
 }
 
-List *
-find_in_list (List ** list, char *name, int wild)
+struct list *find_in_list(struct list **list, char *name, int wild)
 {
-	return find_in_list_ext (list, name, wild, NULL);
+    return find_in_list_ext(list, name, wild, NULL);
 }
 
 /*
@@ -151,56 +136,49 @@ find_in_list (List ** list, char *name, int wild)
  * described above).  If found, it is removed from the list and returned
  * (memory is not deallocated).  If not found, null is returned. 
  */
-List *
-remove_from_list_ext (List ** list, char *name, int (*cmp_func) (List *, char *))
+struct list *remove_from_list_ext(struct list **list, char *name, cmp_fn * cmp_func)
 {
-	register List *tmp;
-	List *last;
+    struct list *tmp;
+    struct list *last;
 
-	if (!cmp_func)
-		cmp_func = list_stricmp;
-	last = NULL;
-	for (tmp = *list; tmp; tmp = tmp->next)
-	{
-		if (cmp_func (tmp, name) == 0)
-		{
-			if (last)
-				last->next = tmp->next;
-			else
-				*list = tmp->next;
-			return (tmp);
-		}
-		last = tmp;
+    if (!cmp_func)
+	cmp_func = list_stricmp;
+    last = NULL;
+    for (tmp = *list; tmp; tmp = tmp->next) {
+	if (cmp_func(tmp, name) == 0) {
+	    if (last)
+		last->next = tmp->next;
+	    else
+		*list = tmp->next;
+	    return (tmp);
 	}
-	return NULL;
+	last = tmp;
+    }
+    return NULL;
 }
 
-List *
-remove_from_list (List ** list, char *name)
+struct list *remove_from_list(struct list **list, char *name)
 {
-	return remove_from_list_ext (list, name, NULL);
+    return remove_from_list_ext(list, name, NULL);
 }
-
 
 /*
  * list_lookup: this routine just consolidates remove_from_list and
  * find_in_list.  I did this cause it fit better with some already existing
  * code 
  */
-List *
-list_lookup_ext (register List ** list, char *name, int wild, int delete, int (*cmp_func) (List *, char *))
+struct list *list_lookup_ext(struct list **list, char *name, int wild, int delete, cmp_fn * cmp_func)
 {
-	register List *tmp;
+    struct list *tmp;
 
-	if (delete)
-		tmp = remove_from_list_ext (list, name, cmp_func);
-	else
-		tmp = find_in_list_ext (list, name, wild, cmp_func);
-	return (tmp);
+    if (delete)
+	tmp = remove_from_list_ext(list, name, cmp_func);
+    else
+	tmp = find_in_list_ext(list, name, wild, cmp_func);
+    return (tmp);
 }
 
-List *
-list_lookup (List ** list, char *name, int wild, int delete)
+struct list *list_lookup(struct list **list, char *name, int wild, int delete)
 {
-	return list_lookup_ext (list, name, wild, delete, NULL);
+    return list_lookup_ext(list, name, wild, delete, NULL);
 }

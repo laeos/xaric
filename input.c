@@ -1568,7 +1568,7 @@ addtabkey (char *nick, char *type)
 
 	tmp = tabkey_array;
 
-	if (!tmp || !(new = (NickTab *) remove_from_list ((List **) & tmp, nick)))
+	if (!tmp || !(new = (NickTab *) remove_from_list ((struct list **) & tmp, nick)))
 	{
 		new = (NickTab *) new_malloc (sizeof (NickTab));
 		malloc_strcpy (&new->nick, nick);

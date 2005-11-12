@@ -105,7 +105,7 @@ check_sync (int comm, char *channel, char *nick, char *whom, char *bantime, Chan
 					new->time = time (NULL);
 				if (whom)
 					new->setby = m_strdup (whom);
-				add_to_list ((List **) & tmp->bans, (List *) new);
+				add_to_list ((struct list **) & tmp->bans, (struct list *) new);
 			}
 		}
 	default:

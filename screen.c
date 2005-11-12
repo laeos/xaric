@@ -140,7 +140,7 @@ add_to_screen (char *buffer)
 				goto found;
 
 			if (from_server == tmp->server)
-				if (find_in_list ((List **) & (tmp->nicks), who_from, !USE_WILDCARDS))
+				if (find_in_list ((struct list **) & (tmp->nicks), who_from, !USE_WILDCARDS))
 					goto found;
 
 		}
@@ -153,7 +153,7 @@ add_to_screen (char *buffer)
 		}
 		if (is_channel (who_from) && from_server != -1) {
 			ChannelList *chan;
-			if ((chan = (ChannelList *) find_in_list ((List **) & (server_list[from_server].chan_list),
+			if ((chan = (ChannelList *) find_in_list ((struct list **) & (server_list[from_server].chan_list),
 						 who_from, !USE_WILDCARDS))) {
 				if (chan->window && from_server == chan->window->server)
 					goto found;

@@ -19,8 +19,8 @@
 
 /* Generic List type hash list */
 void	add_name_to_genericlist (char *, HashEntry *, unsigned int);
-List	*find_name_in_genericlist (char *, HashEntry *, unsigned int, int);
-List	*next_namelist(HashEntry *, List *, unsigned int);
+struct list	*find_name_in_genericlist (char *, HashEntry *, unsigned int, int);
+struct list	*next_namelist(HashEntry *, struct list *, unsigned int);
 
 void	add_nicklist_to_channellist(NickList *, ChannelList *);
 

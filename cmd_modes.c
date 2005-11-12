@@ -661,7 +661,7 @@ remove_bans (char *stuff, char *line)
 			next = tmpc->next;
 			if (tmpc->sent_unban)
 			{
-				if ((tmpc = (BanList *) remove_from_list ((List **) & chan->bans, tmpc->ban)))
+				if ((tmpc = (BanList *) remove_from_list ((struct list **) & chan->bans, tmpc->ban)))
 				{
 					new_free (&tmpc->ban);
 					new_free (&tmpc->setby);

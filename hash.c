@@ -101,11 +101,11 @@ remove_link_from_list (NickList * tmp, NickList * prev, HashEntry * location)
 void 
 add_name_to_genericlist (char *name, HashEntry * list, unsigned int size)
 {
-	List *nptr;
+	struct list *nptr;
 	unsigned long hvalue = hash_nickname (name, size);
 
-	nptr = (List *) new_malloc (sizeof (List));
-	nptr->next = (List *) list[hvalue].list;
+	nptr = (struct list *) new_malloc (sizeof (struct list));
+	nptr->next = (struct list *) list[hvalue].list;
 	nptr->name = m_strdup (name);
 
 	/* assign our new linked list into array spot */
@@ -121,12 +121,12 @@ add_name_to_genericlist (char *name, HashEntry * list, unsigned int size)
  * to the top of the list in the specific array location
  */
 static inline void 
-move_gen_link_to_top (List * tmp, List * prev, HashEntry * location)
+move_gen_link_to_top (struct list * tmp, struct list * prev, HashEntry * location)
 {
 	if (prev)
 	{
-		List *old_list;
-		old_list = (List *) location->list;
+		struct list *old_list;
+		old_list = (struct list *) location->list;
 		location->list = (void *) tmp;
 		prev->next = tmp->next;
 		tmp->next = old_list;
@@ -138,7 +138,7 @@ move_gen_link_to_top (List * tmp, List * prev, HashEntry * location)
  * from our chain of hashed entries.
  */
 static inline void 
-remove_gen_link_from_list (List * tmp, List * prev, HashEntry * location)
+remove_gen_link_from_list (struct list * tmp, struct list * prev, HashEntry * location)
 {
 	if (prev)
 	{
@@ -154,11 +154,11 @@ remove_gen_link_from_list (List * tmp, List * prev, HashEntry * location)
 	tmp->next = NULL;
 }
 
-List *
+struct list *
 find_name_in_genericlist (char *name, HashEntry * list, unsigned int size, int remove)
 {
 	HashEntry *location;
-	register List *tmp, *prev = NULL;
+	register struct list *tmp, *prev = NULL;
 	unsigned long hvalue = hash_nickname (name, size);
 
 	location = &(list[hvalue]);
@@ -167,7 +167,7 @@ find_name_in_genericlist (char *name, HashEntry * list, unsigned int size, int r
 	 * as regular linked list, or as ircd likes to say...
 	 * "We found the bucket, now search the chain"
 	 */
-	for (tmp = (List *) location->list; tmp; prev = tmp, tmp = tmp->next)
+	for (tmp = (struct list *) location->list; tmp; prev = tmp, tmp = tmp->next)
 	{
 		if (!my_stricmp (name, tmp->name))
 		{
@@ -303,8 +303,8 @@ next_nicklist (ChannelList * cptr, NickList * nptr)
 	return NULL;
 }
 
-List *
-next_namelist (HashEntry * cptr, List * nptr, unsigned int size)
+struct list *
+next_namelist (HashEntry * cptr, struct list * nptr, unsigned int size)
 {
 	unsigned long hvalue = 0;
 	if (!cptr)
@@ -313,13 +313,13 @@ next_namelist (HashEntry * cptr, List * nptr, unsigned int size)
 	else if (!nptr)
 	{
 		/* wants to start the walk! */
-		while ((List *) cptr[hvalue].list == NULL)
+		while ((struct list *) cptr[hvalue].list == NULL)
 		{
 			hvalue++;
 			if (hvalue >= size)
 				return NULL;
 		}
-		return (List *) cptr[hvalue].list;
+		return (struct list *) cptr[hvalue].list;
 	}
 	else if (nptr->next)
 	{
@@ -338,14 +338,14 @@ next_namelist (HashEntry * cptr, List * nptr, unsigned int size)
 		}
 		else
 		{
-			while ((List *) cptr[hvalue].list == NULL)
+			while ((struct list *) cptr[hvalue].list == NULL)
 			{
 				hvalue++;
 				if (hvalue >= size)
 					return NULL;
 			}
 			/* return head of next filled bucket */
-			return (List *) cptr[hvalue].list;
+			return (struct list *) cptr[hvalue].list;
 		}
 	}
 	else
@@ -429,7 +429,7 @@ cmd_show_hash (struct command *cmd, char *args)
 	else
 		c = get_current_channel_by_refnum (0);
 	if (c && from_server > -1)
-		chan = (ChannelList *) find_in_list ((List **) & server_list[from_server].chan_list, c, 0);
+		chan = (ChannelList *) find_in_list ((struct list **) & server_list[from_server].chan_list, c, 0);
 	if (chan)
 		show_nicklist_hashtable (chan);
 	show_whowas_debug_hashtable (&whowas_userlist_list);
@@ -741,7 +741,7 @@ sorted_nicklist (ChannelList * chan)
 		l = (NickList *) new_malloc (sizeof (NickList));
 		memcpy (l, tmp, sizeof (NickList));
 		l->next = NULL;
-		add_to_list ((List **) & list, (List *) l);
+		add_to_list ((struct list **) & list, (struct list *) l);
 	}
 	return list;
 }
@@ -792,11 +792,11 @@ find_name_in_floodlist (char *name, HashEntry * list, unsigned int size, int rem
 		if (!my_stricmp (name, tmp->name))
 		{
 			if (remove != REMOVE_FROM_LIST)
-				move_gen_link_to_top ((List *) tmp, (List *) prev, location);
+				move_gen_link_to_top ((struct list *) tmp, (struct list *) prev, location);
 			else
 			{
 				location->links--;
-				remove_gen_link_from_list ((List *) tmp, (List *) prev, location);
+				remove_gen_link_from_list ((struct list *) tmp, (struct list *) prev, location);
 			}
 			return tmp;
 		}

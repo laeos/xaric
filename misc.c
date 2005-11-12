@@ -160,7 +160,7 @@ timer_unban(void *args)
 		server = from_server;
 	channel = next_arg(p, &p);
 	ban = next_arg(p, &p);
-	if ((chan = (ChannelList *) find_in_list((List **) & server_list[server].chan_list, channel, 0))
+	if ((chan = (ChannelList *) find_in_list((struct list **) & server_list[server].chan_list, channel, 0))
 	    && ban_is_on_channel(ban, chan))
 		my_send_to_server(server, "MODE %s -b %s", channel, ban);
 	new_free(&serv);
@@ -488,7 +488,7 @@ remove_split_server(char *server)
 {
 	irc_server *temp;
 
-	if ((temp = (irc_server *) remove_from_list((List **) & split_link, server))) {
+	if ((temp = (irc_server *) remove_from_list((struct list **) & split_link, server))) {
 		new_free(&temp->name);
 		new_free(&temp->link);
 		new_free(&temp->time);

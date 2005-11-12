@@ -916,7 +916,7 @@ p_mode (char *from, char **ArgList)
 		if (is_channel (channel))
 		{
 #ifdef COMPRESS_MODES
-			chan = (ChannelList *) find_in_list ((List **) & server_list[from_server].chan_list, channel, 0);
+			chan = (ChannelList *) find_in_list ((struct list **) & server_list[from_server].chan_list, channel, 0);
 			if (get_int_var (COMPRESS_MODES_VAR))
 			{
 				tmpbuf = compress_modes (from_server, channel, line);

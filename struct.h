@@ -456,12 +456,6 @@ typedef	struct	channel_stru
 
 }	ChannelList;
 
-typedef	struct	list_stru
-{
-	struct	list_stru	*next;
-	char	*name;
-}	List;
-
 typedef struct	flood_stru
 {
 	struct flood_stru	*next;

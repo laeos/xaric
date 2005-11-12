@@ -87,7 +87,7 @@ void
 cmd_no_flood (struct command *cmd, char *args)
 {
 	char *nick;
-	List *nptr;
+	struct list *nptr;
 
 
 	if (!args || !*args)

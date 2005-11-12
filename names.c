@@ -209,7 +209,7 @@ add_channel (char *channel, int server)
 		new->server = server;
 		new->flags.got_modes = new->flags.got_who = new->flags.got_bans = 1;
 		get_time (&new->join_time);
-		add_to_list ((List **) & (server_list[server].chan_list), (List *) new);
+		add_to_list ((struct list **) & (server_list[server].chan_list), (struct list *) new);
 	}
 	new->chop = 0;
 	new->voice = 0;
@@ -468,9 +468,9 @@ compress_modes (int server, char *channel, char *modes)
 			break;
 		case 'o':
 			tmp = next_arg (rest, &rest);
-			tucm = (UserChanModes *) find_in_list ((List **) & ucm, tmp, 0);
+			tucm = (UserChanModes *) find_in_list ((struct list **) & ucm, tmp, 0);
 
-/*                  tnl = (NickList *)find_in_list((List **)&chan->nicks, tmp, 0); */
+/*                  tnl = (NickList *)find_in_list((struct list **)&chan->nicks, tmp, 0); */
 			tnl = find_nicklist_in_channellist (tmp, chan, 0);
 			if (tnl && tnl->chanop)
 				isopped = 1;
@@ -510,14 +510,14 @@ compress_modes (int server, char *channel, char *modes)
 					break;
 				tucm->b_ed = tucm->deb_ed = 0;
 				tucm->v_ed = tucm->dev_ed = 0;
-				add_to_list ((List **) & ucm, (List *) tucm);
+				add_to_list ((struct list **) & ucm, (struct list *) tucm);
 			}
 			break;
 		case 'v':
 			tmp = next_arg (rest, &rest);
-			tucm = (UserChanModes *) find_in_list ((List **) & ucm, tmp, 0);
+			tucm = (UserChanModes *) find_in_list ((struct list **) & ucm, tmp, 0);
 
-/*                  tnl = (NickList *)find_in_list((List **)&chan->nicks, tmp, 0); */
+/*                  tnl = (NickList *)find_in_list((struct list **)&chan->nicks, tmp, 0); */
 			tnl = find_nicklist_in_channellist (tmp, chan, 0);
 			if (tnl && tnl->voice)
 				isvoiced = 1;
@@ -556,12 +556,12 @@ compress_modes (int server, char *channel, char *modes)
 				break;
 				tucm->o_ed = tucm->deo_ed = 0;
 				tucm->b_ed = tucm->deb_ed = 0;
-				add_to_list ((List **) & ucm, (List *) tucm);
+				add_to_list ((struct list **) & ucm, (struct list *) tucm);
 			}
 			break;
 		case 'b':
 			tmp = next_arg (rest, &rest);
-			tucm = (UserChanModes *) find_in_list ((List **) & ucm, tmp, 0);
+			tucm = (UserChanModes *) find_in_list ((struct list **) & ucm, tmp, 0);
 			isbanned = 0;
 			for (tbl = chan->bans; tbl && !isbanned; tbl = tbl->next)
 			{
@@ -608,7 +608,7 @@ compress_modes (int server, char *channel, char *modes)
 					break;
 				tucm->o_ed = tucm->deo_ed = 0;
 				tucm->v_ed = tucm->dev_ed = 0;
-				add_to_list ((List **) & ucm, (List *) tucm);
+				add_to_list ((struct list **) & ucm, (struct list *) tucm);
 			}
 			break;
 		case 'l':
@@ -1034,11 +1034,11 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 			if (add)
 			{
 				ThisNick = find_nicklist_in_channellist (person, *channel, 0);
-				if (!(new = (BanList *) find_in_list ((List **) & (*channel)->bans, person, 0)) || my_stricmp (person, new->ban))
+				if (!(new = (BanList *) find_in_list ((struct list **) & (*channel)->bans, person, 0)) || my_stricmp (person, new->ban))
 				{
 					new = (BanList *) new_malloc (sizeof (BanList));
 					malloc_strcpy (&new->ban, person);
-					add_to_list ((List **) & (*channel)->bans, (List *) new);
+					add_to_list ((struct list **) & (*channel)->bans, (struct list *) new);
 				}
 				new->sent_unban = 0;
 				if (!new->setby)
@@ -1047,7 +1047,7 @@ decifer_mode (char *from, register char *mode_string, ChannelList ** channel, un
 			}
 			else
 			{
-				if ((new = (BanList *) remove_from_list ((List **) & (*channel)->bans, person)))
+				if ((new = (BanList *) remove_from_list ((struct list **) & (*channel)->bans, person)))
 				{
 					new_free (&new->setby);
 					new_free (&new->ban);
@@ -1575,7 +1575,7 @@ fetch_userhost (int server, char *nick)
    for (tmp = channel_list; tmp; tmp = tmp->next)
    {
    if ((tmp->server == server) && 
-   ((user = (NickList *)find_in_list((List **)&tmp->nicks, nick, 0))))
+   ((user = (NickList *)find_in_list((struct list **)&tmp->nicks, nick, 0))))
    return user->userhost;
    }
  */

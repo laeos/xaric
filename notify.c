@@ -78,7 +78,7 @@ cmd_notify (struct command *cmd, char *args)
 				{
 					for (servnum = 0; servnum < number_of_servers; servnum++)
 					{
-						if ((new = (NotifyList *) remove_from_list ((List **) & (server_list[servnum].notify_list), nick)))
+						if ((new = (NotifyList *) remove_from_list ((struct list **) & (server_list[servnum].notify_list), nick)))
 						{
 							new_free (&(new->nick));
 							new_free (&(new->host));
@@ -131,7 +131,7 @@ cmd_notify (struct command *cmd, char *args)
 					{
 						for (servnum = 0; servnum < number_of_servers; servnum++)
 						{
-							if ((new = (NotifyList *) remove_from_list ((List **) & server_list[servnum].notify_list, nick)) != NULL)
+							if ((new = (NotifyList *) remove_from_list ((struct list **) & server_list[servnum].notify_list, nick)) != NULL)
 							{
 								new_free (&(new->nick));
 								new_free (&(new->user));
@@ -141,7 +141,7 @@ cmd_notify (struct command *cmd, char *args)
 							new = (NotifyList *) new_malloc (sizeof (NotifyList));
 							new->nick = m_strdup (nick);
 							new->added = time (NULL);
-							add_to_list ((List **) & server_list[servnum].notify_list, (List *) new);
+							add_to_list ((struct list **) & server_list[servnum].notify_list, (struct list *) new);
 						}
 						bitchsay ("%s added to the notification list", nick);
 					}
@@ -247,7 +247,7 @@ notify_mark (char *nick, char *user, char *host, int flag)
 	if (host && strcmp (host, "<UNKNOWN>"))
 		host1 = host;
 
-	if ((tmp = (NotifyList *) list_lookup ((List **) & server_list[from_server].notify_list, nick, !USE_WILDCARDS, !REMOVE_FROM_LIST)) != NULL)
+	if ((tmp = (NotifyList *) list_lookup ((struct list **) & server_list[from_server].notify_list, nick, !USE_WILDCARDS, !REMOVE_FROM_LIST)) != NULL)
 	{
 		if (flag)
 		{
@@ -365,7 +365,7 @@ make_notify_list (int servnum)
 		new->host = m_strdup (tmp->host);
 		new->user = m_strdup (tmp->user);
 		new->flag = 0;
-		add_to_list ((List **) & server_list[servnum].notify_list, (List *) new);
+		add_to_list ((struct list **) & server_list[servnum].notify_list, (struct list *) new);
 	}
 	do_serv_notify (servnum);
 }

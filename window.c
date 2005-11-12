@@ -1364,7 +1364,7 @@ set_query_nick (char *nick, char *host, char *cmd)
 				continue;
 			if ((ptr = (char *) strchr (lnik, ',')) != NULL)
 				*(ptr++) = 0;
-			if ((tmp = (NickList *) remove_from_list ((List **) & (curr_scr_win->nicks), lnik)) != NULL) {
+			if ((tmp = (NickList *) remove_from_list ((struct list **) & (curr_scr_win->nicks), lnik)) != NULL) {
 				new_free (&tmp->nick);
 				new_free (&tmp->host);	/* CDE why was this not done */
 				new_free ((char **) &tmp);
@@ -1388,7 +1388,7 @@ set_query_nick (char *nick, char *host, char *cmd)
 			tmp->nick = NULL;
 			malloc_strcpy (&tmp->nick, nick);
 			malloc_strcpy (&tmp->host, host);
-			add_to_list ((List **) & (curr_scr_win->nicks), (List *) tmp);
+			add_to_list ((struct list **) & (curr_scr_win->nicks), (struct list *) tmp);
 			nick = ptr;
 		}
 	}
@@ -1994,11 +1994,11 @@ window_add (Window * window, char **args, char *usage)
 		while (arg) {
 			if ((ptr = strchr (arg, ',')))
 				*ptr++ = 0;
-			if (!find_in_list ((List **) & window->nicks, arg, !USE_WILDCARDS)) {
+			if (!find_in_list ((struct list **) & window->nicks, arg, !USE_WILDCARDS)) {
 				say ("Added %s to window name list", arg);
 				new = (NickList *) new_malloc (sizeof (NickList));
 				new->nick = m_strdup (arg);
-				add_to_list ((List **) & (window->nicks), (List *) new);
+				add_to_list ((struct list **) & (window->nicks), (struct list *) new);
 			} else
 				say ("%s already on window name list", arg);
 
@@ -2651,7 +2651,7 @@ window_remove (Window * window, char **args, char *usage)
 			if ((ptr = strchr (arg, ',')) != NULL)
 				*ptr++ = 0;
 
-			if ((new = (NickList *) remove_from_list ((List **) & (window->nicks), arg))) {
+			if ((new = (NickList *) remove_from_list ((struct list **) & (window->nicks), arg))) {
 				say ("Removed %s from window name list", new->nick);
 				new_free (&new->nick);
 				new_free ((char **) &new);

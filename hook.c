@@ -256,17 +256,17 @@ add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int 
 	char buf[4];
 
 	sprintf (buf, "%3.3u", numeric);
-	if ((entry = (NumericList *) find_in_list ((List **) & numeric_list, buf, 0)) ==
+	if ((entry = (NumericList *) find_in_list ((struct list **) & numeric_list, buf, 0)) ==
 	    NULL)
 	{
 		entry = (NumericList *) new_malloc (sizeof (NumericList));
 		memset (entry, 0, sizeof (NumericList));
 		malloc_strcpy (&(entry->name), buf);
-		add_to_list ((List **) & numeric_list, (List *) entry);
+		add_to_list ((struct list **) & numeric_list, (struct list *) entry);
 	}
 
 	setup_struct ((server == -1) ? -1 : (server & ~HS_NOGENERIC), sernum - 1, sernum, 0);
-	if ((new = (Hook *) remove_from_list_ext ((List **) & (entry->list), nick, (int (*)(List *, char *)) Add_Remove_Check)) != NULL)
+	if ((new = (Hook *) remove_from_list_ext ((struct list **) & (entry->list), nick, (int (*)(struct list *, char *)) Add_Remove_Check)) != NULL)
 	{
 		new->not = 1;
 		new_free (&(new->nick));
@@ -283,7 +283,7 @@ add_numeric_hook (int numeric, char *nick, char *stuff, int noisy, int not, int 
 	malloc_strcpy (&new->nick, nick);
 	malloc_strcpy (&new->stuff, stuff);
 	upper (new->nick);
-	add_to_list_ext ((List **) & (entry->list), (List *) new, (int (*)(List *, List *)) Add_Remove_Check);
+	add_to_list_ext ((struct list **) & (entry->list), (struct list *) new, (int (*)(struct list *, struct list *)) Add_Remove_Check);
 }
 
 /*
@@ -303,7 +303,7 @@ add_hook (int which, char *nick, char *stuff, int noisy, int not, int server, in
 		return;
 	}
 	setup_struct ((server == -1) ? -1 : (server & ~HS_NOGENERIC), sernum - 1, sernum, 0);
-	if ((new = (Hook *) remove_from_list_ext ((List **) & (hook_functions[which].list), nick, (int (*)(List *, char *)) Add_Remove_Check)) != NULL)
+	if ((new = (Hook *) remove_from_list_ext ((struct list **) & (hook_functions[which].list), nick, (int (*)(struct list *, char *)) Add_Remove_Check)) != NULL)
 	{
 		new->not = 1;
 		new_free (&(new->nick));
@@ -320,7 +320,7 @@ add_hook (int which, char *nick, char *stuff, int noisy, int not, int server, in
 	malloc_strcpy (&new->nick, nick);
 	malloc_strcpy (&new->stuff, stuff);
 	upper (new->nick);
-	add_to_list_ext ((List **) & (hook_functions[which].list), (List *) new, (int (*)(List *, List *)) Add_Remove_Check);
+	add_to_list_ext ((struct list **) & (hook_functions[which].list), (struct list *) new, (int (*)(struct list *, struct list *)) Add_Remove_Check);
 }
 
 /* show_hook shows a single hook */
@@ -386,7 +386,7 @@ show_numeric_list (int numeric)
 	if (numeric)
 	{
 		sprintf (buf, "%3.3u", numeric);
-		if ((tmp = (NumericList *) find_in_list ((List **) & numeric_list, buf, 0))
+		if ((tmp = (NumericList *) find_in_list ((struct list **) & numeric_list, buf, 0))
 		    != NULL)
 		{
 			for (list = tmp->list; list; list = list->next, cnt++)
@@ -459,7 +459,7 @@ do_hook (int which, char *format,...)
 		char foo[10];
 
 		sprintf (foo, "%3.3u", -which);
-		if ((hook = (NumericList *) find_in_list ((List **) & numeric_list, foo, 0)) != NULL)
+		if ((hook = (NumericList *) find_in_list ((struct list **) & numeric_list, foo, 0)) != NULL)
 		{
 			name = hook->name;
 			list = &hook->list;
@@ -599,12 +599,12 @@ remove_numeric_hook (int numeric, char *nick, int server, int sernum, int quiet)
 	char buf[5];
 
 	sprintf (buf, "%3.3u", numeric);
-	if ((hook = (NumericList *) find_in_list ((List **) & numeric_list, buf, 0)) != NULL)
+	if ((hook = (NumericList *) find_in_list ((struct list **) & numeric_list, buf, 0)) != NULL)
 	{
 		if (nick)
 		{
 			setup_struct ((server == -1) ? -1 : (server & ~HS_NOGENERIC), sernum - 1, sernum, 0);
-			if ((tmp = (Hook *) remove_from_list ((List **) & (hook->list), nick)) != NULL)
+			if ((tmp = (Hook *) remove_from_list ((struct list **) & (hook->list), nick)) != NULL)
 			{
 				if (!quiet)
 					say ("%c%s%c removed from %s list",
@@ -616,7 +616,7 @@ remove_numeric_hook (int numeric, char *nick, int server, int sernum, int quiet)
 				new_free ((char **) &tmp);
 				if (hook->list == NULL)
 				{
-					if ((hook = (NumericList *) remove_from_list ((List **) & numeric_list, buf)) != NULL)
+					if ((hook = (NumericList *) remove_from_list ((struct list **) & numeric_list, buf)) != NULL)
 					{
 						new_free (&(hook->name));
 						new_free ((char **) &hook);
@@ -627,7 +627,7 @@ remove_numeric_hook (int numeric, char *nick, int server, int sernum, int quiet)
 		}
 		else
 		{
-			remove_from_list ((List **) & numeric_list, buf);
+			remove_from_list ((struct list **) & numeric_list, buf);
 			for (tmp = hook->list; tmp; tmp = next)
 			{
 				next = tmp->next;
@@ -681,8 +681,8 @@ remove_hook (int which, char *nick, int server, int sernum, int quiet)
 		setup_struct ((server == -1) ? -1 : (server & ~HS_NOGENERIC), sernum - 1, sernum, 0);
 
 		if ((tmp = (Hook *) remove_from_list_ext (
-			     (List **) & (hook_functions[which].list), nick,
-		       (int (*)(List *, char *)) Add_Remove_Check)) != NULL)
+			     (struct list **) & (hook_functions[which].list), nick,
+		       (int (*)(struct list *, char *)) Add_Remove_Check)) != NULL)
 		{
 			if (!quiet)
 				say ("%c%s%c removed from %s list",

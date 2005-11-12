@@ -57,11 +57,11 @@ add_channel_grep (char *channel, char *what, int flag)
 			*ptr = '\0';
 
 		chan = make_channel (channel);
-		if (!(new = (Ignore *) list_lookup ((List **) & ignored_nicks, chan, !USE_WILDCARDS, !REMOVE_FROM_LIST)))
+		if (!(new = (Ignore *) list_lookup ((struct list **) & ignored_nicks, chan, !USE_WILDCARDS, !REMOVE_FROM_LIST)))
 		{
 			Ignore *tmp, *old;
 			char *s;
-			if ((new = (Ignore *) remove_from_list ((List **) & ignored_nicks, channel)) != NULL)
+			if ((new = (Ignore *) remove_from_list ((struct list **) & ignored_nicks, channel)) != NULL)
 			{
 				new_free (&(new->nick));
 				for (tmp = new->except; tmp; tmp = old)
@@ -84,9 +84,9 @@ add_channel_grep (char *channel, char *what, int flag)
 			{
 				tmp = (Ignore *) new_malloc (sizeof (Ignore));
 				tmp->nick = m_strdup (s);
-				add_to_list ((List **) & new->looking, (List *) tmp);
+				add_to_list ((struct list **) & new->looking, (struct list *) tmp);
 			}
-			add_to_list ((List **) & ignored_nicks, (List *) new);
+			add_to_list ((struct list **) & ignored_nicks, (struct list *) new);
 			new->cgrep = flag;
 		}
 		if (ptr)
@@ -124,7 +124,7 @@ ignore_nickname (char *nick, long type, int flag)
 		{
 			new_nick = is_channel (nick) ? m_strdup (nick) : cut_n_fix_glob (nick);
 
-			if (!(new = (Ignore *) list_lookup ((List **) & ignored_nicks, new_nick, !USE_WILDCARDS, !REMOVE_FROM_LIST)))
+			if (!(new = (Ignore *) list_lookup ((struct list **) & ignored_nicks, new_nick, !USE_WILDCARDS, !REMOVE_FROM_LIST)))
 			{
 				if (flag == IGNORE_REMOVE)
 				{
@@ -136,7 +136,7 @@ ignore_nickname (char *nick, long type, int flag)
 				}
 				else
 				{
-					if ((new = (Ignore *) remove_from_list ((List **) & ignored_nicks, nick)) != NULL)
+					if ((new = (Ignore *) remove_from_list ((struct list **) & ignored_nicks, nick)) != NULL)
 					{
 						Ignore *tmp, *old;
 						new_free (&(new->nick));
@@ -157,7 +157,7 @@ ignore_nickname (char *nick, long type, int flag)
 					}
 					new = (Ignore *) new_malloc (sizeof (Ignore));
 					new->nick = new_nick;
-					add_to_list ((List **) & ignored_nicks, (List *) new);
+					add_to_list ((struct list **) & ignored_nicks, (struct list *) new);
 				}
 				for (newc = ignored_nicks, count = 1; newc; newc = newc->next, count++)
 					newc->num = count;
@@ -290,7 +290,7 @@ remove_ignore (char *nick)
 	/*
 	 * Look for an exact match first.
 	 */
-	if ((tmp = (Ignore *) list_lookup ((List **) & ignored_nicks, new_nick, !USE_WILDCARDS, REMOVE_FROM_LIST)) != NULL)
+	if ((tmp = (Ignore *) list_lookup ((struct list **) & ignored_nicks, new_nick, !USE_WILDCARDS, REMOVE_FROM_LIST)) != NULL)
 	{
 		say ("%s removed from ignorance list", tmp->nick);
 		new_free (&(tmp->nick));
@@ -314,7 +314,7 @@ remove_ignore (char *nick)
 	 * Otherwise clear everything that matches.
 	 */
 	else
-		while ((tmp = (Ignore *) list_lookup ((List **) & ignored_nicks, new_nick, USE_WILDCARDS, REMOVE_FROM_LIST)) != NULL)
+		while ((tmp = (Ignore *) list_lookup ((struct list **) & ignored_nicks, new_nick, USE_WILDCARDS, REMOVE_FROM_LIST)) != NULL)
 		{
 			say ("%s removed from ignorance list", tmp->nick);
 			new_free (&(tmp->nick));
@@ -355,7 +355,7 @@ is_ignored (char *nick, long type)
 
 	if (ignored_nicks)
 	{
-		if ((tmp = (Ignore *) list_lookup ((List **) & ignored_nicks, nick, USE_WILDCARDS, !REMOVE_FROM_LIST)) != NULL)
+		if ((tmp = (Ignore *) list_lookup ((struct list **) & ignored_nicks, nick, USE_WILDCARDS, !REMOVE_FROM_LIST)) != NULL)
 		{
 			if (tmp->dont & type)
 				return (DONT_IGNORE);
@@ -377,7 +377,7 @@ check_is_ignored (char *nick)
 
 	if (ignored_nicks)
 	{
-		if ((tmp = (Ignore *) list_lookup ((List **) & ignored_nicks, nick, USE_WILDCARDS, !REMOVE_FROM_LIST)) != NULL)
+		if ((tmp = (Ignore *) list_lookup ((struct list **) & ignored_nicks, nick, USE_WILDCARDS, !REMOVE_FROM_LIST)) != NULL)
 			return 1;
 	}
 	return 0;
@@ -626,11 +626,11 @@ ignore_exception (Ignore * old, char *args)
 {
 	Ignore *new = NULL;
 	int flag = 0;
-	if (args && !(new = (Ignore *) list_lookup ((List **) & old->except, args, !USE_WILDCARDS, !REMOVE_FROM_LIST)))
+	if (args && !(new = (Ignore *) list_lookup ((struct list **) & old->except, args, !USE_WILDCARDS, !REMOVE_FROM_LIST)))
 	{
 		new = new_malloc (sizeof (Ignore));
 		malloc_strcpy (&new->nick, args);
-		add_to_list ((List **) & old->except, (List *) new);
+		add_to_list ((struct list **) & old->except, (struct list *) new);
 		flag = DONT_IGNORE;
 		bitchsay (" EXCEPT %s", new->nick);
 	}
@@ -761,9 +761,9 @@ check_ignore (char *nick, char *userhost, char *channel, long type, char *str)
 
 	if (ignored_nicks)
 	{
-		if ((tmp = (Ignore *) list_lookup ((List **) & ignored_nicks, nickuserhost, USE_WILDCARDS, !REMOVE_FROM_LIST)))
+		if ((tmp = (Ignore *) list_lookup ((struct list **) & ignored_nicks, nickuserhost, USE_WILDCARDS, !REMOVE_FROM_LIST)))
 		{
-			if (tmp->except && list_lookup ((List **) & tmp->except, nickuserhost, USE_WILDCARDS, !REMOVE_FROM_LIST))
+			if (tmp->except && list_lookup ((struct list **) & tmp->except, nickuserhost, USE_WILDCARDS, !REMOVE_FROM_LIST))
 			{
 				new_free (&nickuserhost);
 				return (DONT_IGNORE);
@@ -778,7 +778,7 @@ check_ignore (char *nick, char *userhost, char *channel, long type, char *str)
 				return (HIGHLIGHTED);
 		}
 		new_free (&nickuserhost);
-		if (channel && is_channel (channel) && (tmp = (Ignore *) list_lookup ((List **) & ignored_nicks, channel, USE_WILDCARDS, !REMOVE_FROM_LIST)))
+		if (channel && is_channel (channel) && (tmp = (Ignore *) list_lookup ((struct list **) & ignored_nicks, channel, USE_WILDCARDS, !REMOVE_FROM_LIST)))
 		{
 			if (tmp->dont & type)
 				return (DONT_IGNORE);

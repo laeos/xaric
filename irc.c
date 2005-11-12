@@ -65,7 +65,6 @@
 #include "ircterm.h"
 #include "commands.h"
 #include "tcommand.h"
-#include "xaric_version.h"
 
 
 /** Global Variables **/
@@ -144,7 +143,7 @@ startup_message (void)
 	put_it (empty_str);
 
 	put_fmt_str("%g***%n", NULL);
-	put_fmt_str("%g***%C $0-", "%s", xversion.v_tex);
+	put_fmt_str("%g***%C $0-", "%s", PACKAGE_STRING);
 	put_fmt_str("%g***%n", NULL);
 	put_fmt_str("%g***%n Xaric is free software, covered by the GNU General Public License,", NULL);
 	put_fmt_str("%g***%n and you are welcome to change it and/or distribute copies of it", NULL);
@@ -205,7 +204,7 @@ parse_args (int argc, char *argv[])
 
 		switch(c) {
 			case 'v': /* print version */
-				puts(xversion.v_tex);
+				puts(PACKAGE_STRING);
 				putchar('\n');
 				exit (0);
 

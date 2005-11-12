@@ -31,8 +31,6 @@
 #include "hash2.h"
 #include "fset.h"
 
-#include "xaric_version.h"
-
 #define MY_BUFFER 150
 
 extern time_t start_time;
@@ -966,7 +964,7 @@ status_version (Window * window)
 	if ((connected_to_server) && !get_int_var (SHOW_STATUS_ALL_VAR)
 	    && (window->screen->current_window != window))
 		return (empty_str);
-	return ((char *) xversion.v_short);
+	return ((char *) PACKAGE_VERSION);
 }
 
 static char *

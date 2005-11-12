@@ -1,4 +1,4 @@
-/* include/config.h.in.  Generated from configure.in by autoheader.  */
+/* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
@@ -177,9 +177,6 @@
 /* Defined if your system has IPv6 support. */
 #undef IPV6
 
-/* Define to disable assert checking. */
-#undef NDEBUG
-
 /* Defined if system has getenv(). */
 #undef NEED_GETENV
 
@@ -188,6 +185,9 @@
 
 /* Defined if struct linger is missing. */
 #undef NO_STRUCT_LINGER
+
+/* Name of package */
+#undef PACKAGE
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
@@ -236,8 +236,8 @@
 /* Defined if we are using curses library. */
 #undef USING_CURSES
 
-/* Define to enable some debug code */
-#undef XARIC_DEBUG
+/* Version number of package */
+#undef VERSION
 
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.

@@ -1,6 +1,6 @@
 #
 # configure.in - autoconf source for xaric. 
-# Copyright (c) 2000,2001 Rex Feany (laeos@xaric.org)
+# Copyright (c) 2000-2005 Rex Feany (laeos@xaric.org)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,16 +23,10 @@ dnl ---------------------------------------------------------------
 dnl autoconf prolog
 dnl ---------------------------------------------------------------
 
-AC_INIT
-AC_CONFIG_SRCDIR([source/version.c])dnl
-AC_PREREQ(2.50)dnl
-
-AC_HEADLINE(dnl
-Xaric, IRC Client, dnl
-XARIC_VERSION, source/version.c, dnl
-[Copyright (c) 1999-2001 Rex G. Feany <laeos@laeos.net>])
-
-AC_CONFIG_HEADER(include/config.h)dnl
+AC_INIT(Xaric, 0.13.0, support@xaric.org, xaric)
+AM_INIT_AUTOMAKE
+AC_CONFIG_SRCDIR([irc.c])
+AM_CONFIG_HEADER(config.h)
 AC_PREFIX_DEFAULT(/usr/local)
 
 CFLAGS="$CFLAGS -D_GNU_SOURCE"
@@ -41,73 +35,26 @@ dnl ----------------------------------------------------------------
 dnl build tools
 dnl ----------------------------------------------------------------
 
-AC_MSG_PART(Build Tools)
-
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
-AC_PROG_MAKE_SET([])
-AC_SANITY_CHECK
+AC_PROG_MAKE_SET
 AC_ISC_POSIX
 AC_AIX
-
-echo ""
-AC_PLATFORM(PLATFORM)
-echo ""
-
-AC_CHECK_DEBUGGING
-AC_CHECK_PROFILING
-AC_CHECK_OPTIMIZE
-
-AC_MSG_CHECKING(if we should turn on assert checking)
-AC_ARG_ENABLE(assert,dnl
-[  --disable-assert          enable runtime assertion checking (default=yes)],
-ASSERT="$enableval",
-if test ".$ASSERT" = .; then
-    ASSERT=yes
-fi
-)dnl
-
-if test ".$ASSERT" = .yes; then
-       AC_MSG_RESULT(yeah)
-else
-       AC_DEFINE(NDEBUG,1,Define to disable assert checking.)
-       AC_MSG_RESULT(nope)
-fi
-
-AC_MSG_CHECKING(if we should link against efence)
-AC_ARG_ENABLE(efence,dnl
-[  --enable-efence	     link against electric fence library (default=no)],
-EFENCE="$enableval",
-if test ".$EFENCE" = .; then
-    EFENCE=
-fi
-)dnl
-
-if test ".$EFENCE" = .yes; then
-       AC_MSG_RESULT(yeah)
-else
-       AC_MSG_RESULT(nope)
-fi
-AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------
 dnl Stuff we need
 dnl ----------------------------------------------------------
 
-AC_MSG_PART(Mandatory stuff)
-
-dnl # check for standard headers
 AC_HEADER_STDC
 AC_FUNC_ALLOCA
+AC_HEADER_TIME
 
 AC_CHECK_HEADERS(
-	stdio.h stdlib.h stdarg.h string.h signal.h unistd.h fcntl.h dnl
-	ctype.h errno.h sys/types.h sys/time.h sys/wait.h sys/socket.h dnl
-	dirent.h pwd.h sys/stat.h assert.h getopt.h netinet/in.h net/if.h dnl
-	netdb.h sys/ioctl.h)
-
-AC_HEADER_TIME
+ 	stdio.h stdlib.h stdarg.h string.h signal.h unistd.h fcntl.h dnl
+ 	ctype.h errno.h sys/types.h sys/time.h sys/wait.h sys/socket.h dnl
+ 	dirent.h pwd.h sys/stat.h assert.h getopt.h netinet/in.h net/if.h dnl
+ 	netdb.h sys/ioctl.h)
 
 AC_CHECK_FUNC(select, ,
   AC_CHECK_LIB(socket, select, LIBS="$LIBS -lsocket",
@@ -117,25 +64,9 @@ AC_CHECK_FUNC(select, ,
           AC_CHECK_LIB(net, select, LIBS="$LIBS -lnet",
             AC_MSG_WARN(i can not find select.  you might need to help me)))))))
 
-AC_CHECK_FUNCTIONS(sigaction memset strncasecmp snprintf vsnprintf getopt_long)
-
-AC_BEGIN_DECISION([mandatory system headers and functions])
-AC_IFALLYES(dnl
-    header:stdio.h header:stdlib.h header:stdarg.h header:string.h dnl
-    header:signal.h header:unistd.h header:fcntl.h header:errno.h dnl
-    header:ctype.h header:sys/types.h header:sys/time.h header:sys/wait.h dnl
-    header:sys/socket.h header:sys/stat.h header:sys/ioctl.h dnl
-    header:netdb.h header:net/if.h header:netinet/in.h dnl
-    header:dirent.h func:vsnprintf func:snprintf dnl
-    func:select func:sigaction func:memset func:strncasecmp func:snprintf)dnl
-AC_DECIDE(fine, [all fine])
-AC_END_DECISION
-AC_CACHE_SAVE
-
 dnl ----------------------------------------------------------
 dnl System services
 dnl ----------------------------------------------------------
-AC_MSG_PART(System Services)
 
 AC_MSG_CHECKING(for IPv4 support)
 AC_CACHE_VAL(ac_cv_ipv4,
@@ -196,13 +127,41 @@ else
       CFLAGS="$CFLAGS -D_REENTRANT"
    fi
 fi
-AC_CACHE_SAVE
+
+dnl ----------------------------------------------------------
+dnl Extra libraries
+dnl ----------------------------------------------------------
+
+AC_MSG_CHECKING(for svr4's /usr/ccs/lib)
+if test -d /usr/ccs/lib; then
+	LIBS="-L/usr/ccs/lib $LIBS"
+	AC_MSG_RESULT(found it!)
+else
+	AC_MSG_RESULT(no)
+fi
+
+if test -z "$libsocket"; then
+	AC_CHECK_LIB(socket, socket, LIBS="$LIBS -lsocket",)
+fi
+
+dnl this is for isc.  need the nsl_s library as well.
+if test -z "$libinet"; then
+	AC_CHECK_LIB(inet, socket, libnsl=1; LIBS="$LIBS -linet -lnsl_s",)
+fi
+
+if test -z "$libnsl"; then
+	AC_CHECK_LIB(nsl, gethostname, LIBS="$LIBS -lnsl",)
+fi
+
+AC_CHECK_LIB(sun, getpwnam, LIBS="$LIBS -lsun",)
+AC_CHECK_LIB(dgc, inet_addr, LIBS="$LIBS -ldgc",)
+AC_CHECK_LIB(resolv, gethostbyname, LIBS="$LIBS -lresolv",)
+AC_CHECK_LIB(gnumalloc, malloc, LIBS="$LIBS -lgnumalloc",
+AC_CHECK_LIB(bsdmalloc, malloc, LIBS="$LIBS -lbsdmalloc",))
 
 dnl ----------------------------------------------------------
 dnl Data Types
 dnl ----------------------------------------------------------
-
-AC_MSG_PART(Types)
 
 AC_TYPE_SIGNAL
 AC_TYPE_MODE_T
@@ -256,100 +215,10 @@ else
 		AC_MSG_ERROR([i need a 32 bit type!])
 	fi
 fi
-AC_CACHE_SAVE
-
-dnl ----------------------------------------------------------
-dnl Extra libraries
-dnl ----------------------------------------------------------
-
-AC_MSG_PART(Libraries)
-
-AC_MSG_CHECKING(for svr4's /usr/ccs/lib)
-if test -d /usr/ccs/lib; then
-	LIBS="-L/usr/ccs/lib $LIBS"
-	AC_MSG_RESULT(found it!)
-else
-	AC_MSG_RESULT(no)
-fi
-
-if test -z "$libsocket"; then
-	AC_CHECK_LIB(socket, socket, LIBS="$LIBS -lsocket",)
-fi
-
-dnl this is for isc.  need the nsl_s library as well.
-if test -z "$libinet"; then
-	AC_CHECK_LIB(inet, socket, libnsl=1; LIBS="$LIBS -linet -lnsl_s",)
-fi
-
-if test -z "$libnsl"; then
-	AC_CHECK_LIB(nsl, gethostname, LIBS="$LIBS -lnsl",)
-fi
-
-if test ".$EFENCE" = .yes; then
-	AC_CHECK_LIB(efence, malloc, LIBS="$LIBS -lefence", )
-fi
-
-AC_CHECK_LIB(sun, getpwnam, LIBS="$LIBS -lsun",)
-AC_CHECK_LIB(dgc, inet_addr, LIBS="$LIBS -ldgc",)
-AC_CHECK_LIB(resolv, gethostbyname, LIBS="$LIBS -lresolv",)
-AC_CHECK_LIB(gnumalloc, malloc, LIBS="$LIBS -lgnumalloc",
-AC_CHECK_LIB(bsdmalloc, malloc, LIBS="$LIBS -lbsdmalloc",))
-
-dnl Not yet!
-dnl AC_PATH_REP(0.13)
-AC_SUBST(REP_CFLAGS)
-AC_SUBST(REP_LIBS)
-
-dnl ----------------------------------------------------------
-dnl termcap or curses
-dnl ----------------------------------------------------------
-
-if test x$hpux = x1 -o x$aix = x1
-then
-	LIBS="-lcurses $LIBS"
-	AC_DEFINE(USING_CURSES, 1, Defined if we are using curses library.)
-else
-  olibs="$LIBS"
-  AC_CHECK_LIB(termcap, tgetent, LIBS="-ltermcap $olibs",
-    AC_CHECK_LIB(termlib, tgetent, LIBS="-ltermlib $olibs",
-      AC_CHECK_LIB(curses, tgetent, LIBS="-lcurses $olibs",
-        AC_CHECK_LIB(xtermcap, tgetent, LIBS="-lxtermcap $olibs",
-          AC_MSG_ERROR([i can not find tgetent.  you need to help me])))))
-fi
-
-AC_CACHE_SAVE
-
-dnl ----------------------------------------------------------
-dnl things we need that we have replacements for
-dnl ----------------------------------------------------------
-
-AC_MSG_PART(Replaceable)
-needaddr=0
-
-AC_CHECK_FUNC(inet_ntop,, EXTRA_SRC="$EXTRA_SRC inet_ntop.c")
-AC_CHECK_FUNC(inet_pton,, EXTRA_SRC="$EXTRA_SRC inet_pton.c")
-AC_CHECK_FUNC(strtoul,,   EXTRA_SRC="$EXTRA_SRC strtoul.c")
-AC_CHECK_FUNC(setenv,,    EXTRA_SRC="$EXTRA_SRC setenv.c")
-
-AC_CHECK_FUNC(freeaddrinfo, AC_DEFINE(HAVE_FREEADDRINFO, 1, Defined if system has freeaddrinfo().), EXTRA_SRC="$EXTRA_SRC freeaddrinfo.c")
-AC_CHECK_FUNC(gai_strerror, AC_DEFINE(HAVE_GAI_STRERROR, 1, Defined if system has gai_strerror().), EXTRA_SRC="$EXTRA_SRC gai_strerror.c")
-AC_CHECK_FUNC(getaddrinfo, AC_DEFINE(HAVE_GETADDRINFO, 1, Defined if system has getaddrinfo().),  needaddr=1)
-AC_CHECK_FUNC(getnameinfo, AC_DEFINE(HAVE_GETNAMEINFO, 1, Defined if system has getnameinfo().),  EXTRA_SRC="$EXTRA_SRC getnameinfo.c gn_ipv46.c")
-
-if test "$needaddr" -eq "1" ; then
-	EXTRA_SRC="$EXTRA_SRC ga_aistruct.c ga_echeck.c"
-	EXTRA_SRC="$EXTRA_SRC ga_nsearch.c ga_serv.c" 
-	EXTRA_SRC="$EXTRA_SRC getaddrinfo.c ga_port.c"
-fi
-
-AC_SUBST(EXTRA_SRC)
-AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------
 dnl Random header files and functions
 dnl ----------------------------------------------------------
-
-AC_MSG_PART(other stuff)
 
 AC_CHECK_HEADERS(sys/ptem.h sys/select.h)
 AC_CHECK_HEADERS(sys/syslimits.h sys/twg_config.h sys/un.h)
@@ -364,34 +233,40 @@ AC_CHECK_FUNC(killpg, AC_DEFINE(HAVE_KILLPG, 1, Defined if system has killpg().)
 AC_CHECK_FUNC(putenv,, AC_DEFINE(NEED_PUTENV, 1, Defined if system has putenv().))
 AC_CHECK_FUNC(getenv,, AC_DEFINE(NEED_GETENV, 1, Defined if system has getenv().))
 
-
-
 AC_MSG_CHECKING(for struct linger)
 AC_EGREP_HEADER([struct( |	)*linger], sys/socket.h, AC_MSG_RESULT(yes), AC_DEFINE(NO_STRUCT_LINGER, 1, Defined if struct linger is missing.) AC_MSG_RESULT(no, ugh.))
 
-dnl ----------------------------------------------------------
-dnl sun_len in <sys/un.h>?
-dnl ----------------------------------------------------------
-
-AC_MSG_CHECKING(for sun_len in <sys/un.h>)
-AC_EGREP_CPP([sun_len], 
-[
-#include <sys/un.h>
-], AC_DEFINE(HAVE_SUN_LEN, 1, Defined if sockaddr_un has sun_len field.) AC_MSG_RESULT(yes), AC_MSG_RESULT(no))
-
 
 dnl ----------------------------------------------------------
-dnl
-dnl svr3's getpgrp() didnt take arguments.  BSD's did.
-dnl POSIX said that there wasnt any usefulness to giving arguments
-dnl to getpgrp(), so that was forbidden.  So svr4 made a new syscall
-dnl getpgid() to fill in this functionality gap (grrrr).  BSD still
-dnl doesnt have any way to do it, even though they were the ones that
-dnl originally wanted to have it around, but svr3 insisted not so. (grrr)
-dnl
+dnl things we need that we have replacements for
+dnl ----------------------------------------------------------
 
-AC_CHECK_FUNC(getpgid, AC_DEFINE(HAVE_GETPGID, 1, Defined if you have getpgid.),)
-AC_FUNC_GETPGRP
+needaddr=0
+
+AC_CHECK_FUNC(inet_ntop,, EXTRA_OBJS="$EXTRA_OBJS inet_ntop.o")
+AC_CHECK_FUNC(inet_pton,, EXTRA_OBJS="$EXTRA_OBJS inet_pton.o")
+AC_CHECK_FUNC(strtoul,,   EXTRA_OBJS="$EXTRA_OBJS strtoul.o")
+AC_CHECK_FUNC(setenv,,    EXTRA_OBJS="$EXTRA_OBJS setenv.o")
+
+AC_CHECK_FUNC(freeaddrinfo, AC_DEFINE(HAVE_FREEADDRINFO, 1, Defined if system has freeaddrinfo().), EXTRA_OBJS="$EXTRA_OBJS freeaddrinfo.o")
+AC_CHECK_FUNC(gai_strerror, AC_DEFINE(HAVE_GAI_STRERROR, 1, Defined if system has gai_strerror().), EXTRA_OBJS="$EXTRA_OBJS gai_strerror.o")
+AC_CHECK_FUNC(getaddrinfo, AC_DEFINE(HAVE_GETADDRINFO, 1, Defined if system has getaddrinfo().),  needaddr=1)
+AC_CHECK_FUNC(getnameinfo, AC_DEFINE(HAVE_GETNAMEINFO, 1, Defined if system has getnameinfo().),  EXTRA_OBJS="$EXTRA_OBJS getnameinfo.c gn_ipv46.o")
+
+if test "$needaddr" -eq "1" ; then
+	EXTRA_OBJS="$EXTRA_OBJS ga_aistruct.o ga_echeck.o"
+	EXTRA_OBJS="$EXTRA_OBJS ga_nsearch.o ga_serv.o" 
+	EXTRA_OBJS="$EXTRA_OBJS getaddrinfo.o ga_port.o"
+fi
+
+AC_SUBST(EXTRA_OBJS)
+
+dnl ----------------------------------------------------------
+dnl check for sys_errlist declaration
+dnl ----------------------------------------------------------
+
+AC_CHECK_FUNC(strerror, AC_DEFINE(HAVE_STRERROR, 1, Defined if strerror() exists.))
+AC_CHECK_DECL(sys_errlist, AC_DEFINE(SYS_ERRLIST_DECLARED, 1, Defined if sys_errlist is declared.))
 
 dnl ----------------------------------------------------------
 dnl Check for sys_siglist declaration
@@ -411,6 +286,47 @@ main()
   sys_siglist="1"
   AC_DEFINE(SYS_SIGLIST_DECLARED, 1, Defined if sys_siglist is declared.), 
   AC_MSG_RESULT(no), :)
+
+
+dnl ----------------------------------------------------------
+dnl termcap or curses
+dnl ----------------------------------------------------------
+
+if test x$hpux = x1 -o x$aix = x1
+then
+	LIBS="-lcurses $LIBS"
+	AC_DEFINE(USING_CURSES, 1, Defined if we are using curses library.)
+else
+  olibs="$LIBS"
+  AC_CHECK_LIB(termcap, tgetent, LIBS="-ltermcap $olibs",
+    AC_CHECK_LIB(termlib, tgetent, LIBS="-ltermlib $olibs",
+      AC_CHECK_LIB(curses, tgetent, LIBS="-lcurses $olibs",
+        AC_CHECK_LIB(xtermcap, tgetent, LIBS="-lxtermcap $olibs",
+          AC_MSG_ERROR([i can not find tgetent.  you need to help me])))))
+fi
+
+dnl ----------------------------------------------------------
+dnl sun_len in <sys/un.h>?
+dnl ----------------------------------------------------------
+
+AC_MSG_CHECKING(for sun_len in <sys/un.h>)
+AC_EGREP_CPP([sun_len], 
+[
+#include <sys/un.h>
+], AC_DEFINE(HAVE_SUN_LEN, 1, Defined if sockaddr_un has sun_len field.) AC_MSG_RESULT(yes), AC_MSG_RESULT(no))
+
+dnl ----------------------------------------------------------
+dnl
+dnl svr3's getpgrp() didnt take arguments.  BSD's did.
+dnl POSIX said that there wasnt any usefulness to giving arguments
+dnl to getpgrp(), so that was forbidden.  So svr4 made a new syscall
+dnl getpgid() to fill in this functionality gap (grrrr).  BSD still
+dnl doesnt have any way to do it, even though they were the ones that
+dnl originally wanted to have it around, but svr3 insisted not so. (grrr)
+dnl
+
+AC_CHECK_FUNC(getpgid, AC_DEFINE(HAVE_GETPGID, 1, Defined if you have getpgid.),)
+AC_FUNC_GETPGRP
 
 dnl ----------------------------------------------------------
 dnl Generate signal list
@@ -456,49 +372,24 @@ case $# in
 esac
 
 sig_name="ZERO $*"
-if test -f source/sig.inc; then
-  /bin/rm -f source/sig.inc
+if test -f sig.inc; then
+  /bin/rm -f sig.inc
 fi
-[echo $sig_name | sed -e 's/$/"};/' -e 's/ /", "/g' -e 's/^/char *sys_siglist[] = { "/' >> source/sig.inc]
+[echo $sig_name | sed -e 's/$/"};/' -e 's/ /", "/g' -e 's/^/char *sys_siglist[] = { "/' >> sig.inc]
 fi
-
-dnl ----------------------------------------------------------
-dnl check for sys_errlist declaration
-dnl ----------------------------------------------------------
-
-AC_CHECK_FUNC(strerror, AC_DEFINE(HAVE_STRERROR, 1, Defined if strerror() exists.),
-AC_MSG_CHECKING(for sys_errlist declaration)
-AC_TRY_RUN([
-#include <sys/types.h>
-#include <stdio.h>
-#include <errno.h>
-main()
-{
-  char *s = sys_errlist[0];
-  exit(0);
-}
-],
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(SYS_ERRLIST_DECLARED, 1, Defined if sys_errlist is declared.),
-  AC_MSG_RESULT(no), :))
-
-AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------
 dnl All done!
 dnl ----------------------------------------------------------
 
-AC_MSG_PART(Finished)
-
+AC_CACHE_SAVE
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_COMMANDS(include/stamp-h, [date > include/stamp-h])
-AC_CONFIG_COMMANDS(dirs, [mkdir -p source], [mkdir -p extra])
+AC_CONFIG_COMMANDS(stamp-h, [date > stamp-h])
 AC_OUTPUT
 
 echo ""
 echo "There we go! That didn't hurt, did it? You might want to"
-echo "look in include/config.h and see if there is anything"
+echo "look in config.h and see if there is anything"
 echo "you want to change, else you can just run make here..."
 echo "Good luck..."
 echo ""
-

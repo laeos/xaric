@@ -4,3 +4,4 @@
 aclocal
 autoheader
 autoconf
+automake

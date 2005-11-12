@@ -27,8 +27,6 @@
 #include "output.h"
 #include "ircterm.h"
 
-#include "xaric_version.h"
-
 
 /*
  * These are used by the malloc routines.  We actually ask for an int-size
@@ -1133,7 +1131,7 @@ ircpanic (char *format,...)
 	yell ("Please email laeos@ptw.com with the following message");
 
 	yell (" ");
-	yell ("Panic: [%s] %s", xversion.v_short, buffer);
+	yell ("Panic: [%s] %s", PACKAGE_VERSION, buffer);
 
 	irc_exit ("Xaric panic... Could it possibly be a bug?  Nahhhh...", NULL);
 }

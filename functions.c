@@ -36,8 +36,6 @@
 #include "ignore.h"
 #include "hash2.h"
 
-#include "xaric_version.h"
-
 #include <sys/stat.h>
 
 static char *alias_sent_nick (void);
@@ -194,7 +192,7 @@ alias_show_realname (void)
 static char *
 alias_version_str (void)
 {
-	return m_strdup (xversion.v_short);
+	return m_strdup (PACKAGE_VERSION);
 }
 static char *
 alias_invite (void)

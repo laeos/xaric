@@ -83,7 +83,7 @@ static int process_list_size = 0;
  */
 
 #ifndef SYS_SIGLIST_DECLARED
-#include "sig.inc"
+#  include "sig.inc"
 #endif
 
 /*

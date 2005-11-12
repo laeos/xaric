@@ -45,9 +45,6 @@
 #include "fset.h"
 #include "tcommand.h"
 
-#include "xaric_version.h"
-
-
 void split_CTCP (char *, char *, char *);
 extern char *mircansi (char *);
 extern time_t start_time;
@@ -335,7 +332,7 @@ CTCP_HANDLER (do_version)
 		the_unix = un.sysname;
 	}
 #endif
-	malloc_strcpy (&version_reply, stripansicodes (convert_output_format (get_fset_var (FORMAT_VERSION_FSET), "%s %s %s", xversion.v_short, the_unix, the_version)));
+	malloc_strcpy (&version_reply, stripansicodes (convert_output_format (get_fset_var (FORMAT_VERSION_FSET), "%s %s %s", PACKAGE_VERSION, the_unix, the_version)));
 	send_ctcp (CTCP_NOTICE, from, CTCP_VERSION, "%s (%s)", version_reply, get_string_var (CLIENTINFO_VAR));
 	new_free (&version_reply);
 	return NULL;

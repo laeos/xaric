@@ -73,10 +73,6 @@
 
 #include "tcommand.h"
 
-
-#include "xaric_version.h"
-
-
 /* recv_nick: the nickname of the last person to send you a privmsg */
 extern char *recv_nick;
 
@@ -126,7 +122,7 @@ cmd_about (struct command *cmd, char *args)
 	charset_ibmpc ();
 	put_it (empty_str);
 	put_it ("\t[36mX a r i c");
-	put_it ("\t[35mv%s brought to you by Laeos, Korndawg, and Hawky", xversion.v_short);
+	put_it ("\t[35mv%s brought to you by Laeos, Korndawg, and Hawky", PACKAGE_VERSION);
 	put_it ("\t[35m<http://www.laeos.net/xaric>");
 	put_it (empty_str);
 	charset_lat1 ();
@@ -1140,7 +1136,7 @@ cmd_quit (struct command *cmd, char *args)
 	else
 		Reason = get_signoffreason (get_server_nickname (from_server));
 	if (!Reason || !*Reason)
-		Reason = (char *) xversion.v_short;
+		Reason = (char *) PACKAGE_VERSION;
 
 	for (Client = ClientList; Client; Client = Client->next)
 	{
@@ -1791,7 +1787,7 @@ cmd_ircii_version (struct command *cmd, char *args)
 		send_to_server ("%s %s", cmd->name, host);
 	else
 	{
-		bitchsay ("Client: %s", xversion.v_short);
+		bitchsay ("Client: %s", PACKAGE_VERSION);
 		send_to_server ("%s", cmd->name);
 	}
 }

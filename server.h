@@ -62,7 +62,6 @@ struct server {
 	int	connected;		/* true if connection is assured */
 	int	write;			/* write descriptor */
 	int	read;			/* read descriptior */
-	pid_t	pid;			/* process id of server */
 	int	eof;			/* eof flag for server */
 	int	motd;			/* motd flag (used in notice.c) */
 	int	sent;			/* set if something has been sent,

@@ -132,7 +132,6 @@ close_server (int cs_index, char *message)
 			new_close (server_list[i].write);
 			if (server_list[i].write == server_list[i].read)
 			{
-				FD_CLR (server_list[i].read, &readables);
 				server_list[i].read = -1;
 			}
 			server_list[i].write = -1;
@@ -140,7 +139,6 @@ close_server (int cs_index, char *message)
 		if (server_list[i].read != -1)
 		{
 			new_close (server_list[i].read);
-			FD_CLR (server_list[i].read, &readables);
 			server_list[i].read = -1;
 		}
 	}
@@ -727,7 +725,6 @@ connect_to_server_direct (char *server_name, int port)
 	else
 		server_list[from_server].read = new_des;
 
-	FD_SET (new_des, &readables);
 	server_list[from_server].local_addr.s_addr = localaddr.sin_addr.s_addr;
 	server_list[from_server].operator = 0;
 	return (0);

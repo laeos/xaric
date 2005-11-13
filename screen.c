@@ -1168,7 +1168,6 @@ create_new_screen (void)
 	new->fdout = 1;
 	new->fpout = stdout;
 	new->fdin = 0;
-	FD_SET (0, &readables);
 	new->fpin = stdin;
 	new->alive = 1;
 	new->promptlist = NULL;
@@ -1190,7 +1189,6 @@ close_all_screen (void)
 	{
 		if (screen->alive && screen->fdin != 0)
 		{
-			FD_CLR (screen->fdin, &readables);
 			new_close (screen->fdin);
 		}
 	}

@@ -97,8 +97,6 @@ exec_close (int des)
 	if (des == -1)
 		return (-1);
 	new_close (des);
-	if (FD_ISSET (des, &readables))
-		FD_CLR (des, &readables);
 	return (-1);
 }
 
@@ -518,8 +516,6 @@ add_process (char *name, char *logical, int pid, int p_stdin, int p_stdout, int 
 			proc->server = curr_scr_win->server;
 			if (who)
 				malloc_strcpy (&(process_list[i]->who), who);
-			FD_SET (proc->p_stdout, &readables);
-			FD_SET (proc->p_stderr, &readables);
 
 			return;
 		}
@@ -547,11 +543,6 @@ add_process (char *name, char *logical, int pid, int p_stdin, int p_stdout, int 
 	proc->who = NULL;
 	if (who)
 		malloc_strcpy (&(proc->who), who);
-	FD_SET (proc->p_stdout, &readables);
-	FD_SET (proc->p_stderr, &readables);
-
-	return;
-
 }
 
 /*

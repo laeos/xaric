@@ -130,7 +130,6 @@ struct in_addr MyHostAddr;	/* The local machine address */
 struct in_addr LocalHostAddr;
 
 time_t idle_time = 0, start_time;
-fd_set readables, writables;
 
 
 /* Display the startup message */
@@ -732,9 +731,6 @@ io (const char *what)
 	/* SET UP TIMEOUTS USED IN SELECTING */
 /*      clock_timeout.tv_sec = time_to_next_minute(); */
 
-	rd = readables;
-	wd = writables;
-
 	FD_ZERO (&wd);
 	FD_ZERO (&rd);
 
@@ -872,13 +868,7 @@ main (int argc, char *argv[], char *envp[])
 		fprintf (stderr, "Woops I need a tty!\n");
 		exit (1);
 	}
-
-	FD_ZERO (&readables);
-	FD_ZERO (&writables);
-
 	xaric_init (argc, argv);
-
 	xaric_main ();
-
 	return retval;
 }

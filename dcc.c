@@ -301,12 +301,10 @@ dcc_erase (DCC_list * Element)
 			*Client = Element->next;
 			if (Element->write > -1)
 			{
-				FD_CLR (Element->write, &writables);
 				close (Element->write);
 			}
 			if (Element->read > -1)
 			{
-				FD_CLR (Element->read, &readables);
 				close (Element->read);
 			}
 			if (Element->file > -1)
@@ -549,7 +547,6 @@ dcc_open (DCC_list * Client)
 		/* BLAH! */
 		Client->remport = htons (Client->remport);
 		Client->read = Client->write;
-		FD_SET (Client->read, &readables);
 		Client->flags |= DCC_ACTIVE;
 		message_from (NULL, LOG_CRAP);
 		get_time (&Client->starttime);
@@ -602,7 +599,6 @@ dcc_open (DCC_list * Client)
 								     "%s %s %s", update_clock (GET_TIME), Type, user));
 			message_from (NULL, LOG_CRAP);
 		}
-		FD_SET (Client->read, &readables);
 		Client->starttime.tv_sec = Client->starttime.tv_usec = 0;
 		from_server = old_server;
 		return 2;
@@ -700,7 +696,6 @@ dcc_raw_listen (int port)
 		(void) set_lastlog_msg_level (lastlog_level);
 		return RetName;
 	}
-	FD_SET (Client->read, &readables);
 	set_socket_options (Client->read);
 	if (bind (Client->read, (struct sockaddr *) &locaddr, sizeof (locaddr)) == -1)
 	{
@@ -1251,12 +1246,9 @@ process_incoming_chat (DCC_list * Client)
 	{
 	    	size_t sra= sizeof (struct sockaddr_in);
 		Client->write = accept (Client->read, (struct sockaddr *) &remaddr, &sra);
-		FD_CLR (Client->read, &readables);
 		close (Client->read);
 		Client->read = -1;
-		if ((Client->read = Client->write) > 0)
-			FD_SET (Client->read, &readables);
-		else
+		if ((Client->read = Client->write) <= 0)
 		{
 			put_it ("%s", convert_output_format ("$G %RDCC error: accept() failed. punt!!", NULL, NULL));
 			Client->flags |= DCC_DELETE;
@@ -1391,7 +1383,6 @@ process_incoming_listen (DCC_list * Client)
 	NewClient = dcc_searchlist ((char *) Name, FdName, DCC_RAW, 1, NULL, NULL, 0);
 	get_time (&NewClient->starttime);
 	NewClient->read = NewClient->write = new_socket;
-	FD_SET (NewClient->read, &readables);
 	NewClient->remote = remaddr.sin_addr;
 	NewClient->remport = remaddr.sin_port;
 	NewClient->flags |= DCC_ACTIVE;
@@ -1516,15 +1507,9 @@ process_outgoing_file (DCC_list * Client, int readwaiting)
 				put_it ("%s", convert_output_format ("$G %RDCC%n reget starting at $0", "%d", Client->transfer_orders.byteoffset));
 		}
 
-		FD_CLR (Client->read, &readables);
 		close (Client->read);
 
-		if ((Client->read = Client->write) >= 0)
-		{
-			FD_SET (Client->read, &readables);
-			FD_SET (Client->write, &writables);
-		}
-		else
+		if ((Client->read = Client->write) < 0)
 		{
 			put_it ("%s", convert_output_format ("$G %RDCC error: accept() failed. punt!!", NULL, NULL));
 
@@ -1542,8 +1527,6 @@ process_outgoing_file (DCC_list * Client, int readwaiting)
 		if ((Client->file = open (Client->description, O_RDONLY)) == -1)
 		{
 			put_it ("%s", convert_output_format ("$G %RDCC%n Unable to open $0: $1-", "%s %s", Client->description, errno ? strerror (errno) : "Unknown Host"));
-			FD_CLR (Client->read, &readables);
-			FD_CLR (Client->write, &writables);
 			if (get_to_from (Type) != -1 && dcc_active_count)
 				dcc_active_count--;
 			close (Client->read);
@@ -2108,8 +2091,6 @@ dcc_close_client_num (unsigned int closenum)
 			{
 				if (to_from_idx != -1 && dcc_active_count)
 					dcc_active_count--;
-				if (Client->read > -1)
-					FD_CLR (Client->read, &readables);
 				close (Client->read);
 				if (Client->file)
 					close (Client->file);
@@ -2190,8 +2171,6 @@ dcc_close_type_all (char *typestr)
 			{
 				if (to_from_idx != -1 && dcc_active_count)
 					dcc_active_count--;
-				if (Client->read > -1)
-					FD_CLR (Client->read, &readables);
 				close (Client->read);
 				if (Client->file)
 					close (Client->file);
@@ -2232,7 +2211,6 @@ dcc_close_nick_all (char *nickstr)
 			{
 				if (to_from_idx != -1 && dcc_active_count)
 					dcc_active_count--;
-				FD_CLR (Client->read, &readables);
 				close (Client->read);
 				if (Client->file)
 					close (Client->file);
@@ -2276,7 +2254,6 @@ dcc_close_type_nick_all (char *typestr, char *nickstr)
 			{
 				if (to_from_idx != -1 && dcc_active_count)
 					dcc_active_count--;
-				FD_CLR (Client->read, &readables);
 				close (Client->read);
 				if (Client->file)
 					close (Client->file);
@@ -2637,9 +2614,7 @@ DCC_close_filesend (DCC_list * Client, char *type)
 
 	if (get_to_from (dcc_types[Client->flags & DCC_TYPES]) != -1 && dcc_active_count)
 		dcc_active_count--;
-	FD_CLR (Client->read, &readables);
 	close (Client->read);
-	FD_CLR (Client->write, &writables);
 	if (Client->read != Client->write)
 		close (Client->write);
 	close (Client->file);

@@ -69,6 +69,13 @@ dnl ----------------------------------------------------------
 dnl System services
 dnl ----------------------------------------------------------
 
+sinclude(sa.ac)
+SA_CHECK_ALL
+
+dnl ----------------------------------------------------------
+dnl System services
+dnl ----------------------------------------------------------
+
 AC_MSG_CHECKING(for IPv4 support)
 AC_CACHE_VAL(ac_cv_ipv4,
 	AC_TRY_RUN([
@@ -141,22 +148,8 @@ else
 	AC_MSG_RESULT(no)
 fi
 
-if test -z "$libsocket"; then
-	AC_CHECK_LIB(socket, socket, LIBS="$LIBS -lsocket",)
-fi
-
-dnl this is for isc.  need the nsl_s library as well.
-if test -z "$libinet"; then
-	AC_CHECK_LIB(inet, socket, libnsl=1; LIBS="$LIBS -linet -lnsl_s",)
-fi
-
-if test -z "$libnsl"; then
-	AC_CHECK_LIB(nsl, gethostname, LIBS="$LIBS -lnsl",)
-fi
-
 AC_CHECK_LIB(sun, getpwnam, LIBS="$LIBS -lsun",)
 AC_CHECK_LIB(dgc, inet_addr, LIBS="$LIBS -ldgc",)
-AC_CHECK_LIB(resolv, gethostbyname, LIBS="$LIBS -lresolv",)
 AC_CHECK_LIB(gnumalloc, malloc, LIBS="$LIBS -lgnumalloc",
 AC_CHECK_LIB(bsdmalloc, malloc, LIBS="$LIBS -lbsdmalloc",))
 
@@ -378,6 +371,36 @@ if test -f sig.inc; then
 fi
 [echo $sig_name | sed -e 's/$/"};/' -e 's/ /", "/g' -e 's/^/char *sys_siglist[] = { "/' >> sig.inc]
 fi
+
+dnl ----------------------------------------------------------
+dnl OpenSSL!
+dnl ----------------------------------------------------------
+
+AC_MSG_CHECKING(for OpenSSL)
+for dir in $withval /usr/local/ssl /usr/lib/ssl /usr/ssl /usr/pkg /usr/local /usr; do
+    ssldir="$dir"
+    if test -f "$dir/include/openssl/ssl.h"; then
+	found_ssl="yes";
+	CFLAGS="$CFLAGS -I$ssldir/include/openssl -DHAVE_SSL";
+	CXXFLAGS="$CXXFLAGS -I$ssldir/include/openssl -DHAVE_SSL";
+	break;
+    fi
+    if test -f "$dir/include/ssl.h"; then
+	found_ssl="yes";
+	CFLAGS="$CFLAGS -I$ssldir/include/ -DHAVE_SSL";
+	CXXFLAGS="$CXXFLAGS -I$ssldir/include/ -DHAVE_SSL";
+	break
+    fi
+done
+if test x_$found_ssl != x_yes; then
+    AC_MSG_ERROR(Cannot find ssl libraries)
+else
+    printf "OpenSSL found in $ssldir\n";
+    LIBS="$LIBS -lssl -lcrypto";
+    LDFLAGS="$LDFLAGS -L$ssldir/lib";
+    HAVE_SSL=yes
+fi
+AC_SUBST(HAVE_SSL)
 
 dnl ----------------------------------------------------------
 dnl All done!

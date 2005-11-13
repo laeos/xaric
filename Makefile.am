@@ -7,7 +7,7 @@ xaric_SOURCES = alist.c  cmd_modes.c ctcp.c dcc.c     \
 		reg.c screen.c server.c status.c ircterm.c timer.c vars.c whois.c   \
 		whowas.c window.c words.c tcommand.c ternary.c ncommand.c cmd_help.c \
 		cmd_hostname.c cmd_who.c cmd_scan.c cmd_save.c cmd_orignick.c \
-		xscandir.c \
+		xscandir.c sa.c sa.h \
 		alist.h commands.h ctcp.h dcc.h debug.h defaults.h \
 		exec.h expr.h flood.h format.h fset.h funny.h \
 		gai.h hash.h hash2.h history.h hook.h iflist.h \

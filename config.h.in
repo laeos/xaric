@@ -1,5 +1,20 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Predefined possible va_copy() implementation (id: ASP) */
+#define __VA_COPY_USE_ASP(d, s) do { *(d) = *(s); } while (0)
+
+/* Predefined possible va_copy() implementation (id: ASS) */
+#define __VA_COPY_USE_ASS(d, s) do { (d) = (s); } while (0)
+
+/* Predefined possible va_copy() implementation (id: C99) */
+#define __VA_COPY_USE_C99(d, s) va_copy((d), (s))
+
+/* Predefined possible va_copy() implementation (id: CPP) */
+#define __VA_COPY_USE_CPP(d, s) memcpy((void *)(d), (void *)(s)), sizeof(*(s))
+
+/* Predefined possible va_copy() implementation (id: CPS) */
+#define __VA_COPY_USE_CPS(d, s) memcpy((void *)&(d), (void *)&(s)), sizeof((s))
+
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
    */
@@ -7,6 +22,15 @@
 
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
+
+/* Predefined possible va_copy() implementation (id: GCB) */
+#define __VA_COPY_USE_GCB(d, s) __builtin_va_copy((d), (s))
+
+/* Predefined possible va_copy() implementation (id: GCH) */
+#define __VA_COPY_USE_GCH(d, s) __va_copy((d), (s))
+
+/* Predefined possible va_copy() implementation (id: GCM) */
+#define __VA_COPY_USE_GCM(d, s) VA_COPY((d), (s))
 
 /* Define to 1 if the `getpgrp' function requires zero arguments. */
 #undef GETPGRP_VOID
@@ -63,17 +87,41 @@
 /* Defined if you have gettimeofday. */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define to 1 if you have the `inet_addr' function. */
+#undef HAVE_INET_ADDR
+
+/* Define to 1 if you have the `inet_aton' function. */
+#undef HAVE_INET_ATON
+
+/* Define to 1 if you have the `inet_ntoa' function. */
+#undef HAVE_INET_NTOA
+
+/* Define to 1 if you have the `inet_ntop' function. */
+#undef HAVE_INET_NTOP
+
+/* Define to 1 if you have the `inet_pton' function. */
+#undef HAVE_INET_PTON
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
 /* Defined if system has killpg(). */
 #undef HAVE_KILLPG
 
+/* Define to 1 if you have the `inet6' library (-linet6). */
+#undef HAVE_LIBINET6
+
+/* Define to 1 if you have the `nsl' library (-lnsl). */
+#undef HAVE_LIBNSL
+
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
 
 /* Define to 1 if you have the `pthreads' library (-lpthreads). */
 #undef HAVE_LIBPTHREADS
+
+/* Define to 1 if you have the `socket' library (-lsocket). */
+#undef HAVE_LIBSOCKET
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -93,8 +141,17 @@
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
 
+/* Define to 1 if you have the `snprintf' function. */
+#undef HAVE_SNPRINTF
+
 /* Defined if struct sockaddr has sa_len field. */
 #undef HAVE_SOCKADDR_SA_LEN
+
+/* Define to 1 if socklen_t exists */
+#undef HAVE_SOCKLEN_T
+
+/* Define to 1 if ssize_t exists */
+#undef HAVE_SSIZE_T
 
 /* Define to 1 if you have the <stdarg.h> header file. */
 #undef HAVE_STDARG_H
@@ -171,6 +228,10 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define if va_copy() macro exists (and no fallback implementation is
+   required) */
+#undef HAVE_VA_COPY
+
 /* Defined if your system has IPv4 support. */
 #undef IPV4
 
@@ -233,6 +294,12 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
+/* Define to use SO_RCVTIMEO with setsockopt(2) */
+#undef USE_SO_RCVTIMEO
+
+/* Define to use SO_SNDTIMEO with setsockopt(2) */
+#undef USE_SO_SNDTIMEO
+
 /* Defined if we are using curses library. */
 #undef USING_CURSES
 
@@ -245,6 +312,15 @@
 #ifndef _ALL_SOURCE
 # undef _ALL_SOURCE
 #endif
+
+/* Optional va_copy() implementation activation */
+#ifndef HAVE_VA_COPY
+#define va_copy(d, s) __VA_COPY_USE(d, s)
+#endif
+
+
+/* Define to id of used va_copy() implementation */
+#undef __VA_COPY_USE
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

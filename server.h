@@ -16,6 +16,7 @@
 /* for struct channel */
 #include "names.h"
 #include "whois.h"
+#include "sa.h"
 
 /*
  * type definition to distinguish different
@@ -60,8 +61,8 @@ struct server {
 	int	flags;			/* Various flags */
 	char    umode[80];		/* User Mode storage */ 
 	int	connected;		/* true if connection is assured */
-	int	write;			/* write descriptor */
-	int	read;			/* read descriptior */
+//	int	write;			/* write descriptor */
+//	int	read;			/* read descriptior */
 	int	eof;			/* eof flag for server */
 	int	motd;			/* motd flag (used in notice.c) */
 	int	sent;			/* set if something has been sent,
@@ -79,7 +80,7 @@ struct server {
 	int	ctcp_dropped;		/* */
 	int	ctcp_not_warned;	/* */
 	time_t	ctcp_last_reply_time;	/* used to limit flooding */
-	struct in_addr local_addr;	/* ip address of this connection */
+//	struct in_addr local_addr;	/* ip address of this connection */
 	struct channel	*chan_list;	/* list of channels for this server */
 	int	in_delay_notify;
 	int	link_look;
@@ -91,6 +92,10 @@ struct server {
 	struct	irc_server *split_link; /* list of linked servers */
 	struct notify_stru *notify_list;/* Notify list */
 	void	(*parse_server)(char *);	/* pointer to parser for this server */
+
+	sa_addr_t *rem_addr;
+	sa_addr_t *lcl_addr;
+	sa_t *sock;
 };
 
 typedef struct ser_group_list

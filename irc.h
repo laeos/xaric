@@ -64,6 +64,15 @@ extern char	*line_thing;
 # include <netdb.h>
 #endif
 
+#ifdef HAVE_SSL
+# include <openssl/crypto.h>
+# include <openssl/x509.h>
+# include <openssl/pem.h>
+# include <openssl/ssl.h>
+# include <openssl/err.h>
+# include <openssl/rand.h>
+# define getrandom(min, max) ((rand() % (int)(((max)+1) - (min))) + (min))
+#endif
 
 #include "irc_std.h"
 #include "debug.h"

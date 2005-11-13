@@ -598,7 +598,7 @@ cmd_disconnect (struct command *cmd, char *args)
 	else
 		message = args;
 
-	if (-1 == server_list[i].write)
+	if (server_list[i].sock == NULL)
 	{
 		say ("That server isn't connected!");
 		return;

@@ -114,13 +114,13 @@ int irc_port = IRC_PORT,	/* port of ircd */
 				 * switchs are set */
   away_set = 0,			/* set if there is an away
 				 * message anywhere */
+#ifdef HAVE_SSL
+  do_use_ssl = 0,
+#endif
   need_redraw = 0;		/* set whenever the terminal is reset */
 
 static int
   load_ircrc = 1,		/* load ircrc file? */
-#ifdef SERVERS_FILE
-  load_g_ircservers = 1,	/* load global servers file? */
-#endif
   load_ircservers = 1;		/* load servers file? */
 
 
@@ -166,11 +166,11 @@ usage (void)
 
 	"Usage: %s [OPTION]... [nick [server list]...]\n"
 	"   -n               do not load your " IRCRC_NAME " file.\n"
-	"   -s               do not load the global server file.\n"
 	"   -S               do not load your " IRCSERVERS_NAME " file.\n"
 	"   -h               this help text.\n"
 	"   -v               display xaric version and exit.\n"
 	"   -f               your terminal users flow control (^s/^q), so xaric shouldn't.\n"
+	"   -s               Use SSL.\n"
 	"   -F               your terminal does not use flow control.\n"
 	"   -H <hostname>    uses the virtual hostname if possible.\n"
 	"   -d <string>      set debug options (see documentation).\n"
@@ -234,14 +234,6 @@ parse_args (int argc, char *argv[])
 				load_ircrc = 0;
 				break;
 
-			case 's': /* do not load global server file */
-#ifdef SERVERS_FILE
-				load_g_ircservers = 0;
-#else
-				fprintf(stderr, "No global servers file!\n");
-#endif
-				break;
-
 			case 'S': /* do not load .ircservers file */
 				load_ircservers = 0;
 				break;
@@ -259,6 +251,9 @@ parse_args (int argc, char *argv[])
 #endif /* XARIC_DEBUG */
 				break;
 
+			case 's': /* use ssl */
+				do_use_ssl = 1;
+				break;
 
 			case '?':  /* unknown option */
 			case ':':  /* missing argument */
@@ -390,10 +385,6 @@ static void
 load_xaric_servers (void)
 {
 	/* load server files here */
-#ifdef SERVERS_FILE
-	if (load_g_ircservers)
-		read_server_file (SERVERS_FILE);
-#endif
 
 	if (load_ircservers)
 		read_server_file (ircservers_file);
@@ -470,11 +461,34 @@ irc_exit (char *reason, char *formated)
 	exit (0);
 }
 
+#ifdef HAVE_SSL
+static void
+init_ssl(void)
+{
+    char *entropy = malloc(100);
+    int i;
+
+    for(i=0;i<100;i++)
+	entropy[i] = (char) getrandom(0, 255);
+
+    /* Many systems don't have /dev/random so we seed */
+    RAND_seed(entropy, 100);
+    SSLeay_add_ssl_algorithms();
+    SSL_load_error_strings();
+    free(entropy);
+}
+#endif /* HAVE_SSL */
+
+
 /* initilize global variables, parse command line, etc */
 static void
 xaric_init (int argc, char *argv[])
 {
 	get_user_info ();
+
+#ifdef HAVE_SSL
+	init_ssl();
+#endif
 
 	load_xaric_environment ();
 

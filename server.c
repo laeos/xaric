@@ -79,7 +79,6 @@ void
 close_server (int cs_index, char *message)
 {
 	int i, min, max;
-	char buffer[BIG_BUFFER_SIZE / 4 + 1];
 
 	if (cs_index == -1)
 	{
@@ -122,24 +121,16 @@ close_server (int cs_index, char *message)
 		server_list[i].buffer = NULL;
 		server_list[i].close_serv = -1;
 		new_free (&server_list[i].away);
-		if (server_list[i].write != -1)
+
+		if (server_list[i].sock)
 		{
 			if (message && *message)
 			{
-				snprintf (buffer, BIG_BUFFER_SIZE, "QUIT :%s\n", message);
-				send (server_list[i].write, buffer, strlen (buffer), 0);
+			    sa_writef(server_list[i].sock, "QUIT :%s\n", message);
 			}
-			new_close (server_list[i].write);
-			if (server_list[i].write == server_list[i].read)
-			{
-				server_list[i].read = -1;
-			}
-			server_list[i].write = -1;
-		}
-		if (server_list[i].read != -1)
-		{
-			new_close (server_list[i].read);
-			server_list[i].read = -1;
+			sa_shutdown(server_list[i].sock, "rw");
+			sa_destroy(server_list[i].sock);
+			server_list[i].sock = NULL;
 		}
 	}
 }
@@ -155,11 +146,14 @@ set_server_bits (fd_set * rd, fd_set * wr)
 
 	for (i = 0; i < number_of_servers; i++)
 	{
-		if (server_list[i].read != -1)
-			FD_SET (server_list[i].read, rd);
-		if (!(server_list[i].flags & (LOGGED_IN | CLOSE_PENDING)) &&
-		    server_list[i].write != -1)
-			FD_SET (server_list[i].write, wr);
+		if (server_list[i].sock) {
+			int fd;
+
+			sa_getfd(server_list[i].sock, &fd);
+			FD_SET(fd, rd);
+			if (!(server_list[i].flags & (LOGGED_IN | CLOSE_PENDING)))
+				FD_SET (fd, wr);
+		}
 	}
 }
 
@@ -177,6 +171,19 @@ timed_server (void *args)
 	}
 	new_free (&p);
 	in_timed_server = 0;
+	return 0;
+}
+
+static int is_connected_p(int i)
+{
+	if (server_list[i].sock) {
+		int des;
+		struct sockaddr_in sa;
+		size_t sa_len = sizeof (struct sockaddr_in);
+		sa_getfd(server_list[i].sock, &des);
+		if (getpeername (des, (struct sockaddr *) &sa, &sa_len) != -1)
+			return 1;
+	}
 	return 0;
 }
 
@@ -200,20 +207,15 @@ do_server (fd_set * rd, fd_set * wr)
 
 	for (i = 0; i < number_of_servers; i++)
 	{
-		if (((des = server_list[i].write) != -1) && FD_ISSET (des, wr) && !(server_list[i].flags & LOGGED_IN))
+	    	if (server_list[i].sock == NULL)
+		    continue;
+		sa_getfd(server_list[i].sock, &des);
+		if (FD_ISSET (des, wr) && !(server_list[i].flags & LOGGED_IN))
 		{
-			struct sockaddr_in sa;
-			size_t sa_len = sizeof (struct sockaddr_in);
-			if (getpeername (des, (struct sockaddr *) &sa, &sa_len) != -1)
-			{
+			if (is_connected_p(i)) 
 				login_to_server (i, -1);
-			}
-#if 0
-			if (errno && errno != EINPROGRESS)
-				say ("%s", strerror (errno));
-#endif
 		}
-		if (((des = server_list[i].read) != -1) && FD_ISSET (des, rd))
+		if (FD_ISSET (des, rd))
 		{
 			int junk;
 			char *bufptr;
@@ -251,7 +253,8 @@ do_server (fd_set * rd, fd_set * wr)
 					say ("Connection closed from %s: %s", server_list[i].name,
 					     (dgets_errno == -1) ? "Remote end closed connection" : strerror (dgets_errno));
 					server_list[i].connected = 0;
-					server_list[i].read = server_list[i].write = -1;
+					sa_destroy(server_list[i].sock);
+					server_list[i].sock = NULL;
 
 					if (!(server_list[i].flags & LOGGED_IN))
 					{
@@ -330,7 +333,7 @@ do_server (fd_set * rd, fd_set * wr)
 			}
 			from_server = primary_server;
 		}
-		if (server_list[i].read != -1 && (errno == ENETUNREACH || errno == EHOSTUNREACH))
+		if (errno == ENETUNREACH || errno == EHOSTUNREACH)
 		{
 			if (last_timeout == 0)
 				last_timeout = time (NULL);
@@ -473,8 +476,7 @@ add_to_server_list (char *server, int port, char *password, char *nick, int over
 		RESIZE (server_list, struct server, number_of_servers + 1);
 
 		server_list[from_server].name = m_strdup (server);
-		server_list[from_server].read = -1;
-		server_list[from_server].write = -1;
+		server_list[from_server].sock = NULL;
 		server_list[from_server].lag = -1;
 		server_list[from_server].motd = 1;
 		server_list[from_server].port = port;
@@ -672,6 +674,7 @@ build_server_list (char *servers)
 	}
 }
 
+#if 0
 /*
  * connect_to_server_direct: handles the tcp connection to a server.  If
  * successful, the user is disconnected from any previously connected server,
@@ -729,13 +732,16 @@ connect_to_server_direct (char *server_name, int port)
 	server_list[from_server].operator = 0;
 	return (0);
 }
+#endif
 
 static void 
 login_to_server (int refnum, int c_server)
 {
+#if 0
 	set_blocking (server_list[refnum].read);
 	if (server_list[refnum].read != server_list[refnum].write)
 		set_blocking (server_list[refnum].write);
+#endif
 
 	server_list[refnum].flags |= LOGGED_IN;
 
@@ -769,35 +775,45 @@ connect_to_server_by_refnum (int refnum, int c_server)
 {
 	char *sname;
 	int sport;
-	int conn;
-	struct sockaddr_in sa;
-	size_t sa_len = sizeof (struct sockaddr_in);
+
 
 	if (refnum == -1)
 	{
 		say ("Connecting to refnum -1.  That makes no sense.");
-		return -1;	/* XXXX */
+		return -1;
 	}
 
 	sname = server_list[refnum].name;
-	sport = server_list[refnum].port;
+	if ((sport = server_list[refnum].port) == -1)
+		sport = irc_port;
 
-	if (server_list[refnum].read == -1)
+	if (server_list[refnum].sock == NULL)
 	{
-		if (sport == -1)
-			sport = irc_port;
+		char buffer[BIG_BUFFER_SIZE];
+		sa_rc_t ret;
+
+		snprintf(buffer, BIG_BUFFER_SIZE, "inet://%s:%d", sname, sport);
+		buffer[BIG_BUFFER_SIZE-1] = '\0';
 
 		from_server = refnum;
 		say ("Connecting to port %d of server %s", sport, sname);
 
-		conn = connect_to_server_direct (sname, sport);
+		if (!server_list[refnum].rem_addr)
+			sa_addr_create(&server_list[refnum].rem_addr);
 
-		if (conn)
-		{
+		if ((ret = sa_addr_u2a(server_list[refnum].rem_addr, buffer)) != SA_OK) {
+			say("Couldn't figure out address %s: %s",  buffer, sa_error(ret));
+			return -1;
+		}
+		sa_create(&server_list[refnum].sock);
+		if ((ret = sa_connect(server_list[refnum].sock, server_list[refnum].rem_addr)) != SA_OK) {
+			say("Couldn't connect to %s: %s",  buffer, sa_error(ret));
+			sa_destroy(server_list[refnum].sock);
+			server_list[refnum].sock = NULL;
 			return -1;
 		}
 		server_list[refnum].flags &= ~LOGGED_IN;
-		if (server_list[refnum].read != -1 && getpeername (server_list[refnum].read, (struct sockaddr *) &sa, &sa_len) != -1)
+		if (is_connected_p(refnum)) 
 			login_to_server (refnum, c_server);
 	}
 	else
@@ -830,7 +846,7 @@ get_connected (int server)
 		s = server;
 		if (connect_to_server_by_refnum (server, primary_server))
 		{
-			while (server_list[server].read == -1)
+			while (server_list[server].sock == NULL)
 			{
 				server++;
 				if (server == number_of_servers)
@@ -838,10 +854,6 @@ get_connected (int server)
 				if (server == s)
 				{
 					clean_whois_queue ();
-/*
-   if (do_hook(DISCONNECT_LIST,"unable to connect to a server"))
-   say("Use /SERVER to connect to a server");
- */
 					break;
 				}
 				from_server = server;
@@ -935,7 +947,7 @@ display_server_list (void)
 		{
 			if (!server_list[i].nickname)
 			{
-				if (server_list[i].read == -1)
+				if (server_list[i].sock == NULL)
 					say ("\t%d) %s %d", i,
 					     server_list[i].name,
 					     server_list[i].port);
@@ -946,7 +958,7 @@ display_server_list (void)
 			}
 			else
 			{
-				if (server_list[i].read == -1)
+				if (server_list[i].sock == NULL)
 					say ("\t%d) %s %d (was %s)", i,
 					     server_list[i].name,
 					     server_list[i].port,
@@ -1018,8 +1030,10 @@ flush_server (void)
 	int old_timeout;
 	char buffer[BIG_BUFFER_SIZE + 1];
 
-	if ((des = server_list[from_server].read) == -1)
+	if (server_list[from_server].sock == NULL)
 		return;
+
+	sa_getfd(server_list[from_server].sock, &des);
 	timeout.tv_usec = 0;
 	timeout.tv_sec = 1;
 	old_timeout = dgets_timeout (1);
@@ -1269,7 +1283,7 @@ is_server_open (int iso_index)
 {
 	if (iso_index < 0 || iso_index >= number_of_servers)
 		return (0);
-	return (server_list[iso_index].read != -1);
+	return !!server_list[iso_index].sock;
 }
 
 /*
@@ -1494,14 +1508,13 @@ send_to_server (const char *format,...)
 	char buffer[BIG_BUFFER_SIZE + 1];	/* make this buffer *much*
 						 * bigger than needed */
 	char *buf = buffer;
-	int len, des;
+	int len;
 	int server;
 
 	if ((server = from_server) == -1)
 		server = primary_server;
 
-
-	if (server != -1 && ((des = server_list[server].write) != -1) && format && (server_list[server].flags & LOGGED_IN))
+	if (server != -1 && server_list[server].sock && format && (server_list[server].flags & LOGGED_IN))
 	{
 		va_list args;
 		va_start (args, format);
@@ -1514,11 +1527,8 @@ send_to_server (const char *format,...)
 			buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
 		strmcat (buffer, "\r\n", IRCD_BUFFER_SIZE);
 		XDEBUG(5, "[%d] -> [%s]", des, buffer);
-		if (do_hook (SEND_TO_SERVER_LIST, "%d %d %s", server, des, buffer))
-		{
-			send (des, buffer, strlen (buffer), 0);
-			memset (buffer, 0, 80);
-		}
+		sa_write(server_list[server].sock, buffer, strlen(buffer), NULL);
+		memset (buffer, 0, 80);
 	}
 	else
 		/*if (from_server == -1) */
@@ -1535,12 +1545,12 @@ my_send_to_server (int server, const char *format,...)
 	char buffer[BIG_BUFFER_SIZE + 1];	/* make this buffer *much*
 						 * bigger than needed */
 	char *buf = buffer;
-	int len, des;
+	int len;
 
 	if (server == -1)
 		server = primary_server;
 
-	if (server != -1 && ((des = server_list[server].write) != -1) && format && (server_list[server].flags & LOGGED_IN))
+	if (server != -1 && server_list[server].sock && format && (server_list[server].flags & LOGGED_IN))
 	{
 		va_list args;
 		va_start (args, format);
@@ -1552,12 +1562,8 @@ my_send_to_server (int server, const char *format,...)
 		if (len > (IRCD_BUFFER_SIZE - 2) || len == -1)
 			buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
 		strmcat (buffer, "\r\n", IRCD_BUFFER_SIZE);
-		XDEBUG(5, "[%d] -> [%s]", des, buffer);
-		if (do_hook (SEND_TO_SERVER_LIST, "%d %d %s", server, des, buffer))
-		{
-			send (des, buffer, strlen (buffer), 0);
-			memset (buffer, 0, 80);
-		}
+		sa_write(server_list[server].sock, buffer, strlen(buffer), NULL);
+		memset (buffer, 0, 80);
 	}
 	else
 	{
@@ -1577,10 +1583,8 @@ close_all_server (void)
 
 	for (i = 0; i < number_of_servers; i++)
 	{
-		if (server_list[i].read != -1)
-			new_close (server_list[i].read);
-		if (server_list[i].write != -1)
-			new_close (server_list[i].write);
+	        if (server_list[i].sock)
+		    sa_destroy(server_list[i].sock);
 	}
 }
 
@@ -1594,7 +1598,7 @@ create_server_list (void)
 	*buffer = '\0';
 	for (i = 0; i < number_of_servers; i++)
 	{
-		if (server_list[i].read != -1)
+		if (server_list[i].sock)
 		{
 			if (server_list[i].itsname)
 			{

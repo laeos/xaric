@@ -512,9 +512,9 @@ int
 dcc_open (DCC_list * Client)
 {
 	char *user, *Type;
-
 	struct in_addr myip;
 	int old_server;
+	struct sockaddr *saddr;
 
 	user = Client->user;
 	old_server = from_server;
@@ -522,8 +522,13 @@ dcc_open (DCC_list * Client)
 	if (from_server == -1)
 		from_server = get_window_server (0);
 
-	myip.s_addr = server_list[from_server].local_addr.s_addr;
-
+	myip.s_addr = 0;
+	if (sa_addr_a2s(server_list[from_server].lcl_addr, &saddr, NULL) == SA_OK) {
+	    if (saddr->sa_family == AF_INET) {
+		myip.s_addr = ((struct sockaddr_in *)saddr)->sin_addr.s_addr;
+	    }
+	    free(saddr);
+	}
 
 	if (myip.s_addr == htonl (0x00000000) || myip.s_addr == htonl (0x7f000001))
 		myip.s_addr = MyHostAddr.s_addr;

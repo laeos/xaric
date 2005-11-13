@@ -10,8 +10,8 @@
  * @(#)$Id$
  */
 
-#ifndef __server_h_
-#define __server_h_
+#ifndef SERVER_H
+#define SERVER_H
   
 /* for struct channel */
 #include "names.h"
@@ -37,8 +37,7 @@ struct notify_stru;
 
 
 /* Server: a structure for the server_list */
-typedef	struct
-{
+struct server {
 	char	*name;			/* the name of the server */
 	char	*itsname;		/* the server's idea of its name */
 	char	*password;		/* password for that server */
@@ -93,7 +92,7 @@ typedef	struct
 	struct	irc_server *split_link; /* list of linked servers */
 	struct notify_stru *notify_list;/* Notify list */
 	void	(*parse_server)(char *);	/* pointer to parser for this server */
-}	Server;
+};
 
 typedef struct ser_group_list
 {
@@ -198,7 +197,7 @@ extern int user_changing_nickname;
 
 		
 /* server_list: the list of servers that the user can connect to,etc */
-extern	Server	*server_list;
+extern	struct server	*server_list;
 
 #define USER_MODE	0x0001
 #define USER_MODE_A	USER_MODE << 0

@@ -44,7 +44,7 @@ typedef struct notify_stru
 }
 NotifyList;
 
-extern Server *server_list;
+extern struct server *server_list;
 extern int number_of_servers;
 
 

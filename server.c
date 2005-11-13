@@ -46,7 +46,7 @@ static void login_to_server (int, int);
 const char *umodes = "abcdefghijklmnopqrstuvwxyz";
 
 /* server_list: the list of servers that the user can connect to,etc */
-Server *server_list = NULL;
+struct server *server_list = NULL;
 
 /* number_of_servers: in the server list */
 int number_of_servers = 0;
@@ -472,7 +472,7 @@ add_to_server_list (char *server, int port, char *password, char *nick, int over
 	if ((from_server = find_in_server_list (server, port)) == -1)
 	{
 		from_server = number_of_servers++;
-		RESIZE (server_list, Server, number_of_servers + 1);
+		RESIZE (server_list, struct server, number_of_servers + 1);
 
 		server_list[from_server].name = m_strdup (server);
 		server_list[from_server].read = -1;
@@ -561,9 +561,9 @@ remove_from_server_list (int i)
 		irc_exit ("Sorry, the server list is empty and I just dont know what to do.", NULL);
 	}
 
-	memmove (&server_list[i], &server_list[i + 1], (number_of_servers - i) * sizeof (Server));
+	memmove (&server_list[i], &server_list[i + 1], (number_of_servers - i) * sizeof (struct server));
 	number_of_servers--;
-	RESIZE (server_list, Server, number_of_servers);
+	RESIZE (server_list, struct server, number_of_servers);
 
 	/* update all he structs with server in them */
 	channel_server_delete (i);

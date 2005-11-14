@@ -2335,7 +2335,7 @@ char *sa_error(sa_rc_t rv)
     else if (rv == SA_ERR_USE) sz = "Invalid Use Or Context";
     else if (rv == SA_ERR_MEM) sz = "Not Enough Memory";
     else if (rv == SA_ERR_MTC) sz = "Matching Failed";
-    else if (rv == SA_ERR_EOF) sz = "End Of Communication";
+    else if (rv == SA_ERR_EOF) sz = "Remote end closed connection";
     else if (rv == SA_ERR_TMT) sz = "Communication Timeout";
     else if (rv == SA_ERR_SYS) sz = "Operating System Error";
     else if (rv == SA_ERR_NET) sz = "Networking Error";

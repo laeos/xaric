@@ -10,7 +10,7 @@ xaric_SOURCES = alist.c  cmd_modes.c ctcp.c dcc.c     \
 		xscandir.c sa.c sa.h \
 		alist.h commands.h ctcp.h dcc.h debug.h defaults.h \
 		exec.h expr.h flood.h format.h fset.h funny.h \
-		gai.h hash.h hash2.h history.h hook.h iflist.h \
+		gai.h hash.h history.h hook.h iflist.h \
 		ignore.h input.h irc.h irc_std.h ircaux.h \
 		ircterm.h keys.h lastlog.h linklist.h list.h \
 		lister.h log.h misc.h names.h newio.h notice.h notify.h \

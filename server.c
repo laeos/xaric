@@ -39,7 +39,6 @@
 /* for debug */
 #define MODULE_ID XD_COMM
 
-static void add_to_server_buffer (int, char *);
 static char *set_umode (int du_index);
 static void login_to_server (int, int);
 
@@ -118,7 +117,7 @@ close_server (int cs_index, char *message)
 		}
 		server_list[i].operator = 0;
 		server_list[i].connected = 0;
-		server_list[i].buffer = NULL;
+		server_list[i].pos = 0;
 		server_list[i].close_serv = -1;
 		new_free (&server_list[i].away);
 
@@ -187,6 +186,109 @@ static int is_connected_p(int i)
 	return 0;
 }
 
+
+static int read_data(int i, time_t *last_timeout)
+{
+    static int times = 0;
+    char *buf = server_list[i].line;
+    int pos = server_list[i].pos;
+    size_t done = 0;
+    sa_rc_t ret = sa_readln(server_list[i].sock, buf+pos, SERVER_BUF_LEN-pos, &done);
+
+    last_server = from_server = i;
+    switch (ret) {
+	case SA_OK:
+	    *last_timeout = 0;
+	    parsing_server_index = i;
+	    server_list[i].last_msg = time (NULL);
+	    parse_server (buf);
+	    server_list[i].pos = 0;
+	    parsing_server_index = -1;
+	    message_from (NULL, LOG_CRAP);
+	    return 1;
+
+	case SA_ERR_TMT:
+	    server_list[from_server].pos = pos;
+	    return 0;
+
+	default:
+	    {
+		int old_serv = server_list[i].close_serv;
+
+		close_server (i, empty_str);
+		*last_timeout = 0;
+		say ("Connection closed from %s: %s", server_list[i].name, sa_error(ret));
+		server_list[i].connected = 0;
+		sa_destroy(server_list[i].sock);
+		server_list[i].sock = NULL;
+
+		if (!(server_list[i].flags & LOGGED_IN))
+		{
+		    if (old_serv == i)	/* a hack?  you bet */
+			goto a_hack;
+		    if (old_serv != -1 && (server_list[old_serv].flags & CLOSE_PENDING))
+		    {
+			say ("Connection to server %s resumed...", server_list[old_serv].name);
+			server_list[i].close_serv = -1;
+			server_list[old_serv].flags &= ~CLOSE_PENDING;
+			server_list[old_serv].flags |= LOGGED_IN;
+			server_list[old_serv].connected = 1;
+			get_connected (old_serv);
+			return 0;
+		    }
+		}
+a_hack:
+
+		if (i == primary_server)
+		{
+		    if (server_list[i].eof)
+		    {
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "Unable to connect to a server"));
+			if (++i >= number_of_servers)
+			{
+			    clean_whois_queue ();
+			    times = 0;
+			    i = 0;
+			}
+
+			get_connected (i);
+			return 0;
+		    }
+		    else
+		    {
+			if (times++ > 3)
+			{
+			    clean_whois_queue ();
+			    if (do_hook (DISCONNECT_LIST, "No Connection"))
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "No connection"));
+			    times = 0;
+			}
+			get_connected (i);
+			return 0;
+		    }
+		}
+		else if (server_list[i].eof)
+		{
+		    say ("Connection to server %s lost.", server_list[i].name);
+		    close_server (i, empty_str);
+		    clean_whois_queue ();
+		    window_check_servers ();
+		}
+		else if (connect_to_server_by_refnum (i, -1))
+		{
+		    say ("Connection to server %s lost.", server_list[i].name);
+		    close_server (i, empty_str);
+		    clean_whois_queue ();
+		    window_check_servers ();
+		}
+		server_list[i].eof = 1;
+		return 0;
+	    }
+    }
+    from_server = primary_server;
+    return 0;
+}
+
 /*
  * do_server: check the given fd_set against the currently open servers in
  * the server list.  If one have information available to be read, it is read
@@ -199,10 +301,7 @@ static int is_connected_p(int i)
 void 
 do_server (fd_set * rd, fd_set * wr)
 {
-	char buffer[BIG_BUFFER_SIZE + 1];
 	int des, i;
-	static int times = 0;
-	int old_timeout;
 	static time_t last_timeout = 0;
 
 	for (i = 0; i < number_of_servers; i++)
@@ -215,123 +314,9 @@ do_server (fd_set * rd, fd_set * wr)
 			if (is_connected_p(i)) 
 				login_to_server (i, -1);
 		}
-		if (FD_ISSET (des, rd))
-		{
-			int junk;
-			char *bufptr;
-			char *s;
-
-			last_server = from_server = i;
-			old_timeout = dgets_timeout (2);
-			s = server_list[from_server].buffer;
-			bufptr = buffer;
-			if (s && *s)
-			{
-				int len = strlen (s);
-
-				strmcpy (buffer, s, len);
-				bufptr += len;
-			}
-
-			junk = dgets (bufptr, BIG_BUFFER_SIZE - 2, des, NULL);
-			(void) dgets_timeout (old_timeout);
-
-			switch (junk)
-			{
-			case -1:	/* timeout */
-				{
-					add_to_server_buffer (from_server, buffer);
-					continue;
-					break;
-				}
-			case 0:	/* EOF condition */
-				{
-					int old_serv = server_list[i].close_serv;
-
-					close_server (i, empty_str);
-					last_timeout = 0;
-					say ("Connection closed from %s: %s", server_list[i].name,
-					     (dgets_errno == -1) ? "Remote end closed connection" : strerror (dgets_errno));
-					server_list[i].connected = 0;
-					sa_destroy(server_list[i].sock);
-					server_list[i].sock = NULL;
-
-					if (!(server_list[i].flags & LOGGED_IN))
-					{
-						if (old_serv == i)	/* a hack?  you bet */
-							goto a_hack;
-						if (old_serv != -1 && (server_list[old_serv].flags & CLOSE_PENDING))
-						{
-							say ("Connection to server %s resumed...", server_list[old_serv].name);
-							server_list[i].close_serv = -1;
-							server_list[old_serv].flags &= ~CLOSE_PENDING;
-							server_list[old_serv].flags |= LOGGED_IN;
-							server_list[old_serv].connected = 1;
-							get_connected (old_serv);
-							break;
-						}
-					}
-				      a_hack:
-
-					if (i == primary_server)
-					{
-						if (server_list[i].eof)
-						{
-							put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "Unable to connect to a server"));
-							if (++i >= number_of_servers)
-							{
-								clean_whois_queue ();
-								times = 0;
-								i = 0;
-							}
-
-							get_connected (i);
-							continue;
-						}
-						else
-						{
-							if (times++ > 3)
-							{
-								clean_whois_queue ();
-								if (do_hook (DISCONNECT_LIST, "No Connection"))
-									put_it ("%s", convert_output_format (get_fset_var (FORMAT_DISCONNECT_FSET), "%s %s", update_clock (GET_TIME), "No connection"));
-								times = 0;
-							}
-							get_connected (i);
-							continue;
-						}
-					}
-					else if (server_list[i].eof)
-					{
-						say ("Connection to server %s lost.", server_list[i].name);
-						close_server (i, empty_str);
-						clean_whois_queue ();
-						window_check_servers ();
-					}
-					else if (connect_to_server_by_refnum (i, -1))
-					{
-						say ("Connection to server %s lost.", server_list[i].name);
-						close_server (i, empty_str);
-						clean_whois_queue ();
-						window_check_servers ();
-					}
-					server_list[i].eof = 1;
-					break;
-				}
-			default:
-				{
-					last_timeout = 0;
-					parsing_server_index = i;
-					XDEBUG(5, "[%d] <- [%s]", des, buffer);
-					server_list[i].last_msg = time (NULL);
-					parse_server (buffer);
-					new_free (&server_list[i].buffer);
-					parsing_server_index = -1;
-					message_from (NULL, LOG_CRAP);
-					break;
-				}
-			}
-			from_server = primary_server;
+		if (FD_ISSET (des, rd)) {
+		    while (read_data(i, &last_timeout))
+			;
 		}
 		if (errno == ENETUNREACH || errno == EHOSTUNREACH)
 		{
@@ -345,11 +330,6 @@ do_server (fd_set * rd, fd_set * wr)
 		}
 
 	}
-
-#if 0
-	if (primary_server == -1 && !connected_to_server)
-		add_timer ("", 1, timed_server, m_sprintf ("%d", 0), NULL);
-#endif
 }
 
 /*
@@ -480,6 +460,7 @@ add_to_server_list (char *server, int port, char *password, char *nick, int over
 		server_list[from_server].lag = -1;
 		server_list[from_server].motd = 1;
 		server_list[from_server].port = port;
+		server_list[from_server].pos = 0;
 
 		if (password && *password)
 			malloc_strcpy (&(server_list[from_server].password), password);
@@ -737,13 +718,8 @@ connect_to_server_direct (char *server_name, int port)
 static void 
 login_to_server (int refnum, int c_server)
 {
-#if 0
-	set_blocking (server_list[refnum].read);
-	if (server_list[refnum].read != server_list[refnum].write)
-		set_blocking (server_list[refnum].write);
-#endif
-
-	server_list[refnum].flags |= LOGGED_IN;
+	sa_buffer(server_list[refnum].sock, SA_BUFFER_READ, 1024);
+	sa_timeout(server_list[refnum].sock, SA_TIMEOUT_READ, 0, 400);
 
 	if ((c_server != -1) && (c_server != refnum))
 	{
@@ -751,12 +727,12 @@ login_to_server (int refnum, int c_server)
 		close_server (c_server, "changing servers");
 	}
 
-
 	if (!server_list[refnum].d_nickname)
 		malloc_strcpy (&(server_list[refnum].d_nickname), nickname);
 
 	if (server_list[refnum].password)
 		send_to_server ("PASS %s", server_list[refnum].password);
+	server_list[refnum].flags |= LOGGED_IN;
 	register_server (refnum, server_list[refnum].d_nickname);
 
 	server_list[refnum].last_msg = time (NULL);
@@ -765,7 +741,6 @@ login_to_server (int refnum, int c_server)
 	server_list[refnum].connected = 1;
 	*server_list[refnum].umode = 0;
 	server_list[refnum].operator = 0;
-	server_list[refnum].flags |= LOGGED_IN;
 	set_umode (refnum);
 }
 
@@ -1612,18 +1587,6 @@ create_server_list (void)
 	malloc_strcpy (&value, buffer);
 
 	return value;
-}
-
-static void 
-add_to_server_buffer (int server, char *buf)
-{
-	if (buf && *buf && server >= 0 && server < number_of_servers)
-	{
-		if (server_list[server].buffer)
-			malloc_strcat (&server_list[server].buffer, buf);
-		else
-			malloc_strcpy (&server_list[server].buffer, buf);
-	}
 }
 
 /*

@@ -33,9 +33,9 @@
 
 #define SPLIT 1
 
+#define SERVER_BUF_LEN BIG_BUFFER_SIZE
 
 struct notify_stru;
-
 
 /* Server: a structure for the server_list */
 struct server {
@@ -61,8 +61,6 @@ struct server {
 	int	flags;			/* Various flags */
 	char    umode[80];		/* User Mode storage */ 
 	int	connected;		/* true if connection is assured */
-//	int	write;			/* write descriptor */
-//	int	read;			/* read descriptior */
 	int	eof;			/* eof flag for server */
 	int	motd;			/* motd flag (used in notice.c) */
 	int	sent;			/* set if something has been sent,
@@ -70,7 +68,6 @@ struct server {
 	int	lag;			/* indication of lag from server CDE*/
 	time_t	lag_time;		/* time ping sent to server CDE */
 	time_t	last_msg;		/* last mesg recieved from the server CDE */
-	char	*buffer;		/* buffer of what dgets() doesn't get */
 	WhoisQueue	*WQ_head;	/* WHOIS Queue head */
 	WhoisQueue	*WQ_tail;	/* WHOIS Queue tail */
 	WhoisStuff	whois_stuff;	/* Whois Queue current collection buffer */
@@ -80,7 +77,6 @@ struct server {
 	int	ctcp_dropped;		/* */
 	int	ctcp_not_warned;	/* */
 	time_t	ctcp_last_reply_time;	/* used to limit flooding */
-//	struct in_addr local_addr;	/* ip address of this connection */
 	struct channel	*chan_list;	/* list of channels for this server */
 	int	in_delay_notify;
 	int	link_look;
@@ -96,6 +92,9 @@ struct server {
 	sa_addr_t *rem_addr;
 	sa_addr_t *lcl_addr;
 	sa_t *sock;
+
+	char line[SERVER_BUF_LEN];
+	int pos;
 };
 
 typedef struct ser_group_list

@@ -1240,7 +1240,7 @@ handle_nickflood (char *old_nick, char *new_nick, register struct nick_list * ni
 	if ((!nick->bancount) || (nick->bancount && ((current_time - nick->bantime) > 3)))
 	{
 		if (!nick->kickcount++)
-			send_to_server ("KICK %s %s :\002Nick flood (%d nicks in %dsecs of %dsecs)\002", chan->channel, new_nick, get_int_var (KICK_ON_NICKFLOOD_VAR) /*chan->set_kick_on_nickflood */ , flood_time, get_int_var (NICKFLOOD_TIME_VAR) /*chan->set_nickflood_time */ );
+			send_to_server (SERVER(from_server), "KICK %s %s :\002Nick flood (%d nicks in %dsecs of %dsecs)\002", chan->channel, new_nick, get_int_var (KICK_ON_NICKFLOOD_VAR) /*chan->set_kick_on_nickflood */ , flood_time, get_int_var (NICKFLOOD_TIME_VAR) /*chan->set_nickflood_time */ );
 	}
 }
 
@@ -1507,7 +1507,7 @@ reconnect_all_channels (int server)
 		clear_bans (tmp);
 	}
 	if (channels)
-		send_to_server ("JOIN %s %s", channels, keys ? keys : empty_str);
+		send_to_server (SERVER(from_server), "JOIN %s %s", channels, keys ? keys : empty_str);
 
 	new_free (&channels);
 	new_free (&keys);
@@ -1805,7 +1805,7 @@ check_mode_list_join (char *channel, int server)
 			int old_server = from_server;
 
 			from_server = server;
-			send_to_server ("MODE %s %s", mptr->chan, mptr->mode);
+			send_to_server (SERVER(from_server), "MODE %s %s", mptr->chan, mptr->mode);
 			from_server = old_server;
 			remove_from_mode_list (channel, server);
 			return;

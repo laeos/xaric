@@ -75,7 +75,7 @@ static void
 flush_mode (struct channel * chan)
 {
 	if (mode_buf)
-		send_to_server ("%s", mode_buf);
+		send_to_server (SERVER(from_server), "%s", mode_buf);
 	new_free (&mode_buf);
 	mode_len = 0;
 }
@@ -318,8 +318,8 @@ userhost_ban (WhoisStuff * stuff, char *nick1, char *args)
 		return;
 	}
 
-	send_to_server ("MODE %s %s %s", channel, stuff->channel ? ob : b, ban_it (nick, user, host));
-	send_to_server ("KICK %s %s :%s", channel, nick, args ? args : get_reason (nick));
+	send_to_server (SERVER(from_server), "MODE %s %s %s", channel, stuff->channel ? ob : b, ban_it (nick, user, host));
+	send_to_server (SERVER(from_server), "KICK %s %s :%s", channel, nick, args ? args : get_reason (nick));
 
 	new_free (&user);
 }
@@ -371,7 +371,7 @@ cmd_unban (struct command *cmd, char *args)
 			{
 				if (bans->sent_unban == 0)
 				{
-					send_to_server ("MODE %s -b %s", chan->channel, bans->ban);
+					send_to_server (SERVER(from_server), "MODE %s -b %s", chan->channel, bans->ban);
 					bans->sent_unban++;
 					tmp = 0;
 					break;
@@ -403,13 +403,13 @@ cmd_unban (struct command *cmd, char *args)
 			}
 			if (count && (count % get_int_var (NUM_BANMODES_VAR) == 0))
 			{
-				send_to_server ("MODE %s -%s %s", chan->channel, strfill ('b', num), banstring);
+				send_to_server (SERVER(from_server), "MODE %s -%s %s", chan->channel, strfill ('b', num), banstring);
 				new_free (&banstring);
 				num = 0;
 			}
 		}
 		if (banstring && num)
-			send_to_server ("MODE %s -%s %s", chan->channel, strfill ('b', num), banstring);
+			send_to_server (SERVER(from_server), "MODE %s -%s %s", chan->channel, strfill ('b', num), banstring);
 		new_free (&banstring);
 	}
 	if (!count)
@@ -446,7 +446,7 @@ cmd_kick (struct command *cmd, char *args)
 	else
 		reason = get_reason (spec);
 
-	send_to_server ("KICK %s %s :%s", chan->channel, spec, reason);
+	send_to_server (SERVER(from_server), "KICK %s %s :%s", chan->channel, spec, reason);
 }
 
 void
@@ -496,8 +496,8 @@ cmd_kickban (struct command *cmd, char *args)
 			host = strchr (user, '@');
 			*host++ = 0;
 
-			send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, user, host));
-			send_to_server ("KICK %s %s :%s", chan->channel, nicks->nick,
+			send_to_server (SERVER(from_server), "MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, user, host));
+			send_to_server (SERVER(from_server), "KICK %s %s :%s", chan->channel, nicks->nick,
 				    rest ? rest : get_reason (nicks->nick));
 			count++;
 			new_free (&t);
@@ -552,10 +552,10 @@ cmd_ban (struct command *cmd, char *args)
 			if (host)
 			{
 				*host++ = 0;
-				send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, user, host));
+				send_to_server (SERVER(from_server), "MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, user, host));
 			}
 			else
-				send_to_server ("MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, user, "*"));
+				send_to_server (SERVER(from_server), "MODE %s -o+b %s %s", chan->channel, nicks->nick, ban_it (nicks->nick, user, "*"));
 
 			new_free (&t);
 			found++;
@@ -569,7 +569,7 @@ cmd_ban (struct command *cmd, char *args)
 	if (!found)
 	{
 		if (strchr (spec, '!') && strchr (spec, '@'))
-			send_to_server ("MODE %s +b %s", chan->channel, spec);
+			send_to_server (SERVER(from_server), "MODE %s +b %s", chan->channel, spec);
 		else
 			add_to_userhost_queue (spec, userhost_ban, "%s %s", chan->channel, spec);
 	}
@@ -618,7 +618,7 @@ cmd_banstat (struct command *cmd, char *args)
 		new_free (&channel);
 	}
 	else if (channel)
-		send_to_server ("MODE %s b", channel);
+		send_to_server (SERVER(from_server), "MODE %s b", channel);
 }
 
 static void 
@@ -649,13 +649,13 @@ remove_bans (char *stuff, char *line)
 				tmpc->sent_unban++;
 				if (num % get_int_var (NUM_BANMODES_VAR) == 0)
 				{
-					send_to_server ("MODE %s -%s %s", stuff, strfill ('b', num), banstring);
+					send_to_server (SERVER(from_server), "MODE %s -%s %s", stuff, strfill ('b', num), banstring);
 					new_free (&banstring);
 					num = 0;
 				}
 			}
 		if (banstring && num)
-			send_to_server ("MODE %s -%s %s", stuff, strfill ('b', num), banstring);
+			send_to_server (SERVER(from_server), "MODE %s -%s %s", stuff, strfill ('b', num), banstring);
 		for (tmpc = chan->bans; tmpc; tmpc = next)
 		{
 			next = tmpc->next;
@@ -786,7 +786,7 @@ cmd_deop (struct command *cmd, char *args)
 void
 cmd_deoper (struct command *cmd, char *args)
 {
-	send_to_server ("MODE %s -o", get_server_nickname (from_server));
+	send_to_server (SERVER(from_server), "MODE %s -o", get_server_nickname (from_server));
 }
 
 
@@ -830,7 +830,7 @@ cmd_op (struct command *cmd, char *args)
 static void
 oper_password_received (char *data, char *line)
 {
-	send_to_server ("OPER %s %s", data, line);
+	send_to_server (SERVER(from_server), "OPER %s %s", data, line);
 }
 
 void
@@ -848,13 +848,13 @@ cmd_oper (struct command *cmd, char *args)
 			    oper_password_received, nick, WAIT_PROMPT_LINE);
 		return;
 	}
-	send_to_server ("OPER %s %s", nick, password);
+	send_to_server (SERVER(from_server), "OPER %s %s", nick, password);
 }
 
 void
 cmd_umode (struct command *cmd, char *args)
 {
-	send_to_server ("%s %s %s", cmd->rname, get_server_nickname (from_server),
+	send_to_server (SERVER(from_server), "%s %s %s", cmd->rname, get_server_nickname (from_server),
 			(args && *args) ? args : empty_str);
 }
 
@@ -870,7 +870,7 @@ cmd_unkey (struct command *cmd, char *args)
 	if (!(chan = prepare_command (&server, channel, NEED_OP)))
 		return;
 	if (chan->key)
-		my_send_to_server (server, "MODE %s -k %s", chan->channel, chan->key);
+		send_to_server (SERVER(server), "MODE %s -k %s", chan->channel, chan->key);
 }
 void
 cmd_kill (struct command *cmd, char *args)
@@ -889,8 +889,8 @@ cmd_kill (struct command *cmd, char *args)
 			args = "*";	/* what-EVER */
 	}
 	if (reason && *reason)
-		send_to_server ("%s %s :%s", cmd->name, args, reason);
+		send_to_server (SERVER(from_server), "%s %s :%s", cmd->name, args, reason);
 	else
-		send_to_server ("%s %s", cmd->name, args);
+		send_to_server (SERVER(from_server), "%s %s", cmd->name, args);
 }
 

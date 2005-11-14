@@ -37,6 +37,7 @@
 #include "misc.h"
 #include "screen.h"
 #include "tcommand.h"
+#include "server.h"
 
 void oh_my_wait (void);		/* in command.c for now XXX */
 
@@ -192,7 +193,7 @@ cmd_who (struct command *cmd, char *args)
 			not_on_a_channel (curr_scr_win);
 			return;
 		}
-		send_to_server ("WHO %s", channel);
+		send_to_server (SERVER(from_server), "WHO %s", channel);
 		return;
 	}
 	if (no_args)
@@ -201,7 +202,7 @@ cmd_who (struct command *cmd, char *args)
 	{
 		if (!channel && who_mask & WHO_OPS)
 			channel = "*.*";
-		send_to_server ("%s %s %c", "WHO", channel ? channel :
+		send_to_server (SERVER(from_server), "%s %s %c", "WHO", channel ? channel :
 				empty_str, (who_mask & WHO_OPS) ?
 				'o' : '\0');
 	}

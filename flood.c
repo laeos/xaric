@@ -478,7 +478,7 @@ flood_prot (char *nick, char *userhost, char *type, int ctcp_type, int ignoretim
 				if ((Nick = find_nicklist_in_channellist (nick, chan, 0)) && kick_on_flood)
 				{
 					if (chan->chop)
-						send_to_server ("KICK %s %s :\002%s\002 flooder", chan->channel, nick, type);
+						send_to_server (SERVER(from_server), "KICK %s %s :\002%s\002 flooder", chan->channel, nick, type);
 				}
 			}
 		}
@@ -493,7 +493,7 @@ flood_prot (char *nick, char *userhost, char *type, int ctcp_type, int ignoretim
 				if ((Nick = find_nicklist_in_channellist (nick, chan, 0)))
 				{
 					if (chan->chop)
-						send_to_server ("KICK %s %s :\002%s\002 flooder", chan->channel, nick, type);
+						send_to_server (SERVER(from_server), "KICK %s %s :\002%s\002 flooder", chan->channel, nick, type);
 				}
 			}
 		}

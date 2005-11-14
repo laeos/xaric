@@ -1335,7 +1335,7 @@ extern void
 join_last_invite (char dumb, char *dumber)
 {
 	if (invite_channel)
-		send_to_server ("JOIN %s", invite_channel);
+		send_to_server (SERVER(from_server), "JOIN %s", invite_channel);
 	else
 		bitchsay ("You haven't been invited to a channel yet");
 }

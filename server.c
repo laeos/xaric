@@ -17,6 +17,7 @@
 #include "build.h"
 
 #include <stdarg.h>
+#include <assert.h>
 
 #include "server.h"
 #include "ircaux.h"
@@ -656,7 +657,7 @@ static void login_to_server(int refnum, int c_server)
 	malloc_strcpy(&(server_list[refnum].d_nickname), nickname);
 
     if (server_list[refnum].password)
-	send_to_server("PASS %s", server_list[refnum].password);
+	send_to_server(SERVER(refnum), "PASS %s", server_list[refnum].password);
     server_list[refnum].flags |= LOGGED_IN;
     register_server(refnum, server_list[refnum].d_nickname);
 
@@ -836,20 +837,6 @@ void display_server_list(void)
 	say("The server list is empty");
 }
 
-#if 0
-void MarkAllAway(char *command, char *message, char *subargs)
-{
-    int old_server;
-
-    old_server = from_server;
-    for (from_server = 0; from_server < number_of_servers; from_server++) {
-	if (server_list[from_server].connected)
-	    send_to_server("%s :%s", command, message);
-    }
-    from_server = old_server;
-}
-#endif
-
 /*
  * set_server_password: this sets the password for the server with the given
  * index.  If password is null, the password for the given server is returned 
@@ -978,7 +965,7 @@ void set_server_away(int ssa_index, char *message)
 	    struct channel *chan;
 
 	    for (chan = server_list[ssa_index].chan_list; chan; chan = chan->next) {
-		send_to_server("PRIVMSG %s :ACTION %s", chan->channel,
+		send_to_server(SERVER(from_server), "PRIVMSG %s :ACTION %s", chan->channel,
 			       stripansicodes(convert_output_format
 					      (get_fset_var(FORMAT_AWAY_FSET), "%s %s", update_clock(GET_TIME), message)));
 	    }
@@ -986,7 +973,7 @@ void set_server_away(int ssa_index, char *message)
 	if (get_fset_var(FORMAT_AWAY_FSET)) {
 	    char buffer[BIG_BUFFER_SIZE + 1];
 
-	    send_to_server("%s :%s", "AWAY",
+	    send_to_server(SERVER(from_server), "%s :%s", "AWAY",
 			   stripansicodes(convert_output_format
 					  (get_fset_var(FORMAT_AWAY_FSET), "%s %s", update_clock(GET_TIME), message)));
 	    strncpy(buffer, convert_output_format("%Kð %W$N%n is away: ", NULL, NULL), BIG_BUFFER_SIZE);
@@ -994,14 +981,14 @@ void set_server_away(int ssa_index, char *message)
 		    convert_output_format(get_fset_var(FORMAT_AWAY_FSET), "%s %s", update_clock(GET_TIME), message), BIG_BUFFER_SIZE);
 	    put_it("%s", buffer);
 	} else
-	    send_to_server("%s :%s", "AWAY", stripansicodes(convert_output_format(message, NULL)));
+	    send_to_server(SERVER(from_server), "%s :%s", "AWAY", stripansicodes(convert_output_format(message, NULL)));
     } else {
 	if (server_list[ssa_index].away)
 	    away_set--;
 	server_list[ssa_index].awaytime = 0;
 	new_free(&server_list[ssa_index].away);
 	if (server_list[ssa_index].connected)
-	    send_to_server("AWAY :");
+	    send_to_server(SERVER(from_server), "AWAY :");
     }
     from_server = old_from_server;
 }
@@ -1274,7 +1261,7 @@ void register_server(int ssn_index, char *nick)
 {
     int old_from_server = from_server;
 
-    send_to_server("USER %s %s %s :%s", username,
+    send_to_server(SERVER(from_server), "USER %s %s %s :%s", username,
 		   (send_umode && *send_umode) ? send_umode :
 		   (LocalHostName ? LocalHostName : hostname), username, *realname ? realname : space_str);
     change_server_nickname(ssn_index, nick);
@@ -1312,70 +1299,27 @@ void server_is_connected(int sic_index, int value)
 }
 
 /* send_to_server: sends the given info the the server */
-void send_to_server(const char *format, ...)
+void send_to_server(struct server *s, const char *format, ...)
 {
-    char buffer[BIG_BUFFER_SIZE + 1];	/* make this buffer *much* bigger than needed */
-    char *buf = buffer;
-    int len;
-    int server;
+    assert(s);
+    assert(format);
 
-    if ((server = from_server) == -1)
-	server = primary_server;
-
-    if (server != -1 && server_list[server].sock && format && (server_list[server].flags & LOGGED_IN)) {
+    if (s->sock && (s->flags & LOGGED_IN)) {
+	char buffer[BIG_BUFFER_SIZE + 1];	/* make this buffer *much* bigger than needed */
 	va_list args;
 
 	va_start(args, format);
-	vsnprintf(buf, BIG_BUFFER_SIZE, format, args);
+	vsnprintf(buffer, BIG_BUFFER_SIZE, format, args);
 	va_end(args);
 
-	server_list[server].sent = 1;
-	len = strlen(buffer);
-	if (len > (IRCD_BUFFER_SIZE - 2) || len == -1)
-	    buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
+	buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
 	strmcat(buffer, "\r\n", IRCD_BUFFER_SIZE);
-	XDEBUG(5, "[%d] -> [%s]", des, buffer);
-	sa_write(server_list[server].sock, buffer, strlen(buffer), NULL);
-	memset(buffer, 0, 80);
-    } else
-	/* if (from_server == -1) */
-    {
-	if (do_hook(DISCONNECT_LIST, "No Connection"))
-	    put_it("%s",
-		   convert_output_format(get_fset_var(FORMAT_DISCONNECT_FSET), "%s %s", update_clock(GET_TIME),
-					 "You are not connected to a server. Use /SERVER to connect."));
-    }
-}
-
-/* send_to_server: sends the given info the the server */
-void my_send_to_server(int server, const char *format, ...)
-{
-    char buffer[BIG_BUFFER_SIZE + 1];	/* make this buffer *much* bigger than needed */
-    char *buf = buffer;
-    int len;
-
-    if (server == -1)
-	server = primary_server;
-
-    if (server != -1 && server_list[server].sock && format && (server_list[server].flags & LOGGED_IN)) {
-	va_list args;
-
-	va_start(args, format);
-	vsnprintf(buf, BIG_BUFFER_SIZE, format, args);
-	va_end(args);
-
-	server_list[server].sent = 1;
-	len = strlen(buffer);
-	if (len > (IRCD_BUFFER_SIZE - 2) || len == -1)
-	    buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
-	strmcat(buffer, "\r\n", IRCD_BUFFER_SIZE);
-	sa_write(server_list[server].sock, buffer, strlen(buffer), NULL);
+	sa_write(s->sock, buffer, strlen(buffer), NULL);
+	s->sent = 1;
 	memset(buffer, 0, 80);
     } else {
-	if (do_hook(DISCONNECT_LIST, "No Connection"))
-	    put_it("%s",
-		   convert_output_format(get_fset_var(FORMAT_DISCONNECT_FSET), "%s %s", update_clock(GET_TIME),
-					 "You are not connected to a server. Use /SERVER to connect."));
+	put_it("%s", convert_output_format(get_fset_var(FORMAT_DISCONNECT_FSET), "%s %s", update_clock(GET_TIME),
+		    "You are not connected to a server. Use /SERVER to connect."));
     }
 }
 
@@ -1452,7 +1396,7 @@ void change_server_nickname(int ssn_index, char *nick)
     }
 
     if (server_list[from_server].s_nickname)
-	send_to_server("NICK %s", server_list[from_server].s_nickname);
+	send_to_server(SERVER(from_server), "NICK %s", server_list[from_server].s_nickname);
 
     from_server = old_from_server;
 }

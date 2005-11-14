@@ -35,6 +35,8 @@
 
 #define SERVER_BUF_LEN BIG_BUFFER_SIZE
 
+#define SERVER(i)	(server_list+i)
+
 struct notify_stru;
 
 /* Server: a structure for the server_list */
@@ -194,6 +196,8 @@ extern int user_changing_nickname;
 
 /* server_list: the list of servers that the user can connect to,etc */
 extern struct server *server_list;
+
+void send_to_server(struct server *s, const char *format, ...);
 
 #define USER_MODE	0x0001
 #define USER_MODE_A	USER_MODE << 0

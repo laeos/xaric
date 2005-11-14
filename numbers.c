@@ -549,7 +549,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			if (do_hook (current_numeric, "%s %s", from, *ArgList))
 				display_msg (from, ArgList);
 			if (send_umode && *send_umode == '+')
-				send_to_server ("MODE %s %s", user, send_umode);
+				send_to_server (SERVER(from_server), "MODE %s %s", user, send_umode);
 			break;
 		}
 	case 004:		/* #define RPL_MYINFO           004 */
@@ -708,7 +708,7 @@ numbered_command (char *from, int comm, char **ArgList)
 				display_msg (from, ArgList);
 		}
 		if (get_string_var (OPER_MODES_VAR))
-			send_to_server ("MODE %s %s", get_server_nickname (from_server), get_string_var (OPER_MODES_VAR));
+			send_to_server (SERVER(from_server), "MODE %s %s", get_server_nickname (from_server), get_string_var (OPER_MODES_VAR));
 		break;
 
 	case 401:		/* #define ERR_NOSUCHNICK       401 */
@@ -918,7 +918,7 @@ numbered_command (char *from, int comm, char **ArgList)
 		{
 			if (check_server_sync (from, ArgList))
 			{
-				send_to_server ("WHO -server %s %s", from, ArgList[0]);
+				send_to_server (SERVER(from_server), "WHO -server %s %s", from, ArgList[0]);
 				break;
 			}
 		}

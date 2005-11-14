@@ -17,8 +17,6 @@
 
 	void	put_echo (char *);
 	void	put_it (const char *, ...);
-	void	send_to_server (const char *, ...);
-	void	my_send_to_server (int, const char *, ...);
 	void	say (const char *, ...);
 	void	bitchsay (const char *, ...);
 	void	serversay (int, int, const char *, ...);

@@ -681,9 +681,9 @@ no_such_nickname (char *from, char **ArgList)
 	if ((foo = get_int_var (AUTO_WHOWAS_VAR)))
 	{
 		if (foo > -1)
-			send_to_server ("WHOWAS %s %d", nick, foo);
+			send_to_server (SERVER(from_server), "WHOWAS %s %d", nick, foo);
 		else
-			send_to_server ("WHOWAS %s", nick);
+			send_to_server (SERVER(from_server), "WHOWAS %s", nick);
 	}
 	else if (do_hook (current_numeric, "%s %s %s", from, nick, ArgList[1]))
 		put_it ("%s", convert_output_format (get_fset_var (FORMAT_NONICK_FSET), "%s %s %s %s", update_clock (GET_TIME), nick, from, ArgList[1]));
@@ -773,7 +773,7 @@ whois_ignore_msgs (WhoisStuff * stuff, char *nick, char *text)
 			notify_mark (nick, stuff->user, stuff->host, 1);
 		}
 		else if (get_int_var (SEND_IGNORE_MSG_VAR))
-			send_to_server ("NOTICE %s :%s is ignoring you.",
+			send_to_server (SERVER(from_server), "NOTICE %s :%s is ignoring you.",
 				   nick, get_server_nickname (from_server));
 		new_free (&ptr);
 	}
@@ -854,10 +854,10 @@ whois_ignore_invites (WhoisStuff * stuff, char *nick, char *text)
 					chan = w_chan->channellist;
 			}
 			if (chan && get_int_var (AUTO_REJOIN_VAR))
-				send_to_server ("JOIN %s%s%s", invite_channel, chan->key ? " " : empty_str, chan->key ? chan->key : empty_str);
+				send_to_server (SERVER(from_server), "JOIN %s%s%s", invite_channel, chan->key ? " " : empty_str, chan->key ? chan->key : empty_str);
 		}
 		else if (get_int_var (SEND_IGNORE_MSG_VAR))
-			send_to_server ("NOTICE %s :%s is ignoring you.",
+			send_to_server (SERVER(from_server), "NOTICE %s :%s is ignoring you.",
 				   nick, get_server_nickname (from_server));
 		new_free (&ptr);
 	}
@@ -986,25 +986,25 @@ typed_add_to_whois_queue (int type, char *nick, void (*func) (WhoisStuff *, char
 #ifdef MONITOR_Q
 			put_it ("+++ ISON %s", nick);
 #endif
-			send_to_server ("ISON %s", nick);
+			send_to_server (SERVER(from_server), "ISON %s", nick);
 			break;
 		case WHOIS_USERHOST:
 #ifdef MONITOR_Q
 			put_it ("+++ USERHOST %s", nick);
 #endif
-			send_to_server ("USERHOST %s", nick);
+			send_to_server (SERVER(from_server), "USERHOST %s", nick);
 			break;
 		case WHOIS_WHOIS:
 #ifdef MONITOR_Q
 			put_it ("+++ WHOIS %s", nick);
 #endif
-			send_to_server ("WHOIS %s", nick);
+			send_to_server (SERVER(from_server), "WHOIS %s", nick);
 			break;
 		case WHOIS_WHOWAS:
 #ifdef MONITOR_Q
 			put_it ("+++ WHOWAS %s", nick);
 #endif
-			send_to_server ("WHOWAS %s", nick);
+			send_to_server (SERVER(from_server), "WHOWAS %s", nick);
 			break;
 		}
 	}

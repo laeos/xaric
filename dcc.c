@@ -2820,7 +2820,7 @@ dcc_check_idle (void)
 				put_it ("%s", convert_output_format ("$G %RDCC%n Auto-closing idle dcc $0 to $1", "%s %s", dcc_types[Client->flags & DCC_TYPES], Client->user));
 				if (!last_notify || !match (Client->user, last_notify))
 				{
-					send_to_server ("NOTICE %s :Dcc %s Auto Closed", Client->user, dcc_types[Client->flags & DCC_TYPES]);
+					send_to_server (SERVER(from_server), "NOTICE %s :Dcc %s Auto Closed", Client->user, dcc_types[Client->flags & DCC_TYPES]);
 					malloc_strcpy (&last_notify, Client->user);
 				}
 				if ((get_to_from (dcc_types[Client->flags & DCC_TYPES]) != -1))

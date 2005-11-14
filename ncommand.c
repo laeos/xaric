@@ -260,7 +260,7 @@ cmd_back (struct command *cmd, char *args)
 				log_toggle (0, chan);
 			for (chan = server_list[curr_scr_win->server].chan_list; chan; chan = chan->next)
 			{
-				send_to_server ("PRIVMSG %s :ACTION %s", chan->channel,
+				send_to_server (SERVER(from_server), "PRIVMSG %s :ACTION %s", chan->channel,
 						stripansicodes (convert_output_format (get_fset_var (FORMAT_BACK_FSET), "%s %d %d %d %d %s",
 						    update_clock (GET_TIME),
 						    hours, minutes, seconds,
@@ -346,7 +346,7 @@ cmd_chwall (struct command *cmd, char *args)
 			}
 			if (count >= 8 && chops)
 			{
-				send_to_server ("%s %s :%s", "NOTICE", chops, buffer);
+				send_to_server (SERVER(from_server), "%s %s :%s", "NOTICE", chops, buffer);
 				i += count;
 				count = 0;
 				new_free (&chops);
@@ -354,7 +354,7 @@ cmd_chwall (struct command *cmd, char *args)
 		}
 		i += count;
 		if (chops)
-			send_to_server ("%s %s :%s", "NOTICE", chops, buffer);
+			send_to_server (SERVER(from_server), "%s %s :%s", "NOTICE", chops, buffer);
 		if (i)
 		{
 			put_it ("%s", convert_output_format (get_fset_var (FORMAT_BWALL_FSET), "%s %s %s %s %s", update_clock (GET_TIME), channel, "*", "*", args));
@@ -487,8 +487,8 @@ cmd_cycle (struct command *cmd, char *args)
 
 	if (!(chan = prepare_command (&server, to, NO_OP)))
 		return;
-	my_send_to_server (server, "PART %s", chan->channel);
-	my_send_to_server (server, "JOIN %s%s%s", chan->channel, chan->key ? " " : "", chan->key ? chan->key : "");
+	send_to_server (SERVER(server), "PART %s", chan->channel);
+	send_to_server (SERVER(server), "JOIN %s%s%s", chan->channel, chan->key ? " " : "", chan->key ? chan->key : "");
 }
 
 static void
@@ -765,7 +765,7 @@ cmd_join (struct command *cmd, char *args)
 		if (my_strnicmp (chan, "-i", 2) == 0)
 		{
 			if (invite_channel)
-				send_to_server ("JOIN %s %s", invite_channel, args);
+				send_to_server (SERVER(from_server), "JOIN %s %s", invite_channel, args);
 			else
 				bitchsay ("You have not been invited to a channel!");
 		}
@@ -795,7 +795,7 @@ cmd_join (struct command *cmd, char *args)
 			}
 			else
 			{
-				send_to_server ("JOIN %s%s%s", buffer, args ? " " : empty_str, args ? args : empty_str);
+				send_to_server (SERVER(from_server), "JOIN %s%s%s", buffer, args ? " " : empty_str, args ? args : empty_str);
 				if (!is_bound (buffer, curr_scr_win->server))
 					malloc_strcpy (&curr_scr_win->waiting_channel, buffer);
 			}
@@ -843,7 +843,7 @@ cmd_map (struct command *cmd, char *args)
 	if (server_list[from_server].link_look == 0)
 	{
 		bitchsay ("Generating irc server map");
-		send_to_server ("LINKS");
+		send_to_server (SERVER(from_server), "LINKS");
 		server_list[from_server].link_look = 2;
 	}
 	else
@@ -901,7 +901,7 @@ cmd_names (struct command *cmd, char *args)
 	if (!(chan = prepare_command (&server, channel, NO_OP)))
 		return;
 
-	my_send_to_server (server, "NAMES %s", chan->channel);
+	send_to_server (SERVER(server), "NAMES %s", chan->channel);
 }
 
 void
@@ -985,12 +985,12 @@ cmd_part (struct command *cmd, char *args)
 			channel = next_arg (args, &args);
 		if (!(chan = prepare_command (&server, channel ? make_channel (channel) : channel, NO_OP)))
 			return;
-		my_send_to_server (server, "PART %s", chan->channel);
+		send_to_server (SERVER(server), "PART %s", chan->channel);
 	}
 	else
 	{
 		for (chan = server_list[server].chan_list; chan; chan = chan->next)
-			my_send_to_server (server, "PART %s", chan->channel);
+			send_to_server (SERVER(server), "PART %s", chan->channel);
 	}
 }
 
@@ -1160,7 +1160,7 @@ void
 cmd_quote (struct command *cmd, char *args)
 {
 	if (!in_on_who && !doing_privmsg && args && *args)
-		send_to_server ("%s", args);
+		send_to_server (SERVER(from_server), "%s", args);
 }
 
 void
@@ -1201,12 +1201,12 @@ cmd_generic_ch (struct command *cmd, char *args)
 	if (ptr && !strcmp (ptr, "*"))
 	{
 		if ((s = get_current_channel_by_refnum (0)) != NULL)
-			send_to_server ("%s %s %s", name, s, args ? args : empty_str);
+			send_to_server (SERVER(from_server), "%s %s %s", name, s, args ? args : empty_str);
 		else
 			say ("%s * is not valid since you are not on a channel", name);
 	}
 	else if (ptr)
-		send_to_server ("%s %s %s", name, ptr, args ? args : empty_str);
+		send_to_server (SERVER(from_server), "%s %s %s", name, ptr, args ? args : empty_str);
 	else
 		userage (cmd->name, cmd->qhelp);
 }
@@ -1215,7 +1215,7 @@ void
 cmd_generic (struct command *cmd, char *args)
 {
 	char *name = cmd->rname ? cmd->rname : cmd->name;
-	send_to_server ("%s %s", name, args ? args : "");
+	send_to_server (SERVER(from_server), "%s %s", name, args ? args : "");
 }
 
 void
@@ -1382,7 +1382,7 @@ cmd_sping (struct command *cmd, char *args)
 #endif
 		{
 			bitchsay ("Sent server ping to [\002%s\002]", servern);
-			send_to_server ("VERSION %s", servern);
+			send_to_server (SERVER(from_server), "VERSION %s", servern);
 #ifdef HAVE_GETTIMEOFDAY
 			gettimeofday (&in_sping, NULL);
 #else
@@ -1413,7 +1413,7 @@ cmd_squit (struct command *cmd, char *args)
 	}
 
 	if (srv1)
-		send_to_server ("%s %s %s", cmd->name, srv1, srv2);
+		send_to_server (SERVER(from_server), "%s %s %s", cmd->name, srv1, srv2);
 	else
 		userage (cmd->name, cmd->qhelp);
 }
@@ -1475,7 +1475,7 @@ cmd_stats (struct command *cmd, char *args)
 		serv = get_server_itsname (from_server);
 	if (str)
 		put_it ("%s", convert_output_format (str, NULL, NULL));
-	send_to_server ("%s %s %s", cmd->name, new_flag, serv);
+	send_to_server (SERVER(from_server), "%s %s %s", cmd->name, new_flag, serv);
 }
 
 void
@@ -1515,7 +1515,7 @@ cmd_topic (struct command *cmd, char *args)
 		return;
 	if (*cmd->name == 'U')
 	{
-		my_send_to_server (server, "TOPIC %s :", chan->channel);
+		send_to_server (SERVER(server), "TOPIC %s :", chan->channel);
 		return;
 	}
 	if (arg && (!(chan->mode & MODE_TOPIC) || chan->chop))
@@ -1523,20 +1523,20 @@ cmd_topic (struct command *cmd, char *args)
 		if (is_channel (arg))
 		{
 			if ((arg2 = next_arg (args, &args)))
-				my_send_to_server (server, "TOPIC %s :%s %s", chan->channel, arg2, args);
+				send_to_server (SERVER(server), "TOPIC %s :%s %s", chan->channel, arg2, args);
 			else
-				my_send_to_server (server, "TOPIC %s", chan->channel);
+				send_to_server (SERVER(server), "TOPIC %s", chan->channel);
 		}
 		else
 		{
 			char *p = NULL;
 			p = m_sprintf ("%s%s%s", arg, arg ? space_str : empty_str, args ? args : empty_str);
-			my_send_to_server (server, "TOPIC %s :%s%s%s", chan->channel, arg, args ? space_str : empty_str, args ? args : empty_str);
+			send_to_server (SERVER(server), "TOPIC %s :%s%s%s", chan->channel, arg, args ? space_str : empty_str, args ? args : empty_str);
 			new_free (&p);
 		}
 	}
 	else
-		my_send_to_server (server, "TOPIC %s", chan->channel);
+		send_to_server (SERVER(server), "TOPIC %s", chan->channel);
 }
 
 void
@@ -1576,7 +1576,7 @@ cmd_trace (struct command *cmd, char *args)
 		bitchsay ("Tracing server %s%sfor Users", serv ? serv : empty_str, serv ? " " : empty_str);
 	if (server_list[from_server].trace_flags & TRACE_SERVER)
 		bitchsay ("Tracing server %s%sfor servers", serv ? serv : empty_str, serv ? " " : empty_str);
-	send_to_server ("%s%s%s", cmd->name, serv ? " " : empty_str, serv ? serv : empty_str);
+	send_to_server (SERVER(from_server), "%s%s%s", cmd->name, serv ? " " : empty_str, serv ? serv : empty_str);
 }
 
 void
@@ -1744,7 +1744,7 @@ void
 cmd_info (struct command *cmd, char *args)
 {
 	say ("We should say something really nice here. But i dont know what.");
-	send_to_server ("%s %s", cmd->name, args);
+	send_to_server (SERVER(from_server), "%s %s", cmd->name, args);
 }
 
 void
@@ -1771,7 +1771,7 @@ cmd_invite (struct command *cmd, char *args)
 
 			if (!chan)
 				return;
-			my_send_to_server (server, "INVITE %s %s%s%s", inick, chan->channel, chan->key ? " " : "", chan->key ? chan->key : "");
+			send_to_server (SERVER(server), "INVITE %s %s%s%s", inick, chan->channel, chan->key ? " " : "", chan->key ? chan->key : "");
 		}
 	}
 	else
@@ -1785,11 +1785,11 @@ cmd_ircii_version (struct command *cmd, char *args)
 	char *host;
 
 	if ((host = next_arg (args, &args)) != NULL)
-		send_to_server ("%s %s", cmd->name, host);
+		send_to_server (SERVER(from_server), "%s %s", cmd->name, host);
 	else
 	{
 		bitchsay ("Client: %s", PACKAGE_VERSION);
-		send_to_server ("%s", cmd->name);
+		send_to_server (SERVER(from_server), "%s", cmd->name);
 	}
 }
 
@@ -1953,7 +1953,7 @@ cmd_users (struct command *cmd, char *args)
 			else if (msg == 4)
 			{
 				if (!isme (nicks->nick))
-					my_send_to_server (server, "KILL %s :%s (%i", nicks->nick,
+					send_to_server (SERVER(server), "KILL %s :%s (%i", nicks->nick,
 							   args && *args ? args : get_reason (nicks->nick),
 							   count + 1);
 				else
@@ -1962,7 +1962,7 @@ cmd_users (struct command *cmd, char *args)
 			else if (msg == 5)
 			{
 				if (!isme (nicks->nick))
-					my_send_to_server (server, "KICK %s %s :%s", chan->channel,
+					send_to_server (SERVER(server), "KICK %s %s :%s", chan->channel,
 					nicks->nick, (args && *args) ? args :
 						  get_reason (nicks->nick));
 				else
@@ -2023,7 +2023,7 @@ cmd_users (struct command *cmd, char *args)
 	if (msg && (msg != 3) && (msg != 4) && (msg != 5) && (msg != 6) /*&& (msg != 7) */  && count)
 	{
 		put_it ("%s", convert_output_format (get_fset_var ((msg == 1) ? FORMAT_SEND_MSG_FSET : FORMAT_SEND_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), msgbuf, args));
-		my_send_to_server (server, "%s %s :%s", (msg == 1) ? "PRIVMSG" : "NOTICE", msgbuf, args);
+		send_to_server (SERVER(server), "%s %s :%s", (msg == 1) ? "PRIVMSG" : "NOTICE", msgbuf, args);
 	}
 	message_from (NULL, LOG_CRAP);
 
@@ -2047,7 +2047,7 @@ void cmd_oper_stuff (struct command *cmd, char *args)
 	
 	message_from (NULL, LOG_WALLOP);
 	if (!in_on_who)
-		send_to_server ("%s :%s", use, args);
+		send_to_server (SERVER(from_server), "%s :%s", use, args);
 
 	message_from (NULL, LOG_CRAP);
 }
@@ -2056,7 +2056,7 @@ void
 cmd_whois_lm (struct command *cmd, char *args)
 {
 	if (recv_nick)
-		send_to_server ("WHOIS %s", recv_nick);
+		send_to_server (SERVER(from_server), "WHOIS %s", recv_nick);
 	else
 		bitchsay ("Nobody has messaged you yet");
 	return;
@@ -2070,10 +2070,10 @@ cmd_whois_i (struct command *cmd, char *args)
 	if (args && *args)
 	{
 		channel = next_arg (args, &args);
-		send_to_server ("WHOIS %s %s", channel, channel);
+		send_to_server (SERVER(from_server), "WHOIS %s %s", channel, channel);
 	}
 	else
-		send_to_server ("WHOIS %s %s", get_server_nickname (from_server),
+		send_to_server (SERVER(from_server), "WHOIS %s %s", get_server_nickname (from_server),
 				get_server_nickname (from_server));
 }
 
@@ -2081,9 +2081,9 @@ void
 cmd_whois (struct command *cmd, char *args)
 {
 	if (args && *args)
-		send_to_server ("WHOIS %s", args);
+		send_to_server (SERVER(from_server), "WHOIS %s", args);
 	else
-		send_to_server ("WHOIS %s", get_server_nickname (from_server));
+		send_to_server (SERVER(from_server), "WHOIS %s", get_server_nickname (from_server));
 }
 
 void
@@ -2105,7 +2105,7 @@ cmd_whowas (struct command *cmd, char *args)
 	else
 		malloc_sprintf (&stuff, "%s %d", get_server_nickname (from_server), /*get_int_var(NUM_OF_WHOWAS_VAR) */ 4);
 
-	send_to_server ("WHOWAS %s", stuff);
+	send_to_server (SERVER(from_server), "WHOWAS %s", stuff);
 	new_free (&stuff);
 }
 
@@ -2485,7 +2485,7 @@ send_text (char *nick_list, char *text, char *command, int hook, int log)
 		else if (!text || !*text)
 			;
 		else if (*current_nick == '"')
-			send_to_server ("%s", text);
+			send_to_server (SERVER(from_server), "%s", text);
 		else if (*current_nick == '/')
 		{
 			line = m_opendup (current_nick, space_str, text, NULL);
@@ -2579,7 +2579,7 @@ send_text (char *nick_list, char *text, char *command, int hook, int log)
 								     "%s %s %s %s", update_clock (GET_TIME), target[i].nick_list, get_server_nickname (from_server), copy));
 		}
 		new_free (&copy);
-		send_to_server ("%s %s :%s", target[i].command, target[i].nick_list, target[i].message);
+		send_to_server (SERVER(from_server), "%s %s :%s", target[i].command, target[i].nick_list, target[i].message);
 		new_free (&target[i].nick_list);
 		target[i].message = NULL;
 		set_lastlog_msg_level (lastlog_level);
@@ -3153,6 +3153,6 @@ BUILT_IN_COMMAND (load)
 				   more then one file at a time.. */
 	status_update (1);
 	load_depth--;
-/*      send_to_server("%s", "WAITFORNOTIFY"); */
+/*      send_to_server(SERVER(from_server), "%s", "WAITFORNOTIFY"); */
 }
 

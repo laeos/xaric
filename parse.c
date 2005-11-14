@@ -431,7 +431,7 @@ p_privmsg (char *from, char **Args)
 	{
 	case IGNORED:
 		if ((list_type == MSG_LIST) && get_int_var (SEND_IGNORE_MSG_VAR))
-			send_to_server ("NOTICE %s :%s is ignoring you", from, get_server_nickname (from_server));
+			send_to_server (SERVER(from_server), "NOTICE %s :%s is ignoring you", from, get_server_nickname (from_server));
 		doing_privmsg = 0;
 		return;
 	case HIGHLIGHTED:
@@ -504,7 +504,7 @@ p_privmsg (char *from, char **Args)
 
 				if (from_server > -1 && get_server_away (from_server) && get_int_var (SEND_AWAY_MSG_VAR))
 				{
-					my_send_to_server (from_server, "NOTICE %s :%s", from, stripansicodes (convert_output_format (get_format (FORMAT_SEND_AWAY_FSET), "%l %l %s", time (NULL), server_list[from_server].awaytime, get_int_var (MSGLOG_VAR) ? "On" : "Off")));
+					send_to_server (SERVER(from_server), "NOTICE %s :%s", from, stripansicodes (convert_output_format (get_format (FORMAT_SEND_AWAY_FSET), "%l %l %s", time (NULL), server_list[from_server].awaytime, get_int_var (MSGLOG_VAR) ? "On" : "Off")));
 				}
 				break;
 			}
@@ -668,7 +668,7 @@ p_channel (char *from, char **ArgList)
 		}
 
 		if (*channel != '+')
-			send_to_server ("MODE %s\r\nMODE %s b", channel, channel, channel);
+			send_to_server (SERVER(from_server), "MODE %s\r\nMODE %s b", channel, channel, channel);
 
 		(void) do_hook (JOIN_ME_LIST, "%s", channel);
 		its_me = 1;
@@ -746,7 +746,7 @@ p_invite (char *from, char **ArgList)
 	{
 	case IGNORED:
 		if (get_int_var (SEND_IGNORE_MSG_VAR))
-			send_to_server ("NOTICE %s :%s is ignoring you",
+			send_to_server (SERVER(from_server), "NOTICE %s :%s is ignoring you",
 				   from, get_server_nickname (from_server));
 		return;
 	case HIGHLIGHTED:
@@ -774,7 +774,7 @@ p_invite (char *from, char **ArgList)
 		if (chan && get_int_var (AUTO_REJOIN_VAR) && invite_channel)
 		{
 			if (!in_join_list (invite_channel, from_server))
-				send_to_server ("JOIN %s %s", invite_channel, ArgList[2] ? ArgList[2] : "");
+				send_to_server (SERVER(from_server), "JOIN %s %s", invite_channel, ArgList[2] ? ArgList[2] : "");
 		}
 
 		malloc_strcpy (&recv_nick, from);
@@ -840,7 +840,7 @@ p_ping (char **ArgList)
 {
 
 	PasteArgs (ArgList, 0);
-	send_to_server ("PONG %s", ArgList[0]);
+	send_to_server (SERVER(from_server), "PONG %s", ArgList[0]);
 }
 
 static void 
@@ -1066,7 +1066,7 @@ p_kick (char *from, char **ArgList)
 				malloc_strcpy (&chankey, chan->key);
 			if (get_int_var (AUTO_REJOIN_VAR))
 			{
-				send_to_server ("JOIN %s %s", channel, chankey ? chankey : empty_str);
+				send_to_server (SERVER(from_server), "JOIN %s %s", channel, chankey ? chankey : empty_str);
 				add_to_join_list (channel, from_server, window ? window->refnum : 0);
 			}
 			new_free (&chankey);
@@ -1091,9 +1091,9 @@ p_kick (char *from, char **ArgList)
 				if (chan->chop && tmpnick && is_other_flood (chan, tmpnick, KICK_FLOOD, &t))
 				{
 					if (get_int_var (KICK_ON_KICKFLOOD_VAR) > get_int_var (DEOP_ON_KICKFLOOD_VAR))
-						send_to_server ("MODE %s -o %s", chan->channel, from);
+						send_to_server (SERVER(from_server), "MODE %s -o %s", chan->channel, from);
 					else if (!f_nick->kickcount++)
-						send_to_server ("KICK %s %s :\002Mass kick detected - (%d kicks in %dsec%s)\002", chan->channel, from, get_int_var (KICK_ON_KICKFLOOD_VAR), t, plural (t));
+						send_to_server (SERVER(from_server), "KICK %s %s :\002Mass kick detected - (%d kicks in %dsec%s)\002", chan->channel, from, get_int_var (KICK_ON_KICKFLOOD_VAR), t, plural (t));
 				}
 			}
 			remove_from_channel (channel, who, from_server, 0, NULL);

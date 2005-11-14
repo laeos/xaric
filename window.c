@@ -2127,7 +2127,7 @@ window_channel (Window * window, char **args, char *usage)
 			int server = from_server;
 
 			from_server = window->server;
-			send_to_server ("JOIN %s", arg);
+			send_to_server (SERVER(from_server), "JOIN %s", arg);
 			malloc_strcpy (&window->waiting_channel, arg);
 			from_server = server;
 		}

@@ -442,5 +442,5 @@ reinstate_user_modes (void)
 {
 	char *modes = get_umode (from_server);
 	if (modes && *modes)
-		send_to_server ("MODE %s +%s", get_server_nickname (from_server), modes);
+		send_to_server (SERVER(from_server), "MODE %s +%s", get_server_nickname (from_server), modes);
 }

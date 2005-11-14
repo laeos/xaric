@@ -825,7 +825,7 @@ io (const char *what)
 		if (time (NULL) - server_list[from_server].link_look_time > get_int_var (LLOOK_DELAY_VAR))
 		{
 			server_list[from_server].link_look++;
-			my_send_to_server (from_server, "LINKS");
+			send_to_server (SERVER(from_server), "LINKS");
 			server_list[from_server].link_look_time = time (NULL);
 		}
 	}

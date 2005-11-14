@@ -133,7 +133,7 @@ check_serverlag(void *args)
 			if ((!my_stricmp(servern, get_server_itsname(i)) || !my_stricmp(servern, get_server_name(i)))
 			    && is_server_connected(i)) {
 				server_list[i].lag_time = time(NULL);
-				send_to_server("PING %lu %s", server_list[i].lag_time, servern);
+				send_to_server(SERVER(from_server), "PING %lu %s", server_list[i].lag_time, servern);
 				in_server_ping++;
 				server_list[i].lag = -1;
 				break;
@@ -162,7 +162,7 @@ timer_unban(void *args)
 	ban = next_arg(p, &p);
 	if ((chan = (struct channel *) find_in_list((struct list **) & server_list[server].chan_list, channel, 0))
 	    && ban_is_on_channel(ban, chan))
-		my_send_to_server(server, "MODE %s -b %s", channel, ban);
+		send_to_server(SERVER(server), "MODE %s -b %s", channel, ban);
 	new_free(&serv);
 	return 0;
 }

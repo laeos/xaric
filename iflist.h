@@ -23,26 +23,25 @@
 # include <netdb.h>
 #endif
 
-#define	IFI_NAME	16		/* same as IFNAMSIZ in <net/if.h> */
+#define	IFI_NAME	16	/* same as IFNAMSIZ in <net/if.h> */
 
 #ifndef NI_MAXHOST
-# define NI_MAXHOST	1024		/* hostname from getnameinfo */
+# define NI_MAXHOST	1024	/* hostname from getnameinfo */
 #endif
 
-
 struct iflist {
-	char ifi_name[IFI_NAME];	/* interface name, null terminated */
-	struct sockaddr *ifi_addr;	/* primary address */
-	int ifi_len;			/* length of above address */
-	char ifi_host[NI_MAXHOST];	/* hostname */
-	struct iflist *ifi_next;	/* next of these structures */
+    char ifi_name[IFI_NAME];	/* interface name, null terminated */
+    struct sockaddr *ifi_addr;	/* primary address */
+    int ifi_len;		/* length of above address */
+    char ifi_host[NI_MAXHOST];	/* hostname */
+    struct iflist *ifi_next;	/* next of these structures */
 };
 
 /* callback function used below */
-typedef void (*iface_cb)(void *data, struct iflist *list);
+typedef void (*iface_cb) (void *data, struct iflist * list);
 
 int ifaces(iface_cb callback, void *data);
-const struct iflist * iface_find (const char *host);
-const struct iflist * iflist_update (void);
+const struct iflist *iface_find(const char *host);
+const struct iflist *iflist_update(void);
 
-#endif	/* iflist_h__ */
+#endif				/* iflist_h__ */

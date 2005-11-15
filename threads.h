@@ -22,13 +22,12 @@
  *
  */
 
-
 #ifdef HAVE_LIBPTHREAD
 # include <pthread.h>
 # define HAVE_THREADS
 #else
 # ifdef HAVE_LIBPTHREADS
-#  include <pthreads.h> /* this is a total guess */
+#  include <pthreads.h>		/* this is a total guess */
 #  define HAVE_THREADS
 # endif
 #endif
@@ -36,21 +35,20 @@
 #ifdef HAVE_THREADS
 # define THR_EXIT()		pthread_exit(NULL); return NULL
 
-static inline int
-THR_CREATE(void *(*func)(void *), void *arg)
+static inline int THR_CREATE(void *(*func) (void *), void *arg)
 {
-	pthread_t x;
+    pthread_t x;
 
-	int retval = pthread_create(&x, NULL, (void * (*)(void *))func, arg);
+    int retval = pthread_create(&x, NULL, (void *(*)(void *)) func, arg);
 
-	if (retval == 0)
-		pthread_detach(x);
-	return  retval;
+    if (retval == 0)
+	pthread_detach(x);
+    return retval;
 }
 
-#else /* HAVE_THREADS */
+#else				/* HAVE_THREADS */
 #  define THR_EXIT()		return NULL
 #  define THR_CREATE(x, y)	x((y))
-#endif /* HAVE_THREADS */
+#endif				/* HAVE_THREADS */
 
-#endif /* threads_h__ */
+#endif				/* threads_h__ */

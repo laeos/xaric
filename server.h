@@ -136,7 +136,6 @@ int set_server_lag(int);
 char *set_server_password(int, char *);
 void set_server_nickname(int, char *);
 
-
 void set_server_qhead(int, WhoisQueue *);
 void set_server_qtail(int, WhoisQueue *);
 void set_server_whois(int, int);

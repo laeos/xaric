@@ -36,21 +36,21 @@
 
 /* This is a list of all the "modules" we have */
 enum xd_module_list {
-	XD_CMD,
-	XD_COMM,
-	XD_EXPR,
-	XD_FUNCTIONS,
-	XD_READLINE,
-	XD_TST,
-	XD_MAX_MODULE
+    XD_CMD,
+    XD_COMM,
+    XD_EXPR,
+    XD_FUNCTIONS,
+    XD_READLINE,
+    XD_TST,
+    XD_MAX_MODULE
 };
 
 /* the type we use for the "knobs" */
-typedef u_int32_t	xd_level;
+typedef u_int32_t xd_level;
 
 struct debug_module {
-	char 		*xd_name;
-	xd_level	 xd_level;	/* some "level"  0, least info */
+    char *xd_name;
+    xd_level xd_level;		/* some "level" 0, least info */
 };
 
 /* This is where we keep information about the state of the debug world */
@@ -73,7 +73,7 @@ void xd_message(enum xd_module_list module, xd_level lev, char *file, int line, 
 void xd_list(int all);
 
 /* Saves the current debug settings */
-int xd_save(FILE *fp, int all);
+int xd_save(FILE * fp, int all);
 
 /* parse a human-generated list of debug values. Returns 1 on failure, 0 on succ
  * the format is:
@@ -81,10 +81,10 @@ int xd_save(FILE *fp, int all);
  */
 int xd_parse(const char *clist);
 
-#else /* XARIC_DEBUG */
+#else				/* XARIC_DEBUG */
 
-#  define DEBUG(mod, sev, arg...)	
+#  define DEBUG(mod, sev, arg...)
 #  define XDEBUG(sev, arg...)
 
-#endif /* XARIC_DEBUG */
-#endif /* xdebug_h__ */
+#endif				/* XARIC_DEBUG */
+#endif				/* xdebug_h__ */

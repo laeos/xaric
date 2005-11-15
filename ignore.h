@@ -14,16 +14,16 @@
 #define __ignore_h_
 
 /* declared in ignore.c */
-	int	is_ignored(char *, long);
-	int	check_ignore(char *, char *, char *, long, char *);
-	void	ignore(char *, char *, char *, char *);
-	void	tignore(char *, char *, char *, char *);
-	void	ignore_nickname(char *, long, int);
-	long	ignore_type (char *, int);
-	int	check_is_ignored(char *);
-		
-extern	int	ignore_usernames;
-extern	char	*highlight_char;
+int is_ignored(char *, long);
+int check_ignore(char *, char *, char *, long, char *);
+void ignore(char *, char *, char *, char *);
+void tignore(char *, char *, char *, char *);
+void ignore_nickname(char *, long, int);
+long ignore_type(char *, int);
+int check_is_ignored(char *);
+
+extern int ignore_usernames;
+extern char *highlight_char;
 
 /* Type of ignored nicks */
 #define IGNORE_MSGS	0x0001
@@ -47,7 +47,6 @@ extern	char	*highlight_char;
 #define IGNORE_SPLITS	0x40000
 #define IGNORE_CRAP	0x80000
 
-
 #define IGNORE_ALL (IGNORE_MSGS | IGNORE_PUBLIC | IGNORE_WALLS | \
 	IGNORE_WALLOPS | IGNORE_INVITES | IGNORE_NOTICES | IGNORE_NOTES | \
 	IGNORE_CTCPS | IGNORE_CRAP | IGNORE_KICKS | \
@@ -61,4 +60,4 @@ extern	char	*highlight_char;
 
 extern Ignore *ignored_nicks;
 
-#endif /* __ignore_h_ */
+#endif				/* __ignore_h_ */

@@ -22,9 +22,8 @@
  */
 
 /* The termcap variables.  */
-extern const char *tc_CM, *tc_CE, *tc_CL, *tc_CR, *tc_NL, *tc_AL, *tc_DL, *tc_CS, 
-	*tc_DC, *tc_IC, *tc_IM, *tc_EI, *tc_SO, *tc_SE, *tc_US, *tc_UE, 
-	*tc_MD, *tc_ME, *tc_SF, *tc_SR, *tc_ND, *tc_LE, *tc_BL, *tc_BS;
+extern const char *tc_CM, *tc_CE, *tc_CL, *tc_CR, *tc_NL, *tc_AL, *tc_DL, *tc_CS,
+    *tc_DC, *tc_IC, *tc_IM, *tc_EI, *tc_SO, *tc_SE, *tc_US, *tc_UE, *tc_MD, *tc_ME, *tc_SF, *tc_SR, *tc_ND, *tc_LE, *tc_BL, *tc_BS;
 
 /* Current width/height */
 extern int term_cols, term_rows;
@@ -43,9 +42,9 @@ extern int term_cols, term_rows;
 #define term_cursor_right()		(tputs_x(tc_ND))
 #define term_clear_to_eol()		(tputs_x(tc_CE))
 
-void term_putchar (unsigned char c);
-int  term_putchar_raw (int c);
-void term_reset (void);
+void term_putchar(unsigned char c);
+int term_putchar_raw(int c);
+void term_reset(void);
 int term_init(void);
 int term_resize(void);
 void term_reset(void);
@@ -62,11 +61,9 @@ int term_eight_bit(void);
 void term_set_eight_bit(int value);
 
 /* strange function pointers, filled in at runtime */
-int (*term_scroll) (int, int, int);     /* best scroll available */
-int (*term_insert) (char);              /* best insert available */
-int (*term_delete) (void);              /* best delete available */
-int (*term_cursor_left) (void);         /* best left available */
+int (*term_scroll) (int, int, int);	/* best scroll available */
+int (*term_insert) (char);	/* best insert available */
+int (*term_delete) (void);	/* best delete available */
+int (*term_cursor_left) (void);	/* best left available */
 
-
-
-#endif /* ircterm_h__ */
+#endif				/* ircterm_h__ */

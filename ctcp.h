@@ -37,13 +37,13 @@
 
 #define NUMBER_OF_CTCPS	CTCP_CUSTOM
 
-#define CTCP_SPECIAL    0       /* Limited, quiet, noreply, not expanded */
-#define CTCP_REPLY      1       /* Sends a reply (not significant) */
-#define CTCP_INLINE     2       /* Expands to an inline value */
-#define CTCP_NOLIMIT    4       /* Limit of one per privmsg. */
-#define CTCP_TELLUSER   8       /* Tell the user about it. */
+#define CTCP_SPECIAL    0	/* Limited, quiet, noreply, not expanded */
+#define CTCP_REPLY      1	/* Sends a reply (not significant) */
+#define CTCP_INLINE     2	/* Expands to an inline value */
+#define CTCP_NOLIMIT    4	/* Limit of one per privmsg. */
+#define CTCP_TELLUSER   8	/* Tell the user about it. */
 
-extern		int	in_ctcp_flag;
+extern int in_ctcp_flag;
 
 #define CTCP_DELIM_CHAR '\001'
 #define CTCP_DELIM_STR 	"\001"
@@ -51,12 +51,11 @@ extern		int	in_ctcp_flag;
 #define CTCP_QUOTE_STR 	"\\"
 #define CTCP_QUOTE_EM 	"\r\n\001\\"
 
+extern char *ctcp_quote_it(char *, int);
+extern char *do_ctcp(char *, char *, char *);
+extern char *do_notice_ctcp(char *, char *, char *);
+extern int in_ctcp(void);
+extern void send_ctcp(int, char *, int, char *, ...);
+extern int get_ctcp_val(char *);
 
-extern	char *	ctcp_quote_it(char *, int);
-extern	char *	do_ctcp(char *, char *, char *);
-extern	char *	do_notice_ctcp(char *, char *, char *);
-extern	int	in_ctcp(void);
-extern	void	send_ctcp(int, char *, int, char *, ...);
-extern	int	get_ctcp_val(char *);
-
-#endif /* _CTCP_H_ */
+#endif				/* _CTCP_H_ */

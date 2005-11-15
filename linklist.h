@@ -12,7 +12,7 @@
  */
 
 struct ll_head {
-	struct ll_head *next, *prev;
+    struct ll_head *next, *prev;
 };
 
 #define LL_HEAD_INIT(name) { &(name), &(name) }
@@ -30,14 +30,12 @@ struct ll_head {
  * This is only for internal list manipulation where we know
  * the prev/next entries already!
  */
-static __inline__ void __ll_add(struct ll_head * new,
-	struct ll_head * prev,
-	struct ll_head * next)
+static __inline__ void __ll_add(struct ll_head *new, struct ll_head *prev, struct ll_head *next)
 {
-	next->prev = new;
-	new->next = next;
-	new->prev = prev;
-	prev->next = new;
+    next->prev = new;
+    new->next = next;
+    new->prev = prev;
+    prev->next = new;
 }
 
 /**
@@ -50,7 +48,7 @@ static __inline__ void __ll_add(struct ll_head * new,
  */
 static __inline__ void ll_add(struct ll_head *new, struct ll_head *head)
 {
-	__ll_add(new, head, head->next);
+    __ll_add(new, head, head->next);
 }
 
 /**
@@ -63,7 +61,7 @@ static __inline__ void ll_add(struct ll_head *new, struct ll_head *head)
  */
 static __inline__ void ll_add_tail(struct ll_head *new, struct ll_head *head)
 {
-	__ll_add(new, head->prev, head);
+    __ll_add(new, head->prev, head);
 }
 
 /*
@@ -73,11 +71,10 @@ static __inline__ void ll_add_tail(struct ll_head *new, struct ll_head *head)
  * This is only for internal list manipulation where we know
  * the prev/next entries already!
  */
-static __inline__ void __ll_del(struct ll_head * prev,
-				  struct ll_head * next)
+static __inline__ void __ll_del(struct ll_head *prev, struct ll_head *next)
 {
-	next->prev = prev;
-	prev->next = next;
+    next->prev = prev;
+    prev->next = next;
 }
 
 /**
@@ -87,7 +84,7 @@ static __inline__ void __ll_del(struct ll_head * prev,
  */
 static __inline__ void ll_del(struct ll_head *entry)
 {
-	__ll_del(entry->prev, entry->next);
+    __ll_del(entry->prev, entry->next);
 }
 
 /**
@@ -96,8 +93,8 @@ static __inline__ void ll_del(struct ll_head *entry)
  */
 static __inline__ void ll_del_init(struct ll_head *entry)
 {
-	__ll_del(entry->prev, entry->next);
-	INIT_LL_HEAD(entry); 
+    __ll_del(entry->prev, entry->next);
+    INIT_LL_HEAD(entry);
 }
 
 /**
@@ -106,7 +103,7 @@ static __inline__ void ll_del_init(struct ll_head *entry)
  */
 static __inline__ int ll_empty(struct ll_head *head)
 {
-	return head->next == head;
+    return head->next == head;
 }
 
 /**
@@ -116,18 +113,18 @@ static __inline__ int ll_empty(struct ll_head *head)
  */
 static __inline__ void ll_splice(struct ll_head *list, struct ll_head *head)
 {
-	struct ll_head *first = list->next;
+    struct ll_head *first = list->next;
 
-	if (first != list) {
-		struct ll_head *last = list->prev;
-		struct ll_head *at = head->next;
+    if (first != list) {
+	struct ll_head *last = list->prev;
+	struct ll_head *at = head->next;
 
-		first->prev = head;
-		head->next = first;
+	first->prev = head;
+	head->next = first;
 
-		last->next = at;
-		at->prev = last;
-	}
+	last->next = at;
+	at->prev = last;
+    }
 }
 
 /**
@@ -169,5 +166,4 @@ static __inline__ void ll_splice(struct ll_head *list, struct ll_head *head)
 #define ll_for_each_backwards(pos, head) \
 	for (pos = (head)->prev; pos != (head); pos = pos->prev)
 
-
-#endif /* _LINUX_LIST_H */
+#endif				/* _LINUX_LIST_H */

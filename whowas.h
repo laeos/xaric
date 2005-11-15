@@ -9,32 +9,32 @@
 #include "hash.h"
 
 struct whowas_chan_list {
-	struct whowas_chan_list *next;
-	char *channel;
-	struct channel *channellist;
-	time_t time;
+    struct whowas_chan_list *next;
+    char *channel;
+    struct channel *channellist;
+    time_t time;
 };
 
 struct whowas_chan_list_head {
-	struct hash_entry NickListTable[WHOWASLIST_HASHSIZE];
+    struct hash_entry NickListTable[WHOWASLIST_HASHSIZE];
 };
 
 struct whowas_list {
-	struct whowas_list *next;
-	int	has_ops; 	/* true is user split away with opz */
-	char 	*channel;	/* name of channel */
-	time_t 	time;		/* time of split/leave */
-	char	*server1;
-	char	*server2;
-	struct nick_list *nicklist;     /* pointer to nicklist */
-	struct channel *channellist;		
+    struct whowas_list *next;
+    int has_ops;		/* true is user split away with opz */
+    char *channel;		/* name of channel */
+    time_t time;		/* time of split/leave */
+    char *server1;
+    char *server2;
+    struct nick_list *nicklist;	/* pointer to nicklist */
+    struct channel *channellist;
 };
 
 struct whowas_list_head {
-	unsigned long total_hits;
-	unsigned long total_links;
-	unsigned long total_unlinks;
-	struct hash_entry NickListTable[WHOWASLIST_HASHSIZE];
+    unsigned long total_hits;
+    unsigned long total_links;
+    unsigned long total_unlinks;
+    struct hash_entry NickListTable[WHOWASLIST_HASHSIZE];
 };
 
 struct whowas_list *check_whowas_buffer(char *, char *, char *, int);

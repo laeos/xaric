@@ -48,7 +48,7 @@
 
 #define DEF_FORMAT_ALIAS "Alias $[20.]0 $1-"
 #define DEF_FORMAT_ASSIGN "Assign $[20.]0 $1-"
-#define DEF_FORMAT_AWAY "is away: $1-"	
+#define DEF_FORMAT_AWAY "is away: $1-"
 #define DEF_FORMAT_BACK "is back from the dead. Gone $1 hrs $2 min $3 secs"
 #define DEF_FORMAT_BANS_HEADER "#  Channel    SetBy        Sec  Ban"
 #define DEF_FORMAT_BANS "$[2]0 $[10]1 $[10]3 $[-5]numdiff($time() $4)  $2"
@@ -58,14 +58,12 @@
 #define DEF_FORMAT_CHANNEL_SIGNOFF "$G %nSignOff %W$1%n: $3 %K(%n$4-%K)"
 #define DEF_FORMAT_CONNECT "$G Connecting to server $1/%c$2%n"
 
-
 #define DEF_FORMAT_CTCP "%K>%n>%W> %G$1 %K[%g$2%K]%g requested $4- from $3"
 #define DEF_FORMAT_CTCP_FUNC "%K>%n>%W> %G$1 %K[%g$2%K]%g requested $4- from $3"
 #define DEF_FORMAT_CTCP_FUNC_USER "%K>%n>%W> %G$1 %K[%g$2%K]%g requested $4- from you"
 #define DEF_FORMAT_CTCP_UNKNOWN "%K>%n>%W> %G$1 %K[%g$2%K]%g requested unknown ctcp $4- from $3"
 #define DEF_FORMAT_CTCP_UNKNOWN_USER "%K>%n>%W> %G$1 %K[%g$2%K]%g requested unknown ctcp $4- from %g$3"
 #define DEF_FORMAT_CTCP_REPLY "$G %nCTCP %W$3 %nreply from %n$1: $4-"
-
 
 #define DEF_FORMAT_DCC	NULL
 #define DEF_FORMAT_DCC_CONNECT "$G %RDCC%n $1 %nconnection with %W$2%K[%c$4, port $5%K]%n established"
@@ -95,7 +93,6 @@
 #define DEF_FORMAT_SMODE "$G %RServerMode%K/%c$3 %K[%W$4-%K]%n by %W$1"
 #define DEF_FORMAT_MODE_CHANNEL "$G %nmode%K/%c$3 %K[%W$4-%K]%n by %W$1"
 
-
 /* zer0-ized */
 #define DEF_FORMAT_MSG           "%Y[%B$1%Y]%n $3-"
 #define DEF_FORMAT_SEND_MSG      "%Y>%R$1%Y<%n $3-"
@@ -106,7 +103,6 @@
 
 #define DEF_FORMAT_SEND_DCC_CHAT "%Y|%R$1%Y| %n$2-"
 #define DEF_FORMAT_DCC_CHAT      "%Y=%B$1%Y= %n$3-"
-
 
 #define DEF_FORMAT_SCANDIR_LIST_HEADER	"%g***%n File matches:"
 #define DEF_FORMAT_SCANDIR_LIST_LINE	"%g>>>%n $0-"
@@ -131,7 +127,6 @@
 #define DEF_FORMAT_NAMES_BANNER NULL
 #define DEF_FORMAT_NAMES_FOOTER NULL
 
-
 #define DEF_FORMAT_NETADD "$G %nAdded: %W$1 $2"
 #define DEF_FORMAT_NETJOIN "$G %nNetjoined: %W$1 $2"
 #define DEF_FORMAT_NETSPLIT "$G %nNetSplit detected: %W$1%n split from %W$2 %K[%c$0%K]"
@@ -141,10 +136,7 @@
 #define DEF_FORMAT_NICKNAME_USER "%K*%n*%W* %WYou%K(%n$1%K)%n are now known as %c$3"
 #define DEF_FORMAT_NONICK "%W$1%K:%n $3-"
 
-
 #define DEF_FORMAT_NOTE "($0) ($1) ($2) ($3) ($4) ($5-)"
-
-
 
 #define DEF_FORMAT_NOTIFY_SIGNOFF "$G %GSignoff%n by %r$[10]1%n at $0"
 #define DEF_FORMAT_NOTIFY_SIGNOFF_UH "$G %GSignoff%n by %r$1%K!%r$2%K@%r$3%n at $0"
@@ -173,7 +165,6 @@
 #define DEF_FORMAT_SET_NOVALUE "%g$[-30.]0 has no value"
 #define DEF_FORMAT_SIGNOFF "$G %nSignOff: %W$1 %K(%n$3-%K)"
 
-
 #define DEF_FORMAT_SILENCE "$G %RWe are $1 silencing $2 at $0"
 
 #define DEF_FORMAT_TRACE_OPER "%R$1%n %K[%n$3%K]"
@@ -195,9 +186,7 @@
 #define DEF_FORMAT_USERS_HEADER "%K[ %WC%nhannel  %K] [ %WN%wickname  %K] [%n %Wu%wser@host                           %K] [%n %Wl%wevel %K]"
 #define DEF_FORMAT_VERSION "\002Xaric v$0\002 running $1"
 
-
 #define DEF_FORMAT_WALL "%G!%g$1:$2%G!%n $3-"
-
 
 #define DEF_FORMAT_WALLOP "%G!%g$1$2%G!%n $3-"
 #define DEF_FORMAT_WHO "%Y$[10]0 %W$[10]1%w %c$[3]2 %w$3%R@%w$4 ($6-)"
@@ -229,7 +218,6 @@
 #define DEF_FORMAT_NOTIFY_OFF "$[10]0 $[35]1 $[-6]2 $[10]3 $4"
 #define DEF_FORMAT_NOTIFY_ON "$[10]0 $[35]1 $[-6]2 $[10]3 $4"
 
-
 /* Hmm these im not sure where they belong */
 #define DEFAULT_KICK_REASON "Xaric: There can be only one"
 #define DEFAULT_INPUT_PROMPT "%K[%n$C%K] "
@@ -259,6 +247,4 @@
 #define DEFAULT_STATUS_OPER_KILLS "[0;44;36m[[37mnk[36m/[1;37m%K [0;44mok[36m/[1;37m%K[0;44;36m]"
 #define DEFAULT_STATUS_WINDOW "[1;33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 
-
-
-#endif /* format_h__ */
+#endif				/* format_h__ */

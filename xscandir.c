@@ -36,24 +36,23 @@
 # include <sys/types.h>
 #endif
 
-
 /* Small parts shamelessly stolen from ircII help.c */
 #if defined(HAVE_DIRENT_H) || defined(_POSIX_SOURCE)
 # include <dirent.h>
 # define NLENGTH(d) (strlen((d)->d_name))
-#else /* DIRENT || _POSIX_SOURCE */
+#else				/* DIRENT || _POSIX_SOURCE */
 # define dirent direct
 # define NLENGTH(d) ((d)->d_namlen)
 # ifdef HAVE_SYS_NDIR_H
 #  include <sys/ndir.h>
-# endif /* HAVE_SYS_NDIR_H */
+# endif				/* HAVE_SYS_NDIR_H */
 # ifdef HAVE_SYS_DIR_H
 #  include <sys/dir.h>
-# endif /* HAVE_SYS_DIR_H */
+# endif				/* HAVE_SYS_DIR_H */
 # ifdef HAVE_NDIR_H
 #  include <ndir.h>
-# endif /* HAVE_NDIR_H */
-#endif /* HAVE_DIRENT_H || _POSIX_VERSION */
+# endif				/* HAVE_NDIR_H */
+#endif				/* HAVE_DIRENT_H || _POSIX_VERSION */
 
 #include "irc.h"
 #include "ircaux.h"
@@ -68,51 +67,47 @@
 #include "lister.h"
 
 /* sneeky */
-typedef int (*scan_cmp_func)(const void *, const void *);
-typedef int (*select_func)(const struct dirent *d);
+typedef int (*scan_cmp_func) (const void *, const void *);
+typedef int (*select_func) (const struct dirent * d);
 
 /* used by scandir to sort help entries */
-static int
-dcompare (const struct dirent **d1, const struct dirent **d2)
+static int dcompare(const struct dirent **d1, const struct dirent **d2)
 {
-	return strcasecmp( (*d1)->d_name, (*d2)->d_name );
+    return strcasecmp((*d1)->d_name, (*d2)->d_name);
 }
-
 
 /* we use these to keep track of what we should look for */
 static char *prefix_str;
-static int   prefix_len;
+static int prefix_len;
 
 /* might as well find the longest, its easy */
 static int the_longest;
 
 /* used by scandir to select entries */
-static int
-dselect (const struct dirent *d)
+static int dselect(const struct dirent *d)
 {
-	int t;
+    int t;
 
-	if ( *(d->d_name) == '.' )
-		return 0;
+    if (*(d->d_name) == '.')
+	return 0;
 
-	if ( prefix_len ) {
-		if ( strncmp(prefix_str, d->d_name, prefix_len) )
-			return 0;
-	}
+    if (prefix_len) {
+	if (strncmp(prefix_str, d->d_name, prefix_len))
+	    return 0;
+    }
 
-	t = NLENGTH(d);
+    t = NLENGTH(d);
 
-	if(t > the_longest) 
-		the_longest = t;
+    if (t > the_longest)
+	the_longest = t;
 
-	return 1;
+    return 1;
 }
 
 /* return the name from the dentry, for list */
-static const char *
-d_name(void *ent)
+static const char *d_name(void *ent)
 {
-	return ((struct dirent *)ent)->d_name;
+    return ((struct dirent *) ent)->d_name;
 }
 
 /*
@@ -126,57 +121,55 @@ d_name(void *ent)
  *
  */
 
-int 
-xscandir(char *dir, char *prefix, char **ret)
+int xscandir(char *dir, char *prefix, char **ret)
 {
-	struct dirent **list = NULL;
-	int retval = 0;
-	int cnt = 0;
-	int i;
+    struct dirent **list = NULL;
+    int retval = 0;
+    int cnt = 0;
+    int i;
 
-	assert(dir);
-	assert(ret);
+    assert(dir);
+    assert(ret);
 
-	prefix_len = 0;
+    prefix_len = 0;
 
-	if ( prefix ) {
-		prefix_str = prefix;
-		prefix_len = strlen(prefix);
+    if (prefix) {
+	prefix_str = prefix;
+	prefix_len = strlen(prefix);
+    }
+
+    the_longest = 0;
+    cnt = retval = scandir(dir, &list, dselect, (scan_cmp_func) dcompare);
+
+    switch (retval) {
+
+    case -1:
+	*ret = strerror(errno);
+	break;
+    case 0:
+	break;
+
+    case 1:
+	*ret = m_strdup((*list)->d_name);
+	break;
+
+    default:
+	/* hrm. if we get an exact prefix match, we want it */
+	if (prefix_len && strcmp(prefix, (*list)->d_name) == 0) {
+	    *ret = m_strdup((*list)->d_name);
+	    retval = 1;
+	    break;
 	}
 
-	the_longest = 0;
-	cnt = retval = scandir(dir, &list, dselect, (scan_cmp_func) dcompare);
+	put_fmt(FORMAT_SCANDIR_LIST_HEADER_FSET, NULL);
+	display_list_cl((ARRAY *) list, d_name, FORMAT_SCANDIR_LIST_LINE_FSET, retval, the_longest);
+	put_fmt(FORMAT_SCANDIR_LIST_FOOTER_FSET, NULL);
+	break;
+    }
 
-	switch (retval) {
+    for (i = 0; i < cnt; i++)
+	free(list[i]);
+    free(list);
 
-		case -1:
-			*ret = strerror(errno);
-			break;
-		case 0:
-			break;
-
-		case 1: 
-			*ret = m_strdup( (*list)->d_name );
-			break;
-
-		default:
-			/* hrm. if we get an exact prefix match, we want it */
-			if (prefix_len && strcmp(prefix, (*list)->d_name) == 0)  {
-				*ret = m_strdup( (*list)->d_name );
-				retval = 1;
-				break;
-			}
-
-			put_fmt(FORMAT_SCANDIR_LIST_HEADER_FSET, NULL);
-			display_list_cl((ARRAY *) list, d_name, FORMAT_SCANDIR_LIST_LINE_FSET, retval, the_longest);
-			put_fmt(FORMAT_SCANDIR_LIST_FOOTER_FSET, NULL);
-			break;
-	}
-
-	for (i = 0; i < cnt; i++)
-		free(list[i]);
-	free(list);
-
-	return retval;
+    return retval;
 }
-

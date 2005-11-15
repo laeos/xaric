@@ -28,4 +28,4 @@ char *my_next_expr(char **args, char type, int whine);
 char *next_expr_failok(char **args, char type);
 char *next_expr(char **args, char type);
 
-#endif /* expr_h__ */
+#endif				/* expr_h__ */

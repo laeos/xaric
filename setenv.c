@@ -49,144 +49,126 @@
  *
  *      This routine *should* be a static; don't use it.
  */
-__inline static char *
-__findenv (const char *name, int *offset)
+__inline static char *__findenv(const char *name, int *offset)
 {
-	extern char **environ;
-	register int len, i;
-	register const char *np;
-	register char **p, *cp;
+    extern char **environ;
+    register int len, i;
+    register const char *np;
+    register char **p, *cp;
 
-	if (name == NULL || environ == NULL)
-		return (NULL);
-	for (np = name; *np && *np != '='; ++np)
-		continue;
-	len = np - name;
-	for (p = environ; (cp = *p) != NULL; ++p)
-	{
-		for (np = name, i = len; i && *cp; i--)
-			if (*cp++ != *np++)
-				break;
-		if (i == 0 && *cp++ == '=')
-		{
-			*offset = p - environ;
-			return (cp);
-		}
-	}
+    if (name == NULL || environ == NULL)
 	return (NULL);
+    for (np = name; *np && *np != '='; ++np)
+	continue;
+    len = np - name;
+    for (p = environ; (cp = *p) != NULL; ++p) {
+	for (np = name, i = len; i && *cp; i--)
+	    if (*cp++ != *np++)
+		break;
+	if (i == 0 && *cp++ == '=') {
+	    *offset = p - environ;
+	    return (cp);
+	}
+    }
+    return (NULL);
 }
-
 
 #ifdef NEED_GETENV
 /*
  * getenv --
  *      Returns ptr to value associated with name, if any, else NULL.
  */
-char *
-getenv (const char *name)
+char *getenv(const char *name)
 {
-	int offset;
+    int offset;
 
-	return (__findenv (name, &offset));
+    return (__findenv(name, &offset));
 }
-#endif /* NEED_GETENV */
-
+#endif				/* NEED_GETENV */
 
 /* i see some os's have putenv but not setenv? */
 #ifdef NEED_PUTENV
-int 
-putenv (const char *str)
+int putenv(const char *str)
 {
-	char *p, *equal;
-	int rval;
+    char *p, *equal;
+    int rval;
 
-	if ((p = strdup ((char *) str)) == NULL)
-		return (-1);
-	if ((equal = index (p, '=')) == NULL)
-	{
-		(void) free (p);
-		return (-1);
-	}
-	*equal = '\0';
-	rval = setenv (p, equal + 1, 1);
-	(void) free (p);
-	return (rval);
+    if ((p = strdup((char *) str)) == NULL)
+	return (-1);
+    if ((equal = index(p, '=')) == NULL) {
+	(void) free(p);
+	return (-1);
+    }
+    *equal = '\0';
+    rval = setenv(p, equal + 1, 1);
+    (void) free(p);
+    return (rval);
 }
-#endif /* NEED_PUTENV */
+#endif				/* NEED_PUTENV */
 
 /*
  * setenv --
  *      Set the value of the environmental variable "name" to be
  *      "value".  If rewrite is set, replace any current value.
  */
-int 
-setenv (const char *name, const char *value, int rewrite)
+int setenv(const char *name, const char *value, int rewrite)
 {
-	extern char **environ;
-	static int alloced;	/* if allocated space before */
-	register char *c;
-	int l_value, offset;
+    extern char **environ;
+    static int alloced;		/* if allocated space before */
+    register char *c;
+    int l_value, offset;
 
-	if (*value == '=')	/* no `=' in value */
-		++value;
-	l_value = strlen (value);
-	if ((c = __findenv (name, &offset)))
-	{			/* find if already exists */
-		if (!rewrite)
-			return (0);
-		if (strlen (c) >= l_value)
-		{		/* old larger; copy over */
-			while ((*c++ = *value++));
-			return (0);
-		}
+    if (*value == '=')		/* no `=' in value */
+	++value;
+    l_value = strlen(value);
+    if ((c = __findenv(name, &offset))) {	/* find if already exists */
+	if (!rewrite)
+	    return (0);
+	if (strlen(c) >= l_value) {	/* old larger; copy over */
+	    while ((*c++ = *value++)) ;
+	    return (0);
 	}
-	else
-	{			/* create new slot */
-		register int cnt;
-		register char **p;
+    } else {			/* create new slot */
+	register int cnt;
+	register char **p;
 
-		for (p = environ, cnt = 0; *p; ++p, ++cnt);
-		if (alloced)
-		{		/* just increase size */
-			environ = (char **) realloc ((char *) environ,
-				    (size_t) (sizeof (char *) * (cnt + 2)));
-			if (!environ)
-				return (-1);
-		}
-		else
-		{		/* get new space */
-			alloced = 1;	/* copy old entries into it */
-			p = malloc ((size_t) (sizeof (char *) * (cnt + 2)));
-			if (!p)
-				return (-1);
-			memcpy (p, environ, cnt * sizeof (char *));
-			environ = p;
-		}
-		environ[cnt + 1] = NULL;
-		offset = cnt;
-	}
-	for (c = (char *) name; *c && *c != '='; ++c);	/* no `=' in name */
-	if (!(environ[offset] =	/* name + `=' + value */
-	      malloc ((size_t) ((int) (c - name) + l_value + 2))))
+	for (p = environ, cnt = 0; *p; ++p, ++cnt) ;
+	if (alloced) {		/* just increase size */
+	    environ = (char **) realloc((char *) environ, (size_t) (sizeof(char *) * (cnt + 2)));
+	    if (!environ)
 		return (-1);
-	for (c = environ[offset]; (*c = *name++) && *c != '='; ++c);
-	for (*c++ = '='; (*c++ = *value++););
-	return (0);
+	} else {		/* get new space */
+	    alloced = 1;	/* copy old entries into it */
+	    p = malloc((size_t) (sizeof(char *) * (cnt + 2)));
+	    if (!p)
+		return (-1);
+	    memcpy(p, environ, cnt * sizeof(char *));
+	    environ = p;
+	}
+	environ[cnt + 1] = NULL;
+	offset = cnt;
+    }
+    for (c = (char *) name; *c && *c != '='; ++c) ;	/* no `=' in name */
+    if (!(environ[offset] =	/* name + `=' + value */
+	  malloc((size_t) ((int) (c - name) + l_value + 2))))
+	return (-1);
+    for (c = environ[offset]; (*c = *name++) && *c != '='; ++c) ;
+    for (*c++ = '='; (*c++ = *value++);) ;
+    return (0);
 }
 
 /*
  * unsetenv(name) --
  *      Delete environmental variable "name".
  */
-void 
-unsetenv (const char *name)
+void unsetenv(const char *name)
 {
-	extern char **environ;
-	register char **p;
-	int offset;
+    extern char **environ;
+    register char **p;
+    int offset;
 
-	while (__findenv (name, &offset))	/* if set multiple times */
-		for (p = &environ[offset];; ++p)
-			if (!(*p = *(p + 1)))
-				break;
+    while (__findenv(name, &offset))	/* if set multiple times */
+	for (p = &environ[offset];; ++p)
+	    if (!(*p = *(p + 1)))
+		break;
 }

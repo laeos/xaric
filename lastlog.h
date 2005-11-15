@@ -43,18 +43,18 @@
 
 # define LOG_DEFAULT	LOG_NONE
 
-	void	set_lastlog_level(Window *, char *, int);
-unsigned long	set_lastlog_msg_level(unsigned long);
-	void	set_lastlog_size(Window *, char *, int);
-	void	set_notify_level(Window *, char *, int);
-	void	set_msglog_level(Window *, char *, int);
-	void	lastlog(char *, char *, char *, char *);
-	void	add_to_lastlog(Window *, const char *);
-	char	*bits_to_lastlog_level(unsigned long);
-unsigned long	real_lastlog_level(void);
-unsigned long	real_notify_level(void);
-unsigned long	parse_lastlog_level(char *);
-	int	islogged(Window *);
-extern        void    remove_from_lastlog     (Window *);
+void set_lastlog_level(Window *, char *, int);
+unsigned long set_lastlog_msg_level(unsigned long);
+void set_lastlog_size(Window *, char *, int);
+void set_notify_level(Window *, char *, int);
+void set_msglog_level(Window *, char *, int);
+void lastlog(char *, char *, char *, char *);
+void add_to_lastlog(Window *, const char *);
+char *bits_to_lastlog_level(unsigned long);
+unsigned long real_lastlog_level(void);
+unsigned long real_notify_level(void);
+unsigned long parse_lastlog_level(char *);
+int islogged(Window *);
+extern void remove_from_lastlog(Window *);
 
-#endif /* __lastlog_h_ */
+#endif				/* __lastlog_h_ */

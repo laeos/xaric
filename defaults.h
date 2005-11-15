@@ -16,7 +16,7 @@
 #ifndef __config_h_
 #define __config_h_
 
-#include "build.h"  /* for path to help files */
+#include "build.h"		/* for path to help files */
 
 /*
  * Set your favorite default server list here.  This list should be a
@@ -30,7 +30,6 @@
 #define DEFAULT_SERVER	    "ircd.grateful.org:6667"
 #endif
 
-
 /*
  * Define this to be the number of seconds that you want the client
  * to block on a server-connection.  I found it annoying that it was
@@ -40,7 +39,6 @@
  * This is ONLY for /server and 'server-like' connections, not for DCC.
  */
 #define CONNECT_TIMEOUT 20
-
 
 /*
  * Set the following to 1 if you wish for IRCII not to disturb the tty's flow
@@ -57,7 +55,6 @@
  * it if you need to. If commented out, the entire gecos field is used. 
  */
 #define GECOS_DELIMITER ','
-
 
 /* Thanks to Allanon a very useful feature, when this is defined, ircII will
  * be able to read help files in compressed format (it will recognize the .Z)
@@ -100,14 +97,12 @@
 
 #undef LATIN1
 
-
 /* If you define REVERSE_WHITE_BLACK, then the format codes for black and
  * white color are reversed. (%W, %w is bold black and black, %K, %k is bold
  * white and white). This way the default format-strings are readable on
  * a display with white background and black foreground.
- */ 
+ */
 #undef REVERSE_WHITE_BLACK
-
 
 /* On some channels mass modes can be confusing and in some case 
  * spectacular so in the interest of keeping sanity, Jordy added this 
@@ -116,8 +111,7 @@
  */
 #define COMPRESS_MODES
 
-
-/* The default help file to use */ 
+/* The default help file to use */
 #define DEFAULT_HELP_PATH XARIC_DATA_PATH "/help"
 
 /*
@@ -228,7 +222,6 @@
 #define DEFAULT_DCC_LIMIT 10
 #define DEFAULT_LLOOK 0
 
-
 #define DEFAULT_AUTO_REJOIN 0
 #define DEFAULT_DEOPFLOOD 1
 #define DEFAULT_DEOPFLOOD_TIME 30
@@ -254,7 +247,7 @@
 #define DEFAULT_DISPATCH_UNKNOWN_COMMANDS 0
 #define DEFAULT_SHOW_NUMERICS_STR "***"
 
-#define DEFAULT_USERMODE "+i"  /* change this to the default usermode */
+#define DEFAULT_USERMODE "+i"	/* change this to the default usermode */
 #define DEFAULT_OPERMODE "swfck"
 
 /* File in home directory to contain specific stuff */
@@ -265,11 +258,9 @@
 
 #define EXEC_COMMAND
 
-				 
 #define HARD_REFRESH
 
-
-  /*
+  /* 
    * Experimental_match_hack is defined if you want the backslash to be
    * considered a real, literal character in a pattern matching unless it
    * followed by a special wildcard character (eg, *, %, or ?).
@@ -277,7 +268,6 @@
    * This feature may become the default or may go away based on how
    * all this works out.
    */
-  #define EXPERIMENTAL_MATCH_HACK
-    
+#define EXPERIMENTAL_MATCH_HACK
 
-#endif /* __config_h_ */
+#endif				/* __config_h_ */

@@ -13,7 +13,7 @@
 
 enum VAR_TYPES {
 #include "vars_gen.h"
-NUMBER_OF_VARIABLES
+    NUMBER_OF_VARIABLES
 };
 
 #define USERINFO_VAR USER_INFORMATION_VAR
@@ -21,31 +21,26 @@ NUMBER_OF_VARIABLES
 #define CLIENTINFO_VAR CLIENT_INFORMATION_VAR
 #define MSGLOGFILE_VAR MSGLOG_FILE_VAR
 
-
-
 #define get_bool_var get_int_var
 #define get_char_var get_int_var
 
+char *get_string_var(enum VAR_TYPES);
+int get_int_var(enum VAR_TYPES);
+void set_string_var(enum VAR_TYPES, char *);
+void set_int_var(enum VAR_TYPES, unsigned int);
+void init_variables(void);
+int do_boolean(char *, int *);
+void set_var_value(int, char *);
+void save_variables(FILE * fp, int do_all);
+char *make_string_var(char *);
+int charset_size(void);
+void clear_sets(void);
+void set_highlight_char(Window *, char *, int);
 
-	char	*get_string_var(enum VAR_TYPES);
-	int	get_int_var(enum VAR_TYPES);
-	void	set_string_var(enum VAR_TYPES, char *);
-	void	set_int_var(enum VAR_TYPES, unsigned int);
-	void	init_variables(void);
-	int	do_boolean(char *, int *);
-	void	set_var_value(int, char *);
-	void	save_variables (FILE * fp, int do_all);
-	char	*make_string_var(char *);
-	int	charset_size(void);
-	void	clear_sets(void);
-	void	set_highlight_char(Window *, char *, int);
-
-extern	char	*var_settings[];
-
+extern char *var_settings[];
 
 	/* in keys.c */
-	void	clear_bindings(void);
-
+void clear_bindings(void);
 
 /* var_settings indexes  also used in display.c for highlights */
 #define OFF 0
@@ -66,4 +61,4 @@ extern	char	*var_settings[];
 #define VIF_GLOBAL	0x02
 #define VIF_PENDING	0x08
 
-#endif /* __vars_h_ */
+#endif				/* __vars_h_ */

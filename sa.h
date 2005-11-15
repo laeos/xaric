@@ -110,27 +110,27 @@ typedef enum {
 
 /* return codes */
 typedef enum {
-    SA_OK,      /* Everything Ok                */
-    SA_ERR_ARG, /* Invalid Argument             */
-    SA_ERR_USE, /* Invalid Use Or Context       */
-    SA_ERR_MEM, /* Not Enough Memory            */
-    SA_ERR_MTC, /* Matching Failed              */
-    SA_ERR_EOF, /* End Of Communication         */
-    SA_ERR_TMT, /* Communication Timeout        */
-    SA_ERR_SYS, /* Operating System Error       */
-    SA_ERR_NET, /* Networking Error             */
-    SA_ERR_FMT, /* Formatting Error             */
-    SA_ERR_IMP, /* Implementation Not Available */
-    SA_ERR_INT  /* Internal Error               */
+    SA_OK,			/* Everything Ok */
+    SA_ERR_ARG,			/* Invalid Argument */
+    SA_ERR_USE,			/* Invalid Use Or Context */
+    SA_ERR_MEM,			/* Not Enough Memory */
+    SA_ERR_MTC,			/* Matching Failed */
+    SA_ERR_EOF,			/* End Of Communication */
+    SA_ERR_TMT,			/* Communication Timeout */
+    SA_ERR_SYS,			/* Operating System Error */
+    SA_ERR_NET,			/* Networking Error */
+    SA_ERR_FMT,			/* Formatting Error */
+    SA_ERR_IMP,			/* Implementation Not Available */
+    SA_ERR_INT			/* Internal Error */
 } sa_rc_t;
 
 /* list of timeouts */
 typedef enum {
-    SA_TIMEOUT_ALL      = -1,
-    SA_TIMEOUT_ACCEPT   = 0,
-    SA_TIMEOUT_CONNECT  = 1,
-    SA_TIMEOUT_READ     = 2,
-    SA_TIMEOUT_WRITE    = 3
+    SA_TIMEOUT_ALL = -1,
+    SA_TIMEOUT_ACCEPT = 0,
+    SA_TIMEOUT_CONNECT = 1,
+    SA_TIMEOUT_READ = 2,
+    SA_TIMEOUT_WRITE = 3
 } sa_timeout_t;
 
 /* list of buffers */
@@ -141,11 +141,11 @@ typedef enum {
 
 /* list of options */
 typedef enum {
-    SA_OPTION_NAGLE     = 0,
-    SA_OPTION_LINGER    = 1,
+    SA_OPTION_NAGLE = 0,
+    SA_OPTION_LINGER = 1,
     SA_OPTION_REUSEADDR = 2,
     SA_OPTION_REUSEPORT = 3,
-    SA_OPTION_NONBLOCK  = 4
+    SA_OPTION_NONBLOCK = 4
 } sa_option_t;
 
 /* list of system calls */
@@ -163,51 +163,50 @@ typedef enum {
 extern const char sa_id[];
 
 /* address object operations */
-extern sa_rc_t sa_addr_create  (sa_addr_t **__saa);
-extern sa_rc_t sa_addr_destroy (sa_addr_t  *__saa);
+extern sa_rc_t sa_addr_create(sa_addr_t ** __saa);
+extern sa_rc_t sa_addr_destroy(sa_addr_t * __saa);
 
 /* address operations */
-extern sa_rc_t sa_addr_u2a     (sa_addr_t       *__saa, const char *__uri, ...);
-extern sa_rc_t sa_addr_s2a     (sa_addr_t       *__saa, const struct sockaddr *__sabuf, socklen_t __salen);
-extern sa_rc_t sa_addr_a2u     (const sa_addr_t *__saa, char **__uri);
-extern sa_rc_t sa_addr_a2s     (const sa_addr_t *__saa, struct sockaddr **__sabuf, socklen_t *__salen);
-extern sa_rc_t sa_addr_match   (const sa_addr_t *__saa1, const sa_addr_t *__saa2, int __prefixlen);
+extern sa_rc_t sa_addr_u2a(sa_addr_t * __saa, const char *__uri, ...);
+extern sa_rc_t sa_addr_s2a(sa_addr_t * __saa, const struct sockaddr *__sabuf, socklen_t __salen);
+extern sa_rc_t sa_addr_a2u(const sa_addr_t * __saa, char **__uri);
+extern sa_rc_t sa_addr_a2s(const sa_addr_t * __saa, struct sockaddr **__sabuf, socklen_t * __salen);
+extern sa_rc_t sa_addr_match(const sa_addr_t * __saa1, const sa_addr_t * __saa2, int __prefixlen);
 
 /* socket object operations */
-extern sa_rc_t sa_create       (sa_t **__sa);
-extern sa_rc_t sa_destroy      (sa_t  *__sa);
+extern sa_rc_t sa_create(sa_t ** __sa);
+extern sa_rc_t sa_destroy(sa_t * __sa);
 
 /* socket parameter operations */
-extern sa_rc_t sa_type         (sa_t  *__sa, sa_type_t    __id);
-extern sa_rc_t sa_timeout      (sa_t  *__sa, sa_timeout_t __id, long __sec, long __usec);
-extern sa_rc_t sa_buffer       (sa_t  *__sa, sa_buffer_t  __id, size_t __size);
-extern sa_rc_t sa_option       (sa_t  *__sa, sa_option_t  __id, ...);
-extern sa_rc_t sa_syscall      (sa_t  *__sa, sa_syscall_t __id, void (*__fptr)(void), void *__fctx);
+extern sa_rc_t sa_type(sa_t * __sa, sa_type_t __id);
+extern sa_rc_t sa_timeout(sa_t * __sa, sa_timeout_t __id, long __sec, long __usec);
+extern sa_rc_t sa_buffer(sa_t * __sa, sa_buffer_t __id, size_t __size);
+extern sa_rc_t sa_option(sa_t * __sa, sa_option_t __id, ...);
+extern sa_rc_t sa_syscall(sa_t * __sa, sa_syscall_t __id, void (*__fptr) (void), void *__fctx);
 
 /* socket connection operations */
-extern sa_rc_t sa_bind         (sa_t  *__sa, const sa_addr_t *__laddr);
-extern sa_rc_t sa_connect      (sa_t  *__sa, const sa_addr_t *__raddr);
-extern sa_rc_t sa_listen       (sa_t  *__sa, int __backlog);
-extern sa_rc_t sa_accept       (sa_t  *__sa, sa_addr_t **__caddr, sa_t **__csa);
-extern sa_rc_t sa_getremote    (sa_t  *__sa, sa_addr_t **__raddr);
-extern sa_rc_t sa_getlocal     (sa_t  *__sa, sa_addr_t **__laddr);
-extern sa_rc_t sa_getfd        (sa_t  *__sa, int *__fd);
-extern sa_rc_t sa_shutdown     (sa_t  *__sa, const char *__flags);
+extern sa_rc_t sa_bind(sa_t * __sa, const sa_addr_t * __laddr);
+extern sa_rc_t sa_connect(sa_t * __sa, const sa_addr_t * __raddr);
+extern sa_rc_t sa_listen(sa_t * __sa, int __backlog);
+extern sa_rc_t sa_accept(sa_t * __sa, sa_addr_t ** __caddr, sa_t ** __csa);
+extern sa_rc_t sa_getremote(sa_t * __sa, sa_addr_t ** __raddr);
+extern sa_rc_t sa_getlocal(sa_t * __sa, sa_addr_t ** __laddr);
+extern sa_rc_t sa_getfd(sa_t * __sa, int *__fd);
+extern sa_rc_t sa_shutdown(sa_t * __sa, const char *__flags);
 
 /* socket input/output operations (stream communication) */
-extern sa_rc_t sa_read         (sa_t  *__sa, char       *__buf, size_t __buflen, size_t *__bufdone);
-extern sa_rc_t sa_readln       (sa_t  *__sa, char       *__buf, size_t __buflen, size_t *__bufdone);
-extern sa_rc_t sa_write        (sa_t  *__sa, const char *__buf, size_t __buflen, size_t *__bufdone);
-extern sa_rc_t sa_writef       (sa_t  *__sa, const char *__fmt, ...);
-extern sa_rc_t sa_flush        (sa_t  *__sa);
+extern sa_rc_t sa_read(sa_t * __sa, char *__buf, size_t __buflen, size_t * __bufdone);
+extern sa_rc_t sa_readln(sa_t * __sa, char *__buf, size_t __buflen, size_t * __bufdone);
+extern sa_rc_t sa_write(sa_t * __sa, const char *__buf, size_t __buflen, size_t * __bufdone);
+extern sa_rc_t sa_writef(sa_t * __sa, const char *__fmt, ...);
+extern sa_rc_t sa_flush(sa_t * __sa);
 
 /* socket input/output operations (datagram communication) */
-extern sa_rc_t sa_recv         (sa_t  *__sa, sa_addr_t **__raddr, char       *__buf, size_t __buflen, size_t *__bufdone);
-extern sa_rc_t sa_send         (sa_t  *__sa, sa_addr_t  *__raddr, const char *__buf, size_t __buflen, size_t *__bufdone);
-extern sa_rc_t sa_sendf        (sa_t  *__sa, sa_addr_t  *__raddr, const char *__fmt, ...);
+extern sa_rc_t sa_recv(sa_t * __sa, sa_addr_t ** __raddr, char *__buf, size_t __buflen, size_t * __bufdone);
+extern sa_rc_t sa_send(sa_t * __sa, sa_addr_t * __raddr, const char *__buf, size_t __buflen, size_t * __bufdone);
+extern sa_rc_t sa_sendf(sa_t * __sa, sa_addr_t * __raddr, const char *__fmt, ...);
 
 /* error handling operations */
-extern char   *sa_error        (sa_rc_t __rv);
+extern char *sa_error(sa_rc_t __rv);
 
-#endif /* __SA_H__ */
-
+#endif				/* __SA_H__ */

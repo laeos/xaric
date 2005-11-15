@@ -12,7 +12,7 @@
  */
 #define QUOTE_CHAR '\\'
 
-extern char	*line_thing;
+extern char *line_thing;
 
 #define STRING_CHANNEL '+'
 #define MULTI_CHANNEL '#'
@@ -38,15 +38,15 @@ extern char	*line_thing;
 #  include <sys/time.h>
 # else
 #  include <time.h>
-# endif /* HAVE_SYS_TIME_H */
-#endif /* TIME_WITH_SYS_TIME */
+# endif				/* HAVE_SYS_TIME_H */
+#endif				/* TIME_WITH_SYS_TIME */
 
 #ifdef HAVE_SYS_FCNTL_H
 # include <sys/fcntl.h>
 #else
-  #ifdef HAVE_FCNTL_H
-  # include <fcntl.h> 
-  #endif /* HAVE_FCNTL_H */
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif				/* HAVE_FCNTL_H */
 #endif
 
 #include <stdarg.h>
@@ -79,13 +79,13 @@ extern char	*line_thing;
 #include "newio.h"
 
 /* these define what characters do, inverse, underline, bold and all off */
-#define REV_TOG		'\026'		/* ^V */
+#define REV_TOG		'\026'	/* ^V */
 #define REV_TOG_STR	"\026"
-#define UND_TOG		'\037'		/* ^_ */
+#define UND_TOG		'\037'	/* ^_ */
 #define UND_TOG_STR	"\037"
-#define BOLD_TOG	'\002'		/* ^B */
+#define BOLD_TOG	'\002'	/* ^B */
 #define BOLD_TOG_STR	"\002"
-#define ALL_OFF		'\017'		/* ^O */
+#define ALL_OFF		'\017'	/* ^O */
 #define ALL_OFF_STR	"\017"
 
 #define IRCD_BUFFER_SIZE	512
@@ -132,68 +132,61 @@ extern char	*line_thing;
  * declared in irc.c 
  */
 
+extern char *cut_buffer;
+extern char oper_command;
+extern int irc_port;
+extern int current_on_hook;
+extern char *joined_nick;
+extern char *public_nick;
+extern char empty_str[];
+extern char zero_str[];
+extern char one_str[];
+extern char on_str[];
+extern char off_str[];
+extern char space_str[];
 
-
-
-
-
-extern	char	*cut_buffer;
-extern	char	oper_command;
-extern	int	irc_port;
-extern	int	current_on_hook;
-extern	char	*joined_nick;
-extern	char	*public_nick;
-extern	char	empty_str[];
-extern	char	zero_str[];
-extern	char	one_str[];
-extern	char	on_str[];
-extern	char	off_str[];
-extern	char	space_str[];
-
-extern  char	*convertstring;
-extern	char	nickname[];
-extern	char	*ircrc_file;
-extern	char	*bircrc_file;
-extern	char	*LocalHostName;
-extern	char	hostname[];
-extern	char	realname[];
-extern	char	username[];
-extern	char	*send_umode;
-extern	int	away_set;
-extern	int	background;
-extern	char	*my_path;
-extern	char	*args_str;
-extern	char	*invite_channel;
-extern	int	who_mask;
-extern	char	*who_name;
-extern	char	*who_host;
-extern	char	*who_server;
-extern	char	*who_file;
-extern	char	*who_nick;
-extern	char	*who_real;
-extern	int	use_input;
-extern	time_t	idle_time;
-extern	int	waiting_out;
-extern	int	waiting_in;
-extern	char	wait_nick[];
-extern	char	lame_wait_nick[];
-extern	char	**environ;
-extern	int	current_numeric;
-extern	int	quick_startup;
-extern	int	strip_ansi_in_echo;
-extern	int	need_redraw;
-extern	char *	prog_name;
+extern char *convertstring;
+extern char nickname[];
+extern char *ircrc_file;
+extern char *bircrc_file;
+extern char *LocalHostName;
+extern char hostname[];
+extern char realname[];
+extern char username[];
+extern char *send_umode;
+extern int away_set;
+extern int background;
+extern char *my_path;
+extern char *args_str;
+extern char *invite_channel;
+extern int who_mask;
+extern char *who_name;
+extern char *who_host;
+extern char *who_server;
+extern char *who_file;
+extern char *who_nick;
+extern char *who_real;
+extern int use_input;
+extern time_t idle_time;
+extern int waiting_out;
+extern int waiting_in;
+extern char wait_nick[];
+extern char lame_wait_nick[];
+extern char **environ;
+extern int current_numeric;
+extern int quick_startup;
+extern int strip_ansi_in_echo;
+extern int need_redraw;
+extern char *prog_name;
 
 extern struct channel *statchan_list;
-extern	char	MyHostName[];
-extern	struct	in_addr MyHostAddr;
-extern	struct	in_addr LocalHostAddr;
-extern	int	cpu_saver;
-extern	struct	in_addr	local_ip_address;
-
+extern char MyHostName[];
+extern struct in_addr MyHostAddr;
+extern struct in_addr LocalHostAddr;
+extern int cpu_saver;
+extern struct in_addr local_ip_address;
 
 int wild_match(char *, char *);
-
 
 char get_a_char(void);
 void free_display(Window *);
@@ -204,23 +197,20 @@ void load_scripts(void);
 void display_name(int j);
 
 /* signals.c */
-void signals_init (void);
-
+void signals_init(void);
 
 /* irc.c */
 void get_line_return(char unused, char *not_used);
-void get_line(char *prompt, int new_input, void (*func)(char, char *));
+void get_line(char *prompt, int new_input, void (*func) (char, char *));
 char get_a_char(void);
 void io(const char *what);
 void irc_exit(char *reason, char *formatted);
 
 extern time_t start_time;
 
-char	*getenv(const char *);
+char *getenv(const char *);
 
 /* xscandir.c */
 int xscandir(char *dir, char *prefix, char **ret);
 
-
-
-#endif /* __irc_h__ */
+#endif				/* __irc_h__ */

@@ -47,72 +47,67 @@
 
 static char *org_nick;
 
-static void
-change_orig_nick (void)
+static void change_orig_nick(void)
 {
-	change_server_nickname(SERVER(from_server), org_nick);
-	bitchsay("Regained nick [%s]", org_nick);
-	new_free(&org_nick);
-	update_all_status(curr_scr_win, NULL, 0);
-	update_input(UPDATE_ALL);
+    change_server_nickname(SERVER(from_server), org_nick);
+    bitchsay("Regained nick [%s]", org_nick);
+    new_free(&org_nick);
+    update_all_status(curr_scr_win, NULL, 0);
+    update_input(UPDATE_ALL);
 }
 
 static int delay_gain_nick(void *);
 
-static void gain_nick (WhoisStuff *stuff, char *nick, char *args)
+static void gain_nick(WhoisStuff * stuff, char *nick, char *args)
 {
-	if (!org_nick)
-		return;
-	if (!stuff || (stuff->nick  && !strcmp(stuff->user, "<UNKNOWN>") && !strcmp(stuff->host, "<UNKNOWN>")))
-	{
-		change_orig_nick();
-		return;
-	}
-	if (get_int_var(ORIGNICK_TIME_VAR) > 0)
-		add_timer("", get_int_var(ORIGNICK_TIME_VAR), 1, delay_gain_nick, NULL, NULL);
+    if (!org_nick)
+	return;
+    if (!stuff || (stuff->nick && !strcmp(stuff->user, "<UNKNOWN>") && !strcmp(stuff->host, "<UNKNOWN>"))) {
+	change_orig_nick();
+	return;
+    }
+    if (get_int_var(ORIGNICK_TIME_VAR) > 0)
+	add_timer("", get_int_var(ORIGNICK_TIME_VAR), 1, delay_gain_nick, NULL, NULL);
 }
 
 static int delay_gain_nick(void *arg)
 {
-	
-	if (org_nick && from_server != -1)
-		add_to_userhost_queue(org_nick, gain_nick, "%s", org_nick);
-	return 0;
+
+    if (org_nick && from_server != -1)
+	add_to_userhost_queue(org_nick, gain_nick, "%s", org_nick);
+    return 0;
 }
 
 void check_orig_nick(char *nick)
 {
-	if (org_nick && !my_stricmp(nick, org_nick))
-		change_orig_nick();
+    if (org_nick && !my_stricmp(nick, org_nick))
+	change_orig_nick();
 }
 
 void cmd_orig_nick(struct command *cmd, char *args)
 {
-	char *nick;
+    char *nick;
 
-	if (!args || !*args) {
-		userage (cmd->name, cmd->qhelp);
-		return;
-	}
-	nick = next_arg(args, &args);
-	if (nick && *nick == '-') {
-		if (!org_nick)
-			bitchsay("Not trying to gain a nick");
-		else {
-			bitchsay("Removing gain nick [%s]", org_nick);
-			new_free(&org_nick);
-		}
-	}
+    if (!args || !*args) {
+	userage(cmd->name, cmd->qhelp);
+	return;
+    }
+    nick = next_arg(args, &args);
+    if (nick && *nick == '-') {
+	if (!org_nick)
+	    bitchsay("Not trying to gain a nick");
 	else {
-		if (nick && org_nick && !my_stricmp(nick, org_nick))
-			bitchsay("Already attempting that nick %s", nick);
-		else if ((nick = check_nickname(nick))) {
-			malloc_strcpy(&org_nick, nick);
-			add_to_userhost_queue(org_nick, gain_nick, "%s", org_nick);
-			bitchsay("Trying to regain nick [%s]", org_nick);
-		}
-		else
-			bitchsay("Nickname was all bad chars");
+	    bitchsay("Removing gain nick [%s]", org_nick);
+	    new_free(&org_nick);
 	}
+    } else {
+	if (nick && org_nick && !my_stricmp(nick, org_nick))
+	    bitchsay("Already attempting that nick %s", nick);
+	else if ((nick = check_nickname(nick))) {
+	    malloc_strcpy(&org_nick, nick);
+	    add_to_userhost_queue(org_nick, gain_nick, "%s", org_nick);
+	    bitchsay("Trying to regain nick [%s]", org_nick);
+	} else
+	    bitchsay("Nickname was all bad chars");
+    }
 }
-

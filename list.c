@@ -74,10 +74,10 @@ void add_to_list_ext(struct list **list, struct list *add, cmp_fn * cmp_func)
     struct list *last;
 
     if (!cmp_func)
-	cmp_func = (cmp_fn *)add_list_stricmp;
+	cmp_func = (cmp_fn *) add_list_stricmp;
     last = NULL;
     for (tmp = *list; tmp; tmp = tmp->next) {
-	if (cmp_func(tmp, (void *)add) > 0)
+	if (cmp_func(tmp, (void *) add) > 0)
 	    break;
 	last = tmp;
     }

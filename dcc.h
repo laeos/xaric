@@ -49,48 +49,45 @@
 #define DCC_PACKETID  0xfeab
 #define MAX_DCC_BLOCK_SIZE 8192
 
-	void	register_dcc_offer(char *, char *, char *, char *, char *, char *, char *, char *);
-	void	process_dcc(char *);
-	char	*dcc_raw_connect(char *, u_short);
-	char	*dcc_raw_listen(int);
-	void	dcc_list(char *, char *);
-	void	dcc_chat_transmit(char *, char *, char *, char *);
-	void	dcc_message_transmit(char *, char *, char *, int, int, char *, int);
-	void	close_all_dcc(void);
-	void	dcc_check(fd_set *, fd_set *);
-	int	dcc_active(char *);
-	void	dcc_reject(char *, char *, char *);
-	void	set_dcc_bits(fd_set *, fd_set *);
-	void	dcc_sendfrom_queue(void);	
-	void	dcc_check_idle(void);
-	void	dcc_glist(char *, char *);
-	void	dcc_chatbot(char *, char *);
-DCC_list	*dcc_searchlist(char *, char *, int, int, char *, char *, int);
-	void	dcc_chat_crash_transmit(char *, char *);
-	int	dcc_erase(DCC_list *);
-	void	dcc_chat(char *, char *);
-	void	dcc_filesend(char *, char *);
-	char	*dcc_time(time_t);
-	void	multiget(char *, char *);
-	void	multisend(char *, char*);
-	void	dcc_resend(char *, char *);
-	void	dcc_regetfile(char *, char *);
-	int	dcc_activebot(char *);
-	void	dcc_bot_transmit(char *, char *, char *);
-	void	dcc_raw_transmit(char *, char *, char *);
-	int	dcc_activeraw(char *);
-	char *DCC_get_current_transfer(void);
+void register_dcc_offer(char *, char *, char *, char *, char *, char *, char *, char *);
+void process_dcc(char *);
+char *dcc_raw_connect(char *, u_short);
+char *dcc_raw_listen(int);
+void dcc_list(char *, char *);
+void dcc_chat_transmit(char *, char *, char *, char *);
+void dcc_message_transmit(char *, char *, char *, int, int, char *, int);
+void close_all_dcc(void);
+void dcc_check(fd_set *, fd_set *);
+int dcc_active(char *);
+void dcc_reject(char *, char *, char *);
+void set_dcc_bits(fd_set *, fd_set *);
+void dcc_sendfrom_queue(void);
+void dcc_check_idle(void);
+void dcc_glist(char *, char *);
+void dcc_chatbot(char *, char *);
+DCC_list *dcc_searchlist(char *, char *, int, int, char *, char *, int);
+void dcc_chat_crash_transmit(char *, char *);
+int dcc_erase(DCC_list *);
+void dcc_chat(char *, char *);
+void dcc_filesend(char *, char *);
+char *dcc_time(time_t);
+void multiget(char *, char *);
+void multisend(char *, char *);
+void dcc_resend(char *, char *);
+void dcc_regetfile(char *, char *);
+int dcc_activebot(char *);
+void dcc_bot_transmit(char *, char *, char *);
+void dcc_raw_transmit(char *, char *, char *);
+int dcc_activeraw(char *);
+char *DCC_get_current_transfer(void);
 
-		                	                        
-	extern	DCC_list *ClientList;
-	extern	unsigned int send_count_stat;
-	extern	unsigned int get_count_stat;
+extern DCC_list *ClientList;
+extern unsigned int send_count_stat;
+extern unsigned int get_count_stat;
 
+void dcc_ftpopen(char *, char *);
+int dcc_ftpcommand(char *, char *);
+int check_dcc_list(char *);
+int dcc_exempt_save(FILE *);
 
-
-	void	dcc_ftpopen(char *, char *);
-	int	dcc_ftpcommand(char *, char *);
-	int	check_dcc_list(char *);
-	int	dcc_exempt_save(FILE *);
-							
-#endif /* __dcc_h_ */
+#endif				/* __dcc_h_ */

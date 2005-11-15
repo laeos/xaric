@@ -58,4 +58,4 @@ void clear_sorted_nicklist(struct nick_list **list);
 struct flood *add_name_to_floodlist(char *name, char *channel, struct hash_entry *list, unsigned int size);
 struct flood *find_name_in_floodlist(char *name, struct hash_entry *list, unsigned int size, int remove);
 
-#endif	/* HASH_H */
+#endif				/* HASH_H */

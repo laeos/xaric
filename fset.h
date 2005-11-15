@@ -27,22 +27,21 @@
  * All of the formats. Index into array in xformats.c so be careful!
  */
 
-typedef enum
-{
+typedef enum {
 
 /* these are automagicly generated from fset.c by the Makefile. */
-#include "fset_gen.h" 
+#include "fset_gen.h"
 
-	NUMBER_OF_FSET
+    NUMBER_OF_FSET
 } xformat;
 
 #define get_fset_var	get_format
 
 const char *get_format(xformat which);
 unsigned int get_format_len(xformat which);
-int save_formats(FILE *outfile);
+int save_formats(FILE * outfile);
 char *get_format_byname(const char *name);
 void cmd_freset(struct command *cmd, char *args);
 void cmd_fset(struct command *cmd, char *args);
 
-#endif /* fset_h__ */
+#endif				/* fset_h__ */

@@ -49,128 +49,122 @@ static struct iflist *iflist;
 
 /* struct for passing information between threads */
 struct thr_comm {
-	iface_cb thr_ifcb;
-	void *thr_data;
-};	
-
+    iface_cb thr_ifcb;
+    void *thr_data;
+};
 
 /* These were written/stolen from W Richard Steven's "Unix Network Programming" */
-static struct iflist *
-iflist_get (void)
+static struct iflist *iflist_get(void)
 {
-	struct iflist *ifi, *ifihead, **ifipnext;
-	int sockfd, len, lastlen;
-	char *ptr, *buf;
-	struct ifconf ifc;
-	struct ifreq *ifr, ifrcopy;
+    struct iflist *ifi, *ifihead, **ifipnext;
+    int sockfd, len, lastlen;
+    char *ptr, *buf;
+    struct ifconf ifc;
+    struct ifreq *ifr, ifrcopy;
 
-	errno = 0;
-	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    errno = 0;
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	return NULL;
+    }
+
+    lastlen = 0;
+    len = 100 * sizeof(struct ifreq);	/* initial buffer size guess */
+    for (;;) {
+	buf = new_malloc(len);
+	ifc.ifc_len = len;
+	ifc.ifc_buf = buf;
+	if (ioctl(sockfd, SIOCGIFCONF, &ifc) < 0) {
+	    if (errno != EINVAL || lastlen != 0)
 		return NULL;
+	} else {
+	    if (ifc.ifc_len == lastlen)
+		break;		/* success, len has not changed */
+	    lastlen = ifc.ifc_len;
 	}
+	len += 10 * sizeof(struct ifreq);	/* increment */
+	new_free(&buf);
+    }
+    ifihead = NULL;
+    ifipnext = &ifihead;
 
-	lastlen = 0;
-	len = 100 * sizeof(struct ifreq);	/* initial buffer size guess */
-	for (;;) {
-		buf = new_malloc(len);
-		ifc.ifc_len = len;
-		ifc.ifc_buf = buf;
-		if (ioctl(sockfd, SIOCGIFCONF, &ifc) < 0) {
-			if (errno != EINVAL || lastlen != 0)
-				return NULL;
-		} else {
-			if (ifc.ifc_len == lastlen)
-				break;	/* success, len has not changed */
-			lastlen = ifc.ifc_len;
-		}
-		len += 10 * sizeof(struct ifreq);	/* increment */
-		new_free(&buf);
-	}
-	ifihead = NULL;
-	ifipnext = &ifihead;
-
-
-	for (ptr = buf; ptr < buf + ifc.ifc_len;) {
-		ifr = (struct ifreq *) ptr;
+    for (ptr = buf; ptr < buf + ifc.ifc_len;) {
+	ifr = (struct ifreq *) ptr;
 
 #ifdef	HAVE_SOCKADDR_SA_LEN
-		len = MAX(sizeof(struct sockaddr), ifr->ifr_addr.sa_len);
+	len = MAX(sizeof(struct sockaddr), ifr->ifr_addr.sa_len);
 #else
-		switch (ifr->ifr_addr.sa_family) {
+	switch (ifr->ifr_addr.sa_family) {
 #ifdef	IPV6
-		case AF_INET6:
-			len = sizeof(struct sockaddr_in6);
-			break;
+	case AF_INET6:
+	    len = sizeof(struct sockaddr_in6);
+	    break;
 #endif
-		case AF_INET:
-		default:
-			len = sizeof(struct sockaddr);
-			break;
-		}
+	case AF_INET:
+	default:
+	    len = sizeof(struct sockaddr);
+	    break;
+	}
 #endif				/* HAVE_SOCKADDR_SA_LEN */
-		ptr += sizeof(ifr->ifr_name) + len;	/* for next one in buffer */
+	ptr += sizeof(ifr->ifr_name) + len;	/* for next one in buffer */
 
 #ifdef	AF_LINK
-		/* we don't care about link level things. just ip */
-		if ( AF_LINK == ifr->ifr_addr.sa_family )
-			continue;
+	/* we don't care about link level things. just ip */
+	if (AF_LINK == ifr->ifr_addr.sa_family)
+	    continue;
 #endif
-		ifrcopy = *ifr;
+	ifrcopy = *ifr;
 
-		if (ioctl(sockfd, SIOCGIFFLAGS, &ifrcopy) < 0) {
-			/* just ignore this error, and this interface ... */
-			continue;
-		}
-
-		if ((ifrcopy.ifr_flags & IFF_UP) == 0)
-			continue;	/* ignore if interface not up */
-		if (ifrcopy.ifr_flags & IFF_LOOPBACK)
-			continue; 	/* ignore if ... */
-
-		ifi = new_malloc(sizeof(struct iflist));
-		*ifipnext = ifi;		/* prev points to this new one */
-		ifipnext = &ifi->ifi_next;	/* pointer to next one goes here */
-
-		memcpy(ifi->ifi_name, ifr->ifr_name, IFI_NAME);;
-		ifi->ifi_name[IFI_NAME - 1] = '\0';
-		getnameinfo(&ifr->ifr_addr, len, ifi->ifi_host, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
-
-		ifi->ifi_len = len;
-		ifi->ifi_addr = new_malloc(len);
-		memcpy(ifi->ifi_addr, &ifr->ifr_addr, len);
+	if (ioctl(sockfd, SIOCGIFFLAGS, &ifrcopy) < 0) {
+	    /* just ignore this error, and this interface ... */
+	    continue;
 	}
-	new_free(&buf);
-	return (ifihead);	/* pointer to first structure in linked list */
+
+	if ((ifrcopy.ifr_flags & IFF_UP) == 0)
+	    continue;		/* ignore if interface not up */
+	if (ifrcopy.ifr_flags & IFF_LOOPBACK)
+	    continue;		/* ignore if ... */
+
+	ifi = new_malloc(sizeof(struct iflist));
+	*ifipnext = ifi;	/* prev points to this new one */
+	ifipnext = &ifi->ifi_next;	/* pointer to next one goes here */
+
+	memcpy(ifi->ifi_name, ifr->ifr_name, IFI_NAME);;
+	ifi->ifi_name[IFI_NAME - 1] = '\0';
+	getnameinfo(&ifr->ifr_addr, len, ifi->ifi_host, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
+
+	ifi->ifi_len = len;
+	ifi->ifi_addr = new_malloc(len);
+	memcpy(ifi->ifi_addr, &ifr->ifr_addr, len);
+    }
+    new_free(&buf);
+    return (ifihead);		/* pointer to first structure in linked list */
 }
 
-
 /* free list of interfaces */
-static void 
-iflist_free (struct iflist  *ifihead)
+static void iflist_free(struct iflist *ifihead)
 {
-	struct iflist *ifi, *ifinext;
+    struct iflist *ifi, *ifinext;
 
-	for (ifi = ifihead; ifi != NULL; ifi = ifinext) {
-		if (ifi->ifi_addr != NULL)
-			new_free(&ifi->ifi_addr);
-		ifinext = ifi->ifi_next;	/* can't fetch ifi_next after free() */
-		new_free(&ifi);			/* the ifi_info{} itself */
-	}
+    for (ifi = ifihead; ifi != NULL; ifi = ifinext) {
+	if (ifi->ifi_addr != NULL)
+	    new_free(&ifi->ifi_addr);
+	ifinext = ifi->ifi_next;	/* can't fetch ifi_next after free() */
+	new_free(&ifi);		/* the ifi_info{} itself */
+    }
 }
 
 /* get list of interfaces */
-static void *
-ifaces_r (void *data)
+static void *ifaces_r(void *data)
 {
-	struct thr_comm *th = (struct thr_comm *)data;
+    struct thr_comm *th = (struct thr_comm *) data;
 
-	/* this could take a long time (usually not) */
-	iflist_update();
+    /* this could take a long time (usually not) */
+    iflist_update();
 
-	th->thr_ifcb(th->thr_data, iflist);
-	new_free(&th);
+    th->thr_ifcb(th->thr_data, iflist);
+    new_free(&th);
 
-	THR_EXIT();
+    THR_EXIT();
 }
 
 /**
@@ -181,17 +175,16 @@ ifaces_r (void *data)
  * A callback function is used here because we may
  * block while looking up hostnames.
  **/
-int 
-ifaces (iface_cb callback, void *data)
+int ifaces(iface_cb callback, void *data)
 {
-	struct thr_comm *c = new_malloc(sizeof(struct thr_comm));
-	
-	assert(callback);
+    struct thr_comm *c = new_malloc(sizeof(struct thr_comm));
 
-	c->thr_ifcb = callback;
-	c->thr_data = data;
+    assert(callback);
 
-	return THR_CREATE(ifaces_r, c);
+    c->thr_ifcb = callback;
+    c->thr_data = data;
+
+    return THR_CREATE(ifaces_r, c);
 }
 
 /**
@@ -203,29 +196,28 @@ ifaces (iface_cb callback, void *data)
  * associated with this hostname. Mainly used to
  * verify that a hostname is actually valid on this machine.
  **/
-const struct iflist *
-iface_find (const char *host)
+const struct iflist *iface_find(const char *host)
 {
-	struct iflist *l;
-	struct iflist *m = NULL;
-	int hlen = strlen(host);
-	int len;
+    struct iflist *l;
+    struct iflist *m = NULL;
+    int hlen = strlen(host);
+    int len;
 
-	assert(host);
-	
-	len = strlen(host);
-	for (l = iflist; l; l = l->ifi_next) 
-		if ( end_strcmp(l->ifi_host, host, len) == 0 ) {
+    assert(host);
 
-			/* best match */
-			if (strlen(l->ifi_host) == hlen)
-				return l;
+    len = strlen(host);
+    for (l = iflist; l; l = l->ifi_next)
+	if (end_strcmp(l->ifi_host, host, len) == 0) {
 
-			/* else take first match */
-			if (m == NULL)
-				m = l;
-		}
-	return m;
+	    /* best match */
+	    if (strlen(l->ifi_host) == hlen)
+		return l;
+
+	    /* else take first match */
+	    if (m == NULL)
+		m = l;
+	}
+    return m;
 }
 
 /**
@@ -236,17 +228,16 @@ iface_find (const char *host)
  * updates that list. Normally this doesn't need to
  * be called.
  **/
-const struct iflist *
-iflist_update (void)
+const struct iflist *iflist_update(void)
 {
-	struct iflist *ifl = iflist_get();
-	struct iflist *ift = iflist;
+    struct iflist *ifl = iflist_get();
+    struct iflist *ift = iflist;
 
-	/* we don't lock, but what are the chances..? */
-	iflist = ifl;
+    /* we don't lock, but what are the chances..? */
+    iflist = ifl;
 
-	if (ift)
-		iflist_free(ift);
+    if (ift)
+	iflist_free(ift);
 
-	return iflist;
+    return iflist;
 }

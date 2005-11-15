@@ -15,26 +15,26 @@
 
 #include "fset.h"
 
-	void	put_echo (char *);
-	void	put_it (const char *, ...);
-	void	say (const char *, ...);
-	void	bitchsay (const char *, ...);
-	void	serversay (int, int, const char *, ...);
-	void	yell (const char *, ...);
-	void	help_put_it (const char *, const char *, ...);
+void put_echo(char *);
+void put_it(const char *, ...);
+void say(const char *, ...);
+void bitchsay(const char *, ...);
+void serversay(int, int, const char *, ...);
+void yell(const char *, ...);
+void help_put_it(const char *, const char *, ...);
 
-	void	refresh_screen(unsigned char, char *);
-	int	init_screen(void);
-	void	put_file(char *);
+void refresh_screen(unsigned char, char *);
+int init_screen(void);
+void put_file(char *);
 
-	void	put_fmt (xformat, const char *, ...);
-	void	put_fmt_str (const char *fmtstr, const char *arg, ...);
+void put_fmt(xformat, const char *, ...);
+void put_fmt_str(const char *fmtstr, const char *arg, ...);
 
-	void	log_put_it (const char *topic, const char *format, ...);
-	void	charset_ibmpc(void);
-	void	charset_lat1(void);
-	void	charset_graf(void);
+void log_put_it(const char *topic, const char *format, ...);
+void charset_ibmpc(void);
+void charset_lat1(void);
+void charset_graf(void);
 
-extern	FILE	*irclog_fp;
+extern FILE *irclog_fp;
 
-#endif /* __output_h_ */
+#endif				/* __output_h_ */

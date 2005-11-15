@@ -20,11 +20,9 @@
 #include "config.h"
 #endif
 
-
 #include "irc.h"
 #include "ircaux.h"
 #include "output.h"
-
 
 #ifdef OLD_MATCH
 
@@ -38,52 +36,46 @@ static int total_explicit;
  */
 #define	mkupper(c)	(((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : c)
 
-int 
-match (register char *pattern, register char *string)
+int match(register char *pattern, register char *string)
 {
-	char type = 0;
+    char type = 0;
 
-	while (*string && *pattern && *pattern != '*' && *pattern != '%')
-	{
-		if (*pattern == '\\' && pattern[1])
-		{
-			if (!*++pattern || !(mkupper (*pattern) == mkupper (*string)))
-				return 0;
-			else
-				pattern++, string++, total_explicit++;
-		}
-
-
-		if (*pattern == '?')
-			pattern++, string++;
-		else if (mkupper (*pattern) == mkupper (*string))
-			pattern++, string++, total_explicit++;
-		else
-			break;
-	}
-	if (*pattern == '*' || *pattern == '%')
-	{
-		type = (*pattern++);
-		while (*string)
-		{
-			if (match (pattern, string))
-				return 1;
-			else if (type == '*' || *string != ' ')
-				string++;
-			else
-				break;
-		}
+    while (*string && *pattern && *pattern != '*' && *pattern != '%') {
+	if (*pattern == '\\' && pattern[1]) {
+	    if (!*++pattern || !(mkupper(*pattern) == mkupper(*string)))
+		return 0;
+	    else
+		pattern++, string++, total_explicit++;
 	}
 
-	/* Slurp up any trailing *'s or %'s... */
-	if (!*string && (type == '*' || type == '%'))
-		while (*pattern && (*pattern == '*' || *pattern == '%'))
-			pattern++;
-
-	if (!*string && !*pattern)
+	if (*pattern == '?')
+	    pattern++, string++;
+	else if (mkupper(*pattern) == mkupper(*string))
+	    pattern++, string++, total_explicit++;
+	else
+	    break;
+    }
+    if (*pattern == '*' || *pattern == '%') {
+	type = (*pattern++);
+	while (*string) {
+	    if (match(pattern, string))
 		return 1;
+	    else if (type == '*' || *string != ' ')
+		string++;
+	    else
+		break;
+	}
+    }
 
-	return 0;
+    /* Slurp up any trailing *'s or %'s... */
+    if (!*string && (type == '*' || type == '%'))
+	while (*pattern && (*pattern == '*' || *pattern == '%'))
+	    pattern++;
+
+    if (!*string && !*pattern)
+	return 1;
+
+    return 0;
 }
 
 /*
@@ -96,107 +88,97 @@ match (register char *pattern, register char *string)
  * ircii because i am not convinced that it is 1) better * and 
  * 2) i think the \\[ \\] stuff is important.
  */
-int 
-wild_match (register char *pattern, register char *str)
+int wild_match(register char *pattern, register char *str)
 {
-	register char *ptr;
-	char *ptr2 = pattern;
-	int nest = 0;
-	char my_buff[2048];
-	char *arg;
-	int best_total = 0;
+    register char *ptr;
+    char *ptr2 = pattern;
+    int nest = 0;
+    char my_buff[2048];
+    char *arg;
+    int best_total = 0;
 
-	total_explicit = 0;
+    total_explicit = 0;
 
-	/* Is there a \[ in the pattern to be expanded? */
-	/* This stuff here just reduces the \[ \] set into a series of
-	 * one-simpler patterns and then recurses */
-	if ((ptr2 = strstr (pattern, "\\[")))
-	{
-		/* we will have to null this out, but not until weve used it */
-		char *placeholder = ptr2;
-		ptr = ptr2;
+    /* Is there a \[ in the pattern to be expanded? */
+    /* This stuff here just reduces the \[ \] set into a series of one-simpler patterns and then recurses */
+    if ((ptr2 = strstr(pattern, "\\["))) {
+	/* we will have to null this out, but not until weve used it */
+	char *placeholder = ptr2;
 
-		/* yes. whats the character after it? (first time
-		   through is a trivial case) */
-		do
-		{
-			switch (ptr[1])
-			{
-				/* step over it and add to nest */
-			case '[':
-				ptr2 = ptr + 2;
-				nest++;
-				break;
-				/* step over it and remove nest */
-			case ']':
-				ptr2 = ptr + 2;
-				nest--;
-				break;
-			default:
-				if (*ptr == '\\')
-					ptr2++;
-			}
-		}
-		/* 
-		 * Repeat while there are more backslashes to look at and
-		 * we have are still in nested \[ \] sets
-		 */
-		while ((nest) && (ptr = index (ptr2, '\\')));
+	ptr = ptr2;
 
-		/* right now, we know ptr points to a \] or to null */
-		/* remember that && short circuits and that ptr will 
-		   not be set to null if (nest) is zero... */
-		if (ptr)
-		{
-			/* null out and step over the original \[ */
-			*placeholder = '\0';
-			placeholder += 2;
-
-			/* null out and step over the matching \] */
-			*ptr = '\0';
-			ptr += 2;
-
-			/* 
-			 * grab words ("" sets or space words) one at a time
-			 * and attempt to match all of them.  The best value
-			 * matched is the one used.
-			 */
-			while ((arg = new_next_arg (placeholder, &placeholder)))
-			{
-				int tmpval;
-				strcpy (my_buff, pattern);
-				strcat (my_buff, arg);
-				strcat (my_buff, ptr);
-
-				/* the total_explicit we return is whichever
-				 * pattern has the highest total_explicit */
-				if ((tmpval = wild_match (my_buff, str)))
-				{
-					if (tmpval > best_total)
-						best_total = tmpval;
-				}
-			}
-			return best_total;	/* end of expansion section */
-		}
-		/* Possibly an unmatched \[ \] set */
-		else
-		{
-			total_explicit = 0;
-			if (match (pattern, str))
-				return total_explicit + 1;
-			else
-				return 0;
-		}
+	/* yes. whats the character after it? (first time through is a trivial case) */
+	do {
+	    switch (ptr[1]) {
+		/* step over it and add to nest */
+	    case '[':
+		ptr2 = ptr + 2;
+		nest++;
+		break;
+		/* step over it and remove nest */
+	    case ']':
+		ptr2 = ptr + 2;
+		nest--;
+		break;
+	    default:
+		if (*ptr == '\\')
+		    ptr2++;
+	    }
 	}
-	/* trivial case (no expansion) when weve expanded all the way out */
-	else if (match (pattern, str))
+	/* 
+	 * Repeat while there are more backslashes to look at and
+	 * we have are still in nested \[ \] sets
+	 */
+	while ((nest) && (ptr = index(ptr2, '\\')));
+
+	/* right now, we know ptr points to a \] or to null */
+	/* remember that && short circuits and that ptr will not be set to null if (nest) is zero... */
+	if (ptr) {
+	    /* null out and step over the original \[ */
+	    *placeholder = '\0';
+	    placeholder += 2;
+
+	    /* null out and step over the matching \] */
+	    *ptr = '\0';
+	    ptr += 2;
+
+	    /* 
+	     * grab words ("" sets or space words) one at a time
+	     * and attempt to match all of them.  The best value
+	     * matched is the one used.
+	     */
+	    while ((arg = new_next_arg(placeholder, &placeholder))) {
+		int tmpval;
+
+		strcpy(my_buff, pattern);
+		strcat(my_buff, arg);
+		strcat(my_buff, ptr);
+
+		/* the total_explicit we return is whichever pattern has the highest total_explicit */
+		if ((tmpval = wild_match(my_buff, str))) {
+		    if (tmpval > best_total)
+			best_total = tmpval;
+		}
+	    }
+	    return best_total;	/* end of expansion section */
+	}
+	/* Possibly an unmatched \[ \] set */
+	else {
+	    total_explicit = 0;
+	    if (match(pattern, str))
 		return total_explicit + 1;
-	else
+	    else
 		return 0;
+	}
+    }
+    /* trivial case (no expansion) when weve expanded all the way out */
+    else if (match(pattern, str))
+	return total_explicit + 1;
+    else
+	return 0;
 }
 
-#else /* NEW MATCH */
+#else				/* NEW MATCH */
 
 /*
  * Written By Douglas A. Lewis <dalewis@cs.Buffalo.EDU>
@@ -208,13 +190,12 @@ wild_match (register char *pattern, register char *str)
 
 #include "ircaux.h"
 
-static int _wild_match (char *, char *);
+static int _wild_match(char *, char *);
 
 #define RETURN_FALSE -1
 #define RETURN_TRUE count
 
-u_char lower_tab[256] =
-{
+u_char lower_tab[256] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
     32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
@@ -245,128 +226,106 @@ u_char lower_tab[256] =
  * of the routine will do that for us.
  */
 
-static int
-_wild_match (mask, string)
-     char *mask, *string;
+static int _wild_match(mask, string)
+char *mask, *string;
 {
-	char *m = mask, *n = string, *ma = NULL, *na = NULL, *mp = NULL,
-	 *np = NULL;
-	int just = 0, pcount = 0, acount = 0, count = 0;
+    char *m = mask, *n = string, *ma = NULL, *na = NULL, *mp = NULL, *np = NULL;
+    int just = 0, pcount = 0, acount = 0, count = 0;
 
-	for (;;)
-	{
-		if (*m == '*')
-		{
-			ma = ++m;
-			na = n;
-			just = 1;
+    for (;;) {
+	if (*m == '*') {
+	    ma = ++m;
+	    na = n;
+	    just = 1;
+	    mp = NULL;
+	    acount = count;
+	} else if (*m == '%') {
+	    mp = ++m;
+	    np = n;
+	    pcount = count;
+	} else if (*m == '?') {
+	    m++;
+	    if (!*n++)
+		return RETURN_FALSE;
+	} else {
+	    if (*m == '\\') {
+		m++;
+		/* Quoting "nothing" is a bad thing */
+		if (!*m)
+		    return RETURN_FALSE;
+	    }
+	    if (!*m) {
+		/* 
+		 * If we are out of both strings or we just
+		 * saw a wildcard, then we can say we have a
+		 * match
+		 */
+		if (!*n)
+		    return RETURN_TRUE;
+		if (just)
+		    return RETURN_TRUE;
+		just = 0;
+		goto not_matched;
+	    }
+	    /* 
+	     * We could check for *n == NULL at this point, but
+	     * since it's more common to have a character there,
+	     * check to see if they match first (m and n) and
+	     * then if they don't match, THEN we can check for
+	     * the NULL of n
+	     */
+	    just = 0;
+	    if (tolower((int) *m) == tolower((int) *n)) {
+		m++;
+		if (*n == ' ')
+		    mp = NULL;
+		count++;
+		n++;
+	    } else {
+
+	      not_matched:
+
+		/* 
+		 * If there are no more characters in the
+		 * string, but we still need to find another
+		 * character (*m != NULL), then it will be
+		 * impossible to match it
+		 */
+		if (!*n)
+		    return RETURN_FALSE;
+		if (mp) {
+		    m = mp;
+		    if (*np == ' ') {
 			mp = NULL;
-			acount = count;
-		}
-		else if (*m == '%')
-		{
-			mp = ++m;
-			np = n;
-			pcount = count;
-		}
-		else if (*m == '?')
-		{
-			m++;
-			if (!*n++)
-				return RETURN_FALSE;
-		}
-		else
-		{
-			if (*m == '\\')
-			{
-				m++;
-				/* Quoting "nothing" is a bad thing */
-				if (!*m)
-					return RETURN_FALSE;
-			}
-			if (!*m)
-			{
-				/*
-				 * If we are out of both strings or we just
-				 * saw a wildcard, then we can say we have a
-				 * match
-				 */
-				if (!*n)
-					return RETURN_TRUE;
-				if (just)
-					return RETURN_TRUE;
-				just = 0;
-				goto not_matched;
-			}
-			/*
-			 * We could check for *n == NULL at this point, but
-			 * since it's more common to have a character there,
-			 * check to see if they match first (m and n) and
-			 * then if they don't match, THEN we can check for
-			 * the NULL of n
-			 */
-			just = 0;
-			if (tolower ((int)*m) == tolower ((int)*n))
-			{
-				m++;
-				if (*n == ' ')
-					mp = NULL;
-				count++;
-				n++;
-			}
-			else
-			{
+			goto check_percent;
+		    }
+		    n = ++np;
+		    count = pcount;
+		} else
+		  check_percent:
 
-			      not_matched:
-
-				/*
-				 * If there are no more characters in the
-				 * string, but we still need to find another
-				 * character (*m != NULL), then it will be
-				 * impossible to match it
-				 */
-				if (!*n)
-					return RETURN_FALSE;
-				if (mp)
-				{
-					m = mp;
-					if (*np == ' ')
-					{
-						mp = NULL;
-						goto check_percent;
-					}
-					n = ++np;
-					count = pcount;
-				}
-				else
-				      check_percent:
-
-				if (ma)
-				{
-					m = ma;
-					n = ++na;
-					count = acount;
-				}
-				else
-					return RETURN_FALSE;
-			}
-		}
+		if (ma) {
+		    m = ma;
+		    n = ++na;
+		    count = acount;
+		} else
+		    return RETURN_FALSE;
+	    }
 	}
+    }
 }
 
-int 
-match (char *pattern, char *string)
+int match(char *pattern, char *string)
 {
 /* -1 on false >= 0 on true */
-	return ((_wild_match (pattern, string) >= 0) ? 1 : 0);
+    return ((_wild_match(pattern, string) >= 0) ? 1 : 0);
 }
 
-int
-wild_match (pattern, str)
-     char *pattern, *str;
+int wild_match(pattern, str)
+char *pattern, *str;
 {
-	/* assuming a -1 return of false */
-	return _wild_match (pattern, str) + 1;
+    /* assuming a -1 return of false */
+    return _wild_match(pattern, str) + 1;
 }
 
-#endif /* NEW MATCH */
+#endif				/* NEW MATCH */

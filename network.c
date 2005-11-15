@@ -50,262 +50,239 @@ extern char hostname[NAME_LEN + 1];
  * Credit: I couldnt have put this together without the help of BSD4.4-lite
  * User Supplimentary Document #20 (Inter-process Communications tutorial)
  */
-int 
-connect_by_number (char *hostn, unsigned short *portnum, int service, int protocol, int nonblocking)
+int connect_by_number(char *hostn, unsigned short *portnum, int service, int protocol, int nonblocking)
 {
-	int fd = -1;
-	int is_unix = (hostn && *hostn == '/');
-	int sock_type, proto_type;
+    int fd = -1;
+    int is_unix = (hostn && *hostn == '/');
+    int sock_type, proto_type;
 
-	sock_type = (is_unix) ? AF_UNIX : AF_INET;
-	proto_type = (protocol == PROTOCOL_TCP) ? SOCK_STREAM : SOCK_DGRAM;
+    sock_type = (is_unix) ? AF_UNIX : AF_INET;
+    proto_type = (protocol == PROTOCOL_TCP) ? SOCK_STREAM : SOCK_DGRAM;
 
-	if ((fd = socket (sock_type, proto_type, 0)) < 0)
-		return -1;
+    if ((fd = socket(sock_type, proto_type, 0)) < 0)
+	return -1;
 
-	set_socket_options (fd);
+    set_socket_options(fd);
 
-	/* Unix domain server */
+    /* Unix domain server */
 #ifdef HAVE_SYS_UN_H
-	if (is_unix)
-	{
-		struct sockaddr_un name;
+    if (is_unix) {
+	struct sockaddr_un name;
 
-		memset (&name, 0, sizeof (struct sockaddr_un));
-		name.sun_family = AF_UNIX;
-		strcpy (name.sun_path, hostn);
+	memset(&name, 0, sizeof(struct sockaddr_un));
+	name.sun_family = AF_UNIX;
+	strcpy(name.sun_path, hostn);
 #ifdef HAVE_SUN_LEN
 #ifdef SUN_LEN
-		name.sun_len = SUN_LEN (&name);
+	name.sun_len = SUN_LEN(&name);
 #else
-		name.sun_len = strlen (hostn) + 1;
+	name.sun_len = strlen(hostn) + 1;
 #endif
 #endif
 
-		if (is_unix && (service == SERVICE_SERVER))
-		{
-			if (bind (fd, (struct sockaddr *) &name, strlen (name.sun_path) + 2))
-				return close (fd), -2;
+	if (is_unix && (service == SERVICE_SERVER)) {
+	    if (bind(fd, (struct sockaddr *) &name, strlen(name.sun_path) + 2))
+		return close(fd), -2;
 
-			if (protocol == PROTOCOL_TCP)
-				if (listen (fd, 4) < 0)
-					return close (fd), -3;
-		}
-
-		/* Unix domain client */
-		else if (service == SERVICE_CLIENT)
-		{
-			alarm (get_int_var (CONNECT_TIMEOUT_VAR));
-			if (connect (fd, (struct sockaddr *) &name, strlen (name.sun_path) + 2) < 0)
-			{
-				alarm (0);
-				return close (fd), -4;
-			}
-			alarm (0);
-		}
+	    if (protocol == PROTOCOL_TCP)
+		if (listen(fd, 4) < 0)
+		    return close(fd), -3;
 	}
-	else
+
+	/* Unix domain client */
+	else if (service == SERVICE_CLIENT) {
+	    alarm(get_int_var(CONNECT_TIMEOUT_VAR));
+	    if (connect(fd, (struct sockaddr *) &name, strlen(name.sun_path) + 2) < 0) {
+		alarm(0);
+		return close(fd), -4;
+	    }
+	    alarm(0);
+	}
+    } else
 #endif
 
-		/* Inet domain server */
-	if (!is_unix && (service == SERVICE_SERVER))
-	{
-		size_t length;
-		struct sockaddr_in name;
+	/* Inet domain server */
+    if (!is_unix && (service == SERVICE_SERVER)) {
+	size_t length;
+	struct sockaddr_in name;
 
-		memset (&name, 0, sizeof (struct sockaddr_in));
-		name.sin_family = AF_INET;
-		name.sin_addr.s_addr = htonl (INADDR_ANY);
-		name.sin_port = htons (*portnum);
+	memset(&name, 0, sizeof(struct sockaddr_in));
+	name.sin_family = AF_INET;
+	name.sin_addr.s_addr = htonl(INADDR_ANY);
+	name.sin_port = htons(*portnum);
 
-		if (bind (fd, (struct sockaddr *) &name, sizeof (name)))
-			return close (fd), -2;
+	if (bind(fd, (struct sockaddr *) &name, sizeof(name)))
+	    return close(fd), -2;
 
-		length = sizeof (name);
-		if (getsockname (fd, (struct sockaddr *) &name, &length))
-			return close (fd), -5;
+	length = sizeof(name);
+	if (getsockname(fd, (struct sockaddr *) &name, &length))
+	    return close(fd), -5;
 
-		*portnum = ntohs (name.sin_port);
+	*portnum = ntohs(name.sin_port);
 
-		if (protocol == PROTOCOL_TCP)
-			if (listen (fd, 4) < 0)
-				return close (fd), -3;
-		if (nonblocking && set_non_blocking (fd) < 0)
-			return close (fd), -4;
+	if (protocol == PROTOCOL_TCP)
+	    if (listen(fd, 4) < 0)
+		return close(fd), -3;
+	if (nonblocking && set_non_blocking(fd) < 0)
+	    return close(fd), -4;
+    }
+
+    /* Inet domain client */
+    else if (!is_unix && (service == SERVICE_CLIENT)) {
+	struct sockaddr_in server;
+	struct hostent *hp;
+	struct sockaddr_in localaddr;
+
+	/* 
+	 * Doing this bind is bad news unless you are sure that
+	 * the hostname is valid.  This is not true for me at home,
+	 * since i dynamic-ip it.
+	 */
+	if (LocalHostName) {
+	    memset(&localaddr, 0, sizeof(struct sockaddr_in));
+	    localaddr.sin_family = AF_INET;
+	    localaddr.sin_addr = LocalHostAddr;
+	    localaddr.sin_port = 0;
+	    if (bind(fd, (struct sockaddr *) &localaddr, sizeof(localaddr)))
+		return close(fd), -2;
 	}
 
-	/* Inet domain client */
-	else if (!is_unix && (service == SERVICE_CLIENT))
-	{
-		struct sockaddr_in server;
-		struct hostent *hp;
-		struct sockaddr_in localaddr;
-		/*
-		 * Doing this bind is bad news unless you are sure that
-		 * the hostname is valid.  This is not true for me at home,
-		 * since i dynamic-ip it.
-		 */
-		if (LocalHostName)
-		{
-			memset (&localaddr, 0, sizeof (struct sockaddr_in));
-			localaddr.sin_family = AF_INET;
-			localaddr.sin_addr = LocalHostAddr;
-			localaddr.sin_port = 0;
-			if (bind (fd, (struct sockaddr *) &localaddr, sizeof (localaddr)))
-				return close (fd), -2;
-		}
+	memset(&server, 0, sizeof(struct sockaddr_in));
+	if (!(hp = resolv(hostn)))
+	    return close(fd), -6;
+	memcpy(&(server.sin_addr), hp->h_addr, hp->h_length);
+	server.sin_family = AF_INET;
+	server.sin_port = htons(*portnum);
 
-		memset (&server, 0, sizeof (struct sockaddr_in));
-		if (!(hp = resolv (hostn)))
-			return close (fd), -6;
-		memcpy (&(server.sin_addr), hp->h_addr, hp->h_length);
-		server.sin_family = AF_INET;
-		server.sin_port = htons (*portnum);
-
-		if (nonblocking && set_non_blocking (fd) < 0)
-			return close (fd), -4;
-		alarm (get_int_var (CONNECT_TIMEOUT_VAR));
-		if (connect (fd, (struct sockaddr *) &server, sizeof (server)) < 0)
-		{
-			alarm (0);
-			if (errno != EINPROGRESS && !nonblocking)
-				return close (fd), -4;
-		}
-		alarm (0);
+	if (nonblocking && set_non_blocking(fd) < 0)
+	    return close(fd), -4;
+	alarm(get_int_var(CONNECT_TIMEOUT_VAR));
+	if (connect(fd, (struct sockaddr *) &server, sizeof(server)) < 0) {
+	    alarm(0);
+	    if (errno != EINPROGRESS && !nonblocking)
+		return close(fd), -4;
 	}
+	alarm(0);
+    }
 
-	/* error */
-	else
-		return close (fd), -7;
+    /* error */
+    else
+	return close(fd), -7;
 
-	return fd;
+    return fd;
 }
 
-
-extern struct hostent *
-resolv (const char *stuff)
+extern struct hostent *resolv(const char *stuff)
 {
-	struct hostent *hep;
+    struct hostent *hep;
 
-	if ((hep = lookup_host (stuff)) == NULL)
-		hep = lookup_ip (stuff);
+    if ((hep = lookup_host(stuff)) == NULL)
+	hep = lookup_ip(stuff);
 
-	return hep;
+    return hep;
 }
 
-extern struct hostent *
-lookup_host (const char *host)
+extern struct hostent *lookup_host(const char *host)
 {
-	struct hostent *hep;
+    struct hostent *hep;
 
-	alarm (1);
-	hep = gethostbyname (host);
-	alarm (0);
-	return hep;
+    alarm(1);
+    hep = gethostbyname(host);
+    alarm(0);
+    return hep;
 }
 
-extern char *
-host_to_ip (const char *host)
+extern char *host_to_ip(const char *host)
 {
-	struct hostent *hep = lookup_host (host);
-	static char ip[256];
+    struct hostent *hep = lookup_host(host);
+    static char ip[256];
 
-	return (hep ? sprintf (ip, "%u.%u.%u.%u", hep->h_addr[0] & 0xff,
-			       hep->h_addr[1] & 0xff,
-			       hep->h_addr[2] & 0xff,
-			       hep->h_addr[3] & 0xff),
-		ip : empty_str);
+    return (hep ? sprintf(ip, "%u.%u.%u.%u", hep->h_addr[0] & 0xff,
+			  hep->h_addr[1] & 0xff, hep->h_addr[2] & 0xff, hep->h_addr[3] & 0xff), ip : empty_str);
 }
 
-extern struct hostent *
-lookup_ip (const char *ip)
+extern struct hostent *lookup_ip(const char *ip)
 {
-	int b1 = 0, b2 = 0, b3 = 0, b4 = 0;
-	char foo[4];
-	struct hostent *hep;
+    int b1 = 0, b2 = 0, b3 = 0, b4 = 0;
+    char foo[4];
+    struct hostent *hep;
 
-	sscanf (ip, "%d.%d.%d.%d", &b1, &b2, &b3, &b4);
-	foo[0] = b1;
-	foo[1] = b2;
-	foo[2] = b3;
-	foo[3] = b4;
+    sscanf(ip, "%d.%d.%d.%d", &b1, &b2, &b3, &b4);
+    foo[0] = b1;
+    foo[1] = b2;
+    foo[2] = b3;
+    foo[3] = b4;
 
-	alarm (1);
-	hep = gethostbyaddr (foo, 4, AF_INET);
-	alarm (0);
+    alarm(1);
+    hep = gethostbyaddr(foo, 4, AF_INET);
+    alarm(0);
 
-	return hep;
+    return hep;
 }
 
-extern char *
-ip_to_host (const char *ip)
+extern char *ip_to_host(const char *ip)
 {
-	struct hostent *hep = lookup_ip (ip);
-	static char host[128];
+    struct hostent *hep = lookup_ip(ip);
+    static char host[128];
 
-	return (hep ? strcpy (host, hep->h_name) : empty_str);
+    return (hep ? strcpy(host, hep->h_name) : empty_str);
 }
 
-extern char *
-one_to_another (const char *what)
+extern char *one_to_another(const char *what)
 {
 
-	if (!isdigit (what[strlen (what) - 1]))
-		return host_to_ip (what);
-	else
-		return ip_to_host (what);
+    if (!isdigit(what[strlen(what) - 1]))
+	return host_to_ip(what);
+    else
+	return ip_to_host(what);
 }
 
-
-int 
-set_non_blocking (int fd)
+int set_non_blocking(int fd)
 {
-	int res, nonb = 0;
+    int res, nonb = 0;
 
 #if defined(O_NONBLOCK)
-	nonb |= O_NONBLOCK;
+    nonb |= O_NONBLOCK;
 #else
 #if defined(O_NDELAY)
-	nonb |= O_NDELAY;
+    nonb |= O_NDELAY;
 #else
-	res = 1;
+    res = 1;
 
-	if (ioctl (fd, FIONBIO, &res) < 0)
-		return -1;
+    if (ioctl(fd, FIONBIO, &res) < 0)
+	return -1;
 #endif
 #endif
 #if defined(O_NONBLOCK) || defined(O_NDELAY)
-	if ((res = fcntl (fd, F_GETFL, 0)) == -1)
-		return -1;
-	else if (fcntl (fd, F_SETFL, res | nonb) == -1)
-		return -1;
+    if ((res = fcntl(fd, F_GETFL, 0)) == -1)
+	return -1;
+    else if (fcntl(fd, F_SETFL, res | nonb) == -1)
+	return -1;
 #endif
-	return 0;
+    return 0;
 }
 
-int 
-set_blocking (int fd)
+int set_blocking(int fd)
 {
-	int res, nonb = 0;
+    int res, nonb = 0;
 
 #if defined(O_NONBLOCK)
-	nonb |= O_NONBLOCK;
+    nonb |= O_NONBLOCK;
 #else
 #if defined(O_NDELAY)
-	nonb |= O_NDELAY;
+    nonb |= O_NDELAY;
 #else
-	res = 0;
+    res = 0;
 
-	if (ioctl (fd, FIONBIO, &res) < 0)
-		return -1;
+    if (ioctl(fd, FIONBIO, &res) < 0)
+	return -1;
 #endif
 #endif
 #if defined(O_NONBLOCK) || defined(O_NDELAY)
-	if ((res = fcntl (fd, F_GETFL, 0)) == -1)
-		return -1;
-	else if (fcntl (fd, F_SETFL, res & ~nonb) == -1)
-		return -1;
+    if ((res = fcntl(fd, F_GETFL, 0)) == -1)
+	return -1;
+    else if (fcntl(fd, F_SETFL, res & ~nonb) == -1)
+	return -1;
 #endif
-	return 0;
+    return 0;
 }
-

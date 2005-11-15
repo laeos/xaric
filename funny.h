@@ -20,16 +20,16 @@
 #define FUNNY_USERS  16
 #define FUNNY_NAME   32
 
-	void	set_funny_flags(int, int, int);
-	void	funny_set_ignore_mode(void);
-	int	funny_is_ignore_channel(void);
-	void	funny_set_ignore_channel(char *);
-	void	funny_match(char *);
-	void	reinstate_user_modes(void);
-	void	funny_print_widelist(void);
-	void	funny_list(char *, char **);
-	void	funny_mode(char *, char **);
-	void	funny_namreply(char *, char **);
-	void	update_user_mode(char *);
+void set_funny_flags(int, int, int);
+void funny_set_ignore_mode(void);
+int funny_is_ignore_channel(void);
+void funny_set_ignore_channel(char *);
+void funny_match(char *);
+void reinstate_user_modes(void);
+void funny_print_widelist(void);
+void funny_list(char *, char **);
+void funny_mode(char *, char **);
+void funny_namreply(char *, char **);
+void update_user_mode(char *);
 
-#endif /* __funny_h_ */
+#endif				/* __funny_h_ */

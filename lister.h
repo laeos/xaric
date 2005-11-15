@@ -21,16 +21,15 @@
  *
  */
 
-
 typedef struct array ARRAY;
 
 struct array {
-	void *data;
+    void *data;
 };
 
-int display_list_cl(ARRAY *list, const char * (*fcn)(void *), xformat fmt, int count, int longest);
-int display_list(ARRAY *list, const char * (*fcn)(void *), xformat fmt);
-int display_list_c(ARRAY *list, const char * (*fcn)(void *), xformat fmt, int count);
-int display_list_l(ARRAY *list, const char * (*fcn)(void *), xformat fmt, int longest);
+int display_list_cl(ARRAY * list, const char *(*fcn) (void *), xformat fmt, int count, int longest);
+int display_list(ARRAY * list, const char *(*fcn) (void *), xformat fmt);
+int display_list_c(ARRAY * list, const char *(*fcn) (void *), xformat fmt, int count);
+int display_list_l(ARRAY * list, const char *(*fcn) (void *), xformat fmt, int longest);
 
-#endif /* lister_h__ */
+#endif				/* lister_h__ */

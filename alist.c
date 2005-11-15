@@ -27,7 +27,6 @@
 #define ARRAY_ITEM(array, loc) ((array_item *) ((array) -> list [ (loc) ]))
 #define LARRAY_ITEM(array, loc) (((array) -> list [ (loc) ]))
 
-
 /*
  * This is just a generalization of the old function  ``find_command''
  *
@@ -57,83 +56,79 @@
  */
 
 #define FIXED_ITEM(list, pos, size) (*(array_item *) ((char *)list + ( pos * size )))
- /*
-    * This is useful for finding items in a fixed array (eg, those lists that
-    * are a simple fixed length arrays of 1st level structs.)
-    *
-    * This code is identical to find_array_item except ``list'' is a 1st
-    * level array instead of a 2nd level array.
+ /* 
+  * This is useful for finding items in a fixed array (eg, those lists that
+  * are a simple fixed length arrays of 1st level structs.)
+  *
+  * This code is identical to find_array_item except ``list'' is a 1st
+  * level array instead of a 2nd level array.
   */
-void *
-find_fixed_array_item (void *list, size_t size, int howmany, const char *name, int *cnt, int *loc)
+void *find_fixed_array_item(void *list, size_t size, int howmany, const char *name, int *cnt, int *loc)
 {
-	int len = strlen (name), min = 0, max = howmany, old_pos = -1,
-	  pos, c;
+    int len = strlen(name), min = 0, max = howmany, old_pos = -1, pos, c;
 
-	*cnt = 0;
+    *cnt = 0;
 
-	while (1)
-	{
-		pos = (max + min) / 2;
-		if (pos == old_pos)
-		{
-			*loc = pos;
-			return NULL;
-		}
-		old_pos = pos;
-
-		c = strncasecmp (name, FIXED_ITEM (list, pos, size).name, len);
-		if (c == 0)
-			break;
-		else if (c > 0)
-			min = pos;
-		else
-			max = pos;
+    while (1) {
+	pos = (max + min) / 2;
+	if (pos == old_pos) {
+	    *loc = pos;
+	    return NULL;
 	}
+	old_pos = pos;
 
-	/*
-	 * If we've gotten this far, then we've found at least
-	 * one appropriate entry.  So we set *cnt to one
-	 */
-	*cnt = 1;
+	c = strncasecmp(name, FIXED_ITEM(list, pos, size).name, len);
+	if (c == 0)
+	    break;
+	else if (c > 0)
+	    min = pos;
+	else
+	    max = pos;
+    }
 
-	/*
-	 * So we know that 'pos' is a match.  So we start 'min'
-	 * at one less than 'pos' and walk downard until we find
-	 * an entry that is NOT matched.
-	 */
-	min = pos - 1;
-	while (min >= 0 && !strncasecmp (name, FIXED_ITEM (list, min, size).name, len))
-		(*cnt)++, min--;
-	min++;
+    /* 
+     * If we've gotten this far, then we've found at least
+     * one appropriate entry.  So we set *cnt to one
+     */
+    *cnt = 1;
 
-	/*
-	 * Repeat the same ordeal, except this time we walk upwards
-	 * from 'pos' until we dont find a match.
-	 */
-	max = pos + 1;
-	while ((max < howmany) && !strncasecmp (name, FIXED_ITEM (list, max, size).name, len))
-		(*cnt)++, max++;
+    /* 
+     * So we know that 'pos' is a match.  So we start 'min'
+     * at one less than 'pos' and walk downard until we find
+     * an entry that is NOT matched.
+     */
+    min = pos - 1;
+    while (min >= 0 && !strncasecmp(name, FIXED_ITEM(list, min, size).name, len))
+	(*cnt)++, min--;
+    min++;
 
-	/*
-	 * Alphabetically, the string that would be identical to
-	 * 'name' would be the first item in a string of items that
-	 * all began with 'name'.  That is to say, if there is an
-	 * exact match, its sitting under item 'min'.  So we check
-	 * for that and whack the count appropriately.
-	 */
-	if (strlen (FIXED_ITEM (list, min, size).name) == len)
-		*cnt *= -1;
+    /* 
+     * Repeat the same ordeal, except this time we walk upwards
+     * from 'pos' until we dont find a match.
+     */
+    max = pos + 1;
+    while ((max < howmany) && !strncasecmp(name, FIXED_ITEM(list, max, size).name, len))
+	(*cnt)++, max++;
 
-	/*
-	 * Then we tell the caller where the lowest match is,
-	 * in case they want to insert here.
-	 */
-	if (loc)
-		*loc = min;
+    /* 
+     * Alphabetically, the string that would be identical to
+     * 'name' would be the first item in a string of items that
+     * all began with 'name'.  That is to say, if there is an
+     * exact match, its sitting under item 'min'.  So we check
+     * for that and whack the count appropriately.
+     */
+    if (strlen(FIXED_ITEM(list, min, size).name) == len)
+	*cnt *= -1;
 
-	/*
-	 * Then we return the first item that matches.
-	 */
-	return (void *) &FIXED_ITEM (list, min, size);
+    /* 
+     * Then we tell the caller where the lowest match is,
+     * in case they want to insert here.
+     */
+    if (loc)
+	*loc = min;
+
+    /* 
+     * Then we return the first item that matches.
+     */
+    return (void *) &FIXED_ITEM(list, min, size);
 }

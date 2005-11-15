@@ -6,29 +6,29 @@
 /* Make up for things missing things in <netdb.h> */
 
 struct search {
-	const char	*host;	/* hostname or address string */
-	int		family;	/* AF_xxx */
+    const char *host;		/* hostname or address string */
+    int family;			/* AF_xxx */
 };
 
 #ifndef HAVE_ADDRINFO_STRUCT
 
 struct addrinfo {
-  int		ai_flags;			/* AI_PASSIVE, AI_CANONNAME */
-  int		ai_family;			/* PF_xxx */
-  int		ai_socktype;		/* SOCK_xxx */
-  int		ai_protocol;		/* IPPROTO_xxx for IPv4 and IPv6 */
-  size_t	ai_addrlen;			/* length of ai_addr */
-  char		*ai_canonname;		/* canonical name for host */
-  struct sockaddr	*ai_addr;	/* binary address */
-  struct addrinfo	*ai_next;	/* next structure in linked list */
+    int ai_flags;		/* AI_PASSIVE, AI_CANONNAME */
+    int ai_family;		/* PF_xxx */
+    int ai_socktype;		/* SOCK_xxx */
+    int ai_protocol;		/* IPPROTO_xxx for IPv4 and IPv6 */
+    size_t ai_addrlen;		/* length of ai_addr */
+    char *ai_canonname;		/* canonical name for host */
+    struct sockaddr *ai_addr;	/* binary address */
+    struct addrinfo *ai_next;	/* next structure in linked list */
 };
 
-#endif /* HAVE_ADDRINFO_STRUCT */
+#endif				/* HAVE_ADDRINFO_STRUCT */
 
 /* chances are if one is missing they all are. right? */
 
 /* these are for getaddrinfo */
-#ifndef AI_PASSIVE 
+#ifndef AI_PASSIVE
 #  define AI_PASSIVE	 1	/* socket is intended for bind() + listen() */
 #  define AI_CANONNAME	 2	/* return canonical name */
 #endif
@@ -57,7 +57,7 @@ struct addrinfo {
 #endif
 
 /* error returns */
-#ifndef EAI_ADDRFAMILY 
+#ifndef EAI_ADDRFAMILY
 #  define EAI_ADDRFAMILY	 1	/* address family for host not supported */
 #  define EAI_AGAIN		 2	/* temporary failure in name resolution */
 #  define EAI_BADFLAGS		 3	/* invalid value for ai_flags */
@@ -69,36 +69,31 @@ struct addrinfo {
 #  define EAI_SERVICE		 9	/* service not supported for ai_socktype */
 #  define EAI_SOCKTYPE		10	/* ai_socktype not supported */
 #  define EAI_SYSTEM		11	/* system error returned in errno */
-#endif 
-
+#endif
 
 #ifndef HAVE_GETADDRINFO
 /* function prototypes -- internal functions */
-int		ga_aistruct(struct addrinfo ***, const struct addrinfo *, const void *, int);
-struct addrinfo	*ga_clone(struct addrinfo *);
-int		ga_echeck(const char *, const char *, int, int, int, int);
-int		ga_nsearch(const char *, const struct addrinfo *, struct search *);
-int		ga_port(struct addrinfo *, int , int);
-int		ga_serv(struct addrinfo *, const struct addrinfo *, const char *);
-int		ga_unix(const char *, struct addrinfo *, struct addrinfo **);
-int		gn_ipv46(char *, size_t, char *, size_t, void *, size_t, int, int, int);
-
+int ga_aistruct(struct addrinfo ***, const struct addrinfo *, const void *, int);
+struct addrinfo *ga_clone(struct addrinfo *);
+int ga_echeck(const char *, const char *, int, int, int, int);
+int ga_nsearch(const char *, const struct addrinfo *, struct search *);
+int ga_port(struct addrinfo *, int, int);
+int ga_serv(struct addrinfo *, const struct addrinfo *, const char *);
+int ga_unix(const char *, struct addrinfo *, struct addrinfo **);
+int gn_ipv46(char *, size_t, char *, size_t, void *, size_t, int, int, int);
 
 #endif
 
 #ifndef HAVE_GETNAMEINFO
-int getnameinfo(const struct sockaddr *sa, socklen_t salen,
-                    char *host, size_t hostlen,
-                       char *serv, size_t servlen, int flags);
+int getnameinfo(const struct sockaddr *sa, socklen_t salen, char *host, size_t hostlen, char *serv, size_t servlen, int flags);
 
 #endif
 
 #ifndef HAVE_GAI_STRERROR
-const char * gai_strerror(int err);
+const char *gai_strerror(int err);
 #endif
-
 
 #ifndef HAVE_FREEADDRINFO
 #endif
 
-#endif	/* gai_h__ */
+#endif				/* gai_h__ */

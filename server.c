@@ -972,7 +972,6 @@ int get_server_flag(int gsf_index, int value)
     return server_list[gsf_index].flags & value;
 }
 
-
 /* get_server_name: returns the name for the given server index */
 char *get_server_name(int gsn_index)
 {
@@ -1215,7 +1214,7 @@ void send_to_server(struct server *s, const char *format, ...)
 	memset(buffer, 0, 80);
     } else {
 	put_it("%s", convert_output_format(get_fset_var(FORMAT_DISCONNECT_FSET), "%s %s", update_clock(GET_TIME),
-		    "You are not connected to a server. Use /SERVER to connect."));
+					   "You are not connected to a server. Use /SERVER to connect."));
     }
 }
 

@@ -7,10 +7,10 @@
 #ifndef __flood_h_
 #define __flood_h_
 
-	int	check_flooding (char *, int, char *, char *);
-	int	is_other_flood (struct channel *, struct nick_list *, int, int *);
-	int	flood_prot (char *, char *, char *, int, int, char *);
-	void	clean_flood_list (void);		
+int check_flooding(char *, int, char *, char *);
+int is_other_flood(struct channel *, struct nick_list *, int, int *);
+int flood_prot(char *, char *, char *, int, int, char *);
+void clean_flood_list(void);
 
 #define MSG_FLOOD 	0x0001
 #define PUBLIC_FLOOD 	0x0002
@@ -29,4 +29,4 @@
 #define FLOOD_HASHSIZE 31
 extern struct hash_entry no_flood_list[FLOOD_HASHSIZE];
 
-#endif /* __flood_h_ */
+#endif				/* __flood_h_ */

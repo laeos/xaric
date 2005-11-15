@@ -13,10 +13,9 @@
 #ifndef __log_h_
 #define __log_h_
 
-	void	do_log (int, char *, FILE **);
-	void	logger (Window *, char *, int);
-	void	set_log_file (Window *, char *, int);
-	void	add_to_log (FILE *, time_t, const char *);
+void do_log(int, char *, FILE **);
+void logger(Window *, char *, int);
+void set_log_file(Window *, char *, int);
+void add_to_log(FILE *, time_t, const char *);
 
-
-#endif /* __log_h_ */
+#endif				/* __log_h_ */

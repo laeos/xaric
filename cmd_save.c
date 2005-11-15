@@ -53,83 +53,73 @@
 
 static int save_which;
 
-static void
-really_save (char *file, char *line)
+static void really_save(char *file, char *line)
 {
-	FILE *fp;
-	int save_do_all = 0;
+    FILE *fp;
+    int save_do_all = 0;
 
-	if (*line != 'y' && *line != 'Y')
-		return;
-	if ((fp = fopen (file, "w")) != NULL)
-	{
-		if (save_which & SFLAG_BIND)
-			save_bindings (fp, save_do_all);
-		if (save_which & SFLAG_ON)
-			save_hooks (fp, save_do_all);
-		if (save_which & SFLAG_NOTIFY)
-			save_notify (fp);
-		if (save_which & SFLAG_SET)
-			save_variables (fp, save_do_all);
-		if (save_which & SFLAG_FORMATS )
-			save_formats(fp);
-		fclose (fp);
-		bitchsay ("Xaric settings saved to %s", file);
-	}
-	else
-		bitchsay ("Error opening %s: %s", file, strerror (errno));
+    if (*line != 'y' && *line != 'Y')
+	return;
+    if ((fp = fopen(file, "w")) != NULL) {
+	if (save_which & SFLAG_BIND)
+	    save_bindings(fp, save_do_all);
+	if (save_which & SFLAG_ON)
+	    save_hooks(fp, save_do_all);
+	if (save_which & SFLAG_NOTIFY)
+	    save_notify(fp);
+	if (save_which & SFLAG_SET)
+	    save_variables(fp, save_do_all);
+	if (save_which & SFLAG_FORMATS)
+	    save_formats(fp);
+	fclose(fp);
+	bitchsay("Xaric settings saved to %s", file);
+    } else
+	bitchsay("Error opening %s: %s", file, strerror(errno));
 }
 
-void
-save_all (char *fname)
+void save_all(char *fname)
 {
-	save_which = SFLAG_ALL;
-	really_save (fname, "y");
+    save_which = SFLAG_ALL;
+    really_save(fname, "y");
 }
-
 
 /* save_settings: saves the current state of IRCII to a file */
-void
-cmd_save (struct command *cmd, char *args)
+void cmd_save(struct command *cmd, char *args)
 {
-	char *arg = NULL;
-	int all = 1;
-	char buffer[BIG_BUFFER_SIZE + 1];
+    char *arg = NULL;
+    int all = 1;
+    char buffer[BIG_BUFFER_SIZE + 1];
 
-	save_which = 0;
-	while ((arg = next_arg (args, &args)) != NULL)
-	{
-		if ('-' == *arg || '/' == *arg)
-		{
-			all = 0;
-			arg++;
-			if (0 == my_strnicmp ("B", arg, 1))
-				save_which |= SFLAG_BIND;
-			else if (0 == my_strnicmp ("O", arg, 1))
-				save_which |= SFLAG_ON;
-			else if (0 == my_strnicmp ("S", arg, 1))
-				save_which |= SFLAG_SET;
-			else if (0 == my_strnicmp ("N", arg, 1))
-				save_which |= SFLAG_NOTIFY;
-			else if (0 == my_strnicmp("F", arg, 1))
-				save_which |= SFLAG_FORMATS;
-			else if (0 == my_strnicmp ("ALL", arg, 3))
-				save_which = SFLAG_ALL;
-			else
-			{
-				userage (cmd->name, cmd->qhelp);
-				return;
-			}
-			continue;
-		}
-		if (!(arg = expand_twiddle (ircrc_file)))
-		{
-			bitchsay ("Unknown user");
-			return;
-		}
-	}
-	if (all)
+    save_which = 0;
+    while ((arg = next_arg(args, &args)) != NULL) {
+	if ('-' == *arg || '/' == *arg) {
+	    all = 0;
+	    arg++;
+	    if (0 == my_strnicmp("B", arg, 1))
+		save_which |= SFLAG_BIND;
+	    else if (0 == my_strnicmp("O", arg, 1))
+		save_which |= SFLAG_ON;
+	    else if (0 == my_strnicmp("S", arg, 1))
+		save_which |= SFLAG_SET;
+	    else if (0 == my_strnicmp("N", arg, 1))
+		save_which |= SFLAG_NOTIFY;
+	    else if (0 == my_strnicmp("F", arg, 1))
+		save_which |= SFLAG_FORMATS;
+	    else if (0 == my_strnicmp("ALL", arg, 3))
 		save_which = SFLAG_ALL;
-	snprintf (buffer, BIG_BUFFER_SIZE, "Really write %s? ", arg ? arg : ircrc_file);
-	add_wait_prompt (buffer, really_save, arg ? arg : ircrc_file, WAIT_PROMPT_LINE);
+	    else {
+		userage(cmd->name, cmd->qhelp);
+		return;
+	    }
+	    continue;
+	}
+	if (!(arg = expand_twiddle(ircrc_file))) {
+	    bitchsay("Unknown user");
+	    return;
+	}
+    }
+    if (all)
+	save_which = SFLAG_ALL;
+    snprintf(buffer, BIG_BUFFER_SIZE, "Really write %s? ", arg ? arg : ircrc_file);
+    add_wait_prompt(buffer, really_save, arg ? arg : ircrc_file, WAIT_PROMPT_LINE);
 }

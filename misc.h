@@ -119,6 +119,7 @@ struct channel *	prepare_command(int *, char *, int);
 	void	check_server_connect(int);
 	char	*country(char *);
 	char 	*str_terminate_at (char *string, const char *chars);
+	char    *mircansi (char *);
 
 
 	/* in cmd_modes.h */

@@ -44,9 +44,6 @@
 #define CTCP_NOLIMIT    4       /* Limit of one per privmsg. */
 #define CTCP_TELLUSER   8       /* Tell the user about it. */
 
-
-
-extern		int	sed;
 extern		int	in_ctcp_flag;
 
 #define CTCP_DELIM_CHAR '\001'
@@ -57,7 +54,6 @@ extern		int	in_ctcp_flag;
 
 
 extern	char *	ctcp_quote_it(char *, int);
-extern	char *	ctcp_unquote_it(char *, int *);
 extern	char *	do_ctcp(char *, char *, char *);
 extern	char *	do_notice_ctcp(char *, char *, char *);
 extern	int	in_ctcp(void);

@@ -45,9 +45,7 @@
 #include "fset.h"
 #include "tcommand.h"
 
-void split_CTCP (char *, char *, char *);
-extern char *mircansi (char *);
-extern time_t start_time;
+static void split_CTCP (char *, char *, char *);
 
 /*
  * ctcp_entry: the format for each ctcp function.   note that the function
@@ -76,7 +74,6 @@ typedef	struct _CtcpEntry
 
 /* forward declarations for the built in CTCP functions */
 
-static char *do_sed (CtcpEntry *, char *, char *, char *);
 static char *do_null (CtcpEntry *, char *, char *, char *);
 static char *do_version (CtcpEntry *, char *, char *, char *);
 static char *do_clientinfo (CtcpEntry *, char *, char *, char *);
@@ -93,9 +90,6 @@ static char *do_ping_reply (CtcpEntry *, char *, char *, char *);
 
 static CtcpEntry ctcp_cmd[] =
 {
-	{"SED", CTCP_SED, CTCP_INLINE | CTCP_NOLIMIT,
-	 "contains simple_encrypted_data",
-	 do_sed, do_sed},
 	{"UTC", CTCP_UTC, CTCP_INLINE | CTCP_NOLIMIT,
 	 "substitutes the local timezone",
 	 do_utc, do_utc},
@@ -154,8 +148,6 @@ static char *ctcp_type[] =
 	"NOTICE"
 };
 
-/* This is set to one if we parsed an SED */
-int sed = 0;
 
 /*
  * in_ctcp_flag is set to true when IRCII is handling a CTCP request.  This
@@ -172,20 +164,6 @@ int not_warned = 0;
 /**************************** CTCP PARSERS ****************************/
 
 /********** INLINE EXPANSION CTCPS ***************/
-
-/*
- * do_sed: Performs the Simple Encrypted Data trasfer for ctcp.  Returns in a
- * malloc string the decryped message (if a key is set for that user) or the
- * text "[ENCRYPTED MESSAGE]" 
- */
-CTCP_HANDLER (do_sed)
-{
-	char *ret2 = NULL;
-
-	malloc_strcpy (&ret2, "[ENCRYPTED MESSAGE]");
-
-	return ret2;
-}
 
 CTCP_HANDLER (do_utc)
 {
@@ -503,7 +481,7 @@ CTCP_HANDLER (do_ping_reply)
  * do_ctcp: a re-entrant form of a CTCP parser.  The old one was lame,
  * so i took a hatchet to it so it didnt suck.
  */
-extern char *
+char *
 do_ctcp (char *from, char *to, char *str)
 {
 	int flag;
@@ -664,7 +642,7 @@ do_ctcp (char *from, char *to, char *str)
 /*
  * do_notice_ctcp: a re-entrant form of a CTCP reply parser.
  */
-extern char *
+char *
 do_notice_ctcp (char *from, char *to, char *str)
 {
 	int flag;
@@ -764,7 +742,7 @@ do_notice_ctcp (char *from, char *to, char *str)
 
 
 /* in_ctcp: simply returns the value of the ctcp flag */
-extern int 
+int 
 in_ctcp (void)
 {
 	return in_ctcp_flag;
@@ -782,7 +760,7 @@ in_ctcp (void)
  * transparantly.  This greatly reduces the logic, complexity, and
  * possibility for error in this function.
  */
-extern void 
+void 
 send_ctcp (int type, char *to, int datatag, char *format,...)
 {
 	char putbuf[BIG_BUFFER_SIZE + 1], putbuf2[BIG_BUFFER_SIZE + 1];
@@ -812,7 +790,7 @@ send_ctcp (int type, char *to, int datatag, char *format,...)
  * null terminated (it can contain nulls).  Returned is a malloced, null
  * terminated string.   
  */
-extern char *
+char *
 ctcp_quote_it (char *str, int len)
 {
 	char buffer[BIG_BUFFER_SIZE + 1];
@@ -853,6 +831,7 @@ ctcp_quote_it (char *str, int len)
 	return m_strdup (buffer);
 }
 
+#if 0
 /*
  * ctcp_unquote_it: This takes a null terminated string that had previously
  * been quoted using ctcp_quote_it and unquotes it.  Returned is a malloced
@@ -860,7 +839,7 @@ ctcp_quote_it (char *str, int len)
  * convenied, but the returned data may contain nulls!.  The len is modified
  * to contain the size of the data returned. 
  */
-extern char *
+static char *
 ctcp_unquote_it (char *str, int *len)
 {
 	char *buffer;
@@ -905,6 +884,7 @@ ctcp_unquote_it (char *str, int *len)
 	*len = new_size;
 	return (buffer);
 }
+#endif
 
 int 
 get_ctcp_val (char *str)
@@ -933,7 +913,7 @@ get_ctcp_val (char *str)
  * XXXX -- some may call this a hack, but if youve got a better
  * way to handle this job, id love to use it.
  */
-void 
+static void 
 split_CTCP (char *raw_message, char *ctcp_dest, char *after_ctcp)
 {
 	char *ctcp_start, *ctcp_end;

@@ -215,6 +215,8 @@ char get_a_char(void);
 void io(const char *what);
 void irc_exit(char *reason, char *formatted);
 
+extern time_t start_time;
+
 char	*getenv(const char *);
 
 /* xscandir.c */

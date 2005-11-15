@@ -62,7 +62,6 @@ char *connect_next_nick;
 int parsing_server_index = -1;
 int last_server = -1;
 
-extern int dgets_errno;
 extern int doing_who;
 extern int in_on_who;
 

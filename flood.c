@@ -47,18 +47,6 @@ static char *ignore_types[] =
 	"ACTION"
 };
 
-#if 0
-typedef struct flood_stru
-{
-	char nick[NICKNAME_LEN + 1];
-	char channel[BIG_BUFFER_SIZE + 1];
-	int type;
-	char flood;
-	long cnt;
-	time_t start;
-}
-struct flood;
-#endif
 
 #define FLOOD_HASHSIZE 31
 
@@ -80,8 +68,6 @@ static double this_flood = 0.0;
 
 #define NO_RESET 0
 #define RESET 1
-
-
 
 void
 cmd_no_flood (struct command *cmd, char *args)

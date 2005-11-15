@@ -744,11 +744,6 @@ whois_ignore_msgs (WhoisStuff * stuff, char *nick, char *text)
 		{
 			level = set_lastlog_msg_level (LOG_MSG);
 			message_from (stuff->nick, LOG_MSG);
-			if (sed == 1 && !do_hook (ENCRYPTED_PRIVMSG_LIST, "%s %s", stuff->nick, text))
-			{
-				sed = 0;
-				return;
-			}
 			if (do_hook (MSG_LIST, "%s %s", stuff->nick, text))
 			{
 				if (away_set)
@@ -769,7 +764,6 @@ whois_ignore_msgs (WhoisStuff * stuff, char *nick, char *text)
 			if (beep_on_level & LOG_MSG)
 				beep_em (1);
 			set_lastlog_msg_level (level);
-			sed = 0;
 			notify_mark (nick, stuff->user, stuff->host, 1);
 		}
 		else if (get_int_var (SEND_IGNORE_MSG_VAR))
@@ -811,15 +805,9 @@ whois_ignore_notices (WhoisStuff * stuff, char *nick, char *text)
 		{
 			level = set_lastlog_msg_level (LOG_NOTICE);
 			message_from (stuff->nick, LOG_NOTICE);
-			if (sed == 0 && !do_hook (ENCRYPTED_NOTICE_LIST, "%s %s", stuff->nick, text))
-			{
-				sed = 0;
-				return;
-			}
 			if (do_hook (NOTICE_LIST, "%s %s", stuff->nick, text))
 				put_it ("%s", convert_output_format (get_fset_var (FORMAT_IGNORE_NOTICE_FSET), "%s %s %s", update_clock (GET_TIME), stuff->nick, text));
 			set_lastlog_msg_level (level);
-			sed = 0;
 		}
 		new_free (&ptr);
 	}

@@ -167,13 +167,6 @@ parse_notice (char *from, char **Args)
 			level = set_lastlog_msg_level (LOG_NOTICE);
 			no_flooding = check_flooding (from, NOTICE_FLOOD, line, NULL);
 
-			if (sed == 1)
-			{
-				if (do_hook (ENCRYPTED_NOTICE_LIST, "%s %s %s", from, to, line))
-					put_it ("%s", convert_output_format (get_fset_var (FORMAT_ENCRYPTED_NOTICE_FSET), "%s %s %s %s", update_clock (GET_TIME), from, FromUserHost, line));
-				sed = 0;
-			}
-			else
 			{
 				char *free_me = NULL;
 				free_me = newline = stripansi (line);

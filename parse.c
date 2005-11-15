@@ -80,9 +80,6 @@ char *FromUserHost = empty_str;
 int doing_privmsg = 0;
 int chan_who = 0;
 
-extern int sed;
-
-
 /* returns 1 if the ban is on the channel already, 0 if not */
 BanList *
 ban_is_on_channel (char *ban, struct channel * chan)
@@ -465,13 +462,6 @@ p_privmsg (char *from, char **Args)
 	else
 		no_flood = check_flooding (from, flood_type, ptr, NULL);
 
-	if (sed == 1)
-	{
-		if (do_hook (ENCRYPTED_PRIVMSG_LIST, "%s %s %s", from, to, ptr))
-			put_it ("%s", convert_output_format (get_format (FORMAT_ENCRYPTED_PRIVMSG_FSET), "%s %s %s %s %s", update_clock (GET_TIME), from, FromUserHost, to, ptr));
-		sed = 0;
-	}
-	else
 	{
 		switch (list_type)
 		{

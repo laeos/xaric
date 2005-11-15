@@ -19,22 +19,21 @@
 #define CTCP_PRIVMSG 	0
 #define CTCP_NOTICE 	1
 
-#define CTCP_SED	0
-#define CTCP_UTC	1
-#define CTCP_ACTION	2
-#define CTCP_DCC	3
+#define CTCP_UTC	0
+#define CTCP_ACTION	1
+#define CTCP_DCC	2
 
-#define CTCP_VERSION	4
-#define CTCP_CLIENTINFO	5
-#define CTCP_USERINFO	6
-#define CTCP_ERRMSG	7
-#define CTCP_FINGER	8
-#define CTCP_TIME	9
-#define CTCP_PING	10
-#define	CTCP_ECHO	11
-#define CTCP_SOUND	12
-#define CTCP_TROUT	13
-#define CTCP_CUSTOM	14
+#define CTCP_VERSION	3
+#define CTCP_CLIENTINFO	4
+#define CTCP_USERINFO	5
+#define CTCP_ERRMSG	6
+#define CTCP_FINGER	7
+#define CTCP_TIME	8
+#define CTCP_PING	9
+#define	CTCP_ECHO	10
+#define CTCP_SOUND	11
+#define CTCP_TROUT	12
+#define CTCP_CUSTOM	13
 
 #define NUMBER_OF_CTCPS	CTCP_CUSTOM
 

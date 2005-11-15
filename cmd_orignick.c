@@ -50,7 +50,7 @@ static char *org_nick;
 static void
 change_orig_nick (void)
 {
-	change_server_nickname(from_server, org_nick);
+	change_server_nickname(SERVER(from_server), org_nick);
 	bitchsay("Regained nick [%s]", org_nick);
 	new_free(&org_nick);
 	update_all_status(curr_scr_win, NULL, 0);

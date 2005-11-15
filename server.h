@@ -94,6 +94,7 @@ struct server {
 
     char line[SERVER_BUF_LEN];
     int pos;
+    int index;
 };
 
 typedef struct ser_group_list {
@@ -183,12 +184,10 @@ int server_list_size(void);
 void set_server_away(int, char *);
 char *get_server_away(int);
 
-extern void change_server_nickname(int, char *);
 extern void register_server(int, char *);
 extern void fudge_nickname(int);
 extern char *get_pending_nickname(int);
 extern void accept_server_nickname(int, char *);
-extern void reset_nickname(void);
 
 /* XXXXX ick, gross, bad.  XXXXX */
 void password_sendline(char *data, char *line);
@@ -198,6 +197,8 @@ extern int user_changing_nickname;
 extern struct server *server_list;
 
 void send_to_server(struct server *s, const char *format, ...);
+void reset_nickname(struct server *s);
+void change_server_nickname(struct server *s, char *nick);
 
 #define USER_MODE	0x0001
 #define USER_MODE_A	USER_MODE << 0

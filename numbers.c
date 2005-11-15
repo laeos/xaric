@@ -755,7 +755,7 @@ numbered_command (char *from, int comm, char **ArgList)
 		break;
 
 	case 462:		/* #define ERR_ALREADYREGISTRED 462 */
-		change_server_nickname (from_server, NULL);
+		change_server_nickname (SERVER(from_server), NULL);
 		PasteArgs (ArgList, 0);
 		if (do_hook (current_numeric, "%s %s", from, *ArgList))
 			display_msg (from, ArgList);
@@ -1161,7 +1161,7 @@ numbered_command (char *from, int comm, char **ArgList)
 
 		case 432:	/* #define ERR_ERRONEUSNICKNAME 432 */
 			display_msg (from, ArgList);
-			reset_nickname ();
+			reset_nickname (SERVER(from_server));
 			break;
 
 		case 471:	/* #define ERR_CHANNELISFULL    471 */

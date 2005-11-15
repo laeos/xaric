@@ -923,7 +923,7 @@ cmd_nick (struct command *cmd, char *args)
 		return;
 	}
 	user_changing_nickname = 1;
-	change_server_nickname (from_server, nick);
+	change_server_nickname (SERVER(from_server), nick);
 }
 
 static void

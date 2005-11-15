@@ -416,6 +416,7 @@ void add_to_server_list(char *server, int port, char *password, char *nick, int 
 	server_list[from_server].motd = 1;
 	server_list[from_server].port = port;
 	server_list[from_server].pos = 0;
+	server_list[from_server].index = from_server;
 
 	if (password && *password)
 	    malloc_strcpy(&(server_list[from_server].password), password);
@@ -589,59 +590,6 @@ void build_server_list(char *servers)
 	servers = rest;
     }
 }
-
-#if 0
-/*
- * connect_to_server_direct: handles the tcp connection to a server.  If
- * successful, the user is disconnected from any previously connected server,
- * the new server is added to the server list, and the user is registered on
- * the new server.  If connection to the server is not successful,  the
- * reason for failure is displayed and the previous server connection is
- * resumed uniterrupted. 
- *
- * This version of connect_to_server() connects directly to a server 
- */
-static int connect_to_server_direct(char *server_name, int port)
-{
-    int new_des;
-    struct sockaddr_in localaddr;
-    size_t address_len;
-    unsigned short this_sucks;
-
-    oper_command = 0;
-    errno = 0;
-    memset(&localaddr, 0, sizeof(localaddr));
-    this_sucks = (unsigned short) port;
-
-    new_des = connect_by_number(server_name, &this_sucks, SERVICE_CLIENT, PROTOCOL_TCP, 0);
-    port = this_sucks;
-    XDEBUG(19, "Descriptor for [%s:%d]: %d", server_name, port, new_des);
-
-    if (new_des < 0) {
-	say("Unable to connect to port %d of server %s: %s", port, server_name, errno ? strerror(errno) : "unknown host");
-	if ((from_server != -1) && (server_list[from_server].read != -1))
-	    say("Connection to server %s resumed...", server_list[from_server].name);
-	return (-1);
-    }
-
-    if (*server_name != '/') {
-	address_len = sizeof(struct sockaddr_in);
-	getsockname(new_des, (struct sockaddr *) &localaddr, &address_len);
-    }
-
-    update_all_status(curr_scr_win, NULL, 0);
-    add_to_server_list(server_name, port, NULL, NULL, 1);
-    if (port) {
-	server_list[from_server].read = new_des;
-	server_list[from_server].write = new_des;
-    } else
-	server_list[from_server].read = new_des;
-
-    server_list[from_server].local_addr.s_addr = localaddr.sin_addr.s_addr;
-    server_list[from_server].operator = 0;
-    return (0);
-}
-#endif
 
 static void login_to_server(int refnum, int c_server)
 {
@@ -1264,7 +1212,7 @@ void register_server(int ssn_index, char *nick)
     send_to_server(SERVER(from_server), "USER %s %s %s :%s", username,
 		   (send_umode && *send_umode) ? send_umode :
 		   (LocalHostName ? LocalHostName : hostname), username, *realname ? realname : space_str);
-    change_server_nickname(ssn_index, nick);
+    change_server_nickname(SERVER(ssn_index), nick);
     from_server = old_from_server;
 }
 
@@ -1368,37 +1316,30 @@ extern char *create_server_list(void)
  * we're trying to change our nickname to.  If we're not trying to change
  * our nickname, then this function does nothing.
  */
-void change_server_nickname(int ssn_index, char *nick)
+void change_server_nickname(struct server *s, char *nick)
 {
-    int old_from_server = from_server;
+    assert(nick);
+    if ((nick = check_nickname(nick)) != NULL) {
+	if (from_server != -1) {
+	    malloc_strcpy(&s->d_nickname, nick);
+	    malloc_strcpy(&s->s_nickname, nick);
+	} else {
+	    int i = 0;
 
-    from_server = ssn_index;
-
-    if (nick) {
-	if ((nick = check_nickname(nick)) != NULL) {
-	    if (from_server != -1) {
-		malloc_strcpy(&server_list[from_server].d_nickname, nick);
-		malloc_strcpy(&server_list[from_server].s_nickname, nick);
-	    } else {
-		int i = 0;
-
-		strncpy(nickname, nick, NICKNAME_LEN);
-		for (i = 0; i < number_of_servers; i++) {
-		    malloc_strcpy(&server_list[i].nickname, nickname);
-		    new_free(&server_list[i].d_nickname);
-		    new_free(&server_list[i].s_nickname);
-		}
-		user_changing_nickname = 0;
-		return;
+	    strncpy(nickname, nick, NICKNAME_LEN);
+	    for (i = 0; i < number_of_servers; i++) {
+		malloc_strcpy(&s->nickname, nickname);
+		new_free(&s->d_nickname);
+		new_free(&s->s_nickname);
 	    }
-	} else
-	    reset_nickname();
+	    user_changing_nickname = 0;
+	    return;
+	}
+    } else {
+	reset_nickname(s);
     }
-
-    if (server_list[from_server].s_nickname)
-	send_to_server(SERVER(from_server), "NICK %s", server_list[from_server].s_nickname);
-
-    from_server = old_from_server;
+    if (s->s_nickname)
+	send_to_server(s, "NICK %s", s->s_nickname);
 }
 
 void accept_server_nickname(int ssn_index, char *nick)
@@ -1457,7 +1398,7 @@ void fudge_nickname(int servnum)
 	server_list[servnum].fudge_factor++;
 	if (server_list[servnum].fudge_factor == 17) {
 	    /* give up... */
-	    reset_nickname();
+	    reset_nickname(SERVER(servnum));
 	    server_list[servnum].fudge_factor = 0;
 	    return;
 	}
@@ -1487,7 +1428,7 @@ void fudge_nickname(int servnum)
 	l_nickname[0] = tmp;
     }
 
-    change_server_nickname(servnum, l_nickname);
+    change_server_nickname(SERVER(servnum), l_nickname);
 }
 
 /*
@@ -1498,7 +1439,7 @@ static void nickname_sendline(char *data, char *nick)
     int new_server;
 
     new_server = atoi(data);
-    change_server_nickname(new_server, nick);
+    change_server_nickname(SERVER(new_server), nick);
 }
 
 /*
@@ -1506,14 +1447,14 @@ static void nickname_sendline(char *data, char *nick)
  * a good one, it gets reset here. 
  * -- Called by more than one place
  */
-void reset_nickname(void)
+void reset_nickname(struct server *s)
 {
     char server_num[10];
 
     kill(getpid(), SIGINT);
     say("You have specified an illegal nickname");
     say("Please enter your nickname");
-    strcpy(server_num, ltoa(from_server));
+    strcpy(server_num, ltoa(s->index));
     add_wait_prompt("Nickname: ", nickname_sendline, server_num, WAIT_PROMPT_LINE);
     update_all_status(curr_scr_win, NULL, 0);
 }

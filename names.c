@@ -40,10 +40,9 @@
 #include "hash.h"
 #include "fset.h"
 
-extern int in_on_who;
-extern struct channel default_statchan;
+extern char *last_split_server;
 
-static char mode_str[] = "iklmnpsta";
+static const char mode_str[] = "iklmnpsta";
 
 static void add_to_mode_list (char *, int, char *);
 static void check_mode_list_join (char *, int);
@@ -91,7 +90,7 @@ clear_channel (struct channel * chan)
 	chan->totalnicks = 0;
 }
 
-extern struct channel *
+struct channel *
 lookup_channel (char *channel, int server, int unlink)
 {
 	register struct channel *chan = NULL, *last = NULL;
@@ -126,7 +125,7 @@ lookup_channel (char *channel, int server, int unlink)
 	return chan;
 }
 
-extern void 
+void 
 set_waiting_channel (int i)
 {
 	Window *tmp = NULL;
@@ -143,7 +142,7 @@ set_waiting_channel (int i)
 }
 
 /* if the user is on the given channel, it returns 1. */
-extern int 
+int 
 im_on_channel (char *channel)
 {
 	return (channel ? (lookup_channel (channel, from_server, 0) ? 1 : 0) : 0);
@@ -1180,8 +1179,6 @@ remove_from_channel (char *channel, char *nick, int server, int netsplit, char *
 {
 	struct channel *chan;
 	struct nick_list *tmp = NULL;
-	extern char *last_split_server;
-	extern char *last_split_from;
 	char buf[BIG_BUFFER_SIZE + 1];
 	char *server1 = NULL, *server2 = NULL;
 	if (netsplit && reason)
@@ -1199,7 +1196,6 @@ remove_from_channel (char *channel, char *nick, int server, int netsplit, char *
 			add_split_server (server1, server2, 0);
 			message_from (channel, LOG_CRAP);
 			malloc_strcpy (&last_split_server, server1);
-			malloc_strcpy (&last_split_from, server2);
 			if (do_hook (LLOOK_SPLIT_LIST, "%s %s", server2, server1))
 			{
 				put_it ("%s", convert_output_format (get_fset_var (FORMAT_NETSPLIT_FSET), "%s %s %s", update_clock (GET_TIME), server1, server2));
@@ -1593,7 +1589,7 @@ get_channel_voice (char *channel, int server)
 	return 1;
 }
 
-extern void 
+void 
 set_channel_window (Window * window, char *channel, int server)
 {
 	struct channel *tmp;
@@ -1611,7 +1607,7 @@ set_channel_window (Window * window, char *channel, int server)
 	}
 }
 
-extern char *
+char *
 create_channel_list (Window * window)
 {
 	struct channel *tmp;
@@ -1630,7 +1626,7 @@ create_channel_list (Window * window)
 	return m_strdup (buffer);
 }
 
-extern void 
+void 
 channel_server_delete (int server)
 {
 	struct channel *tmp;
@@ -1813,7 +1809,7 @@ check_mode_list_join (char *channel, int server)
 	}
 }
 
-extern void 
+void 
 remove_from_mode_list (char *channel, int server)
 {
 	struct modelist *curr, *next, *prev = NULL;
@@ -1838,7 +1834,7 @@ remove_from_mode_list (char *channel, int server)
 	}
 }
 
-extern void 
+void 
 clear_mode_list (int server)
 {
 	struct modelist *curr, *next, *prev = NULL;
@@ -1858,7 +1854,7 @@ clear_mode_list (int server)
 	}
 }
 
-extern int 
+int 
 chan_is_connected (char *channel, int server)
 {
 	struct channel *cp = lookup_channel (channel, server, CHAN_NOUNLINK);

@@ -32,9 +32,6 @@
 #include "screen.h"
 #include "window.h"
 
-/* need redraw? */
-extern int need_redraw;
-
 /* make this buffer *much* bigger than needed */
 #define LARGE_BIG_BUFFER_SIZE BIG_BUFFER_SIZE
 

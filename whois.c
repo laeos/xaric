@@ -39,8 +39,6 @@
 #include "struct.h"
 #include "fset.h"
 
-char whois_nick[] = "#WHOIS#";
-
 /* current setting for BEEP_ON_MSG */
 static int ignore_whois_crap = 0;
 static int eat_away = 0;
@@ -998,7 +996,7 @@ typed_add_to_whois_queue (int type, char *nick, void (*func) (WhoisStuff *, char
 	}
 }
 
-extern void 
+void 
 userhost_cmd_returned (WhoisStuff * stuff, char *nick, char *text)
 {
 	char args[BIG_BUFFER_SIZE + 1];

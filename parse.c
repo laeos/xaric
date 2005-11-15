@@ -52,7 +52,6 @@ extern char *do_nslookup (char *);
 extern char *random_str (int, int);
 
 char *last_split_server = NULL;
-char *last_split_from = NULL;
 int in_server_ping = 0;
 
 extern char *mircansi (char *);

@@ -176,7 +176,6 @@ extern	time_t	idle_time;
 extern	int	waiting_out;
 extern	int	waiting_in;
 extern	char	wait_nick[];
-extern	char	whois_nick[];
 extern	char	lame_wait_nick[];
 extern	char	**environ;
 extern	int	current_numeric;

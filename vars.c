@@ -52,8 +52,6 @@ extern Screen *screen_list, *current_screen;
 
 int loading_global = 0;
 
-extern struct channel default_statchan;
-
 
 enum VAR_TYPES find_variable (char *, int *);
 static void exec_warning (Window *, char *, int);

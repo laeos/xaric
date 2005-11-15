@@ -47,7 +47,7 @@ static int whowas_userlist_count = 0;
 static int whowas_reg_count = 0;
 static int whowas_chan_count = 0;
 
-extern struct whowas_list *
+struct whowas_list *
 check_whowas_buffer (char *nick, char *userhost, char *channel, int unlnk)
 {
 	struct whowas_list *tmp = NULL;
@@ -57,7 +57,7 @@ check_whowas_buffer (char *nick, char *userhost, char *channel, int unlnk)
 }
 
 
-extern struct whowas_list *
+struct whowas_list *
 check_whowas_nick_buffer (char *nick, char *channel, int unlnk)
 {
 	struct whowas_list *tmp = NULL, *last = NULL;
@@ -88,7 +88,7 @@ check_whowas_nick_buffer (char *nick, char *channel, int unlnk)
 	return (NULL);
 }
 
-extern struct whowas_list *
+struct whowas_list *
 check_whosplitin_buffer (char *nick, char *userhost, char *channel, int unlnk)
 {
 	struct whowas_list *tmp = NULL;
@@ -163,7 +163,7 @@ clean_whowas_list (void)
 
 /* BELOW THIS MARK IS THE CHANNEL WHOWAS STUFF */
 
-extern struct whowas_chan_list *
+struct whowas_chan_list *
 check_whowas_chan_buffer (char *channel, int unlnk)
 {
 	struct whowas_chan_list *tmp, *last = NULL;

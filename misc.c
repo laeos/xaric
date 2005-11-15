@@ -72,8 +72,6 @@ extern int in_cparse;
 
 extern char *mircansi(char *);
 
-struct channel default_statchan = { 0 };
-
 extern NickTab *tabkey_array;
 
 extern Ignore *ignored_nicks;

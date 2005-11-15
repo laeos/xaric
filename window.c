@@ -334,7 +334,7 @@ add_to_invisible_list (Window * window)
  * too small, the next largest window is used.  The added window is returned
  * as the function value or null is returned if the window couldn't be added 
  */
-extern Window *
+Window *
 add_to_window_list (Window * new)
 {
 	Window *biggest = NULL, *tmp;
@@ -1491,7 +1491,7 @@ is_bound_anywhere (const char *channel)
 	return 0;
 }
 
-extern int
+int
 is_bound (const char *channel, int server)
 {
 	Window *tmp = NULL;

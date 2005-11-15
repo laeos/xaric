@@ -20,8 +20,9 @@
 	BanList *ban_is_on_channel(char *ban, struct channel *);
 					
 extern	char	*FromUserHost;
-
 extern	int	doing_privmsg;
+extern  char    *last_split_server;
+
 #define WAIT_WHO 0
 #define WAIT_BANS 1
 #define WAIT_MODE 2

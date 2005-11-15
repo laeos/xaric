@@ -39,24 +39,14 @@
 #include "hash.h"
 #include "fset.h"
 #include "tcommand.h"
-
-
-#include <sys/ioctl.h>
-
-void get_history (int);
+#include "parse.h" /* last_split_server */
 
 static char new_nick[NICKNAME_LEN + 1] = "";
 static char *input_lastmsg = NULL;
 
-extern NickTab *getnextnick (char *, char *, char *);
-extern int extended_handled;
-extern char *getchannick (char *, char *);
-
 NickTab *tabkey_array = NULL;
 
-
-
-const int WIDTH = 10;
+static const int WIDTH = 10;
 
 /* input_prompt: contains the current, unexpanded input prompt */
 static char *input_prompt = NULL;
@@ -68,16 +58,14 @@ static int input_line;
 /* str_start: position in buffer of first visible character in the input line */
 static int str_start = 0;
 
-enum I_STATE
-{
+enum I_STATE {
 	STATE_NORMAL = 0,
 	STATE_COMPLETE,
 	STATE_TABKEY,
 	STATE_TABKEYNEXT,
 	STATE_CNICK,
 	STATE_CNICKNEXT
-}
-in_completion = STATE_NORMAL;
+} in_completion = STATE_NORMAL;
 
 /* These are sanity macros.  The file was completely unreadable before 
  * i put these in here.  I make no apologies for them.
@@ -117,7 +105,7 @@ safe_puts (char *str, int len)
 }
 
 /* cursor_to_input: move the cursor to the input line, if not there already */
-extern void 
+void 
 cursor_to_input (void)
 {
 	Screen *old_current_screen;
@@ -153,7 +141,7 @@ cursor_to_input (void)
  *
  * UPDATE_ALL - redraws the entire line 
  */
-extern void 
+void 
 update_input (int update)
 {
 	int old_start;
@@ -301,7 +289,7 @@ update_input (int update)
 	term_flush ();
 }
 
-extern void 
+void 
 change_input_prompt (int direction)
 {
 	if (!current_screen->promptlist)
@@ -330,7 +318,7 @@ change_input_prompt (int direction)
 }
 
 /* input_move_cursor: moves the cursor left or right... got it? */
-extern void 
+void 
 input_move_cursor (int dir)
 {
 	cursor_to_input ();
@@ -376,7 +364,7 @@ get_input (void)
 }
 
 /* init_input: initialized the input buffer by clearing it out */
-extern void 
+void 
 init_input (void)
 {
 	*INPUT_BUFFER = (char) 0;
@@ -384,7 +372,7 @@ init_input (void)
 }
 
 /* get_input_prompt: returns the current input_prompt */
-extern char *
+char *
 get_input_prompt (void)
 {
 	return (input_prompt);
@@ -425,7 +413,7 @@ set_input_prompt (Window * win, char *prompt, int unused)
  * input_forward_word: move the input cursor forward one word in the input
  * line 
  */
-extern void 
+void 
 input_forward_word (char unused, char *not_used)
 {
 	cursor_to_input ();
@@ -438,7 +426,7 @@ input_forward_word (char unused, char *not_used)
 }
 
 /* input_backward_word: move the cursor left on word in the input line */
-extern void 
+void 
 input_backward_word (char unused, char *not_used)
 {
 	cursor_to_input ();
@@ -451,7 +439,7 @@ input_backward_word (char unused, char *not_used)
 }
 
 /* input_delete_character: deletes a character from the input line */
-extern void 
+void 
 input_delete_character (char unused, char *not_used)
 {
 	cursor_to_input ();
@@ -482,7 +470,7 @@ input_delete_character (char unused, char *not_used)
 }
 
 /* input_backspace: does a backspace in the input buffer */
-extern void 
+void 
 input_backspace (char key, char *blah)
 {
 	cursor_to_input ();
@@ -527,7 +515,7 @@ input_backspace (char key, char *blah)
  * input_beginning_of_line: moves the input cursor to the first character in
  * the input buffer 
  */
-extern void 
+void 
 input_beginning_of_line (char unused, char *not_used)
 {
 	cursor_to_input ();
@@ -539,7 +527,7 @@ input_beginning_of_line (char unused, char *not_used)
  * input_beginning_of_line: moves the input cursor to the first character in
  * the input buffer 
  */
-extern void 
+void 
 new_input_beginning_of_line (char unused, char *not_used)
 {
 	cursor_to_input ();
@@ -552,7 +540,7 @@ new_input_beginning_of_line (char unused, char *not_used)
  * input_end_of_line: moves the input cursor to the last character in the
  * input buffer 
  */
-extern void 
+void 
 input_end_of_line (char unused, char *not_used)
 {
 	cursor_to_input ();
@@ -560,7 +548,7 @@ input_end_of_line (char unused, char *not_used)
 	update_input (UPDATE_JUST_CURSOR);
 }
 
-extern void 
+void 
 input_delete_to_previous_space (char key, char *blah)
 {
 	int old_pos;
@@ -587,7 +575,7 @@ input_delete_to_previous_space (char key, char *blah)
  * input_delete_previous_word: deletes from the cursor backwards to the next
  * space character. 
  */
-extern void 
+void 
 input_delete_previous_word (char unused, char *not_used)
 {
 	int old_pos;
@@ -611,7 +599,7 @@ input_delete_previous_word (char unused, char *not_used)
  * input_delete_next_word: deletes from the cursor to the end of the next
  * word 
  */
-extern void 
+void 
 input_delete_next_word (char unused, char *not_used)
 {
 	int pos;
@@ -637,7 +625,7 @@ input_delete_next_word (char unused, char *not_used)
  * input_add_character: adds the character c to the input buffer, repecting
  * the current overwrite/insert mode status, etc 
  */
-extern void 
+void 
 input_add_character (char c, char *unused)
 {
 	int display_flag = NO_UPDATE;
@@ -692,7 +680,7 @@ input_add_character (char c, char *unused)
 }
 
 /* input_clear_to_eol: erases from the cursor to the end of the input buffer */
-extern void 
+void 
 input_clear_to_eol (char unused, char *not_used)
 {
 	cursor_to_input ();
@@ -706,7 +694,7 @@ input_clear_to_eol (char unused, char *not_used)
  * input_clear_to_bol: clears from the cursor to the beginning of the input
  * buffer 
  */
-extern void 
+void 
 input_clear_to_bol (char unused, char *not_used)
 {
 	char *ptr = NULL;
@@ -726,7 +714,7 @@ input_clear_to_bol (char unused, char *not_used)
 /*
  * input_clear_line: clears entire input line
  */
-extern void 
+void 
 input_clear_line (char unused, char *not_used)
 {
 	cursor_to_input ();
@@ -743,7 +731,7 @@ input_clear_line (char unused, char *not_used)
  * input_transpose_characters: swaps the positions of the two characters
  * before the cursor position 
  */
-extern void 
+void 
 input_transpose_characters (char unused, char *not_used)
 {
 	cursor_to_input ();
@@ -779,7 +767,7 @@ input_transpose_characters (char unused, char *not_used)
 }
 
 
-extern void 
+void 
 refresh_inputline (char unused, char *not_used)
 {
 	update_input (UPDATE_ALL);
@@ -789,7 +777,7 @@ refresh_inputline (char unused, char *not_used)
  * input_yank_cut_buffer: takes the contents of the cut buffer and inserts it
  * into the input line 
  */
-extern void 
+void 
 input_yank_cut_buffer (char unused, char *not_used)
 {
 	char *ptr = NULL;
@@ -816,31 +804,31 @@ input_yank_cut_buffer (char unused, char *not_used)
 #define LEFT 0
 
 /* BIND functions: */
-extern void 
+void 
 forward_character (char dumb, char *dumber)
 {
 	input_move_cursor (RIGHT);
 }
 
-extern void 
+void 
 backward_character (char dumb, char *dumber)
 {
 	input_move_cursor (LEFT);
 }
 
-extern void 
+void 
 backward_history (char dumb, char *dumber)
 {
 	get_history (PREV);
 }
 
-extern void 
+void 
 forward_history (char dumb, char *dumber)
 {
 	get_history (NEXT);
 }
 
-extern void 
+void 
 toggle_insert_mode (char dumb, char *dumber)
 {
 	int tog = get_int_var (INSERT_MODE_VAR);
@@ -848,827 +836,7 @@ toggle_insert_mode (char dumb, char *dumber)
 	set_int_var (INSERT_MODE_VAR, tog);
 }
 
-
-extern void 
-input_msgreply (char dumb, char *dumber)
-{
-	char *cmdchar;
-	char *line, *cmd, *t;
-	char *snick;
-	NickTab *nick = NULL;
-	int got_space = 0;
-
-	if (!(cmdchar = get_string_var (CMDCHARS_VAR)))
-		cmdchar = DEFAULT_CMDCHARS;
-
-	t = line = m_strdup (get_input ());
-	if (t)
-		got_space = strchr (t, ' ') ? 1 : 0;
-	cmd = next_arg (line, &line);
-	snick = next_arg (line, &line);
-	if ((cmd && *cmd == *cmdchar && got_space) || !cmd)
-	{
-
-		if (cmd && *cmd == *cmdchar)
-			cmd++;
-		if (in_completion == STATE_NORMAL && snick)
-			strncpy (new_nick, snick, sizeof (new_nick) - 1);
-
-		if ((nick = getnextnick (new_nick, input_lastmsg, snick)))
-		{
-			if (nick->nick && *(nick->nick))
-			{
-				snick = nick->nick;
-				malloc_strcpy (&input_lastmsg, nick->nick);
-			}
-		}
-		if (nick)
-		{
-			char *tmp = NULL;
-			input_clear_line ('\0', NULL);
-			if (get_fset_var (FORMAT_NICK_MSG_FSET))
-				malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_MSG_FSET), "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_str)));
-			else
-				malloc_sprintf (&tmp, "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_str);
-			set_input (tmp);
-			new_free (&tmp);
-		}
-		else
-			command_completion (0, NULL);
-	}
-	else
-		command_completion (0, NULL);
-	update_input (UPDATE_ALL);
-	new_free (&t);
-}
-
-
-void 
-add_autonick_input (char *nick, char *line)
-{
-	char *tmp1 = NULL;
-	input_clear_line ('\0', NULL);
-	if ((do_hook (AR_REPLY_LIST, "%s", nick)))
-	{
-		if (get_fset_var (FORMAT_NICK_AUTO_FSET))
-			malloc_strcpy (&tmp1, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_AUTO_FSET), "%s %s", nick, line ? line : empty_str)));
-		else
-			malloc_sprintf (&tmp1, "%s: %s", nick, line);
-		set_input (tmp1);
-		new_free (&tmp1);
-	}
-	update_input (UPDATE_ALL);
-}
-
-extern void 
-send_line (char dumb, char *dumber)
-{
-	int server;
-	WaitPrompt *OldPrompt;
-
-	server = from_server;
-	from_server = get_window_server (0);
-	unhold_a_window (curr_scr_win);
-	if (current_screen->promptlist && current_screen->promptlist->type == WAIT_PROMPT_LINE)
-	{
-		OldPrompt = current_screen->promptlist;
-		(*OldPrompt->func) (OldPrompt->data, get_input ());
-		set_input (empty_str);
-		current_screen->promptlist = OldPrompt->next;
-		new_free (&OldPrompt->data);
-		new_free (&OldPrompt->prompt);
-		new_free ((char **) &OldPrompt);
-		change_input_prompt (-1);
-	}
-	else
-	{
-		char *line, *tmp = NULL;
-
-		line = get_input ();
-		if (line && (*line != get_int_var (CMDCHARS_VAR)) && get_int_var (NICK_COMPLETION_VAR))
-		{
-			char auto_comp_char = ':';
-			if (!(auto_comp_char = (char) get_int_var (NICK_COMPLETION_CHAR_VAR)))
-				auto_comp_char = ':';
-
-			/* possible nick completion */
-			if (strchr (line, auto_comp_char))
-			{
-				char *p;
-				struct channel *chan;
-				struct nick_list *nick;
-				char *channel;
-				malloc_strcpy (&tmp, line);
-				p = strchr (tmp, auto_comp_char);
-				*p++ = 0;
-				if (*tmp && *p && (channel = get_current_channel_by_refnum (0)))
-				{
-					chan = lookup_channel (channel, from_server, 0);
-					for (nick = next_nicklist (chan, NULL); nick; nick = next_nicklist (chan, nick))
-						if (!my_strnicmp (tmp, nick->nick, strlen (tmp)))
-							break;
-					if (nick)
-					{
-						if (get_fset_var (FORMAT_NICK_COMP_FSET))
-							malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_COMP_FSET), "%s %s", nick->nick, p)));
-						else
-							malloc_sprintf (&tmp, "%s%c %s", nick->nick, auto_comp_char, p);
-					}
-					else
-						malloc_strcpy (&tmp, line);
-				}
-				else
-					malloc_strcpy (&tmp, line);
-			}
-			else
-				malloc_strcpy (&tmp, line);
-		}
-		else
-			malloc_strcpy (&tmp, line);
-		if (do_hook (INPUT_LIST, "%s", tmp))
-		{
-			if (get_int_var (INPUT_ALIASES_VAR))
-				parse_line (NULL, tmp, empty_str, 1, 0);
-			else
-				parse_line (NULL, tmp, NULL, 1, 0);
-		}
-		update_input (UPDATE_ALL);
-		new_free (&tmp);
-	}
-	new_free (&input_lastmsg);
-	*new_nick = 0;
-	in_completion = STATE_NORMAL;
-	from_server = server;
-}
-
-
-
-extern void 
-meta9_char (char dumb, char *dumber)
-{
-	current_screen->meta_hit[9] = 1;
-}
-
-extern void 
-meta8_char (char dumb, char *dumber)
-{
-	current_screen->meta_hit[8] = 1;
-}
-
-extern void 
-meta7_char (char dumb, char *dumber)
-{
-	current_screen->meta_hit[7] = 1;
-}
-
-extern void 
-meta6_char (char dumb, char *dumber)
-{
-	current_screen->meta_hit[6] = 1;
-}
-
-extern void 
-meta5_char (char dumb, char *dumber)
-{
-	current_screen->meta_hit[5] = 1;
-}
-
-extern void 
-meta4_char (char dumb, char *dumber)
-{
-	current_screen->meta_hit[4] = 1 - current_screen->meta_hit[4];
-}
-
-extern void 
-meta3_char (char dumb, char *dumber)
-{
-	current_screen->meta_hit[3] = 1;
-}
-
-extern void 
-meta2_char (char dumb, char *dumber)
-{
-	current_screen->meta_hit[2] = 1;
-}
-
-extern void 
-meta1_char (char dumb, char *dumber)
-{
-	current_screen->meta_hit[1] = 1;
-}
-
-extern void 
-quote_char (char c, char *dumber)
-{
-	current_screen->quote_hit = 1;
-}
-
-/* These four functions are boomerang functions, which allow the highlight
- * characters to be bound by simply having these functions put in the
- * appropriate characters when you press any key to which you have bound
- * that highlight character. >;-)
- */
-extern void 
-insert_bold (char c, char *dumber)
-{
-	input_add_character (BOLD_TOG, dumber);
-}
-
-extern void 
-insert_reverse (char c, char *dumber)
-{
-	input_add_character (REV_TOG, dumber);
-}
-
-extern void 
-insert_underline (char c, char *dumber)
-{
-	input_add_character (UND_TOG, dumber);
-}
-
-extern void 
-highlight_off (char c, char *dumber)
-{
-	input_add_character (ALL_OFF, dumber);
-}
-
-/* type_text: the BIND function TYPE_TEXT */
-extern void 
-type_text (char c, char *str)
-{
-	if (!str)
-		return;
-	for (; *str; str++)
-		input_add_character (*str, empty_str);
-}
-
-/*
- * clear_screen: the CLEAR_SCREEN function for BIND.  Clears the screen and
- * starts it if it is held 
- */
-extern void 
-clear_screen (char c, char *str)
-{
-	hold_mode (NULL, OFF, 1);
-	clear_window_by_refnum (0);
-}
-
-/* parse_text: the bindable function that executes its string */
-extern void 
-parse_text (char c, char *str)
-{
-	parse_line (NULL, str, empty_str, 0, 0);
-}
-
-
-/*
- * edit_char: handles each character for an input stream.  Not too difficult
- * to work out.
- */
-extern void 
-edit_char (u_char key)
-{
-	void (*func) (char, char *) = NULL;
-	char *ptr = NULL;
-	u_char extended_key;
-	WaitPrompt *oldprompt;
-	int meta_hit = 0, meta_not_hit;
-	int i;
-
-
-	/* were we waiting for a keypress? */
-	if (current_screen->promptlist && current_screen->promptlist->type == WAIT_PROMPT_KEY)
-	{
-		char key_[2] = "\0";
-		key_[0] = key;
-		oldprompt = current_screen->promptlist;
-
-		(*oldprompt->func) (oldprompt->data, key_);
-
-		set_input (empty_str);
-		current_screen->promptlist = oldprompt->next;
-		new_free (&oldprompt->data);
-		new_free (&oldprompt->prompt);
-		new_free ((char **) &oldprompt);
-		change_input_prompt (-1);
-		return;
-	}
-
-	extended_key = key;
-
-
-	/* Check to see if its an eight bit char and if we allow it */
-	if (!get_int_var (EIGHT_BIT_CHARACTERS_VAR))
-		key &= 0x7f;	/* mask out non-ascii crap */
-
-
-	/* Check to see if this is a meta-key */
-	for (i = 1; i <= 9; i++)
-	{
-		if (current_screen->meta_hit[i])
-		{
-			if (keys[i][key])
-			{
-				func = key_names[keys[i][key]->key_index].func;
-				ptr = keys[i][key]->stuff;
-			}
-			current_screen->meta_hit[i] = 0;
-			meta_hit = 1;
-			break;
-		}
-	}
-	if (!meta_hit)
-	{
-		if (keys[0][key])
-		{
-			func = key_names[keys[0][key]->key_index].func;
-			ptr = keys[0][key]->stuff;
-		}
-	}
-
-	/* is there a meta key that isnt still outstanding? */
-	meta_not_hit = 1;
-	for (i = 1; i <= 3; i++)
-		meta_not_hit = meta_not_hit && !current_screen->meta_hit[i];
-	for (i = 5; i <= 9; i++)
-		meta_not_hit = meta_not_hit && !current_screen->meta_hit[i];
-
-	if (meta_not_hit)
-	{
-		/* did we just hit the quote character? */
-		if (current_screen->quote_hit)
-		{
-			current_screen->quote_hit = 0;
-			input_add_character (extended_key, empty_str);
-		}
-
-		/* nope. none of these.  just a regular character */
-		else if (func)
-			func (extended_key, ptr ? ptr : empty_str);
-	}
-	else
-		term_beep ();	/* two metas in a row gets a beep */
-}
-
-extern void 
-my_scrollback (char dumb, char *dumber)
-{
-	scrollback_backwards (dumb, dumber);
-	extended_handled = 1;
-}
-
-extern void 
-my_scrollforward (char dumb, char *dumber)
-{
-	scrollback_forwards (dumb, dumber);
-	extended_handled = 1;
-}
-
-extern void 
-my_scrollend (char dumb, char *dumber)
-{
-	scrollback_end (dumb, dumber);
-	extended_handled = 1;
-}
-
-extern void 
-dcc_plist (char dumb, char *dumber)
-{
-	dcc_glist (NULL, NULL);
-	extended_handled = 1;
-}
-
-
-extern int in_window_command;
-
-static void 
-handle_swap (int windownum)
-{
-	char *p = NULL;
-
-	malloc_sprintf (&p, "SWAP %d", windownum);
-	t_parse_command ("WINDOW", p);
-	set_channel_window (curr_scr_win, get_current_channel_by_refnum (curr_scr_win->refnum), curr_scr_win->server);
-	new_free (&p);
-	set_input_prompt (curr_scr_win, get_string_var (INPUT_PROMPT_VAR), 0);
-	update_input (UPDATE_ALL);
-	update_all_windows ();
-}
-
-extern void 
-window_swap1 (char dumb, char *dumber)
-{
-	handle_swap (1);
-	extended_handled = 1;
-}
-
-extern void 
-window_swap2 (char dumb, char *dumber)
-{
-	handle_swap (2);
-	extended_handled = 1;
-}
-
-extern void 
-window_swap3 (char dumb, char *dumber)
-{
-	handle_swap (3);
-	extended_handled = 1;
-}
-
-extern void 
-window_swap4 (char dumb, char *dumber)
-{
-	handle_swap (4);
-	extended_handled = 1;
-}
-
-extern void 
-window_swap5 (char dumb, char *dumber)
-{
-	handle_swap (5);
-	extended_handled = 1;
-}
-
-extern void 
-window_swap6 (char dumb, char *dumber)
-{
-	handle_swap (6);
-	extended_handled = 1;
-}
-
-extern void 
-window_swap7 (char dumb, char *dumber)
-{
-	handle_swap (7);
-	extended_handled = 1;
-}
-extern void 
-window_swap8 (char dumb, char *dumber)
-{
-	handle_swap (8);
-	extended_handled = 1;
-}
-extern void 
-window_swap9 (char dumb, char *dumber)
-{
-	handle_swap (9);
-	extended_handled = 1;
-}
-extern void 
-window_swap10 (char dumb, char *dumber)
-{
-	handle_swap (10);
-	extended_handled = 1;
-}
-
-extern void 
-change_to_split (char dumb, char *dumber)
-{
-	extern char *last_split_server;
-	if (!last_split_server)
-		return;
-	t_parse_command ("SERVER", last_split_server);
-}
-
-extern void 
-join_last_invite (char dumb, char *dumber)
-{
-	if (invite_channel)
-		send_to_server (SERVER(from_server), "JOIN %s", invite_channel);
-	else
-		bitchsay ("You haven't been invited to a channel yet");
-}
-
-extern void 
-wholeft (char dumb, char *dumber)
-{
-	show_wholeft (NULL);
-}
-
-extern void 
-window_key_balance (char dumb, char *dumber)
-{
-	in_window_command = 1;
-	message_from (NULL, LOG_CURRENT);
-	recalculate_windows ();
-	update_all_windows ();
-	in_window_command = 0;
-	message_from (NULL, LOG_CRAP);
-}
-
-extern void 
-window_grow_one (char dumb, char *dumber)
-{
-	in_window_command = 1;
-	message_from (NULL, LOG_CURRENT);
-	resize_window (1, curr_scr_win, 1);
-	update_all_windows ();
-	in_window_command = 0;
-	message_from (NULL, LOG_CRAP);
-}
-
-extern void 
-window_key_hide (char dumb, char *dumber)
-{
-	in_window_command = 1;
-	message_from (NULL, LOG_CURRENT);
-	hide_window (curr_scr_win);
-	update_all_windows ();
-	in_window_command = 0;
-	message_from (NULL, LOG_CRAP);
-}
-
-extern void 
-window_key_kill (char dumb, char *dumber)
-{
-	in_window_command = 1;
-	message_from (NULL, LOG_CURRENT);
-	delete_window (curr_scr_win);
-	update_all_windows ();
-	in_window_command = 0;
-	message_from (NULL, LOG_CRAP);
-}
-
-extern void 
-window_key_list (char dumb, char *dumber)
-{
-	in_window_command = 1;
-	message_from (NULL, LOG_CURRENT);
-	window_list (curr_scr_win, NULL, NULL);
-	in_window_command = 0;
-	message_from (NULL, LOG_CRAP);
-}
-
-extern void 
-window_key_move (char dumb, char *dumber)
-{
-	in_window_command = 1;
-	message_from (NULL, LOG_CURRENT);
-	move_window (curr_scr_win, 1);
-	update_all_windows ();
-	in_window_command = 0;
-	message_from (NULL, LOG_CRAP);
-}
-
-
-extern void 
-window_shrink_one (char dumb, char *dumber)
-{
-	in_window_command = 1;
-	message_from (NULL, LOG_CURRENT);
-	resize_window (1, curr_scr_win, -1);
-	update_all_windows ();
-	in_window_command = 0;
-	message_from (NULL, LOG_CRAP);
-}
-
-extern void 
-ignore_last_nick (char dumb, char *dumber)
-{
-	NickTab *nick;
-	char *tmp1;
-	if ((nick = gettabkey (1, NULL)))
-	{
-		set_input (empty_str);
-		tmp1 = m_sprintf ("%sig %s", get_string_var (CMDCHARS_VAR), nick->nick);
-		set_input (tmp1);
-		new_free (&tmp1);
-	}
-	update_input (UPDATE_ALL);
-}
-
-extern void 
-nick_completion (char dumb, char *dumber)
-{
-	char *q, *line;
-	int i = -1;
-	char *nick = NULL, *tmp;
-
-	q = line = m_strdup (&current_screen->input_buffer[MIN_POS]);
-	if (in_completion == STATE_NORMAL)
-	{
-		i = word_count (line);
-		nick = extract_words (line, i - 1, i);
-	}
-	if (nick)
-		line[strlen (line) - strlen (nick)] = 0;
-	else
-		*line = 0;
-	if ((tmp = getchannick (input_lastmsg, nick && *nick ? nick : NULL)))
-	{
-		malloc_strcat (&q, tmp);
-		set_input (q);
-		update_input (UPDATE_ALL);
-		malloc_strcpy (&input_lastmsg, tmp);
-		in_completion = STATE_COMPLETE;
-	}
-	new_free (&q);
-	new_free (&nick);
-}
-
-char *
-getchannick (char *oldnick, char *nick)
-{
-	struct channel *chan;
-	char *channel, *tnick = NULL;
-	struct nick_list *cnick;
-	channel = get_current_channel_by_refnum (0);
-	if (channel)
-	{
-		if (!(chan = lookup_channel (channel, from_server, 0)) || !(cnick = next_nicklist (chan, NULL)))
-		{
-			in_completion = STATE_NORMAL;
-			return NULL;
-		}
-		/* 
-		 * we've never been here before so return first nick 
-		 * user hasn't entered anything on the line.
-		 */
-		if (!oldnick && !nick && cnick)
-		{
-			in_completion = STATE_CNICK;
-			return cnick->nick;
-		}
-		/*
-		 * user has been here before so we attempt to find the correct
-		 * first nick to start from.
-		 */
-		if (oldnick)
-		{
-			/* find the old nick so we have a frame of reference */
-			for (cnick = next_nicklist (chan, NULL); cnick; cnick = next_nicklist (chan, cnick))
-			{
-				if (!my_strnicmp (cnick->nick, oldnick, strlen (oldnick)))
-				{
-					tnick = cnick->nick;
-					if ((cnick = next_nicklist (chan, cnick)))
-						tnick = cnick->nick;
-					break;
-
-				}
-
-			}
-		}
-		/*
-		 * if the user has put something on the line
-		 * we attempt to pattern match here.
-		 */
-		if (nick && in_completion == STATE_NORMAL)
-		{
-			/* 
-			 * if oldnick was the last one in the channel 
-			 * cnick will be NULL;
-			 */
-			if (!cnick)
-			{
-				cnick = next_nicklist (chan, NULL);
-				tnick = cnick->nick;
-			}
-			/* we have a new nick */
-			else if (next_nicklist (chan, cnick))
-			{
-				/* 
-				 * if there's more than one nick, start 
-				 * scanning.
-				 */
-				for (; cnick; cnick = next_nicklist (chan, cnick))
-				{
-					if (!my_strnicmp (cnick->nick, nick, strlen (nick)))
-					{
-						tnick = cnick->nick;
-						break;
-					}
-				}
-			}
-			else
-				tnick = cnick->nick;
-		}
-		else if (in_completion == STATE_CNICK)
-		{
-			/*
-			 * else we've been here before so
-			 * attempt to continue through the nicks 
-			 */
-			if (!cnick)
-				cnick = next_nicklist (chan, NULL);
-			tnick = cnick->nick;
-		}
-	}
-	if (tnick)
-		in_completion = STATE_CNICK;
-
-	return tnick;
-}
-
-void 
-addtabkey (char *nick, char *type)
-{
-	NickTab *tmp, *new;
-
-	tmp = tabkey_array;
-
-	if (!tmp || !(new = (NickTab *) remove_from_list ((struct list **) & tmp, nick)))
-	{
-		new = (NickTab *) new_malloc (sizeof (NickTab));
-		malloc_strcpy (&new->nick, nick);
-		if (type)
-			malloc_strcpy (&new->type, type);
-	}
-	/*
-	 * most recent nick is at the top of the list 
-	 */
-	new->next = tmp;
-	tmp = new;
-	tabkey_array = tmp;
-}
-
-
-NickTab *
-gettabkey (int direction, char *nick)
-{
-	NickTab *tmp, *new;
-
-
-	new = tmp = tabkey_array;
-
-	if (nick)
-	{
-		for (; tmp; tmp = tmp->next)
-			if (!my_strnicmp (nick, tmp->nick, strlen (nick)))
-				return tmp;
-		return NULL;
-	}
-	tmp = new;
-	if (!tmp)
-		return NULL;
-
-	switch (direction)
-	{
-	case 1:
-	default:
-		{
-			/*
-			 * need at least two nicks in the list
-			 */
-			if (new->next)
-			{
-				/*
-				 * reset top of array
-				 */
-				tabkey_array = new->next;
-
-				/*
-				 * set the current nick next pointer to NULL
-				 * and then reset top of list.
-				 */
-
-				new->next = NULL;
-				tmp = tabkey_array;
-
-				/*
-				 * find the last nick in the list
-				 * so we can make the old top pointer 
-				 * point to the item
-				 */
-				while (tmp)
-					if (tmp->next)
-						tmp = tmp->next;
-					else
-						break;
-				/* set the pointer and then return. */
-				tmp->next = new;
-			}
-			break;
-		}
-	case -1:
-		{
-			if (new && new->next)
-			{
-				tmp = new;
-				while (tmp)
-					if (tmp->next && tmp->next->next)
-						tmp = tmp->next;
-					else
-						break;
-				/* 
-				 * tmp now points at last two items in list 
-				 * now just swap some pointers.
-				 */
-				new = tmp->next;
-				tmp->next = NULL;
-				new->next = tabkey_array;
-				tabkey_array = new;
-			}
-			break;
-		}
-	}
-	if (new && new->nick)
-		return new;
-	return NULL;
-}
-
-NickTab *
+static NickTab *
 getnextnick (char *input_nick, char *oldnick, char *nick)
 {
 	struct channel *chan;
@@ -1779,4 +947,823 @@ getnextnick (char *input_nick, char *oldnick, char *nick)
 	if (cnick)
 		sucks.nick = cnick->nick;
 	return sucks.nick ? &sucks : NULL;
+}
+
+void 
+input_msgreply (char dumb, char *dumber)
+{
+	char *cmdchar;
+	char *line, *cmd, *t;
+	char *snick;
+	NickTab *nick = NULL;
+	int got_space = 0;
+
+	if (!(cmdchar = get_string_var (CMDCHARS_VAR)))
+		cmdchar = DEFAULT_CMDCHARS;
+
+	t = line = m_strdup (get_input ());
+	if (t)
+		got_space = strchr (t, ' ') ? 1 : 0;
+	cmd = next_arg (line, &line);
+	snick = next_arg (line, &line);
+	if ((cmd && *cmd == *cmdchar && got_space) || !cmd)
+	{
+
+		if (cmd && *cmd == *cmdchar)
+			cmd++;
+		if (in_completion == STATE_NORMAL && snick)
+			strncpy (new_nick, snick, sizeof (new_nick) - 1);
+
+		if ((nick = getnextnick (new_nick, input_lastmsg, snick)))
+		{
+			if (nick->nick && *(nick->nick))
+			{
+				snick = nick->nick;
+				malloc_strcpy (&input_lastmsg, nick->nick);
+			}
+		}
+		if (nick)
+		{
+			char *tmp = NULL;
+			input_clear_line ('\0', NULL);
+			if (get_fset_var (FORMAT_NICK_MSG_FSET))
+				malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_MSG_FSET), "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_str)));
+			else
+				malloc_sprintf (&tmp, "%s%s %s %s", cmdchar, nick->type ? nick->type : cmd ? cmd : "msg", nick->nick, line ? line : empty_str);
+			set_input (tmp);
+			new_free (&tmp);
+		}
+		else
+			command_completion (0, NULL);
+	}
+	else
+		command_completion (0, NULL);
+	update_input (UPDATE_ALL);
+	new_free (&t);
+}
+
+
+void 
+add_autonick_input (char *nick, char *line)
+{
+	char *tmp1 = NULL;
+	input_clear_line ('\0', NULL);
+	if ((do_hook (AR_REPLY_LIST, "%s", nick)))
+	{
+		if (get_fset_var (FORMAT_NICK_AUTO_FSET))
+			malloc_strcpy (&tmp1, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_AUTO_FSET), "%s %s", nick, line ? line : empty_str)));
+		else
+			malloc_sprintf (&tmp1, "%s: %s", nick, line);
+		set_input (tmp1);
+		new_free (&tmp1);
+	}
+	update_input (UPDATE_ALL);
+}
+
+void 
+send_line (char dumb, char *dumber)
+{
+	int server;
+	WaitPrompt *OldPrompt;
+
+	server = from_server;
+	from_server = get_window_server (0);
+	unhold_a_window (curr_scr_win);
+	if (current_screen->promptlist && current_screen->promptlist->type == WAIT_PROMPT_LINE)
+	{
+		OldPrompt = current_screen->promptlist;
+		(*OldPrompt->func) (OldPrompt->data, get_input ());
+		set_input (empty_str);
+		current_screen->promptlist = OldPrompt->next;
+		new_free (&OldPrompt->data);
+		new_free (&OldPrompt->prompt);
+		new_free ((char **) &OldPrompt);
+		change_input_prompt (-1);
+	}
+	else
+	{
+		char *line, *tmp = NULL;
+
+		line = get_input ();
+		if (line && (*line != get_int_var (CMDCHARS_VAR)) && get_int_var (NICK_COMPLETION_VAR))
+		{
+			char auto_comp_char = ':';
+			if (!(auto_comp_char = (char) get_int_var (NICK_COMPLETION_CHAR_VAR)))
+				auto_comp_char = ':';
+
+			/* possible nick completion */
+			if (strchr (line, auto_comp_char))
+			{
+				char *p;
+				struct channel *chan;
+				struct nick_list *nick;
+				char *channel;
+				malloc_strcpy (&tmp, line);
+				p = strchr (tmp, auto_comp_char);
+				*p++ = 0;
+				if (*tmp && *p && (channel = get_current_channel_by_refnum (0)))
+				{
+					chan = lookup_channel (channel, from_server, 0);
+					for (nick = next_nicklist (chan, NULL); nick; nick = next_nicklist (chan, nick))
+						if (!my_strnicmp (tmp, nick->nick, strlen (tmp)))
+							break;
+					if (nick)
+					{
+						if (get_fset_var (FORMAT_NICK_COMP_FSET))
+							malloc_strcpy (&tmp, stripansicodes (convert_output_format (get_fset_var (FORMAT_NICK_COMP_FSET), "%s %s", nick->nick, p)));
+						else
+							malloc_sprintf (&tmp, "%s%c %s", nick->nick, auto_comp_char, p);
+					}
+					else
+						malloc_strcpy (&tmp, line);
+				}
+				else
+					malloc_strcpy (&tmp, line);
+			}
+			else
+				malloc_strcpy (&tmp, line);
+		}
+		else
+			malloc_strcpy (&tmp, line);
+		if (do_hook (INPUT_LIST, "%s", tmp))
+		{
+			if (get_int_var (INPUT_ALIASES_VAR))
+				parse_line (NULL, tmp, empty_str, 1, 0);
+			else
+				parse_line (NULL, tmp, NULL, 1, 0);
+		}
+		update_input (UPDATE_ALL);
+		new_free (&tmp);
+	}
+	new_free (&input_lastmsg);
+	*new_nick = 0;
+	in_completion = STATE_NORMAL;
+	from_server = server;
+}
+
+
+
+void 
+meta9_char (char dumb, char *dumber)
+{
+	current_screen->meta_hit[9] = 1;
+}
+
+void 
+meta8_char (char dumb, char *dumber)
+{
+	current_screen->meta_hit[8] = 1;
+}
+
+void 
+meta7_char (char dumb, char *dumber)
+{
+	current_screen->meta_hit[7] = 1;
+}
+
+void 
+meta6_char (char dumb, char *dumber)
+{
+	current_screen->meta_hit[6] = 1;
+}
+
+void 
+meta5_char (char dumb, char *dumber)
+{
+	current_screen->meta_hit[5] = 1;
+}
+
+void 
+meta4_char (char dumb, char *dumber)
+{
+	current_screen->meta_hit[4] = 1 - current_screen->meta_hit[4];
+}
+
+void 
+meta3_char (char dumb, char *dumber)
+{
+	current_screen->meta_hit[3] = 1;
+}
+
+void 
+meta2_char (char dumb, char *dumber)
+{
+	current_screen->meta_hit[2] = 1;
+}
+
+void 
+meta1_char (char dumb, char *dumber)
+{
+	current_screen->meta_hit[1] = 1;
+}
+
+void 
+quote_char (char c, char *dumber)
+{
+	current_screen->quote_hit = 1;
+}
+
+/* These four functions are boomerang functions, which allow the highlight
+ * characters to be bound by simply having these functions put in the
+ * appropriate characters when you press any key to which you have bound
+ * that highlight character. >;-)
+ */
+void 
+insert_bold (char c, char *dumber)
+{
+	input_add_character (BOLD_TOG, dumber);
+}
+
+void 
+insert_reverse (char c, char *dumber)
+{
+	input_add_character (REV_TOG, dumber);
+}
+
+void 
+insert_underline (char c, char *dumber)
+{
+	input_add_character (UND_TOG, dumber);
+}
+
+void 
+highlight_off (char c, char *dumber)
+{
+	input_add_character (ALL_OFF, dumber);
+}
+
+/* type_text: the BIND function TYPE_TEXT */
+void 
+type_text (char c, char *str)
+{
+	if (!str)
+		return;
+	for (; *str; str++)
+		input_add_character (*str, empty_str);
+}
+
+/*
+ * clear_screen: the CLEAR_SCREEN function for BIND.  Clears the screen and
+ * starts it if it is held 
+ */
+void 
+clear_screen (char c, char *str)
+{
+	hold_mode (NULL, OFF, 1);
+	clear_window_by_refnum (0);
+}
+
+/* parse_text: the bindable function that executes its string */
+void 
+parse_text (char c, char *str)
+{
+	parse_line (NULL, str, empty_str, 0, 0);
+}
+
+
+/*
+ * edit_char: handles each character for an input stream.  Not too difficult
+ * to work out.
+ */
+void 
+edit_char (u_char key)
+{
+	void (*func) (char, char *) = NULL;
+	char *ptr = NULL;
+	u_char extended_key;
+	WaitPrompt *oldprompt;
+	int meta_hit = 0, meta_not_hit;
+	int i;
+
+
+	/* were we waiting for a keypress? */
+	if (current_screen->promptlist && current_screen->promptlist->type == WAIT_PROMPT_KEY)
+	{
+		char key_[2] = "\0";
+		key_[0] = key;
+		oldprompt = current_screen->promptlist;
+
+		(*oldprompt->func) (oldprompt->data, key_);
+
+		set_input (empty_str);
+		current_screen->promptlist = oldprompt->next;
+		new_free (&oldprompt->data);
+		new_free (&oldprompt->prompt);
+		new_free ((char **) &oldprompt);
+		change_input_prompt (-1);
+		return;
+	}
+
+	extended_key = key;
+
+
+	/* Check to see if its an eight bit char and if we allow it */
+	if (!get_int_var (EIGHT_BIT_CHARACTERS_VAR))
+		key &= 0x7f;	/* mask out non-ascii crap */
+
+
+	/* Check to see if this is a meta-key */
+	for (i = 1; i <= 9; i++)
+	{
+		if (current_screen->meta_hit[i])
+		{
+			if (keys[i][key])
+			{
+				func = key_names[keys[i][key]->key_index].func;
+				ptr = keys[i][key]->stuff;
+			}
+			current_screen->meta_hit[i] = 0;
+			meta_hit = 1;
+			break;
+		}
+	}
+	if (!meta_hit)
+	{
+		if (keys[0][key])
+		{
+			func = key_names[keys[0][key]->key_index].func;
+			ptr = keys[0][key]->stuff;
+		}
+	}
+
+	/* is there a meta key that isnt still outstanding? */
+	meta_not_hit = 1;
+	for (i = 1; i <= 3; i++)
+		meta_not_hit = meta_not_hit && !current_screen->meta_hit[i];
+	for (i = 5; i <= 9; i++)
+		meta_not_hit = meta_not_hit && !current_screen->meta_hit[i];
+
+	if (meta_not_hit)
+	{
+		/* did we just hit the quote character? */
+		if (current_screen->quote_hit)
+		{
+			current_screen->quote_hit = 0;
+			input_add_character (extended_key, empty_str);
+		}
+
+		/* nope. none of these.  just a regular character */
+		else if (func)
+			func (extended_key, ptr ? ptr : empty_str);
+	}
+	else
+		term_beep ();	/* two metas in a row gets a beep */
+}
+
+void 
+my_scrollback (char dumb, char *dumber)
+{
+	scrollback_backwards (dumb, dumber);
+	extended_handled = 1;
+}
+
+void 
+my_scrollforward (char dumb, char *dumber)
+{
+	scrollback_forwards (dumb, dumber);
+	extended_handled = 1;
+}
+
+void 
+my_scrollend (char dumb, char *dumber)
+{
+	scrollback_end (dumb, dumber);
+	extended_handled = 1;
+}
+
+void 
+dcc_plist (char dumb, char *dumber)
+{
+	dcc_glist (NULL, NULL);
+	extended_handled = 1;
+}
+
+
+int in_window_command;
+
+static void 
+handle_swap (int windownum)
+{
+	char *p = NULL;
+
+	malloc_sprintf (&p, "SWAP %d", windownum);
+	t_parse_command ("WINDOW", p);
+	set_channel_window (curr_scr_win, get_current_channel_by_refnum (curr_scr_win->refnum), curr_scr_win->server);
+	new_free (&p);
+	set_input_prompt (curr_scr_win, get_string_var (INPUT_PROMPT_VAR), 0);
+	update_input (UPDATE_ALL);
+	update_all_windows ();
+}
+
+void 
+window_swap1 (char dumb, char *dumber)
+{
+	handle_swap (1);
+	extended_handled = 1;
+}
+
+void 
+window_swap2 (char dumb, char *dumber)
+{
+	handle_swap (2);
+	extended_handled = 1;
+}
+
+void 
+window_swap3 (char dumb, char *dumber)
+{
+	handle_swap (3);
+	extended_handled = 1;
+}
+
+void 
+window_swap4 (char dumb, char *dumber)
+{
+	handle_swap (4);
+	extended_handled = 1;
+}
+
+void 
+window_swap5 (char dumb, char *dumber)
+{
+	handle_swap (5);
+	extended_handled = 1;
+}
+
+void 
+window_swap6 (char dumb, char *dumber)
+{
+	handle_swap (6);
+	extended_handled = 1;
+}
+
+void 
+window_swap7 (char dumb, char *dumber)
+{
+	handle_swap (7);
+	extended_handled = 1;
+}
+void 
+window_swap8 (char dumb, char *dumber)
+{
+	handle_swap (8);
+	extended_handled = 1;
+}
+void 
+window_swap9 (char dumb, char *dumber)
+{
+	handle_swap (9);
+	extended_handled = 1;
+}
+void 
+window_swap10 (char dumb, char *dumber)
+{
+	handle_swap (10);
+	extended_handled = 1;
+}
+
+void 
+change_to_split (char dumb, char *dumber)
+{
+	if (!last_split_server)
+		return;
+	t_parse_command ("SERVER", last_split_server);
+}
+
+void 
+join_last_invite (char dumb, char *dumber)
+{
+	if (invite_channel)
+		send_to_server (SERVER(from_server), "JOIN %s", invite_channel);
+	else
+		bitchsay ("You haven't been invited to a channel yet");
+}
+
+void 
+wholeft (char dumb, char *dumber)
+{
+	show_wholeft (NULL);
+}
+
+void 
+window_key_balance (char dumb, char *dumber)
+{
+	in_window_command = 1;
+	message_from (NULL, LOG_CURRENT);
+	recalculate_windows ();
+	update_all_windows ();
+	in_window_command = 0;
+	message_from (NULL, LOG_CRAP);
+}
+
+void 
+window_grow_one (char dumb, char *dumber)
+{
+	in_window_command = 1;
+	message_from (NULL, LOG_CURRENT);
+	resize_window (1, curr_scr_win, 1);
+	update_all_windows ();
+	in_window_command = 0;
+	message_from (NULL, LOG_CRAP);
+}
+
+void 
+window_key_hide (char dumb, char *dumber)
+{
+	in_window_command = 1;
+	message_from (NULL, LOG_CURRENT);
+	hide_window (curr_scr_win);
+	update_all_windows ();
+	in_window_command = 0;
+	message_from (NULL, LOG_CRAP);
+}
+
+void 
+window_key_kill (char dumb, char *dumber)
+{
+	in_window_command = 1;
+	message_from (NULL, LOG_CURRENT);
+	delete_window (curr_scr_win);
+	update_all_windows ();
+	in_window_command = 0;
+	message_from (NULL, LOG_CRAP);
+}
+
+void 
+window_key_list (char dumb, char *dumber)
+{
+	in_window_command = 1;
+	message_from (NULL, LOG_CURRENT);
+	window_list (curr_scr_win, NULL, NULL);
+	in_window_command = 0;
+	message_from (NULL, LOG_CRAP);
+}
+
+void 
+window_key_move (char dumb, char *dumber)
+{
+	in_window_command = 1;
+	message_from (NULL, LOG_CURRENT);
+	move_window (curr_scr_win, 1);
+	update_all_windows ();
+	in_window_command = 0;
+	message_from (NULL, LOG_CRAP);
+}
+
+
+void 
+window_shrink_one (char dumb, char *dumber)
+{
+	in_window_command = 1;
+	message_from (NULL, LOG_CURRENT);
+	resize_window (1, curr_scr_win, -1);
+	update_all_windows ();
+	in_window_command = 0;
+	message_from (NULL, LOG_CRAP);
+}
+
+void 
+ignore_last_nick (char dumb, char *dumber)
+{
+	NickTab *nick;
+	char *tmp1;
+	if ((nick = gettabkey (1, NULL)))
+	{
+		set_input (empty_str);
+		tmp1 = m_sprintf ("%sig %s", get_string_var (CMDCHARS_VAR), nick->nick);
+		set_input (tmp1);
+		new_free (&tmp1);
+	}
+	update_input (UPDATE_ALL);
+}
+
+static char *
+getchannick (char *oldnick, char *nick)
+{
+	struct channel *chan;
+	char *channel, *tnick = NULL;
+	struct nick_list *cnick;
+	channel = get_current_channel_by_refnum (0);
+	if (channel)
+	{
+		if (!(chan = lookup_channel (channel, from_server, 0)) || !(cnick = next_nicklist (chan, NULL)))
+		{
+			in_completion = STATE_NORMAL;
+			return NULL;
+		}
+		/* 
+		 * we've never been here before so return first nick 
+		 * user hasn't entered anything on the line.
+		 */
+		if (!oldnick && !nick && cnick)
+		{
+			in_completion = STATE_CNICK;
+			return cnick->nick;
+		}
+		/*
+		 * user has been here before so we attempt to find the correct
+		 * first nick to start from.
+		 */
+		if (oldnick)
+		{
+			/* find the old nick so we have a frame of reference */
+			for (cnick = next_nicklist (chan, NULL); cnick; cnick = next_nicklist (chan, cnick))
+			{
+				if (!my_strnicmp (cnick->nick, oldnick, strlen (oldnick)))
+				{
+					tnick = cnick->nick;
+					if ((cnick = next_nicklist (chan, cnick)))
+						tnick = cnick->nick;
+					break;
+
+				}
+
+			}
+		}
+		/*
+		 * if the user has put something on the line
+		 * we attempt to pattern match here.
+		 */
+		if (nick && in_completion == STATE_NORMAL)
+		{
+			/* 
+			 * if oldnick was the last one in the channel 
+			 * cnick will be NULL;
+			 */
+			if (!cnick)
+			{
+				cnick = next_nicklist (chan, NULL);
+				tnick = cnick->nick;
+			}
+			/* we have a new nick */
+			else if (next_nicklist (chan, cnick))
+			{
+				/* 
+				 * if there's more than one nick, start 
+				 * scanning.
+				 */
+				for (; cnick; cnick = next_nicklist (chan, cnick))
+				{
+					if (!my_strnicmp (cnick->nick, nick, strlen (nick)))
+					{
+						tnick = cnick->nick;
+						break;
+					}
+				}
+			}
+			else
+				tnick = cnick->nick;
+		}
+		else if (in_completion == STATE_CNICK)
+		{
+			/*
+			 * else we've been here before so
+			 * attempt to continue through the nicks 
+			 */
+			if (!cnick)
+				cnick = next_nicklist (chan, NULL);
+			tnick = cnick->nick;
+		}
+	}
+	if (tnick)
+		in_completion = STATE_CNICK;
+
+	return tnick;
+}
+
+void 
+nick_completion (char dumb, char *dumber)
+{
+	char *q, *line;
+	int i = -1;
+	char *nick = NULL, *tmp;
+
+	q = line = m_strdup (&current_screen->input_buffer[MIN_POS]);
+	if (in_completion == STATE_NORMAL)
+	{
+		i = word_count (line);
+		nick = extract_words (line, i - 1, i);
+	}
+	if (nick)
+		line[strlen (line) - strlen (nick)] = 0;
+	else
+		*line = 0;
+	if ((tmp = getchannick (input_lastmsg, nick && *nick ? nick : NULL)))
+	{
+		malloc_strcat (&q, tmp);
+		set_input (q);
+		update_input (UPDATE_ALL);
+		malloc_strcpy (&input_lastmsg, tmp);
+		in_completion = STATE_COMPLETE;
+	}
+	new_free (&q);
+	new_free (&nick);
+}
+
+
+void 
+addtabkey (char *nick, char *type)
+{
+	NickTab *tmp, *new;
+
+	tmp = tabkey_array;
+
+	if (!tmp || !(new = (NickTab *) remove_from_list ((struct list **) & tmp, nick)))
+	{
+		new = (NickTab *) new_malloc (sizeof (NickTab));
+		malloc_strcpy (&new->nick, nick);
+		if (type)
+			malloc_strcpy (&new->type, type);
+	}
+	/*
+	 * most recent nick is at the top of the list 
+	 */
+	new->next = tmp;
+	tmp = new;
+	tabkey_array = tmp;
+}
+
+
+NickTab *
+gettabkey (int direction, char *nick)
+{
+	NickTab *tmp, *new;
+
+
+	new = tmp = tabkey_array;
+
+	if (nick)
+	{
+		for (; tmp; tmp = tmp->next)
+			if (!my_strnicmp (nick, tmp->nick, strlen (nick)))
+				return tmp;
+		return NULL;
+	}
+	tmp = new;
+	if (!tmp)
+		return NULL;
+
+	switch (direction)
+	{
+	case 1:
+	default:
+		{
+			/*
+			 * need at least two nicks in the list
+			 */
+			if (new->next)
+			{
+				/*
+				 * reset top of array
+				 */
+				tabkey_array = new->next;
+
+				/*
+				 * set the current nick next pointer to NULL
+				 * and then reset top of list.
+				 */
+
+				new->next = NULL;
+				tmp = tabkey_array;
+
+				/*
+				 * find the last nick in the list
+				 * so we can make the old top pointer 
+				 * point to the item
+				 */
+				while (tmp)
+					if (tmp->next)
+						tmp = tmp->next;
+					else
+						break;
+				/* set the pointer and then return. */
+				tmp->next = new;
+			}
+			break;
+		}
+	case -1:
+		{
+			if (new && new->next)
+			{
+				tmp = new;
+				while (tmp)
+					if (tmp->next && tmp->next->next)
+						tmp = tmp->next;
+					else
+						break;
+				/* 
+				 * tmp now points at last two items in list 
+				 * now just swap some pointers.
+				 */
+				new = tmp->next;
+				tmp->next = NULL;
+				new->next = tabkey_array;
+				tabkey_array = new;
+			}
+			break;
+		}
+	}
+	if (new && new->nick)
+		return new;
+	return NULL;
 }

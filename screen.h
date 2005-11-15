@@ -66,5 +66,6 @@ extern	Screen	*current_screen;
 extern	Screen	*main_screen;
 extern	Screen	*last_input_screen;
 extern	Screen	*screen_list;
+extern  int     extended_handled;
 
 #endif /* __screen_h_ */

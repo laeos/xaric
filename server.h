@@ -71,6 +71,13 @@ struct server {
     char line[SERVER_BUF_LEN];
     int pos;
     int index;
+
+#ifdef HAVE_SSL
+    int enable_ssl;
+    SSL_CTX* ctx;
+    int ssl_error;
+    SSL* ssl_fd;
+#endif /* HAVE_SSL */
 };
 
 int find_server_group(char *, int);
@@ -153,6 +160,12 @@ extern void accept_server_nickname(int, char *);
 /* XXXXX ick, gross, bad.  XXXXX */
 void password_sendline(char *data, char *line);
 extern int user_changing_nickname;
+
+#ifdef HAVE_SSL
+extern       void    set_server_ssl          (int idx, int val); 
+extern       int     get_server_ssl          (int idx); 
+#endif /* HAVE_SSL */
+
 
 /* server_list: the list of servers that the user can connect to,etc */
 extern struct server *server_list;

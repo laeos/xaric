@@ -2559,20 +2559,34 @@ static Window *window_remove(Window * window, char **args, char *usage)
 static Window *window_server(Window * window, char **args, char *usage)
 {
     char *arg;
+#ifdef HAVE_SSL
+    int with_ssl = 0;
+#endif 
 
     if ((arg = next_arg(*args, args))) {
-	int i = find_server_refnum(arg, NULL);
 
-	if (!connect_to_server_by_refnum(i, -1)) {
-	    set_window_server(window->refnum, from_server, 0);
-	    window->window_level = LOG_ALL;
-	    if (window->current_channel)
-		new_free(&window->current_channel);
-	    update_all_status(window, NULL, 0);
+#ifdef HAVE_SSL
+	if (!my_stricmp(arg, "-SSL")) {
+	    with_ssl = 1;
+	    arg = next_arg(*args, args);
 	}
-    } else
+#endif
+	if (arg) {
+	    int i = find_server_refnum(arg, NULL);
+#ifdef HAVE_SSL
+	    set_server_ssl(i, with_ssl);
+#endif
+	    if (!connect_to_server_by_refnum(i, -1)) {
+		set_window_server(window->refnum, from_server, 0);
+		window->window_level = LOG_ALL;
+		if (window->current_channel)
+		    new_free(&window->current_channel);
+		update_all_status(window, NULL, 0);
+	    }
+	}
+    } else {
 	say("SERVER: You must specify a server");
-
+    }
     return window;
 }
 

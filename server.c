@@ -65,6 +65,12 @@ int last_server = -1;
 extern int doing_who;
 extern int in_on_who;
 
+#ifdef HAVE_SSL
+extern int do_use_ssl;
+#else
+static const int do_use_ssl = 0;
+#endif
+
 /*
  * close_server: Given an index into the server list, this closes the
  * connection to the corresponding server.  It does no checking on the
@@ -416,6 +422,10 @@ void add_to_server_list(char *server, int port, char *password, char *nick, int 
 	server_list[from_server].port = port;
 	server_list[from_server].pos = 0;
 	server_list[from_server].index = from_server;
+#ifdef HAVE_SSL
+	server_list[from_server].enable_ssl = do_use_ssl;
+#endif         
+
 
 	if (password && *password)
 	    malloc_strcpy(&(server_list[from_server].password), password);
@@ -590,6 +600,31 @@ void build_server_list(char *servers)
     }
 }
 
+#ifdef HAVE_SSL
+static void SSL_show_errors(void)
+{       
+    char buf[1000];
+    int sslerr;
+
+    while((sslerr = ERR_get_error()))
+    {       
+	ERR_error_string(sslerr, buf);
+	say("%s", buf);
+    }
+}
+
+static ssize_t ssl_read_fn(void *ctx, int fd, void *data, size_t len)
+{
+    return SSL_read(ctx, data, len);
+}
+
+static ssize_t ssl_write_fn(void *ctx, int fd, const void *data, size_t len)
+{
+    return SSL_write(ctx, data, len);
+}
+#endif
+
+
 static void login_to_server(int refnum, int c_server)
 {
     sa_buffer(server_list[refnum].sock, SA_BUFFER_READ, 1024);
@@ -599,6 +634,44 @@ static void login_to_server(int refnum, int c_server)
 	server_list[c_server].flags &= ~CLOSE_PENDING;
 	close_server(c_server, "changing servers");
     }
+
+#ifdef HAVE_SSL
+    if(get_server_ssl(refnum)) {       
+	int err = 0;
+
+	/* XXX TODO error handling here sucks */
+	if(!server_list[refnum].ctx) {       
+	    int fd;
+	    sa_getfd(server_list[refnum].sock, &fd);
+	    set_blocking(fd);
+	    server_list[refnum].ctx = SSL_CTX_new (SSLv23_client_method());
+	    if (server_list[refnum].ctx == NULL) {
+		say("ssl init failed");
+		close_server(refnum, empty_str);
+		return;
+	    }
+	    server_list[refnum].ssl_fd = SSL_new (server_list[refnum].ctx);
+	    if (server_list[refnum].ssl_fd == NULL) {
+		say("ssl new failed");
+		close_server(refnum, empty_str);
+		return; 
+	    }
+	    SSL_set_fd (server_list[refnum].ssl_fd, fd);
+
+	    sa_syscall(server_list[refnum].sock, SA_SYSCALL_READ, (void *)&ssl_read_fn, server_list[refnum].ssl_fd);
+	    sa_syscall(server_list[refnum].sock, SA_SYSCALL_WRITE, (void *)&ssl_write_fn, server_list[refnum].ssl_fd);
+	}
+	err = SSL_connect (server_list[refnum].ssl_fd);
+	if(err == -1) {       
+	    server_list[refnum].ssl_error = SSL_get_error((SSL *)server_list[refnum].ssl_fd, err);
+	    if(server_list[refnum].ssl_error == SSL_ERROR_WANT_READ || server_list[refnum].ssl_error == SSL_ERROR_WANT_WRITE) {
+		return;
+	    }
+	}
+	SSL_show_errors();
+	say("SSL server connected");
+    }
+#endif                                                                                                                                    
 
     if (!server_list[refnum].d_nickname)
 	malloc_strcpy(&(server_list[refnum].d_nickname), nickname);
@@ -1137,6 +1210,18 @@ void set_server_operator(int sso_index, int flag)
     oper_command = 0;
     set_umode(sso_index);
 }
+
+#ifdef HAVE_SSL
+void set_server_ssl(int idx, int val)
+{
+    server_list[idx].enable_ssl = val;
+}
+
+int get_server_ssl(int idx)
+{
+    return server_list[idx].enable_ssl;
+}
+#endif /* HAVE_SSL */
 
 /*
  * set_server_nickname: sets the nickname for the given server to nickname.

@@ -727,7 +727,7 @@ numbered_command (char *from, int comm, char **ArgList)
 		PasteArgs (ArgList, 0);
 		if (do_hook (current_numeric, "%s %s", from, *ArgList))
 			display_msg (from, ArgList);
-		fudge_nickname (from_server);
+		fudge_nickname (SERVER(from_server));
 		break;
 	case 433:		/* #define ERR_NICKNAMEINUSE    433 */
 		if (is_server_connected (from_server) && server_list[from_server].itsname && strcmp (from, server_list[from_server].itsname))
@@ -735,7 +735,7 @@ numbered_command (char *from, int comm, char **ArgList)
 			say ("433 nicknameinuse attempt from hacked server %s", from);
 			break;
 		}
-		fudge_nickname (from_server);
+		fudge_nickname (SERVER(from_server));
 		if (server_list[from_server].itsname)
 			add_to_whois_queue (ArgList[0], whohas_nick, "%s", ArgList[0]);
 		PasteArgs (ArgList, 0);

@@ -185,7 +185,6 @@ void set_server_away(int, char *);
 char *get_server_away(int);
 
 extern void register_server(int, char *);
-extern void fudge_nickname(int);
 extern char *get_pending_nickname(int);
 extern void accept_server_nickname(int, char *);
 
@@ -199,6 +198,7 @@ extern struct server *server_list;
 void send_to_server(struct server *s, const char *format, ...);
 void reset_nickname(struct server *s);
 void change_server_nickname(struct server *s, char *nick);
+void fudge_nickname(struct server *s);
 
 #define USER_MODE	0x0001
 #define USER_MODE_A	USER_MODE << 0

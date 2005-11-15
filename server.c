@@ -1367,7 +1367,7 @@ void accept_server_nickname(int ssn_index, char *nick)
  * out of guesses, and if it ever gets to that point, it will do the
  * manually-ask-you-for-a-new-nickname thing.
  */
-void fudge_nickname(int servnum)
+void fudge_nickname(struct server *s)
 {
     char l_nickname[NICKNAME_LEN + 1];
 
@@ -1377,7 +1377,7 @@ void fudge_nickname(int servnum)
      * we just cancel the pending action and give up.
      */
     if (user_changing_nickname) {
-	new_free(&server_list[from_server].s_nickname);
+	new_free(&s->s_nickname);
 	return;
     }
 
@@ -1385,21 +1385,21 @@ void fudge_nickname(int servnum)
      * Ok.  So we're not doing a /NICK command, so we need to see
      * if maybe we're doing some other type of NICK change.
      */
-    if (server_list[servnum].s_nickname)
-	strcpy(l_nickname, server_list[servnum].s_nickname);
-    else if (server_list[servnum].nickname)
-	strcpy(l_nickname, server_list[servnum].nickname);
+    if (s->s_nickname)
+	strcpy(l_nickname, s->s_nickname);
+    else if (s->nickname)
+	strcpy(l_nickname, s->nickname);
     else
 	strcpy(l_nickname, nickname);
 
-    if (server_list[servnum].fudge_factor < strlen(l_nickname))
-	server_list[servnum].fudge_factor = strlen(l_nickname);
+    if (s->fudge_factor < strlen(l_nickname))
+	s->fudge_factor = strlen(l_nickname);
     else {
-	server_list[servnum].fudge_factor++;
-	if (server_list[servnum].fudge_factor == 17) {
+	s->fudge_factor++;
+	if (s->fudge_factor == 17) {
 	    /* give up... */
-	    reset_nickname(SERVER(servnum));
-	    server_list[servnum].fudge_factor = 0;
+	    reset_nickname(s);
+	    s->fudge_factor = 0;
 	    return;
 	}
     }
@@ -1427,8 +1427,7 @@ void fudge_nickname(int servnum)
 	l_nickname[1] = l_nickname[0];
 	l_nickname[0] = tmp;
     }
-
-    change_server_nickname(SERVER(servnum), l_nickname);
+    change_server_nickname(s, l_nickname);
 }
 
 /*

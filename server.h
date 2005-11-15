@@ -74,14 +74,6 @@ struct server {
     int index;
 };
 
-typedef struct ser_group_list {
-    struct ser_group_list *next;
-    char *name;
-    int number;
-} SGroup;
-
-typedef unsigned short ServerType;
-
 int find_server_group(char *, int);
 char *find_server_group_name(int);
 void add_to_server_list(char *, int, char *, char *, int);
@@ -113,7 +105,6 @@ extern int last_server;
 extern char *connect_next_nick;
 extern char *connect_next_password;
 extern int parsing_server_index;
-extern SGroup *server_group_list;
 
 void servercmd(char *, char *, char *, char *);
 char *get_server_nickname(int);

@@ -262,22 +262,6 @@ got_initial_version (char **ArgList)
 	server = ArgList[0];
 	version = ArgList[1];
 
-	if (!strncmp (version, "2.8", 3))
-	{
-		if (strstr (version, "mu") || strstr (version, "me"))
-			set_server_version (from_server, Server_u2_8);
-		else
-			set_server_version (from_server, Server2_8);
-	}
-	else if (!strncmp (version, "u2.9", 4))
-		set_server_version (from_server, Server_u2_9);
-	else if (!strncmp (version, "u2.10", 4))
-		set_server_version (from_server, Server_u2_10);
-	else if (!strncmp (version, "u3.0", 4))
-		set_server_version (from_server, Server_u3_0);
-	else
-		set_server_version (from_server, Server2_8);
-
 	malloc_strcpy (&server_list[from_server].version_string, version);
 	set_server_itsname (from_server, server);
 	reconnect_all_channels (from_server);

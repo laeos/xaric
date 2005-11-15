@@ -973,34 +973,6 @@ int get_server_flag(int gsf_index, int value)
     return server_list[gsf_index].flags & value;
 }
 
-/*
- * set_server_version: Sets the server version for the given server type.  A
- * zero version means pre 2.6, a one version means 2.6 aso. (look server.h
- * for typedef)
- */
-void set_server_version(int ssv_index, int version)
-{
-    if (ssv_index == -1)
-	ssv_index = primary_server;
-    else if (ssv_index >= number_of_servers)
-	return;
-    server_list[ssv_index].version = version;
-}
-
-/*
- * get_server_version: returns the server version value for the given server
- * index 
- */
-int get_server_version(int gsv_index)
-{
-    if (gsv_index == -1)
-	gsv_index = primary_server;
-    else if (gsv_index >= number_of_servers)
-	return 0;
-    if (gsv_index == -1)
-	return 0;
-    return (server_list[gsv_index].version);
-}
 
 /* get_server_name: returns the name for the given server index */
 char *get_server_name(int gsn_index)
@@ -1144,28 +1116,6 @@ void set_server_qtail(int ssq_index, WhoisQueue * value)
     return;
 }
 
-/* 
- * set_server2_8 - set the server as a 2.8 server 
- * This is used if we get a 001 numeric so that we dont bite on
- * the "kludge" that ircd has for older clients
- */
-void set_server2_8(int ss2_index, int value)
-{
-    if (ss2_index < number_of_servers)
-	server_list[ss2_index].server2_8 = value;
-    return;
-}
-
-/* get_server2_8 - get the server as a 2.8 server */
-int get_server2_8(int gs2_index)
-{
-    if (gs2_index == -1)
-	gs2_index = primary_server;
-    else if (gs2_index >= number_of_servers)
-	return 0;
-    return (server_list[gs2_index].server2_8);
-}
-
 /*
  * get_server_operator: returns true if the user has op privs on the server,
  * false otherwise 
@@ -1263,7 +1213,6 @@ void send_to_server(struct server *s, const char *format, ...)
 	buffer[IRCD_BUFFER_SIZE - 2] = (char) 0;
 	strmcat(buffer, "\r\n", IRCD_BUFFER_SIZE);
 	sa_write(s->sock, buffer, strlen(buffer), NULL);
-	s->sent = 1;
 	memset(buffer, 0, 80);
     } else {
 	put_it("%s", convert_output_format(get_fset_var(FORMAT_DISCONNECT_FSET), "%s %s", update_clock(GET_TIME),

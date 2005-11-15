@@ -18,19 +18,6 @@
 #include "whois.h"
 #include "sa.h"
 
-/*
- * type definition to distinguish different
- * server versions
- */
-#define Server2_7	0
-#define Server2_8	1
-#define Server2_9	2
-#define Server2_10	3
-#define Server_u2_8     4
-#define Server_u2_9     5
-#define Server_u2_10	6
-#define Server_u3_0     7
-
 #define SPLIT 1
 
 #define SERVER_BUF_LEN BIG_BUFFER_SIZE
@@ -55,8 +42,6 @@ struct server {
     char *away;			/* away message for this server */
     time_t awaytime;
     int operator;		/* true if operator */
-    int server2_8;
-    int version;		/* the version of the server - defined above */
     char *version_string;	/* what is says */
     int whois;			/* true if server sends numeric 318 */
     int flags;			/* Various flags */
@@ -64,29 +49,21 @@ struct server {
     int connected;		/* true if connection is assured */
     int eof;			/* eof flag for server */
     int motd;			/* motd flag (used in notice.c) */
-    int sent;			/* set if something has been sent, used for redirect */
     int lag;			/* indication of lag from server CDE */
     time_t lag_time;		/* time ping sent to server CDE */
     time_t last_msg;		/* last mesg recieved from the server CDE */
     WhoisQueue *WQ_head;	/* WHOIS Queue head */
     WhoisQueue *WQ_tail;	/* WHOIS Queue tail */
     WhoisStuff whois_stuff;	/* Whois Queue current collection buffer */
-    int copy_from;		/* server to copy the channels from when (re)connecting */
     int close_serv;		/* Server to close when we're LOGGED_IN */
-    int ctcp_dropped;		/* */
-    int ctcp_not_warned;	/* */
     time_t ctcp_last_reply_time;	/* used to limit flooding */
     struct channel *chan_list;	/* list of channels for this server */
-    int in_delay_notify;
     int link_look;
     time_t link_look_time;
     int trace_flags;
     int stats_flags;
     struct irc_server *tmplink;	/* list of linked servers */
-    struct irc_server *server_last;	/* list of linked servers */
-    struct irc_server *split_link;	/* list of linked servers */
     struct notify_stru *notify_list;	/* Notify list */
-    void (*parse_server) (char *);	/* pointer to parser for this server */
 
     sa_addr_t *rem_addr;
     sa_addr_t *lcl_addr;
@@ -148,8 +125,6 @@ char *create_server_list(void);
 void set_server_motd(int, int);
 int get_server_motd(int);
 int get_server_operator(int);
-int get_server_2_6_2(int);
-int get_server_version(int);
 void close_server(int, char *);
 int is_server_connected(int);
 void flush_server(void);
@@ -171,8 +146,6 @@ int set_server_lag(int);
 char *set_server_password(int, char *);
 void set_server_nickname(int, char *);
 
-void set_server2_8(int, int);
-int get_server2_8(int);
 
 void set_server_qhead(int, WhoisQueue *);
 void set_server_qtail(int, WhoisQueue *);

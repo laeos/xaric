@@ -540,7 +540,6 @@ numbered_command (char *from, int comm, char **ArgList)
 	case 001:		/* #define RPL_WELCOME          001 */
 		{
 			yell ("For more information about \002Xaric\002 type \002/about\002");
-			set_server2_8 (from_server, 1);
 			accept_server_nickname (from_server, user);
 			set_server_motd (from_server, 1);
 			server_is_connected (from_server, 1);

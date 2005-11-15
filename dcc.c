@@ -53,9 +53,6 @@ static off_t filesize = 0;
 DCC_list *ClientList = NULL;
 
 static char DCC_current_transfer_buffer[BIG_BUFFER_SIZE / 4];
-extern int dgets_errno;
-
-
 static void dcc_add_deadclient (register DCC_list *);
 static void dcc_close (char *, char *);
 static void dcc_getfile (char *, char *);
@@ -81,8 +78,8 @@ static void dcc_show_active (char *, char *);
 static void dcc_help1 (char *, char *);
 
 static unsigned char byteordertest (void);
-static void dcc_reject_notify (char *, char *, char *);
-static int get_to_from (char *);
+static void dcc_reject_notify (char *, char *, const char *);
+static int get_to_from (const char *);
 
 static char *strip_path (char *);
 static void dcc_tog_rename (char *, char *);
@@ -134,15 +131,12 @@ static int dcc_quiet = 0;
 static int dcc_paths = 0;
 static int dcc_overwrite_var = 0;
 
-
 unsigned int send_count_stat = 0;
 unsigned int get_count_stat = 0;
 
-char *last_chat_req = NULL;
+static char *last_chat_req = NULL;
 
-
-char *dcc_types[] =
-{
+static const char *dcc_types[] = {
 	"<none>",
 	"CHAT",
 	"SEND",
@@ -154,12 +148,10 @@ char *dcc_types[] =
 	NULL
 };
 
-struct deadlist
-{
+static struct deadlist {
 	DCC_list *it;
 	struct deadlist *next;
-}
- *deadlist = NULL;
+} *deadlist = NULL;
 
 
 static int 
@@ -259,13 +251,13 @@ dcc_searchlist (char *name, char *user, int type, int flag, char *othername, cha
 /*
  * Added by Chaos: Is used in edit.c for checking redirect.
  */
-extern int 
+int 
 dcc_active (char *user)
 {
 	return (dcc_searchlist ("chat", user, DCC_CHAT, 0, NULL, NULL, 1)) ? 1 : 0;
 }
 
-extern int 
+int 
 dcc_activeraw (char *user)
 {
 	return (dcc_searchlist ( /*"RAW" */ NULL, user, DCC_RAW, 0, NULL, NULL, 1)) ? 1 : 0;
@@ -347,7 +339,7 @@ dcc_really_erase (void)
  * Set the descriptor set to show all fds in Client connections to
  * be checked for data.
  */
-extern void 
+void 
 set_dcc_bits (fd_set * rd, fd_set * wd)
 {
 	register DCC_list *Client;
@@ -419,7 +411,7 @@ dcc_got_connected (DCC_list * client)
  * Check all DCCs for data, and if they have any, perform whatever
  * actions are required.
  */
-extern void 
+void 
 dcc_check (fd_set * Readables, fd_set * Writables)
 {
 	register DCC_list **Client;
@@ -484,7 +476,7 @@ dcc_check (fd_set * Readables, fd_set * Writables)
 /*
  * Process a DCC command from the user.
  */
-extern void 
+void 
 process_dcc (char *args)
 {
 	char *command;
@@ -511,7 +503,8 @@ process_dcc (char *args)
 int 
 dcc_open (DCC_list * Client)
 {
-	char *user, *Type;
+	char *user;
+	const char *type;
 	struct in_addr myip;
 	int old_server;
 	struct sockaddr *saddr;
@@ -533,7 +526,7 @@ dcc_open (DCC_list * Client)
 	if (myip.s_addr == htonl (0x00000000) || myip.s_addr == htonl (0x7f000001))
 		myip.s_addr = MyHostAddr.s_addr;
 
-	Type = dcc_types[Client->flags & DCC_TYPES];
+	type = dcc_types[Client->flags & DCC_TYPES];
 
 	if (Client->flags & DCC_OFFER)
 	{
@@ -575,7 +568,7 @@ dcc_open (DCC_list * Client)
 			from_server = old_server;
 			return 0;
 		}
-		if (get_to_from (Type) != -1)
+		if (get_to_from (type) != -1)
 			dcc_active_count++;
 		if (Client->flags & DCC_TWOCLIENTS)
 		{
@@ -589,19 +582,19 @@ dcc_open (DCC_list * Client)
 
 			if (Client->filesize)
 				send_ctcp (CTCP_PRIVMSG, user, CTCP_DCC,
-					   "%s %s %lu %u %lu", Type, nopath,
+					   "%s %s %lu %u %lu", type, nopath,
 					   (u_long) ntohl (myip.s_addr),
 					   (u_short) portnum,
 					   Client->filesize);
 			else
 				send_ctcp (CTCP_PRIVMSG, user, CTCP_DCC,
-					   "%s %s %lu %u", Type, nopath,
+					   "%s %s %lu %u", type, nopath,
 					   (u_long) ntohl (myip.s_addr),
 					   (u_short) portnum);
 			message_from (NULL, LOG_DCC);
 			if (!doing_multi && !dcc_quiet)
 				put_it ("%s", convert_output_format (get_fset_var (FORMAT_SEND_DCC_CHAT_FSET),
-								     "%s %s %s", update_clock (GET_TIME), Type, user));
+								     "%s %s %s", update_clock (GET_TIME), type, user));
 			message_from (NULL, LOG_CRAP);
 		}
 		Client->starttime.tv_sec = Client->starttime.tv_usec = 0;
@@ -665,7 +658,7 @@ dcc_chat (char *command, char *args)
 }
 
 
-extern char *
+char *
 dcc_raw_listen (int port)
 {
 	DCC_list *Client;
@@ -721,7 +714,7 @@ dcc_raw_listen (int port)
 	return RetName;
 }
 
-extern char *
+char *
 dcc_raw_connect (char *host, u_short port)
 {
 	DCC_list *Client;
@@ -1071,7 +1064,7 @@ dcc_regetfile (char *command, char *args)
 	new_free (&tmp);
 }
 
-extern void 
+void 
 register_dcc_offer (char *user, char *type, char *description, char *address, char *port, char *size, char *extra, char *userhost)
 {
 	DCC_list *Client;
@@ -1475,11 +1468,11 @@ process_outgoing_file (DCC_list * Client, int readwaiting)
 	char tmp[MAX_DCC_BLOCK_SIZE + 1];
 	u_32int_t bytesrecvd = 0;
 	int bytesread = 0;
-	char *Type;
+	const char *type;
 	unsigned char packet[BIG_BUFFER_SIZE / 8];
 	struct transfer_struct *received;
 
-	Type = dcc_types[Client->flags & DCC_TYPES];
+	type = dcc_types[Client->flags & DCC_TYPES];
 	if (Client->flags & DCC_WAIT)
 	{
 		sra = sizeof (struct sockaddr_in);
@@ -1519,7 +1512,7 @@ process_outgoing_file (DCC_list * Client, int readwaiting)
 			put_it ("%s", convert_output_format ("$G %RDCC error: accept() failed. punt!!", NULL, NULL));
 
 			Client->flags |= DCC_DELETE;
-			if (get_to_from (Type) != -1 && dcc_active_count)
+			if (get_to_from (type) != -1 && dcc_active_count)
 				dcc_active_count--;
 			return;
 		}
@@ -1532,7 +1525,7 @@ process_outgoing_file (DCC_list * Client, int readwaiting)
 		if ((Client->file = open (Client->description, O_RDONLY)) == -1)
 		{
 			put_it ("%s", convert_output_format ("$G %RDCC%n Unable to open $0: $1-", "%s %s", Client->description, errno ? strerror (errno) : "Unknown Host"));
-			if (get_to_from (Type) != -1 && dcc_active_count)
+			if (get_to_from (type) != -1 && dcc_active_count)
 				dcc_active_count--;
 			close (Client->read);
 			Client->read = Client->write = (-1);
@@ -1571,7 +1564,7 @@ process_outgoing_file (DCC_list * Client, int readwaiting)
 			if (do_hook (DCC_LOST_LIST, "%s SEND %s CONNECTION LOST",
 				     Client->user, Client->description))
 				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), "SEND", Client->user, Client->description));
-			if (get_to_from (Type) != -1 && dcc_active_count)
+			if (get_to_from (type) != -1 && dcc_active_count)
 				dcc_active_count--;
 			Client->flags |= DCC_DELETE;
 			return;
@@ -1599,9 +1592,9 @@ process_incoming_file (DCC_list * Client)
 	char tmp[MAX_DCC_BLOCK_SIZE + 1];
 	u_32int_t bytestemp;
 	int bytesread;
-	char *Type;
+	const char *type;
 
-	Type = dcc_types[Client->flags & DCC_TYPES];
+	type = dcc_types[Client->flags & DCC_TYPES];
 
 	if ((bytesread = read (Client->read, tmp, MAX_DCC_BLOCK_SIZE)) <= 0)
 	{
@@ -1645,7 +1638,7 @@ process_incoming_file (DCC_list * Client)
 
 /* flag == 1 means show it.  flag == 0 used by redirect (and /ctcp) */
 
-extern void 
+void 
 dcc_message_transmit (char *user, char *text, char *text_display, int type, int flag, char *cmd, int check_host)
 {
 	DCC_list *Client;
@@ -1711,25 +1704,25 @@ dcc_message_transmit (char *user, char *text, char *text_display, int type, int 
 	return;
 }
 
-extern void 
+void 
 dcc_chat_transmit (char *user, char *text, char *orig, char *type)
 {
 	dcc_message_transmit (user, text, orig, DCC_CHAT, 1, type, 0);
 }
 
-extern void 
+void 
 dcc_raw_transmit (char *user, char *text, char *type)
 {
 	dcc_message_transmit (user, text, NULL, DCC_RAW, 0, type, 0);
 }
 
-extern void 
+void 
 dcc_chat_transmit_quiet (char *user, char *text, char *type)
 {
 	dcc_message_transmit (user, text, NULL, DCC_CHAT, 0, type, 0);
 }
 
-extern void 
+void 
 dcc_chat_crash_transmit (char *user, char *text)
 {
 	char buffer[20000];
@@ -1795,7 +1788,7 @@ get_dcc_type (unsigned long flag)
 	return ret;
 }
 
-extern void 
+void 
 dcc_list (char *command, char *args)
 {
 	DCC_list *Client;
@@ -1865,7 +1858,7 @@ dcc_glist (char *command, char *args)
 	double barsize = 0.0, perc = 0.0;
 	int barlen = BAR_LENGTH;
 	char spec[BIG_BUFFER_SIZE + 1];
-	char *Type;
+	const char *type;
 
 	barlen = BAR_LENGTH;
 	barsize = 0.0;
@@ -1883,9 +1876,9 @@ dcc_glist (char *command, char *args)
 		if ((flags == DCC_FILEOFFER || flags == DCC_FILEREAD || flags == DCC_RESENDOFFER || flags == DCC_REGETFILE))
 			if ((Client->flags & DCC_ACTIVE))
 				continue;
-		Type = get_dcc_type (flags & DCC_TYPES);
+		type = get_dcc_type (flags & DCC_TYPES);
 		if (do_hook (DCC_STAT_LIST, "%d %s %s %s %s %s",
-			     Client->dccnum, Type,
+			     Client->dccnum, type,
 			     Client->user,
 			     Client->flags & DCC_OFFER ? "Offer" :
 			     Client->flags & DCC_DELETE ? "Close" :
@@ -1900,7 +1893,7 @@ dcc_glist (char *command, char *args)
 			{
 				put_it ("%s", convert_output_format (c1format, "%d %s %s %s %s %s %s",
 							     Client->dccnum,
-								     Type,
+								     type,
 							       Client->user,
 								   "Active",
 						      convert_time (u_time),
@@ -1911,7 +1904,7 @@ dcc_glist (char *command, char *args)
 			{
 				put_it ("%s", convert_output_format (dformat, "%d %s %s %s %s %s",
 							     Client->dccnum,
-								     Type,
+								     type,
 							       Client->user,
 				       Client->flags & DCC_OFFER ? "Offer" :
 				      Client->flags & DCC_DELETE ? "Close" :
@@ -1997,9 +1990,9 @@ dcc_glist (char *command, char *args)
 			sprintf (spec, "%s %s%s %02d:%02d", _dcc_offer[iperc], stats, "%%", minutes, seconds);
 			sprintf (spec, "%s", convert_output_format (spec, NULL, NULL));
 		}
-		Type = get_dcc_type (flags & DCC_TYPES);
+		type = get_dcc_type (flags & DCC_TYPES);
 		if (do_hook (DCC_STATF_LIST, "%d %s %s %s %s %s",
-			     Client->dccnum, Type,
+			     Client->dccnum, type,
 			     Client->user,
 			     Client->flags & DCC_OFFER ? "Offer" :
 			     Client->flags & DCC_DELETE ? "Close" :
@@ -2020,7 +2013,7 @@ dcc_glist (char *command, char *args)
 			else
 				s = dformat;
 			put_it ("%s", convert_output_format (s, "%d %s %s %s %s %s",
-						       Client->dccnum, Type,
+						       Client->dccnum, type,
 							     Client->user,
 				       Client->flags & DCC_OFFER ? "Offer" :
 				      Client->flags & DCC_DELETE ? "Close" :
@@ -2077,15 +2070,15 @@ dcc_close_client_num (unsigned int closenum)
 {
 	DCC_list *Client, *next;
 	unsigned flags;
-	char *Type;
+	const char *type;
 	int to_from_idx;
 
 	for (Client = ClientList; Client != NULL; Client = next)
 	{
 		flags = Client->flags;
-		Type = get_dcc_type (flags & DCC_TYPES);
+		type = get_dcc_type (flags & DCC_TYPES);
 		/*dcc_types[flags & DCC_TYPES]; */
-		to_from_idx = get_to_from (Type);
+		to_from_idx = get_to_from (type);
 		next = Client->next;
 
 		if (Client->dccnum == closenum)
@@ -2101,10 +2094,10 @@ dcc_close_client_num (unsigned int closenum)
 					close (Client->file);
 			}
 
-			if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, Type,
+			if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, type,
 			Client->description ? Client->description : "<any>"))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
-			dcc_reject_notify (Client->description, Client->user, Type);
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), type, Client->user, Client->description));
+			dcc_reject_notify (Client->description, Client->user, type);
 			dcc_erase (Client);
 			update_transfer_buffer ("");
 			update_all_status (curr_scr_win, NULL, 0);
@@ -2121,15 +2114,15 @@ dcc_close_all (void)
 {
 	DCC_list *Client, *next;
 	unsigned flags;
-	char *Type;
+	const char *type;
 	int to_from_idx;
 
 	for (Client = ClientList; Client != NULL; Client = next)
 	{
 		flags = Client->flags;
-		Type = get_dcc_type (flags & DCC_TYPES);
+		type = get_dcc_type (flags & DCC_TYPES);
 		/*dcc_types[flags & DCC_TYPES]; */
-		to_from_idx = get_to_from (Type);
+		to_from_idx = get_to_from (type);
 		next = Client->next;
 
 		if (flags & DCC_DELETE)
@@ -2140,10 +2133,10 @@ dcc_close_all (void)
 				dcc_active_count--;
 		}
 
-		if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, Type,
+		if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, type,
 		       Client->description ? Client->description : "<any>"))
-			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
-		dcc_reject_notify (Client->description, Client->user, Type);
+			put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), type, Client->user, Client->description));
+		dcc_reject_notify (Client->description, Client->user, type);
 		dcc_erase (Client);
 		update_transfer_buffer ("");
 		update_all_status (curr_scr_win, NULL, 0);
@@ -2156,7 +2149,7 @@ dcc_close_type_all (char *typestr)
 {
 	DCC_list *Client, *next;
 	unsigned flags;
-	char *Type;
+	const char *type;
 	int to_from_idx;
 
 	to_from_idx = get_to_from (typestr);
@@ -2164,11 +2157,11 @@ dcc_close_type_all (char *typestr)
 	for (Client = ClientList; Client != NULL; Client = next)
 	{
 		flags = Client->flags;
-		Type = get_dcc_type (flags & DCC_TYPES);
+		type = get_dcc_type (flags & DCC_TYPES);
 		/*dcc_types[flags & DCC_TYPES]; */
 		next = Client->next;
 
-		if (my_stricmp (Type, typestr) == 0)
+		if (my_stricmp (type, typestr) == 0)
 		{
 			if (flags & DCC_DELETE)
 				return;
@@ -2180,10 +2173,10 @@ dcc_close_type_all (char *typestr)
 				if (Client->file)
 					close (Client->file);
 			}
-			if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, Type,
+			if (do_hook (DCC_LOST_LIST, "%s %s %s", Client->user, type,
 			Client->description ? Client->description : "<any>"))
-				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), Type, Client->user, Client->description));
-			dcc_reject_notify (Client->description, Client->user, Type);
+				put_it ("%s", convert_output_format (get_fset_var (FORMAT_DCC_ERROR_FSET), "%s %s %s %s", update_clock (GET_TIME), type, Client->user, Client->description));
+			dcc_reject_notify (Client->description, Client->user, type);
 			dcc_erase (Client);
 			update_transfer_buffer ("");
 			update_all_status (curr_scr_win, NULL, 0);
@@ -2402,25 +2395,25 @@ dcc_close (char *command, char *args)
 }
 
 void 
-dcc_reject_notify (char *description, char *user, char *Type)
+dcc_reject_notify (char *description, char *user, const char *type)
 {
 	strcpy (DCC_reject_description, description ? description : "(null)");
-	if (!my_stricmp (Type, "SEND"))
+	if (!my_stricmp (type, "SEND"))
 		strcpy (DCC_reject_type, "GET");
-	else if (!my_stricmp (Type, "GET"))
+	else if (!my_stricmp (type, "GET"))
 		strcpy (DCC_reject_type, "SEND");
-	else if (!my_stricmp (Type, "RESEND"))
+	else if (!my_stricmp (type, "RESEND"))
 		strcpy (DCC_reject_type, "REGET");
-	else if (!my_stricmp (Type, "REGET"))
+	else if (!my_stricmp (type, "REGET"))
 		strcpy (DCC_reject_type, "RESEND");
 	else
-		strcpy (DCC_reject_type, Type);
+		strcpy (DCC_reject_type, type);
 	if (*user == '=')
 		user++;
 	add_ison_to_whois (user, output_reject_ctcp);
 }
 
-extern void 
+void 
 dcc_reject (char *from, char *type, char *args)
 {
 	DCC_list *Client;
@@ -2492,7 +2485,7 @@ dcc_rename (char *command, char *args)
  * we don't leave any fd's lying around, that won't close when we
  * want them to..
  */
-extern void 
+void 
 close_all_dcc (void)
 {
 	DCC_list *Client, *last;
@@ -2521,7 +2514,7 @@ add_to_dcc_buffer (DCC_list * Client, char *buf)
 /* Looks for the dcc transfer that is "current" (last recieved data)
  * and returns information for it
  */
-extern char *
+char *
 DCC_get_current_transfer (void)
 {
 	return DCC_current_transfer_buffer;
@@ -2684,16 +2677,16 @@ update_transfer_buffer (char *format,...)
 		*DCC_current_transfer_buffer = 0;
 }
 
-int 
-get_to_from (char *Type)
+static int 
+get_to_from (const char *type)
 {
-	if (!my_stricmp (Type, "SEND"))
+	if (!my_stricmp (type, "SEND"))
 		return 0;
-	else if (!my_stricmp (Type, "RESEND"))
+	else if (!my_stricmp (type, "RESEND"))
 		return 1;
-	else if (!my_stricmp (Type, "GET"))
+	else if (!my_stricmp (type, "GET"))
 		return 2;
-	else if (!my_stricmp (Type, "REGET"))
+	else if (!my_stricmp (type, "REGET"))
 		return 3;
 	else
 		return -1;

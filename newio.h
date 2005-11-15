@@ -11,6 +11,8 @@
 #ifndef __newio_h_
 # define __newio_h_
 
+extern int dgets_errno;
+
 #ifdef ESIX
 	void	mark_socket(int);
 	void	unmark_socket(int);

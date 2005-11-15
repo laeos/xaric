@@ -62,7 +62,6 @@ struct server {
     time_t link_look_time;
     int trace_flags;
     int stats_flags;
-    struct irc_server *tmplink;	/* list of linked servers */
     struct notify_stru *notify_list;	/* Notify list */
 
     sa_addr_t *rem_addr;

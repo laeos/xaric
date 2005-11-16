@@ -19,8 +19,6 @@
 #include <sys/un.h>
 #endif
 
-extern char hostname[NAME_LEN + 1];
-
 /*
  * connect_by_number:  Wheeeee. Yet another monster function i get to fix
  * for the sake of it being inadequate for extension.
@@ -131,14 +129,15 @@ int connect_by_number(char *hostn, unsigned short *portnum, int service, int pro
     else if (!is_unix && (service == SERVICE_CLIENT)) {
 	struct sockaddr_in server;
 	struct hostent *hp;
-	struct sockaddr_in localaddr;
 
+#if 0
 	/* 
 	 * Doing this bind is bad news unless you are sure that
 	 * the hostname is valid.  This is not true for me at home,
 	 * since i dynamic-ip it.
 	 */
 	if (LocalHostName) {
+	    struct sockaddr_in localaddr;
 	    memset(&localaddr, 0, sizeof(struct sockaddr_in));
 	    localaddr.sin_family = AF_INET;
 	    localaddr.sin_addr = LocalHostAddr;
@@ -146,6 +145,7 @@ int connect_by_number(char *hostn, unsigned short *portnum, int service, int pro
 	    if (bind(fd, (struct sockaddr *) &localaddr, sizeof(localaddr)))
 		return close(fd), -2;
 	}
+#endif
 
 	memset(&server, 0, sizeof(struct sockaddr_in));
 	if (!(hp = resolv(hostn)))

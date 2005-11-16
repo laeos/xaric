@@ -101,6 +101,11 @@ WhoisQueue *get_server_qtail(int);
 
 extern int save_chan_from;	/* to keep the channel list if all servers are lost */
 
+/* for vhost stuff */
+extern sa_addr_t *local_host_addr;
+extern char *local_host_name;
+extern char def_hostname[NAME_LEN + 1];
+
 extern int number_of_servers;
 extern int connected_to_server;
 extern int never_connected;
@@ -174,6 +179,7 @@ void send_to_server(struct server *s, const char *format, ...);
 void reset_nickname(struct server *s);
 void change_server_nickname(struct server *s, char *nick);
 void fudge_nickname(struct server *s);
+void init_hostname(void);
 
 #define USER_MODE	0x0001
 #define USER_MODE_A	USER_MODE << 0

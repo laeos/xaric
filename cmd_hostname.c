@@ -30,36 +30,40 @@
 #include "output.h"
 #include "misc.h"
 #include "tcommand.h"
-
+#include "server.h"
 #include "iflist.h"
 
-/* XXX this should/will be part of the network code */
-/* XXX this will not work for IPv6 */
 static void set_hostname(char *host)
 {
     const struct iflist *ifl = iface_find(host);
-    int reconn = 0;
 
     if (ifl == NULL) {
-	yell("No such hostname [%s]!", host);
-	return;
+	yell("no such hostname [%s]!", host);
+    } else if (local_host_name && strcmp(local_host_name, ifl->ifi_host)) {
+	bitchsay("%s is already my hostname, yo.", local_host_name);
+    } else {
+	sa_addr_t *addr;
+	sa_rc_t ret;
+
+	malloc_strcpy(&local_host_name, ifl->ifi_host);
+	sa_addr_create(&addr);
+	ret = sa_addr_s2a(addr, ifl->ifi_addr, ifl->ifi_len);
+	if (ret != SA_OK) {
+	    sa_addr_destroy(addr);
+	    bitchsay("couldn't set local hostname: %s", sa_error(ret));
+	} else {
+	    bitchsay("local host name is now %s", local_host_name);
+	    if (local_host_addr)
+		sa_addr_destroy(local_host_addr);
+	    local_host_addr = addr;
+	    t_parse_command("RECONNECT", NULL);
+	}
     }
-
-    if (LocalHostName == NULL || strcmp(LocalHostName, ifl->ifi_host))
-	reconn = 1;
-
-    malloc_strcpy(&LocalHostName, ifl->ifi_host);
-    memcpy((void *) &LocalHostAddr, &((struct sockaddr_in *) ifl->ifi_addr)->sin_addr.s_addr, sizeof(LocalHostAddr));
-
-    bitchsay("Local host name is now %s", LocalHostName);
-    if (reconn)
-	t_parse_command("RECONNECT", NULL);
 }
 
 /* list interface info */
 static void iface_callback(void *data, struct iflist *list)
 {
-
     if (list == NULL && errno == 0) {
 	put_it("%s", convert_output_format("%G Unable to find anything!", NULL, NULL));
     } else if (list == NULL) {

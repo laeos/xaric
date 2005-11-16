@@ -190,7 +190,7 @@ static char *alias_idle(void)
 }
 static char *alias_show_userhost(void)
 {
-    return m_sprintf("%s@%s", username, hostname);
+    return m_sprintf("%s@%s", username, local_host_name ? local_host_name : def_hostname);
 }
 static char *alias_current_numeric(void)
 {

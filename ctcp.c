@@ -381,7 +381,7 @@ CTCP_HANDLER(do_finger)
 	strmcpy(pwd->pw_gecos, ctcpfinger, NAME_LEN);
 
     send_ctcp(CTCP_NOTICE, from, CTCP_FINGER,
-	      "%s (%s@%s) Idle %ld second%s", pwd->pw_gecos, pwd->pw_name, hostname, diff, plural(diff));
+	      "%s (%s@%s) Idle %ld second%s", pwd->pw_gecos, pwd->pw_name, local_host_name ? local_host_name : def_hostname, diff, plural(diff));
     return NULL;
 }
 

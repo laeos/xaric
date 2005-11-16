@@ -471,13 +471,16 @@ int dcc_open(DCC_list * Client)
     if (sa_addr_a2s(server_list[from_server].lcl_addr, &saddr, NULL) == SA_OK) {
 	if (saddr->sa_family == AF_INET) {
 	    myip.s_addr = ((struct sockaddr_in *) saddr)->sin_addr.s_addr;
+	    free(saddr);
+	} else {
+	    yell("hello sorry dcc works only with IPv4 kthx");
+	    free(saddr);
+	    return 0;
 	}
-	free(saddr);
+    } else {
+	yell("something bad happened, I couldn't get local address");
+	return 0;
     }
-
-    if (myip.s_addr == htonl(0x00000000) || myip.s_addr == htonl(0x7f000001))
-	myip.s_addr = MyHostAddr.s_addr;
-
     type = dcc_types[Client->flags & DCC_TYPES];
 
     if (Client->flags & DCC_OFFER) {

@@ -71,6 +71,33 @@ extern int do_use_ssl;
 static const int do_use_ssl = 0;
 #endif
 
+/* What to use as a local address */
+sa_addr_t *local_host_addr;
+
+/* given a host and a port, make a sa_addr_t */
+static sa_rc_t make_address(const char *host, int port, sa_addr_t **addr)
+{
+    char buffer[BIG_BUFFER_SIZE];
+    sa_addr_t *naddr;
+    sa_rc_t ret;
+
+    assert(addr);
+    assert(host);
+
+    snprintf(buffer, BIG_BUFFER_SIZE, "inet://%s:%d", host, port);
+    buffer[BIG_BUFFER_SIZE - 1] = '\0';
+
+    sa_addr_create(&naddr);
+
+    if ((ret = sa_addr_u2a(naddr, buffer)) != SA_OK) {
+	say("Couldn't figure out address %s: %s", buffer, sa_error(ret));
+	sa_addr_destroy(naddr);
+    } else {
+	*addr = naddr;
+    }
+    return ret;
+}
+
 /*
  * close_server: Given an index into the server list, this closes the
  * connection to the corresponding server.  It does no checking on the
@@ -705,25 +732,35 @@ int connect_to_server_by_refnum(int refnum, int c_server)
 	sport = irc_port;
 
     if (server_list[refnum].sock == NULL) {
-	char buffer[BIG_BUFFER_SIZE];
 	sa_rc_t ret;
 
-	snprintf(buffer, BIG_BUFFER_SIZE, "inet://%s:%d", sname, sport);
-	buffer[BIG_BUFFER_SIZE - 1] = '\0';
-
 	from_server = refnum;
+	if (local_host_name) {
+	    char *uri;
+	    sa_addr_a2u(local_host_addr, &uri);
+	    say("Using local host name %s (%s)", local_host_name, uri);
+	    free(uri);
+	}
 	say("Connecting to port %d of server %s", sport, sname);
 
-	if (!server_list[refnum].rem_addr)
-	    sa_addr_create(&server_list[refnum].rem_addr);
-
-	if ((ret = sa_addr_u2a(server_list[refnum].rem_addr, buffer)) != SA_OK) {
-	    say("Couldn't figure out address %s: %s", buffer, sa_error(ret));
+	if (!server_list[refnum].rem_addr) {
+	    sa_addr_destroy(server_list[refnum].rem_addr);
+	}
+	if ((ret = make_address(sname, sport, &server_list[refnum].rem_addr)) != SA_OK) {
+	    say("Couldn't figure out address %s:%d: %s", sname, sport, sa_error(ret));
 	    return -1;
 	}
 	sa_create(&server_list[refnum].sock);
+	if (local_host_name) {
+	    if ((ret = sa_bind(server_list[refnum].sock, local_host_addr))) {
+		yell("can't bind %s: %s", local_host_name, sa_error(ret));
+		sa_destroy(server_list[refnum].sock);
+		server_list[refnum].sock = NULL;
+		return -1;
+	    }
+	}
 	if ((ret = sa_connect(server_list[refnum].sock, server_list[refnum].rem_addr)) != SA_OK) {
-	    say("Couldn't connect to %s: %s", buffer, sa_error(ret));
+	    say("Couldn't connect to %s:%d: %s", sname, sport, sa_error(ret));
 	    sa_destroy(server_list[refnum].sock);
 	    server_list[refnum].sock = NULL;
 	    return -1;
@@ -759,8 +796,10 @@ void get_connected(int server)
 	if (connect_to_server_by_refnum(server, primary_server)) {
 	    while (server_list[server].sock == NULL) {
 		server++;
-		if (server == number_of_servers)
+		if (server == number_of_servers) {
 		    server = 0;
+		    break;
+		}
 		if (server == s) {
 		    clean_whois_queue();
 		    break;
@@ -1244,7 +1283,7 @@ void register_server(int ssn_index, char *nick)
 
     send_to_server(SERVER(from_server), "USER %s %s %s :%s", username,
 		   (send_umode && *send_umode) ? send_umode :
-		   (LocalHostName ? LocalHostName : hostname), username, *realname ? realname : space_str);
+		   local_host_name ? local_host_name : def_hostname, username, *realname ? realname : space_str);
     change_server_nickname(SERVER(ssn_index), nick);
     from_server = old_from_server;
 }
@@ -1507,4 +1546,24 @@ void password_sendline(char *data, char *line)
 char *get_pending_nickname(int servnum)
 {
     return server_list[servnum].s_nickname;
+}
+
+
+/* Figure out what local_host_name and local_host_addr should start off with */
+void init_hostname(void)
+{
+    sa_rc_t ret;
+
+    if (gethostname(def_hostname, sizeof(def_hostname))) {
+	if (!local_host_name) {
+	    fprintf(stderr, "%s: can't figure out hostname, pass -H please!\n", prog_name);
+	    exit(1);
+	}
+    }
+    if (local_host_name) {
+	if ((ret = make_address(local_host_name, 0, &local_host_addr)) != SA_OK) {
+	    fprintf(stderr, "%s: can't figure out address %s: %s", prog_name, local_host_name, sa_error(ret));
+	    exit(1);
+	}
+    }
 }

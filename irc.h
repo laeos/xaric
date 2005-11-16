@@ -149,8 +149,6 @@ extern char *convertstring;
 extern char nickname[];
 extern char *ircrc_file;
 extern char *bircrc_file;
-extern char *LocalHostName;
-extern char hostname[];
 extern char realname[];
 extern char username[];
 extern char *send_umode;
@@ -180,11 +178,7 @@ extern int need_redraw;
 extern char *prog_name;
 
 extern struct channel *statchan_list;
-extern char MyHostName[];
-extern struct in_addr MyHostAddr;
-extern struct in_addr LocalHostAddr;
 extern int cpu_saver;
-extern struct in_addr local_ip_address;
 
 int wild_match(char *, char *);
 

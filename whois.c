@@ -685,7 +685,7 @@ void whois_ignore_msgs(WhoisStuff * stuff, char *nick, char *text)
 void whois_nickname(WhoisStuff * stuff, char *nick, char *text)
 {
     if (stuff) {
-	if (!(my_stricmp(stuff->user, username)) && (!my_stricmp(stuff->host, hostname)))
+	if (!(my_stricmp(stuff->user, username)) && (!my_stricmp(stuff->host, local_host_name ? local_host_name : def_hostname)))
 	    set_server_nickname(from_server, nick);
     }
 }

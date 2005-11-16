@@ -923,7 +923,7 @@ static void real_quit(char *dummy, char *ptr)
     if (ptr && *ptr && (*ptr == 'Y' || *ptr == 'y'))
 	irc_exit(dummy,
 		 convert_output_format(get_fset_var(FORMAT_SIGNOFF_FSET), "%s %s %s %s", update_clock(GET_TIME),
-				       get_server_nickname(get_window_server(0)), m_sprintf("%s@%s", username, hostname), dummy));
+				       get_server_nickname(get_window_server(0)), m_sprintf("%s@%s", username, local_host_name ? local_host_name : def_hostname), dummy));
     bitchsay("Excelllaaant!!");
 }
 
@@ -1005,7 +1005,7 @@ void cmd_quit(struct command *cmd, char *args)
 	from_server = old_server;
 	irc_exit(Reason,
 		 convert_output_format(get_fset_var(FORMAT_SIGNOFF_FSET), "%s %s %s %s", update_clock(GET_TIME),
-				       get_server_nickname(get_window_server(0)), m_sprintf("%s@%s", username, hostname), Reason));
+				       get_server_nickname(get_window_server(0)), m_sprintf("%s@%s", username, local_host_name ? local_host_name : def_hostname), Reason));
     }
 }
 

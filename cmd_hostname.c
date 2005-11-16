@@ -39,7 +39,7 @@ static void set_hostname(char *host)
 
     if (ifl == NULL) {
 	yell("no such hostname [%s]!", host);
-    } else if (local_host_name && strcmp(local_host_name, ifl->ifi_host)) {
+    } else if (local_host_name && !strcmp(local_host_name, ifl->ifi_host)) {
 	bitchsay("%s is already my hostname, yo.", local_host_name);
     } else {
 	sa_addr_t *addr;

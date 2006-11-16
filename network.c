@@ -101,7 +101,7 @@ int connect_by_number(char *hostn, unsigned short *portnum, int service, int pro
 
 	/* Inet domain server */
     if (!is_unix && (service == SERVICE_SERVER)) {
-	size_t length;
+	socklen_t length;
 	struct sockaddr_in name;
 
 	memset(&name, 0, sizeof(struct sockaddr_in));

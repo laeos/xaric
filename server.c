@@ -195,7 +195,7 @@ static int is_connected_p(int i)
     if (server_list[i].sock) {
 	int des;
 	struct sockaddr_in sa;
-	size_t sa_len = sizeof(struct sockaddr_in);
+	socklen_t sa_len = sizeof(struct sockaddr_in);
 
 	sa_getfd(server_list[i].sock, &des);
 	if (getpeername(des, (struct sockaddr *) &sa, &sa_len) != -1)

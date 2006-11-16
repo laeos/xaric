@@ -248,7 +248,7 @@ void display_msg(char *from, char **ArgList)
 	from = NULL;
     if ((ptr = strchr(rest, ':')))
 	*ptr++ = 0;
-    drem = (int) (from) /* && (!get_int_var(SUPPRESS_FROM_REMOTE_SERVER)) */ ;
+    drem = !!from /* && (!get_int_var(SUPPRESS_FROM_REMOTE_SERVER)) */ ;
 
     put_it("%s %s%s%s%s%s%s", numeric_banner(), strlen(rest) ? rest : empty_str,
 /*                strlen(rest) && ptr ? ":"      : empty_str, */

@@ -68,7 +68,6 @@
 
 /* sneeky */
 typedef int (*scan_cmp_func) (const void *, const void *);
-typedef int (*select_func) (const struct dirent * d);
 
 /* used by scandir to sort help entries */
 static int dcompare(const struct dirent **d1, const struct dirent **d2)
@@ -84,7 +83,7 @@ static int prefix_len;
 static int the_longest;
 
 /* used by scandir to select entries */
-static int dselect(const struct dirent *d)
+static int dselect(struct dirent *d)
 {
     int t;
 
@@ -139,7 +138,7 @@ int xscandir(char *dir, char *prefix, char **ret)
     }
 
     the_longest = 0;
-    cnt = retval = scandir(dir, &list, dselect, (scan_cmp_func) dcompare);
+    cnt = retval = scandir(dir, &list, (void *)dselect, (scan_cmp_func) dcompare);
 
     switch (retval) {
 

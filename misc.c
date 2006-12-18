@@ -104,7 +104,7 @@ char *awaymsg = NULL;
 
 char *convert_time(time_t ltime)
 {
-    time_t days = 0, hours = 0, minutes = 0, seconds = 0;
+    unsigned int days = 0, hours = 0, minutes = 0, seconds = 0;
     static char buffer[100];
 
     *buffer = '\0';
@@ -114,7 +114,7 @@ char *convert_time(time_t ltime)
     ltime = (ltime - minutes) / 60;
     hours = ltime % 24;
     days = (ltime - hours) / 24;
-    sprintf(buffer, "%2ldd %2ldh %2ldm %2lds", days, hours, minutes, seconds);
+    sprintf(buffer, "%2udd %2udh %uldm %2uds", days, hours, minutes, seconds);
     return (*buffer ? buffer : empty_str);
 }
 

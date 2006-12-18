@@ -1580,32 +1580,6 @@ char *m_dupchar(int i)
     return ret;
 }
 
-#ifndef HAVE_VSNPRINTF
-int vsnprintf(char *str, size_t size, const char *format, va_list ap)
-{
-    int ret = vsprintf(str, format, ap);
-
-    /* If the string ended up overflowing, just give up. */
-    if (strlen(str) > size)
-	ircpanic("Buffer overflow in vsnprintf");
-
-    return ret;
-}
-#endif
-
-#ifndef HAVE_SNPRINTF
-int snprintf(char *str, size_t size, const char *format, ...)
-{
-    int ret;
-    va_list args;
-
-    va_start(args, format);
-    ret = vsnprintf(str, size, format, args);
-    va_end(args);
-    return ret;
-}
-#endif
-
 char *strmopencat(char *dest, int maxlen, ...)
 {
     va_list args;

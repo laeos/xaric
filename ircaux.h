@@ -106,12 +106,6 @@ extern int is_root(char *, char *, int);
 extern size_t streq(const char *, const char *);
 extern char *m_strndup(const char *, size_t);
 
-#ifndef HAVE_VSNPRINTF
-extern int vsnprintf(char *, size_t, const char *, va_list);
-#endif
-#ifndef HAVE_SNPRINTF
-extern int snprintf(char *, size_t, const char *, ...);
-#endif
 extern char *on_off(int);
 extern char *rfgets(char *, int, FILE *);
 extern char *strmopencat(char *, int, ...);

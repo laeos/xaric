@@ -184,7 +184,7 @@ int ifaces(iface_cb callback, void *data)
     c->thr_ifcb = callback;
     c->thr_data = data;
 
-    return THR_CREATE(ifaces_r, c);
+    return (int)THR_CREATE(ifaces_r, c);
 }
 
 /**

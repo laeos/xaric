@@ -5,6 +5,7 @@
 	* ircaux.[ch] - remove vsnprintf/snprintf - configure.ac wasn't even checking for
 	  them and the overrides were silly and broken.
 	* merged some freebsd ports patches
+	* autogen.sh from debian autotools, preping for building debian package
 
 2006-11-15  Rex Feany  <laeos@laeos.net>
 

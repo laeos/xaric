@@ -656,6 +656,11 @@ static void login_to_server(int refnum, int c_server)
 {
     sa_buffer(server_list[refnum].sock, SA_BUFFER_READ, 1024);
     sa_timeout(server_list[refnum].sock, SA_TIMEOUT_READ, 0, 400);
+    sa_addr_create(&server_list[refnum].lcl_addr);
+    if (sa_getlocal(server_list[refnum].sock, &server_list[refnum].lcl_addr) != SA_OK) {
+	sa_addr_destroy(server_list[refnum].lcl_addr);
+	server_list[refnum].lcl_addr = NULL;
+    }
 
     if ((c_server != -1) && (c_server != refnum)) {
 	server_list[c_server].flags &= ~CLOSE_PENDING;
@@ -746,6 +751,11 @@ int connect_to_server_by_refnum(int refnum, int c_server)
 	if (!server_list[refnum].rem_addr) {
 	    sa_addr_destroy(server_list[refnum].rem_addr);
 	}
+	if (!server_list[refnum].lcl_addr) {
+	    sa_addr_destroy(server_list[refnum].lcl_addr);
+	    server_list[refnum].lcl_addr = NULL;
+	}
+
 	if ((ret = make_address(sname, sport, &server_list[refnum].rem_addr)) != SA_OK) {
 	    say("Couldn't figure out address %s:%d: %s", sname, sport, sa_error(ret));
 	    return -1;

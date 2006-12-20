@@ -460,6 +460,7 @@ int dcc_open(DCC_list * Client)
     struct in_addr myip;
     int old_server;
     struct sockaddr *saddr;
+    socklen_t slen;
 
     user = Client->user;
     old_server = from_server;
@@ -468,7 +469,7 @@ int dcc_open(DCC_list * Client)
 	from_server = get_window_server(0);
 
     myip.s_addr = 0;
-    if (sa_addr_a2s(server_list[from_server].lcl_addr, &saddr, NULL) == SA_OK) {
+    if (sa_addr_a2s(server_list[from_server].lcl_addr, &saddr, &slen) == SA_OK) {
 	if (saddr->sa_family == AF_INET) {
 	    myip.s_addr = ((struct sockaddr_in *) saddr)->sin_addr.s_addr;
 	    free(saddr);

@@ -225,7 +225,7 @@ static int read_data(int i, time_t * last_timeout)
 	return 1;
 
     case SA_ERR_TMT:
-	server_list[from_server].pos = pos;
+	server_list[from_server].pos = pos+done;
 	return 0;
 
     default:

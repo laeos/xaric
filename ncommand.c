@@ -787,15 +787,17 @@ void cmd_names(struct command *cmd, char *args)
 {
     char *channel = NULL;
     int server = from_server;
-    struct channel *chan;
 
     if (args)
 	channel = next_arg(args, &args);
-
-    if (!(chan = prepare_command(&server, channel, NO_OP)))
-	return;
-
-    send_to_server(SERVER(server), "NAMES %s", chan->channel);
+    if (!channel || (channel && (strcmp(channel, "*") == 0))) {
+	channel = get_current_channel_by_refnum(0);
+	if (!channel || *channel == '0') {
+	    not_on_a_channel(curr_scr_win);
+	    return;
+	}
+    }
+    send_to_server(SERVER(server), "NAMES %s", channel);
 }
 
 void cmd_nick(struct command *cmd, char *args)
@@ -1968,7 +1970,7 @@ struct command xaric_cmds[] = {
     {"MOTD", NULL, NULL, cmd_generic, "%R[%nserver%R]%n\n- Shows MOTD on current server %R[%nserver%R]%n"},
     {"MORE", NULL, NULL, cmd_readlog, "%R[%nfilename%R]%n\n- displays file in pages"},
     {"MUB", NULL, NULL, cmd_unban, "- Mass unbans current channel"},
-    {"NAMES", NULL, NULL, cmd_generic, "%R[%Bchannel%R]%n\n- Shows names on current channel or %R[%Bchannel%R]%n"},
+    {"NAMES", NULL, NULL, cmd_names, "%R[%Bchannel%R]%n\n- Shows names on current channel or %R[%Bchannel%R]%n"},
     {"NICK", "NICK", NULL, cmd_nick, "-Changes nick to specified nickname"},
     {"NOCHAT", NULL, NULL, cmd_chat, "%Y<%nnick%Y>%n\n- Kills chat reqest from %Y<%nnick%Y>"},
     {"NOTE", NULL, NULL, cmd_generic, "- send a note to someone, if the irc server supports it."},

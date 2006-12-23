@@ -1314,34 +1314,34 @@ void cmd_showidle(struct command *cmd, char *args)
 
 void cmd_topic(struct command *cmd, char *args)
 {
-    char *arg = NULL;
-    char *arg2;
     struct channel *chan;
+    char *arg, *channel = NULL;
     int server;
 
-    arg = next_arg(args, &args);
-    if (!(chan = prepare_command(&server, arg ? (is_channel(arg) ? arg : NULL) : NULL, NO_OP)))
+    if ((arg = next_arg(args, &args))) {
+	if (is_channel(arg)) {
+	    channel = arg;
+	}
+	if (is_channel(arg) || strcmp(arg, "*") == 0) {
+	    arg = NULL; 
+	}
+    }
+    if (!channel)
+	channel = get_current_channel_by_refnum(0);
+    if (!(chan = prepare_command(&server, channel, DONT_CARE)))
 	return;
-    if (*cmd->name == 'U') {
+    if (*cmd->name == 'U') { /* UNTOPIC command */
 	send_to_server(SERVER(server), "TOPIC %s :", chan->channel);
 	return;
     }
-    if (arg && (!(chan->mode & MODE_TOPIC) || chan->chop)) {
-	if (is_channel(arg)) {
-	    if ((arg2 = next_arg(args, &args)))
-		send_to_server(SERVER(server), "TOPIC %s :%s %s", chan->channel, arg2, args);
-	    else
-		send_to_server(SERVER(server), "TOPIC %s", chan->channel);
-	} else {
-	    char *p = NULL;
-
-	    p = m_sprintf("%s%s%s", arg, arg ? space_str : empty_str, args ? args : empty_str);
-	    send_to_server(SERVER(server), "TOPIC %s :%s%s%s", chan->channel, arg, args ? space_str : empty_str,
-			   args ? args : empty_str);
-	    new_free(&p);
-	}
-    } else
+    if (!arg)
+	arg = next_arg(args, &args);
+    if (!arg || ((chan->mode & MODE_TOPIC) && !chan->chop))
 	send_to_server(SERVER(server), "TOPIC %s", chan->channel);
+    else
+	send_to_server(SERVER(server), "TOPIC %s :%s%s%s", chan->channel, arg, 
+		*args ? space_str : empty_str,
+		*args ? args : empty_str);
 }
 
 void cmd_trace(struct command *cmd, char *args)

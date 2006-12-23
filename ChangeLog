@@ -1,3 +1,7 @@
+2006-12-23  Rex Feany  <laeos@laeos.net>
+
+	* /topic * now does the expected thing. same for /untopic *
+
 2006-12-19  Rex Feany  <laeos@laeos.net>
 
 	* server.c:read_data() - so broken. when select timed out in the

@@ -66,15 +66,15 @@ struct debug_module xd_modules[] = {
 static int get_module(const char *name, enum xd_module_list *ridx)
 {
     int count, idx;
-    char *rn = alloca(strlen(name) + 1);
+    char *rn = strdup(name);
 
     /* Fix case */
-    strcpy(rn, name);
     upper(rn);
 
     find_fixed_array_item(xd_modules, sizeof(struct debug_module), XD_MAX_MODULE, rn, &count, &idx);
     if (count == 1)
 	count = -1;
+    free(rn);
 
     if (count < 0) {
 	*ridx = (enum xd_module_list) idx;
@@ -123,34 +123,36 @@ int xd_save(FILE * fp, int all)
  */
 int xd_parse(const char *clist)
 {
-    char *fcn = alloca(strlen(clist) + 1);
+    char *save, *fcn = strdup(clist);
     char *what, *sep;
+    int retval = 1;
     int done = 0;
     xd_level lev;
 
-    strcpy(fcn, clist);
-
+    save = fcn;
     do {
 	if ((what = strchr(fcn, '=')) == NULL)
-	    return 1;
+	    break;
 	*what++ = '\0';
 
 	if ((sep = strchr(what, ',')) == NULL)
-	    done = 1;
+	    retval = 0;
 	else
 	    *sep++ = '\0';
 
 	if ((lev = atoi(what)) < 0)
-	    return 1;
+	    break;
 
 	if (xd_set(fcn, lev, NULL))
-	    return 1;
+	    break;
 
 	fcn = sep;
 
-    } while (done == 0);
+    } while (retval == 1);
 
-    return 0;
+    free(save);
+
+    return ret;
 }
 
 /* List the status of the world according to debug */

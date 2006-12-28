@@ -293,6 +293,7 @@ char **split_up_line(const char *str)
     char buffer[BIG_BUFFER_SIZE + 1];
     const char *ptr;
     char *cont_ptr, *cont = empty_str, c;
+    int free_cont = 0;
     int pos = 0,		/* Current pos in "buffer" */
 	col = 0,		/* Current col on display */
 	word_break = 0,		/* Last end of word */
@@ -504,7 +505,8 @@ char **split_up_line(const char *str)
 	     * line is layed out.
 	     */
 	    if (!*cont && do_indent && (indent < term_cols / 3) && (strlen(cont_ptr) < indent)) {
-		cont = alloca(indent + 10);
+		cont = malloc(indent + 10);
+		free_cont = 1;
 		sprintf(cont, "%-*s", indent, cont_ptr);
 	    }
 	    /* 
@@ -528,11 +530,12 @@ char **split_up_line(const char *str)
 	     * and figure out where we are.
 	     */
 	    buffer[pos] = 0;
-	    pos_copy = alloca(strlen(buffer + word_break) + strlen(cont) + 2);
+	    pos_copy = malloc(strlen(buffer + word_break) + strlen(cont) + 2);
 	    strcpy(pos_copy, buffer + word_break);
 
 	    strcpy(buffer, cont);
 	    strcat(buffer, pos_copy);
+	    free(pos_copy);
 	    col = pos = strlen(buffer);
 	    word_break = 0;
 	    newline = 0;
@@ -553,6 +556,7 @@ char **split_up_line(const char *str)
 	malloc_strcpy((char **) &(output[line++]), buffer);
 
     new_free(&output[line]);
+    if (free_cont) free(cont);
     recursion--;
     return output;
 }

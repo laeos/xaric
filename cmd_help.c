@@ -157,11 +157,11 @@ static void dir_prompt_callback(char *data, char *line)
     } else if (*line == '?') {
 	end_callback(data, empty_str);
     } else if (*line != 'Q' && *line != 'q') {
-	char *f = alloca(strlen(data) + strlen(line) + 2);
+	char *f = malloc(strlen(data) + strlen(line) + 2);
 
 	sprintf(f, "%s %s", data, line);
-
 	display_topic(f);
+	free(f);
     } else {
 	destroy_help_window();
     }

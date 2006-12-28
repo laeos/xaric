@@ -194,20 +194,12 @@ int parse_key(char *key_str)
 	else {
 	    int foo = META1_CHARACTER - 1;	/* just to make sure */
 
-#ifdef __GNUC__
-	    char *safe_copy;
-#endif
 	    if (keys[0][(u_char) * key_str])
 		foo = keys[0][(u_char) * key_str]->key_index;
 	    if ((foo >= META1_CHARACTER) && (foo - META1_CHARACTER < MAX_META))
 		meta = foo - META1_CHARACTER + 1;
-#ifndef __GNUC__
-	    strcpy(key_str, key_str + 1);
-#else
-	    safe_copy = (char *) alloca(strlen(key_str));
-	    strcpy(safe_copy, key_str + 1);
-	    strcpy(key_str, safe_copy);
-#endif
+
+	    memmove(key_str, key_str+1, strlen(key_str));
 	}
     }
     return (meta);

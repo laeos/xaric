@@ -85,20 +85,21 @@ static char *get_variable_with_args(char *str, char *args, int *args_flag)
  **/
 static void TruncateAndQuote(char **buff, char *add, int length, char *quote_em, char pad_char)
 {
-    if (length) {
-	char *buffer = alloca(abs(length) + 1);
+    char *l_ptr = NULL, *q_ptr = NULL;
 
-	strformat(buffer, add, length, pad_char);
-	add = buffer;
+    if (length) {
+	l_ptr = malloc(abs(length) + 1);
+	strformat(l_ptr, add, length, pad_char);
+	add = l_ptr;
     }
     if (quote_em) {
-	char *ptr = alloca(strlen(add) * 2 + 2);
-
-	add = double_quote(add, quote_em, ptr);
+	q_ptr = malloc(strlen(add) * 2 + 2);
+	add = double_quote(add, quote_em, q_ptr);
     }
-
     if (buff)
 	malloc_strcat(buff, add);
+    if (l_ptr) free(l_ptr);
+    if (q_ptr) free(q_ptr);
 }
 
 static void do_alias_string(char unused, char *not_used)
@@ -137,8 +138,7 @@ char *expand_alias(char *string, char *args, int *args_flag, char **more_text)
     }
     quote_temp[1] = 0;
 
-    ptr = free_stuff = stuff = alloca(strlen(string) + 1);
-    strcpy(stuff, string);
+    ptr = free_stuff = stuff = strdup(string);
 
     if (more_text)
 	*more_text = NULL;
@@ -225,6 +225,8 @@ char *expand_alias(char *string, char *args, int *args_flag, char **more_text)
     }
     if (stuff)
 	m_strcat_ues(&buffer, stuff, unescape);
+
+    free(free_stuff);
 
     DEBUG(XD_EXPR, 5, "Expanded [%s] to [%s]", string, buffer);
 

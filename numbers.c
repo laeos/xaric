@@ -398,9 +398,9 @@ static int handle_server_stats(char *from, char **ArgList, int comm)
     static int norm = 0, invisible = 0, servers = 0, ircops = 0, unknown = 0, chans = 0, local_users = 0, total_users;
     char tmp[80];
     int ret = 1;
-    char *line = alloca(strlen(ArgList[0]) + 1);
-
-    strcpy(line, ArgList[0]);
+    char *line, *save;
+    
+    line = save = strdup(ArgList[0]);
     switch (comm) {
     case 251:			/* number of users */
 	BreakArgs(line, NULL, ArgList, 1);
@@ -471,6 +471,7 @@ static int handle_server_stats(char *from, char **ArgList, int comm)
 	ret = 0;
 	break;
     }
+    free(save);
     return ret;
 }
 

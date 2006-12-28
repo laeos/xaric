@@ -126,7 +126,7 @@ int display_list_cl(ARRAY * list, const char *(*fcn) (void *), xformat fmt, int 
     epl = cols / longest;
 
     /* allocate the buffer we use to construct each line */
-    save_buf = buf = alloca(epl * longest + 1);
+    save_buf = buf = malloc(epl * longest + 1);
 
 #ifndef NDEBUG
     buf_end = buf + (epl * longest + 1) + 1;
@@ -160,6 +160,8 @@ int display_list_cl(ARRAY * list, const char *(*fcn) (void *), xformat fmt, int 
 	put_fmt(fmt, "%s", save_buf);
 
     } while (cnt);
+
+    free(save_buf);
 
     return count;
 }

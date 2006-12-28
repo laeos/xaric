@@ -48,14 +48,13 @@ dnl Stuff we need
 dnl ----------------------------------------------------------
 
 AC_HEADER_STDC
-AC_FUNC_ALLOCA
 AC_HEADER_TIME
 
 AC_CHECK_HEADERS(
- 	stdio.h stdlib.h stdarg.h string.h signal.h unistd.h fcntl.h dnl
- 	ctype.h errno.h sys/types.h sys/time.h sys/wait.h sys/socket.h dnl
- 	dirent.h pwd.h sys/stat.h assert.h getopt.h netinet/in.h net/if.h dnl
- 	netdb.h sys/ioctl.h)
+ 	stdio.h stdlib.h stdarg.h string.h unistd.h fcntl.h dnl
+ 	ctype.h sys/types.h sys/time.h sys/wait.h sys/socket.h dnl
+ 	dirent.h sys/stat.h assert.h  dnl
+ 	netdb.h)
 
 AC_CHECK_FUNC(select, ,
   AC_CHECK_LIB(socket, select, LIBS="$LIBS -lsocket",
@@ -218,7 +217,6 @@ AC_CHECK_HEADERS(sys/ptem.h sys/select.h)
 AC_CHECK_HEADERS(sys/syslimits.h sys/twg_config.h sys/un.h)
 AC_CHECK_HEADERS(sys/termios.h sys/ttycom.h termcap.h)
 
-AC_CHECK_FUNC(getpass, AC_DEFINE(HAVE_GETPASS, 1, Defined if system has getpass().),)
 AC_CHECK_FUNC(fpathconf, AC_DEFINE(HAVE_FPATHCONF, 1, Defined if you have fpathconf().),)
 AC_CHECK_FUNC(gettimeofday, AC_DEFINE(HAVE_GETTIMEOFDAY, 1, Defined if you have gettimeofday.),)
 AC_CHECK_FUNC(sysconf, AC_DEFINE(HAVE_SYSCONF, 1, Defined if system has sysconf.),)

@@ -570,12 +570,12 @@ void input_add_character(char c, char *unused)
 	    if (THIS_CHAR) {
 		char *ptr = NULL;
 
-		ptr = alloca(strlen(&(THIS_CHAR)));
-		strcpy(ptr, &(THIS_CHAR));
+		ptr = strdup(&(THIS_CHAR));
 
 		THIS_CHAR = c;
 		NEXT_CHAR = 0;
 		ADD_TO_INPUT(ptr);
+		free(ptr);
 		if (term_insert(c)) {
 		    term_putchar(c);
 		    if (NEXT_CHAR)

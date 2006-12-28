@@ -314,8 +314,7 @@ void cmd_lastlog(struct command *cmd, char *args)
 	say("Lastlog:");
 
     if (the_match) {
-
-	blah = (char *) alloca(strlen(the_match) + 4);
+	blah = malloc(strlen(the_match) + 4);
 	sprintf(blah, "*%s*", the_match);
     }
     for (i = 0; (i < cnt) && start_pos; start_pos = start_pos->prev) {
@@ -334,6 +333,8 @@ void cmd_lastlog(struct command *cmd, char *args)
 	    }
 	}
     }
+    if (blah)
+	free(blah);
     if (header && !fp)
 	say("End of Lastlog");
     strip_ansi_in_echo = 1;

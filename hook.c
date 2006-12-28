@@ -502,7 +502,7 @@ extern int do_hook(int which, char *format, ...)
     }
 
     for (i = 0; i < hook_num; i++) {
-	char *foo, *saved_who_from = NULL;
+	char *saved_who_from = NULL;
 	int saved_who_level;
 
 	if (!(tmp = hook_array[i])) {
@@ -532,13 +532,13 @@ extern int do_hook(int which, char *format, ...)
 	if (!tmp->noisy && !tmp->sernum)
 	    RetVal = 0;
 	if (tmp->stuff && *tmp->stuff) {
-	    char *name2 = alloca(strlen(name) + 1);
+	    char *name2 = strdup(name);
+	    char *stuff2 = strdup(tmp->stuff);
 
-	    strcpy(name2, name);
+	    parse_line(name2, stuff2, buffer, 0, 0);
 
-	    foo = alloca(strlen(tmp->stuff) + 1);
-	    strcpy(foo, tmp->stuff);
-	    parse_line(name2, foo, buffer, 0, 0);
+	    free(name2);
+	    free(stuff2);
 	}
 	in_on_who = old_in_on_who;
 	window_display = display;

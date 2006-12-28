@@ -785,16 +785,19 @@ void cmd_me(struct command *cmd, char *args)
 
 void cmd_names(struct command *cmd, char *args)
 {
-    char *channel = NULL;
+    char *channel = NULL, *charg = NULL;
     int server = from_server;
 
     if (args)
-	channel = next_arg(args, &args);
+	charg = channel = next_arg(args, &args);
     if (!channel || (channel && (strcmp(channel, "*") == 0))) {
 	channel = get_current_channel_by_refnum(0);
 	if (!channel || *channel == '0') {
-	    not_on_a_channel(curr_scr_win);
-	    return;
+	    if (charg) {
+		not_on_a_channel(curr_scr_win);
+		return;
+	    }
+	    channel = empty_str;
 	}
     }
     send_to_server(SERVER(server), "NAMES %s", channel);

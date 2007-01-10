@@ -122,7 +122,7 @@
  * proper compilation.
  */
 
-#define DEFAULT_SIGNOFF_REASON "if you have a better quit message then submit a patch!"
+#define DEFAULT_SIGNOFF_REASON "Xaric: If you have a better quit message then submit a patch!"
 #define DEFAULT_BANTYPE 2
 #define DEFAULT_SHOW_CTCP_IDLE 1
 #define DEFAULT_PING_TYPE 1

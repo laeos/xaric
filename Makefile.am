@@ -19,13 +19,14 @@ xaric_SOURCES = alist.c  cmd_modes.c ctcp.c dcc.c     \
 
 nodist_xaric_SOURCES = fset_gen.h vars_gen.h build.h
 BUILT_SOURCES = fset_gen.h vars_gen.h build.h
+CLEANFILES = fset_gen.h build.h stamp-h vars_gen.h config.log
 EXTRA_xaric_SOURCES = freeaddrinfo.c ga_aistruct.c ga_echeck.c ga_nsearch.c \
 		      ga_port.c ga_serv.c gai_strerror.c getaddrinfo.c getnameinfo.c \
 		      gn_ipv46.c inet_ntop.c inet_pton.c setenv.c strtoul.c
 
 HELP_FILES= help/copying help/help help/warranty
 xaric_LDADD = @EXTRA_OBJS@ 
-xaric_CFLAGS = -Werror -Wall -ggdb3
+xaric_CFLAGS = -Wall -ggdb3
 man_MANS = xaric.1
 EXTRA_DIST = $(man_MANS) $(HELP_FILES) xaric.xpm
 

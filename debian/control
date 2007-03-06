@@ -1,0 +1,13 @@
+Source: xaric
+Section: net
+Priority: optional
+Maintainer: Rex Feany <bugs@xaric.org>
+Build-Depends: debhelper (>= 5), autotools-dev
+Standards-Version: 3.7.2
+
+Package: xaric
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: irc
+Description: Yet another text-mode IRC client.
+ Xaric is a text IRC client derived from ircii-pana.

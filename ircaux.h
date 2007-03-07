@@ -52,7 +52,6 @@ extern char *m_s3cat_s(char **, const char *, const char *);
 extern char *m_s3cat(char **, const char *, const char *);
 extern char *m_3cat(char **, const char *, const char *);
 extern char *m_e3cat(char **, const char *, const char *);
-extern char *m_2dup(const char *, const char *);
 extern char *m_3dup(const char *, const char *, const char *);
 extern char *m_opendup(const char *, ...);
 extern char *m_strdup(const char *);

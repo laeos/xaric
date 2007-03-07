@@ -1492,13 +1492,6 @@ extern char *unsplitw(char **str, int howmany)
     return retval;
 }
 
-char *m_2dup(const char *str1, const char *str2)
-{
-    size_t msize = strlen(str1) + strlen(str2) + 1;
-
-    return strcat(strcpy((char *) new_malloc(msize), str1), str2);
-}
-
 char *on_off(int var)
 {
     if (var)

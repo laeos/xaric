@@ -1,29 +1,5 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Predefined possible va_copy() implementation (id: ASP) */
-#define __VA_COPY_USE_ASP(d, s) do { *(d) = *(s); } while (0)
-
-/* Predefined possible va_copy() implementation (id: ASS) */
-#define __VA_COPY_USE_ASS(d, s) do { (d) = (s); } while (0)
-
-/* Predefined possible va_copy() implementation (id: C99) */
-#define __VA_COPY_USE_C99(d, s) va_copy((d), (s))
-
-/* Predefined possible va_copy() implementation (id: CPP) */
-#define __VA_COPY_USE_CPP(d, s) memcpy((void *)(d), (void *)(s)), sizeof(*(s))
-
-/* Predefined possible va_copy() implementation (id: CPS) */
-#define __VA_COPY_USE_CPS(d, s) memcpy((void *)&(d), (void *)&(s)), sizeof((s))
-
-/* Predefined possible va_copy() implementation (id: GCB) */
-#define __VA_COPY_USE_GCB(d, s) __builtin_va_copy((d), (s))
-
-/* Predefined possible va_copy() implementation (id: GCH) */
-#define __VA_COPY_USE_GCH(d, s) __va_copy((d), (s))
-
-/* Predefined possible va_copy() implementation (id: GCM) */
-#define __VA_COPY_USE_GCM(d, s) VA_COPY((d), (s))
-
 /* Define to 1 if the `getpgrp' function requires zero arguments. */
 #undef GETPGRP_VOID
 
@@ -192,10 +168,6 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define if va_copy() macro exists (and no fallback implementation is
-   required) */
-#undef HAVE_VA_COPY
-
 /* Defined if your system has IPv4 support. */
 #undef IPV4
 
@@ -268,15 +240,6 @@
 #ifndef _ALL_SOURCE
 # undef _ALL_SOURCE
 #endif
-
-/* Optional va_copy() implementation activation */
-#ifndef HAVE_VA_COPY
-#define va_copy(d, s) __VA_COPY_USE(d, s)
-#endif
-
-
-/* Define to id of used va_copy() implementation */
-#undef __VA_COPY_USE
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

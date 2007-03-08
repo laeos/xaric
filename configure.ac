@@ -23,10 +23,10 @@ dnl ---------------------------------------------------------------
 dnl autoconf prolog
 dnl ---------------------------------------------------------------
 
-AC_INIT(Xaric, 0.13.3, support@xaric.org, xaric)
+AC_INIT([Xaric],[0.13.3],[support@xaric.org],[xaric])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([irc.c])
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 AC_PREFIX_DEFAULT(/usr/local)
 AM_MAINTAINER_MODE
 
@@ -77,7 +77,7 @@ dnl ----------------------------------------------------------
 
 AC_MSG_CHECKING(for IPv4 support)
 AC_CACHE_VAL(ac_cv_ipv4,
-	AC_TRY_RUN([
+	AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #	include <sys/types.h>
 #	include <sys/socket.h>
 #	include <netinet/in.h>
@@ -90,10 +90,7 @@ AC_CACHE_VAL(ac_cv_ipv4,
 		struct sockaddr_in foo;
 		fd = socket(AF_INET, SOCK_STREAM, 0);
 		exit(fd >= 0 ? 0 : 1);
-	}],
-	ac_cv_ipv4=yes,
-	ac_cv_ipv4=no,
-	ac_cv_ipv4=no))
+	}]])],[ac_cv_ipv4=yes],[ac_cv_ipv4=no],[ac_cv_ipv4=no]))
 AC_MSG_RESULT($ac_cv_ipv4)
 if test $ac_cv_ipv4 = yes ; then
 	AC_DEFINE(IPV4, 1, Defined if your system has IPv4 support.)
@@ -103,7 +100,7 @@ dnl Let's see if the system really supports IPv6.
 dnl
 AC_MSG_CHECKING(for IPv6 support)
 AC_CACHE_VAL(ac_cv_ipv6,
-	AC_TRY_RUN([
+	AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #	include <sys/types.h>
 #	include <sys/socket.h>
 #	include <netinet/in.h>
@@ -116,10 +113,7 @@ AC_CACHE_VAL(ac_cv_ipv6,
 		struct sockaddr_in6 foo;
 		fd = socket(AF_INET6, SOCK_STREAM, 0);
 		exit(fd >= 0 ? 0 : 1);
-	}],
-	ac_cv_ipv6=yes,
-	ac_cv_ipv6=no,
-	ac_cv_ipv6=no))
+	}]])],[ac_cv_ipv6=yes],[ac_cv_ipv6=no],[ac_cv_ipv6=no]))
 AC_MSG_RESULT($ac_cv_ipv6)
 if test $ac_cv_ipv6 = yes ; then
 	AC_DEFINE(IPV6, 1, Defined if your system has IPv6 support.)
@@ -174,23 +168,17 @@ if test $ac_cv_have_addrinfo_struct = yes ; then
 fi
 
 AC_CACHE_CHECK(if sockaddr{} has sa_len member, ac_cv_sockaddr_has_sa_len,
-	AC_TRY_COMPILE([
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #		include <sys/types.h>
-#		include <sys/socket.h>],
-		[unsigned int i = sizeof(((struct sockaddr *)0)->sa_len)],
-	ac_cv_sockaddr_has_sa_len=yes,
-	ac_cv_sockaddr_has_sa_len=no))
+#		include <sys/socket.h>]], [[unsigned int i = sizeof(((struct sockaddr *)0)->sa_len)]])],[ac_cv_sockaddr_has_sa_len=yes],[ac_cv_sockaddr_has_sa_len=no]))
 if test $ac_cv_sockaddr_has_sa_len = yes ; then
 	AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1, Defined if struct sockaddr has sa_len field.)
 fi
 
 AC_CACHE_CHECK(for socklen_t, ac_cv_socklen_t,
-	AC_TRY_COMPILE([
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #		include <sys/types.h>
-#		include <sys/socket.h>],
-		[socklen_t foo = 0],
-	ac_cv_socklen_t=yes,
-	ac_cv_socklen_t=no))
+#		include <sys/socket.h>]], [[socklen_t foo = 0]])],[ac_cv_socklen_t=yes],[ac_cv_socklen_t=no]))
 if test $ac_cv_socklen_t = no ; then
 	AC_DEFINE_UNQUOTED(socklen_t, unsigned int, Defined unless socklen_t is defined.)
 fi
@@ -265,7 +253,7 @@ dnl Check for sys_siglist declaration
 dnl ----------------------------------------------------------
 
 AC_MSG_CHECKING(for sys_siglist declaration)
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <signal.h>
 main()
@@ -273,11 +261,9 @@ main()
 	char *s = sys_siglist[0];
 	exit(0);
 }
-],
-  AC_MSG_RESULT(yes) 
+]])],[AC_MSG_RESULT(yes) 
   sys_siglist="1"
-  AC_DEFINE(SYS_SIGLIST_DECLARED, 1, Defined if sys_siglist is declared.), 
-  AC_MSG_RESULT(no), :)
+  AC_DEFINE(SYS_SIGLIST_DECLARED, 1, Defined if sys_siglist is declared.)],[AC_MSG_RESULT(no)],[:])
 
 
 dnl ----------------------------------------------------------

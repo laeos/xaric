@@ -2257,7 +2257,6 @@ sa_rc_t sa_send(sa_t * sa, sa_addr_t * raddr, const char *buf, size_t buflen, si
 sa_rc_t sa_sendf(sa_t * sa, sa_addr_t * raddr, const char *cpFmt, ...)
 {
     va_list ap;
-    va_list apbak;
     int nBuf;
     char *cpBuf;
     sa_rc_t rv;
@@ -2269,10 +2268,10 @@ sa_rc_t sa_sendf(sa_t * sa, sa_addr_t * raddr, const char *cpFmt, ...)
 
     /* format string into temporary buffer */
     va_start(ap, cpFmt);
-    va_copy(apbak, ap);
     if ((nBuf = sa_mvsnprintf(NULL, 0, cpFmt, ap)) == -1)
 	return SA_RC(SA_ERR_FMT);
-    va_copy(ap, apbak);
+    va_end(ap);
+    va_start(ap, cpFmt);
     if ((nBuf + 1) > (int) sizeof(caBuf)) {
 	/* requires a larger buffer, so allocate dynamically */
 	if ((cpBuf = (char *) malloc((size_t) (nBuf + 1))) == NULL)

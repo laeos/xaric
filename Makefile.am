@@ -45,7 +45,7 @@ build.h: Makefile
 	@mv .ver $@
 
 
-helpdir     := $(DESTDIR)$(pkgdatadir)/help
+helpdir = $(DESTDIR)$(pkgdatadir)/help
 install-data-hook:
 	$(mkdir_p) $(helpdir)
 	for i in $(HELP_FILES) ; do \

@@ -387,10 +387,9 @@ static int delete_process(int process)
 		}
 
 		if (process_list_size)
-		    process_list = (Process **)
-			RESIZE(process_list, Process *, process_list_size);
+			process_list = new_realloc(process_list, Process *, 0, process_list_size);
 		else {
-		    new_free((char **) &process_list);
+		    new_free(&process_list);
 		    process_list = NULL;
 		}
 	    }
@@ -411,7 +410,7 @@ static int delete_process(int process)
 	    new_free(&dead->logical);
 	    new_free(&dead->who);
 	    new_free(&dead->redirect);
-	    new_free((char **) &dead);
+	    new_free(&dead);
 	    return (0);
 	}
     }
@@ -455,7 +454,7 @@ add_process(char *name, char *logical, int pid, int p_stdin, int p_stdout, int p
 	}
     }
     process_list_size++;
-    process_list = (Process **) RESIZE(process_list, Process *, process_list_size);
+    process_list = new_realloc(process_list, Process *, process_list_size - 1, process_list_size);
     process_list[process_list_size - 1] = NULL;
     proc = process_list[i] = (Process *) new_malloc(sizeof(Process));
     proc->name = m_strdup(name);
@@ -598,7 +597,7 @@ void start_process(char *name, char *logical, char *redirect, char *who, unsigne
 		while ((arg = next_arg(name, &name)) != NULL) {
 		    if (cnt == max) {
 			max += 5;
-			RESIZE(args, char *, max);
+			args = new_realloc(args, char *, cnt, max);
 		    }
 		    args[cnt++] = arg;
 		}

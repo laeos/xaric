@@ -349,7 +349,7 @@ void clear_array(NickTab ** tmp)
 	q = t->next;
 	new_free(&t->nick);
 	new_free(&t->type);
-	new_free((char **) &t);
+	new_free(&t);
 	t = q;
     }
     *tmp = NULL;
@@ -413,7 +413,7 @@ void clear_link(irc_server ** serv1)
 	new_free(&temp->name);
 	new_free(&temp->link);
 	new_free(&temp->time);
-	new_free((char **) &temp);
+	new_free(&temp);
 	temp = hold;
     }
     *serv1 = NULL;
@@ -470,7 +470,7 @@ void remove_split_server(char *server)
 	new_free(&temp->name);
 	new_free(&temp->link);
 	new_free(&temp->time);
-	new_free((char **) &temp);
+	new_free(&temp);
     }
 }
 
@@ -1058,7 +1058,7 @@ void show_server_map(void)
 	put_it("%s", convert_output_format(tmp2, "%s %s", tmp->name, prevdist != tmp->hopcount ? ascii : empty_str));
 	prevdist = tmp->hopcount;
 	new_free(&tmp->name);
-	new_free((char **) &tmp);
+	new_free(&tmp);
     }
 }
 

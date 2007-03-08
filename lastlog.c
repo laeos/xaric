@@ -173,7 +173,7 @@ void remove_from_lastlog(Window * window)
 	    window->lastlog_head = window->lastlog_tail;
 	window->lastlog_size--;
 	new_free(&end_holder->msg);
-	new_free((char **) &end_holder);
+	new_free(&end_holder);
     } else
 	window->lastlog_size = 0;
 }

@@ -120,7 +120,7 @@ void funny_print_widelist(void)
 	new_free(&wide_list[i]->channel);
 	new_free((char **) &wide_list[i]);
     }
-    new_free((char **) &wide_list);
+    new_free(&wide_list);
     wl_elements = wl_size = 0;
 }
 
@@ -163,7 +163,7 @@ void funny_list(char *from, char **ArgList)
 	    if (wl_size)
 		memcpy(new_list, wide_list, sizeof(WideList *) * wl_size);
 	    wl_size += 50;
-	    new_free((char **) &wide_list);
+	    new_free(&wide_list);
 	    wide_list = new_list;
 	}
 	wide_list[wl_elements] = (WideList *)

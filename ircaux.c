@@ -27,89 +27,44 @@
 #include "output.h"
 #include "ircterm.h"
 
-/*
- * These are used by the malloc routines.  We actually ask for an int-size
- * more of memory, and in that extra int we store the malloc size.  Very
- * handy for debugging and other hackeries.
- */
-/*#include <dmalloc.h> */
-
-#define alloc_start(ptr) (((char *)(ptr)) - sizeof(void *) - sizeof(void *))
-#define alloc_size(ptr) (*(int *)( alloc_start((ptr)) + sizeof(void *)))
-#define alloc_magic(ptr) (*(int *)( alloc_start((ptr)) ))
-
-#define FREED_VAL -3
-#define ALLOC_MAGIC 0xafbdce70
-
-/*
- * really_new_malloc is the general interface to the malloc(3) call.
- * It is only called by way of the ``new_malloc'' #define.
- * It wont ever return NULL.
- */
-
-/*
- * Malloc allocator with size caching.
- */
-void *n_malloc(size_t size, char *file, int line)
+void *n_malloc(size_t size, const char *file, int line)
 {
     char *ptr;
 
-    if (!(ptr = (char *) calloc(1, size + sizeof(void *) + sizeof(void *)))) {
+    if (!(ptr = (char *) calloc(1, size))) {
 	yell("Malloc() failed, giving up!");
 	term_reset();
 	exit(1);
     }
-
-    /* Store the size of the allocation in the buffer. */
-    ptr += sizeof(void *) + sizeof(void *);
-    alloc_magic(ptr) = ALLOC_MAGIC;
-    alloc_size(ptr) = size;
     return ptr;
 }
 
 /*
  * new_free:  Why do this?  Why not?  Saves me a bit of trouble here and there 
  */
-void *n_free(void **ptr, char *file, int line)
+void *n_free(char **ptr, const char *file, int line)
 {
     if (*ptr) {
-#ifdef XARIC_DEBUG
-	if (alloc_magic(*ptr) != ALLOC_MAGIC)
-	    abort();
-
-	/* Check to make sure its not been freed before */
-	if (alloc_size(*ptr) == FREED_VAL)
-	    abort();
-#endif
-	alloc_size(*ptr) = FREED_VAL;
-	free((void *) alloc_start(*ptr));
+	free(*ptr);
 	*ptr = NULL;
     }
     return (*ptr);
 }
 
-void *n_realloc(void **ptr, size_t size, char *file, int line)
+void *n_realloc(void *ptr, size_t eltsize, int newct, int oldct, const char *file, int line)
 {
-    char *ptr2 = NULL;
+    size_t newsize = eltsize * newct;
+    size_t oldsize = eltsize * oldct;
+    void *nptr = realloc(ptr, newsize);
 
-    if (*ptr) {
-	if (size) {
-	    size_t msize = alloc_size(*ptr);
-
-	    if (msize >= size)
-		return *ptr;
-
-	    ptr2 = new_malloc(size);
-	    memmove(ptr2, *ptr, msize);
-	    new_free(ptr);
-	    return ((*ptr = ptr2));
-	}
-	new_free(ptr);
-	return NULL;
-    } else if (size)
-	ptr2 = new_malloc(size);
-
-    return ((*ptr = ptr2));
+    if (!nptr) {
+	yell("realloc() failed, giving up!");
+	term_reset();
+	exit(1);
+    }
+    if (newsize > oldsize)
+	memset(nptr+oldsize, 0, newsize-oldsize);
+    return nptr;
 }
 
 /*
@@ -126,13 +81,10 @@ char *malloc_strcpy(char **ptr, const char *src)
     if (ptr && *ptr) {
 	if (*ptr == src)
 	    return *ptr;
-	if (alloc_size(*ptr) > strlen(src))
-	    return strcpy(*ptr, src);
 	new_free(ptr);
     }
     *ptr = new_malloc(strlen(src) + 1);
     return strcpy(*ptr, src);
-    return *ptr;
 }
 
 /* malloc_strcat: Yeah, right */
@@ -144,26 +96,10 @@ char *malloc_strcat(char **ptr, const char *src)
 	if (!src)
 	    return *ptr;
 	msize = strlen(*ptr) + strlen(src) + 1;
-	RESIZE(*ptr, char, msize);
+	*ptr = new_realloc(*ptr, char, strlen(*ptr), msize);
 	return strcat(*ptr, src);
     }
     return (*ptr = m_strdup(src));
-}
-
-char *malloc_str2cpy(char **ptr, const char *src1, const char *src2)
-{
-    if (!src1 && !src2)
-	return new_free(ptr);
-
-    if (*ptr) {
-	if (alloc_size(*ptr) > strlen(src1) + strlen(src2))
-	    return strcat(strcpy(*ptr, src1), src2);
-
-	new_free(ptr);
-    }
-
-    *ptr = new_malloc(strlen(src1) + strlen(src2) + 1);
-    return strcat(strcpy(*ptr, src1), src2);
 }
 
 char *m_3dup(const char *str1, const char *str2, const char *str3)
@@ -697,7 +633,7 @@ char *m_strcat_ues(char **dest, char *src, int unescape)
     z = total_length = (*dest) ? strlen(*dest) : 0;
     total_length += strlen(src);
 
-    RESIZE(*dest, char, total_length + 2);
+    *dest = new_realloc(*dest, char, 0, total_length + 2);
     if (z == 0)
 	**dest = 0;
 

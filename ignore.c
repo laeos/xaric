@@ -71,7 +71,7 @@ void add_channel_grep(char *channel, char *what, int flag)
 		    new_free(&(tmp->nick));
 		    new_free(&(tmp));
 		}
-		new_free((char **) &new);
+		new_free(&new);
 	    }
 	    new = (Ignore *) new_malloc(sizeof(Ignore));
 	    new->nick = m_strdup(chan);
@@ -138,7 +138,7 @@ void ignore_nickname(char *nick, long type, int flag)
 			    new_free(&(tmp->nick));
 			    new_free(&(tmp));
 			}
-			new_free((char **) &new);
+			new_free(&new);
 		    }
 		    new = (Ignore *) new_malloc(sizeof(Ignore));
 		    new->nick = new_nick;
@@ -282,7 +282,7 @@ static int remove_ignore(char *nick)
 	    new_free(&(new->nick));
 	    new_free(&(new));
 	}
-	new_free((char **) &tmp);
+	new_free(&tmp);
 	count++;
     }
 
@@ -303,7 +303,7 @@ static int remove_ignore(char *nick)
 		new_free(&(new->nick));
 		new_free(&(new));
 	    }
-	    new_free((char **) &tmp);
+	    new_free(&tmp);
 
 	    count++;
 	}

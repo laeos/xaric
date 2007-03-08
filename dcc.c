@@ -283,7 +283,7 @@ int dcc_erase(DCC_list * Element)
 	    new_free(&Element->cksum);
 	    if (Element->dcc_handler)
 		(Element->dcc_handler) (NULL, NULL);
-	    new_free((char **) &Element);
+	    new_free(&Element);
 	    erase_one++;
 	    break;
 	}

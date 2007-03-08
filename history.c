@@ -122,7 +122,7 @@ static void add_to_history_list(int cnt, char *stuff)
 	command_history_tail = command_history_tail->prev;
 	command_history_tail->next = NULL;
 	new_free(&new->stuff);
-	new_free((char **) &new);
+	new_free(&new);
 	if (command_history_tail == NULL)
 	    command_history_head = NULL;
     } else
@@ -158,7 +158,7 @@ void set_history_size(Window * win, char *unused, int size)
 	    ptr = command_history_tail;
 	    command_history_tail = ptr->prev;
 	    new_free(&(ptr->stuff));
-	    new_free((char **) &ptr);
+	    new_free(&ptr);
 	}
 	if (command_history_tail == NULL)
 	    command_history_head = NULL;

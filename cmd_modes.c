@@ -581,7 +581,7 @@ static void remove_bans(char *stuff, char *line)
 		if ((tmpc = (BanList *) remove_from_list((struct list **) &chan->bans, tmpc->ban))) {
 		    new_free(&tmpc->ban);
 		    new_free(&tmpc->setby);
-		    new_free((char **) &tmpc);
+		    new_free(&tmpc);
 		    tmpc = NULL;
 		}
 	    }

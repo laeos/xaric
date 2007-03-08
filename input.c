@@ -923,7 +923,7 @@ void send_line(char dumb, char *dumber)
 	current_screen->promptlist = OldPrompt->next;
 	new_free(&OldPrompt->data);
 	new_free(&OldPrompt->prompt);
-	new_free((char **) &OldPrompt);
+	new_free(&OldPrompt);
 	change_input_prompt(-1);
     } else {
 	char *line, *tmp = NULL;
@@ -1106,7 +1106,7 @@ void edit_char(u_char key)
 	current_screen->promptlist = oldprompt->next;
 	new_free(&oldprompt->data);
 	new_free(&oldprompt->prompt);
-	new_free((char **) &oldprompt);
+	new_free(&oldprompt);
 	change_input_prompt(-1);
 	return;
     }

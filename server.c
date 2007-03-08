@@ -440,7 +440,7 @@ void add_to_server_list(char *server, int port, char *password, char *nick, int 
 {
     if ((from_server = find_in_server_list(server, port)) == -1) {
 	from_server = number_of_servers++;
-	RESIZE(server_list, struct server, number_of_servers + 1);
+	server_list = new_realloc(server_list, struct server, number_of_servers - 1, number_of_servers + 1);
 
 	server_list[from_server].name = m_strdup(server);
 	server_list[from_server].sock = NULL;
@@ -529,7 +529,7 @@ void remove_from_server_list(int i)
 
     memmove(&server_list[i], &server_list[i + 1], (number_of_servers - i) * sizeof(struct server));
     number_of_servers--;
-    RESIZE(server_list, struct server, number_of_servers);
+    server_list = new_realloc(server_list, struct server, number_of_servers + 1, number_of_servers);
 
     /* update all he structs with server in them */
     channel_server_delete(i);

@@ -152,7 +152,7 @@ extern void ExecuteTimers(void)
 		new_free((char **) &current->command);
 		new_free((char **) &current->subargs);
 	    }
-	    new_free((char **) &current);
+	    new_free(&current);
 	}
     }
     parsingtimer = 0;
@@ -258,7 +258,7 @@ extern int delete_timer(char *ref)
 		new_free((char **) &tmp->command);
 		new_free((char **) &tmp->subargs);
 	    }
-	    new_free((char **) &tmp);
+	    new_free(&tmp);
 	    return 0;
 	}
     }
@@ -309,7 +309,7 @@ char *add_timer(char *refnum_want, long when, long events, int (callback) (void 
     ntimer->events = events;
     if (create_timer_ref(refnum_want, refnum_got) == -1) {
 	say("TIMER: Refnum %s already exists", refnum_want);
-	new_free((char **) &ntimer);
+	new_free(&ntimer);
 	return NULL;
     }
 

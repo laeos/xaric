@@ -567,11 +567,11 @@ static void remove_numeric_hook(int numeric, char *nick, int server, int sernum,
 		tmp->not = 1;
 		new_free(&(tmp->nick));
 		new_free(&(tmp->stuff));
-		new_free((char **) &tmp);
+		new_free(&tmp);
 		if (hook->list == NULL) {
 		    if ((hook = (NumericList *) remove_from_list((struct list **) &numeric_list, buf)) != NULL) {
 			new_free(&(hook->name));
-			new_free((char **) &hook);
+			new_free(&hook);
 		    }
 		}
 		return;
@@ -583,11 +583,11 @@ static void remove_numeric_hook(int numeric, char *nick, int server, int sernum,
 		tmp->not = 1;
 		new_free(&(tmp->nick));
 		new_free(&(tmp->stuff));
-		new_free((char **) &tmp);
+		new_free(&tmp);
 	    }
 	    hook->list = NULL;
-	    new_free((char **) &hook->name);
-	    new_free((char **) &hook);
+	    new_free(&hook->name);
+	    new_free(&hook);
 	    if (!quiet)
 		say("The %s list is empty", buf);
 	    return;
@@ -633,7 +633,7 @@ extern void remove_hook(int which, char *nick, int server, int sernum, int quiet
 	    tmp->not = 1;
 	    new_free(&(tmp->nick));
 	    new_free(&(tmp->stuff));
-	    new_free((char **) &tmp);
+	    new_free(&tmp);
 	} else if (!quiet)
 	    say("\"%s\" is not on the %s list", nick, hook_functions[which].name);
     } else {
@@ -655,7 +655,7 @@ extern void remove_hook(int which, char *nick, int server, int sernum, int quiet
 	    tmp->not = 1;
 	    new_free(&(tmp->nick));
 	    new_free(&(tmp->stuff));
-	    new_free((char **) &tmp);
+	    new_free(&tmp);
 	}
 	hook_functions[which].list = top;
 	if (!quiet) {

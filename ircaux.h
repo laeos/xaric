@@ -20,17 +20,15 @@
 typedef int comp_len_func(char *, char *, int);
 typedef int comp_func(char *, char *);
 
-extern void *n_malloc(size_t, char *, int);
-extern void *n_realloc(void **, size_t, char *, int);
-
-extern void *n_free(void **, char *, int);
+extern void *n_malloc(size_t, const char *, int);
+extern void *n_free(char **, const char *, int);
+extern void *n_realloc(void *ptr, size_t eltsize, int newct, int oldct, const char *, int);
 
 #define new_malloc(x) n_malloc(x, __FILE__, __LINE__)
-#define new_free(x) n_free((void **)(x), __FILE__, __LINE__)
-
-/*#define new_realloc(x,y) n_realloc((x),(y),__FILE__,__LINE__)*/
-
-#define RESIZE(x, y, z) n_realloc     ((void **)& (x), sizeof(y) * (z), __FILE__, __LINE__)
+#define new_free(x) \
+    free(*(x)), *(x) = NULL
+#define new_realloc(ptr, type, oldcnt, newcnt) \
+    n_realloc(ptr, sizeof(type), newcnt, oldcnt, __FILE__, __LINE__)
 
 extern void beep_em(int);
 extern char *check_nickname(char *);
@@ -45,7 +43,6 @@ extern char *sindex(char *, char *);
 extern char *path_search(char *, char *);
 extern char *double_quote(const char *, const char *, char *);
 extern char *malloc_strcpy(char **, const char *);
-extern char *malloc_str2cpy(char **, const char *, const char *);
 extern char *malloc_strcat(char **, const char *);
 extern char *m_s3cat_s(char **, const char *, const char *);
 extern char *m_s3cat(char **, const char *, const char *);

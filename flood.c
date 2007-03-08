@@ -85,7 +85,7 @@ void cmd_no_flood(struct command *cmd, char *args)
 	if (*nick == '-') {
 	    if ((nptr = find_name_in_genericlist(nick + 1, no_flood_list, FLOOD_HASHSIZE, 1))) {
 		new_free(&nptr->name);
-		new_free((char **) &nptr);
+		new_free(&nptr);
 		bitchsay("%s removed from no-flood list", nick);
 	    } else
 		bitchsay("%s is not on your no-flood list", nick);
@@ -455,7 +455,7 @@ static int remove_oldest_flood_hashlist(struct hash_entry *list, time_t timet, i
 		if ((ptr->start + timet) <= t) {
 		    ptr = find_name_in_floodlist(ptr->name, flood_list, FLOOD_HASHSIZE, 1);
 		    new_free(&(ptr->channel));
-		    new_free((char **) &ptr);
+		    new_free(&ptr);
 		    total++;
 		    ptr = (struct flood *) (list + x)->list;
 		} else
@@ -473,7 +473,7 @@ static int remove_oldest_flood_hashlist(struct hash_entry *list, time_t timet, i
 		ptr = find_name_in_floodlist(ptr->name, flood_list, FLOOD_HASHSIZE, 1);
 		next = ptr->next;
 		new_free(&(ptr->channel));
-		new_free((char **) &ptr);
+		new_free(&ptr);
 		total++;
 		count--;
 		ptr = (struct flood *) (list + x)->list;

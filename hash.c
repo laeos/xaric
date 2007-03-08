@@ -596,11 +596,11 @@ int remove_oldest_whowas_hashlist(struct whowas_list_head *list, time_t timet, i
 		    ptr = find_userhost_channel(ptr->nicklist->host, ptr->channel, 1, list);
 		    new_free(&(ptr->nicklist->nick));
 		    new_free(&(ptr->nicklist->host));
-		    new_free((char **) &(ptr->nicklist));
+		    new_free(&(ptr->nicklist));
 		    new_free(&(ptr->channel));
 		    new_free(&(ptr->server1));
 		    new_free(&(ptr->server2));
-		    new_free((char **) &ptr);
+		    new_free(&ptr);
 		    total++;
 		    ptr = (struct whowas_list *) (&(list->NickListTable[x]))->list;
 		} else
@@ -614,12 +614,12 @@ int remove_oldest_whowas_hashlist(struct whowas_list_head *list, time_t timet, i
 	    if (ptr->nicklist) {
 		new_free(&(ptr->nicklist->nick));
 		new_free(&(ptr->nicklist->host));
-		new_free((char **) &(ptr->nicklist));
+		new_free(&(ptr->nicklist));
 	    }
 	    new_free(&(ptr->channel));
 	    new_free(&(ptr->server1));
 	    new_free(&(ptr->server2));
-	    new_free((char **) &ptr);
+	    new_free(&ptr);
 	    total++;
 	    count--;
 	}

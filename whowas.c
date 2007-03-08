@@ -206,9 +206,9 @@ int remove_oldest_chan_whowas(struct whowas_chan_list **list, time_t timet, int 
 	    new_free(&(tmp->channellist->channel));
 	    new_free(&(tmp->channellist->topic));
 	    tmp->channellist->bans = NULL;
-	    new_free((char **) &(tmp->channellist));
+	    new_free(&(tmp->channellist));
 	    *list = tmp->next;
-	    new_free((char **) &tmp);
+	    new_free(&tmp);
 	    total++;
 	}
     } else {
@@ -217,9 +217,9 @@ int remove_oldest_chan_whowas(struct whowas_chan_list **list, time_t timet, int 
 	    new_free(&(tmp->channellist->channel));
 	    new_free(&(tmp->channellist->topic));
 	    tmp->channellist->bans = NULL;
-	    new_free((char **) &(tmp->channellist));
+	    new_free(&(tmp->channellist));
 	    *list = tmp->next;
-	    new_free((char **) &tmp);
+	    new_free(&tmp);
 	    total++;
 	    count--;
 	}

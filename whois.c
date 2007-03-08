@@ -112,7 +112,7 @@ void clean_whois_queue(void)
 	thing = remove_from_whois_queue(from_server);
 	new_free(&thing->nick);
 	new_free(&thing->text);
-	new_free((char **) &thing);
+	new_free(&thing);
     }
     ignore_whois_crap = 0;
     eat_away = 0;
@@ -132,7 +132,7 @@ void ison_returned(char *from, char **ArgList)
 	thing->func(thing->nick, ArgList[0] ? ArgList[0] : empty_str);
 	new_free(&thing->nick);
 	new_free(&thing->text);
-	new_free((char **) &thing);
+	new_free(&thing);
     } else
 	ison_now(NULL, ArgList[0] ? ArgList[0] : empty_str);
 }
@@ -274,7 +274,7 @@ void userhost_returned(char *from, char **ArgList)
     if (thing) {
       out_free:new_free(&thing->nick);
 	new_free(&thing->text);
-	new_free((char **) &thing);
+	new_free(&thing);
     }
 }
 
@@ -514,7 +514,7 @@ void end_of_whois(char *from, char **ArgList)
 	    new_free(&whois_stuff->channels);
 	    new_free(&thing->nick);
 	    new_free(&thing->text);
-	    new_free((char **) &thing);
+	    new_free(&thing);
 	    ignore_whois_crap = 0;
 	    return;
 	}
@@ -565,7 +565,7 @@ void no_such_nickname(char *from, char **ArgList)
 	    new_free(&whois_stuff->channels);
 	    new_free(&thing->nick);
 	    new_free(&thing->text);
-	    new_free((char **) &thing);
+	    new_free(&thing);
 	    ignore_whois_crap = 0;
 	    return;
 	}
@@ -591,7 +591,7 @@ void no_such_nickname(char *from, char **ArgList)
 	    new_free(&whois_stuff->channels);
 	    new_free(&thing->nick);
 	    new_free(&thing->text);
-	    new_free((char **) &thing);
+	    new_free(&thing);
 	    ignore_whois_crap = 0;
 	}
 	return;

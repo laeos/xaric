@@ -170,7 +170,7 @@ struct channel *add_channel(char *channel, int server)
 	} else {
 	    new = whowaschan->channellist;
 	    new_free(&whowaschan->channel);
-	    new_free((char **) &whowaschan);
+	    new_free(&whowaschan);
 	    new_free(&(new->key));
 	    new->mode = 0;
 	    new_free(&new->s_mode);
@@ -263,7 +263,7 @@ struct channel *add_to_channel(char *channel, char *nick, int server, int oper, 
 	    } else {
 		new = whowas->nicklist;
 		new_free(&whowas->channel);
-		new_free((char **) &whowas);
+		new_free(&whowas);
 		malloc_strcpy(&(new->nick), nick);
 
 		new->idle_time = new->kicktime = new->doptime = new->nicktime = new->floodtime = new->bantime = time(NULL);
@@ -855,7 +855,7 @@ decifer_mode(char *from, register char *mode_string, struct channel **channel, u
 		if ((new = (BanList *) remove_from_list((struct list **) &(*channel)->bans, person))) {
 		    new_free(&new->setby);
 		    new_free(&new->ban);
-		    new_free((char **) &new);
+		    new_free(&new);
 		}
 	    }
 	    break;
@@ -923,7 +923,7 @@ void clear_bans(struct channel *channel)
 	next = bans->next;
 	new_free(&bans->setby);
 	new_free(&bans->ban);
-	new_free((char **) &bans);
+	new_free(&bans);
     }
     channel->bans = NULL;
 }
@@ -1386,7 +1386,7 @@ void remove_from_join_list(char *chan, int server)
 	    else
 		prev->next = next;
 	    new_free(&tmp->chan);
-	    new_free((char **) &tmp);
+	    new_free(&tmp);
 	    return;
 	} else
 	    prev = tmp;
@@ -1537,7 +1537,7 @@ void remove_from_mode_list(char *channel, int server)
 	    prev = curr;
 	    new_free(&curr->chan);
 	    new_free(&curr->mode);
-	    new_free((char **) &curr);
+	    new_free(&curr);
 	} else
 	    prev = curr;
     }
@@ -1557,7 +1557,7 @@ void clear_mode_list(int server)
 	prev = curr;
 	new_free(&curr->chan);
 	new_free(&curr->mode);
-	new_free((char **) &curr);
+	new_free(&curr);
     }
 }
 

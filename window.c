@@ -177,7 +177,7 @@ void delete_window(Window * window)
 	while (window->top_of_scrollback) {
 	    next = window->top_of_scrollback->next;
 	    new_free(&window->top_of_scrollback->line);
-	    new_free((char **) &window->top_of_scrollback);
+	    new_free(&window->top_of_scrollback);
 	    window->display_buffer_size--;
 	    window->top_of_scrollback = next;
 	}
@@ -201,7 +201,7 @@ void delete_window(Window * window)
 	while (window->nicks) {
 	    next = window->nicks->next;
 	    new_free(&window->nicks->nick);
-	    new_free((char **) &window->nicks);
+	    new_free(&window->nicks);
 	    window->nicks = next;
 	}
     }
@@ -217,7 +217,7 @@ void delete_window(Window * window)
     new_free(&window->status_line[0]);
     new_free(&window->status_line[1]);
 
-    new_free((char **) &window);
+    new_free(&window);
     window_check_servers();
     do_hook(WINDOW_KILL_LIST, "%s", buffer);
 }
@@ -1328,7 +1328,7 @@ void set_query_nick(char *nick, char *host, char *cmd)
 	    if ((tmp = (struct nick_list *) remove_from_list((struct list **) &(curr_scr_win->nicks), lnik)) != NULL) {
 		new_free(&tmp->nick);
 		new_free(&tmp->host);	/* CDE why was this not done */
-		new_free((char **) &tmp);
+		new_free(&tmp);
 	    }
 	    lnik = ptr;
 	}
@@ -2544,7 +2544,7 @@ static Window *window_remove(Window * window, char **args, char *usage)
 	    if ((new = (struct nick_list *) remove_from_list((struct list **) &(window->nicks), arg))) {
 		say("Removed %s from window name list", new->nick);
 		new_free(&new->nick);
-		new_free((char **) &new);
+		new_free(&new);
 	    } else
 		say("%s is not on the list for this window!", arg);
 
@@ -2803,7 +2803,7 @@ void delete_display_line(Display * stuff)
     if (recycle == stuff)
 	ircpanic("error in delete_display_line");
     if (recycle)
-	new_free((char **) &recycle);
+	new_free(&recycle);
     recycle = stuff;
     new_free(&stuff->line);
 }

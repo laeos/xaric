@@ -71,7 +71,7 @@ void cmd_notify(struct command *cmd, char *args)
 			    new_free(&(new->nick));
 			    new_free(&(new->host));
 			    new_free(&(new->user));
-			    new_free((char **) &new);
+			    new_free(&new);
 
 			    if (!shown) {
 				bitchsay("%s removed from notification list", nick);
@@ -91,7 +91,7 @@ void cmd_notify(struct command *cmd, char *args)
 			    new_free(&new->nick);
 			    new_free(&(new->user));
 			    new_free(&new->host);
-			    new_free((char **) &new);
+			    new_free(&new);
 			}
 		    }
 		    bitchsay("Notify list cleared");
@@ -111,7 +111,7 @@ void cmd_notify(struct command *cmd, char *args)
 				new_free(&(new->nick));
 				new_free(&(new->user));
 				new_free(&(new->host));
-				new_free((char **) &new);
+				new_free(&new);
 			    }
 			    new = (NotifyList *) new_malloc(sizeof(NotifyList));
 			    new->nick = m_strdup(nick);

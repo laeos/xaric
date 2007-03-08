@@ -314,10 +314,8 @@ char **split_up_line(const char *str)
 
     /* XXXXX BOGUS! XXXXX */
     if (!output_size) {
-	int new = MAXIMUM_SPLITS;
-	RESIZE(output, char *, new);
-
-	output_size = new;
+	output_size = MAXIMUM_SPLITS;
+	output = new_malloc(output_size);
     }
 
     *buffer = 0;
@@ -481,8 +479,7 @@ char **split_up_line(const char *str)
 	     */
 	    if (line >= output_size - 3) {
 		int new = output_size + MAXIMUM_SPLITS + 1;
-		RESIZE(output, char *, new);
-
+		output = new_realloc(output, char *, output_size, new);
 		output_size = new;
 	    }
 

@@ -560,7 +560,7 @@ void get_line(char *prompt, int new_input, void (*func) (char, char *))
      * items in stuff and removed it from the list. Noone but us has a pointer to it, so we free it here. */
     new_free(&stuff->saved_input);
     new_free(&stuff->saved_prompt);
-    new_free((char **) &stuff);
+    new_free(&stuff);
 }
 
 /* This simply waits for a key to be pressed before it unrecurses.

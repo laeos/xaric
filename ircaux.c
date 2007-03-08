@@ -727,24 +727,6 @@ char *m_strcat_ues(char **dest, char *src, int unescape)
     return *dest;
 }
 
-/*
- * scanstr: looks for an occurrence of str in source.  If not found, returns
- * 0.  If it is found, returns the position in source (1 being the first
- * position).  Not the best way to handle this, but what the hell 
- */
-extern int scanstr(char *str, char *source)
-{
-    int i, max, len;
-
-    len = strlen(str);
-    max = strlen(source) - len;
-    for (i = 0; i <= max; i++, source++) {
-	if (!my_strnicmp(source, str, len))
-	    return (i + 1);
-    }
-    return (0);
-}
-
 /* expand_twiddle: expands ~ in pathnames. */
 char *expand_twiddle(char *str)
 {
@@ -838,33 +820,6 @@ char *sindex(char *string, char *group)
 	}
     }
     return (char *) NULL;
-}
-
-/*
- * rsindex: much like rindex(), but it looks for a match of any character in
- * the group, and returns that position.  If the first character is a ^, then
- * this will match the first occurence not in that group.
- */
-char *rsindex(char *string, char *start, char *group)
-{
-    char *ptr;
-    char *retval = NULL;
-
-    if (string && start && group && start <= string) {
-	if (*group == '^') {
-	    group++;
-	    for (ptr = start; ptr <= string; ptr++) {
-		if (!strchr(group, *ptr))
-		    retval = ptr;
-	    }
-	} else {
-	    for (ptr = start; ptr <= string; ptr++) {
-		if (strchr(group, *ptr))
-		    retval = ptr;
-	    }
-	}
-    }
-    return retval;
 }
 
 /* is_number: returns true if the given string is a number, false otherwise */
@@ -1335,26 +1290,6 @@ double time_diff(struct timeval one, struct timeval two)
     return (double) td.tv_sec + ((double) td.tv_usec / 1000000.0);
 }
 
-int time_to_next_minute(void)
-{
-    time_t now = time(NULL);
-    static int which = 0;
-
-    if (which == 1)
-	return 60 - now % 60;
-    else {
-	struct tm *now_tm = gmtime(&now);
-
-	if (!which) {
-	    if (now_tm->tm_sec == now % 60)
-		which = 1;
-	    else
-		which = 2;
-	}
-	return 60 - now_tm->tm_sec;
-    }
-}
-
 char *plural(int number)
 {
     return (number != 1) ? "s" : empty_str;
@@ -1466,30 +1401,6 @@ extern int parse_number(char **str)
 	ret = -1;
 
     return (int) ret;
-}
-
-extern int splitw(char *str, char ***to)
-{
-    int numwords = word_count(str);
-    int counter;
-
-    *to = (char **) new_malloc(sizeof(char *) * numwords);
-    for (counter = 0; counter < numwords; counter++)
-	(*to)[counter] = new_next_arg(str, &str);
-
-    return numwords;
-}
-
-extern char *unsplitw(char **str, int howmany)
-{
-    char *retval = NULL;
-
-    while (howmany) {
-	m_s3cat(&retval, " ", *str);
-	str++, howmany--;
-    }
-
-    return retval;
 }
 
 char *on_off(int var)

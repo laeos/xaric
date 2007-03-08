@@ -650,7 +650,6 @@ void io(const char *what)
     }
 
     /* SET UP TIMEOUTS USED IN SELECTING */
-/*      clock_timeout.tv_sec = time_to_next_minute(); */
 
     FD_ZERO(&wd);
     FD_ZERO(&rd);

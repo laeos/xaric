@@ -280,17 +280,13 @@ set_int_var (enum VAR_TYPES var, unsigned int value)
 void 
 init_variables ()
 {
-	int old_display = window_display;
+        int i, old_display = window_display;
+
 	char *foo;
-
-
-#ifdef XARIC_DEBUG
-	int i;
 
 	for (i = 1; i < NUMBER_OF_VARIABLES - 1; i++)
 		if (strcmp (irc_variable[i - 1].name, irc_variable[i].name) >= 0)
 			ircpanic ("Variable [%d] (%s) is out of order.", i, irc_variable[i].name);
-#endif
 
 	window_display = 0;
 	set_numeric_string (NULL, DEFAULT_SHOW_NUMERICS_STR, 0);

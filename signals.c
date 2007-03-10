@@ -168,14 +168,6 @@ sigfunc *my_signal(int sig_no, sigfunc * sig_handler)
  **/
 void signals_init(void)
 {
-
-#ifdef XARIC_DEBUG
-    static int once = 0;
-
-    if (once++)
-	ircpanic("second call to signals_init() ??");
-#endif
-
     my_signal(SIGBUS, sig_coredump);
     old_segv = my_signal(SIGSEGV, sig_coredump);
 

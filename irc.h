@@ -75,7 +75,6 @@ extern char *line_thing;
 #endif
 
 #include "irc_std.h"
-#include "debug.h"
 #include "newio.h"
 
 /* these define what characters do, inverse, underline, bold and all off */
@@ -206,5 +205,10 @@ char *getenv(const char *);
 
 /* xscandir.c */
 int xscandir(char *dir, char *prefix, char **ret);
+
+#define TRACE(fmt, ...) \
+    trace("%s/%d: " fmt, __FUNCTION__, __LINE__, ## __VA_ARGS__)
+
+void trace(const char *fmt, ...);
 
 #endif				/* __irc_h__ */

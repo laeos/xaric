@@ -147,19 +147,6 @@ void cmd_alias(struct command *cmd, char *args)
 
 }
 
-#ifdef XARIC_DEBUG
-void cmd_debug(struct command *cmd, char *args)
-{
-    if (args && *args) {
-	if (xd_parse(args)) {
-	    yell("Invalid DEBUG values!");
-	}
-    } else {
-	xd_list(0);
-    }
-}
-#endif				/* XARIC_DEBUG */
-
 void cmd_away(struct command *cmd, char *args)
 {
     int len;
@@ -1916,9 +1903,6 @@ struct command xaric_cmds[] = {
     {"DESCRIBE", NULL, NULL, cmd_describe,
      "%Y<%Cnick%G|%Bchannel%Y>%n %Y<%naction%Y>%n\n- Describes to %Y<%Cnick%G|%Bchannel%Y>%n with %Y<%naction%Y>%n"},
     {"DEVOICE", "DeVoice", NULL, cmd_deop, "%Y<%C%nnick(s)%Y>%n\n- de-voices %Y<%Cnick%y(%Cs%y)%Y>%n"},
-#ifdef XARIC_DEBUG
-    {"DEBUG", NULL, NULL, cmd_debug, NULL},
-#endif
     {"DIE", NULL, NULL, cmd_generic, "%Y*%n Requires irc operator status\n- Kills the IRC server you are on"},
     {"DISCONNECT", NULL, NULL, cmd_disconnect, "- Disconnects you from the current server"},
     {"DNS", NULL, NULL, cmd_nslookup, "%Y<%nnick|hostname%y>%n\n- Attempts to nslookup on nick or hostname"},
@@ -2385,7 +2369,7 @@ int parse_command(char *line, int hist_flag, char *sub_args)
     if (!line || !*line)
 	return 0;
 
-    DEBUG(XD_CMD, 5, "Executing [%d] %s", level, line);
+    TRACE("Executing [%d] %s\n", level, line);
     level++;
 
     if (!(cmdchars = get_string_var(CMDCHARS_VAR)))

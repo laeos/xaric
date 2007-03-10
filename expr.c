@@ -24,7 +24,6 @@
 #include "expr.h"
 #include "history.h"
 #include "input.h"
-#include "debug.h"
 
 #define LEFT_BRACE '{'
 #define RIGHT_BRACE '}'
@@ -227,9 +226,6 @@ char *expand_alias(char *string, char *args, int *args_flag, char **more_text)
 	m_strcat_ues(&buffer, stuff, unescape);
 
     free(free_stuff);
-
-    DEBUG(XD_EXPR, 5, "Expanded [%s] to [%s]", string, buffer);
-
     return buffer;
 }
 

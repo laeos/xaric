@@ -47,7 +47,6 @@
 #include "vars.h"
 #include "names.h"
 #include "build.h"
-#include "debug.h"
 #include "newio.h"
 #include "flood.h"
 #include "input.h"
@@ -113,6 +112,20 @@ struct in_addr MyHostAddr;	/* The local machine address */
 struct in_addr LocalHostAddr;
 
 time_t idle_time = 0, start_time;
+
+/* where TRACE() output should go */
+static FILE *traceout;
+
+/* for TRACE(), xaric -d */
+void trace(const char *fmt, ...)
+{
+    if (traceout) {
+	va_list ma;
+	va_start(ma, fmt);
+	vfprintf(traceout, fmt, ma);
+	va_end(ma);
+    }
+}
 
 /* Display the startup message */
 static void startup_message(void)
@@ -216,14 +229,16 @@ static void parse_args(int argc, char *argv[])
 	    break;
 
 	case 'd':		/* set server debug */
-#ifdef XARIC_DEBUG
-	    if (xd_parse(optarg)) {
-		fprintf(stderr, "Bad arguments to -d\n");
+	    if (traceout)
+		fclose(traceout);
+	    if (! (traceout = fopen(optarg, "a"))) {
+		fprintf(stderr, "%s: unable to open '%s' for -d output: %s\n",
+			prog_name,
+			optarg,
+			strerror(errno));
 		exit(1);
 	    }
-#else
-	    fprintf(stderr, "Debug fluf not compiled in!\n");
-#endif				/* XARIC_DEBUG */
+	    TRACE("trace logging enabled\n");
 	    break;
 
 	case 's':		/* use ssl */
@@ -605,8 +620,8 @@ void io(const char *what)
     level++;
 
     if (level != old_level) {
-	DEBUG(XD_COMM, 5, "Moving from io level [%d] to level [%d] from\
-				[%s]", old_level, level, what);
+	TRACE("Moving from io level [%d] to level [%d] from [%s]\n",
+	      old_level, level, what);
 	old_level = level;
     }
 

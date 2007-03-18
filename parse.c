@@ -1079,6 +1079,8 @@ void parse_server(char *line)
     if (!line || !*line)
 	return;
 
+    TRACE("srv: %s\n", line);
+
     end = strlen(line) + line;
     if (*--end == '\n')
 	*end-- = '\0';

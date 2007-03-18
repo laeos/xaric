@@ -584,6 +584,13 @@ void numbered_command(char *from, int comm, char **ArgList)
 	whois_channels(from, ArgList);
 	break;
 
+    case 320: {
+	char *zork = ArgList[1];
+	if ((strlen(zork) > 3) && (memcmp(zork, "is ", 3) == 0))
+	    zork += 3;
+	put_it("%s", convert_output_format(get_format(FORMAT_WHOIS_SEC_FSET), "%s %s", ArgList[0], zork));
+	break;
+    }
     case 321:			/* #define RPL_LISTSTART 321 */
 	ArgList[0] = "Channel\0Users\0Topic";
 	ArgList[1] = ArgList[0] + 8;

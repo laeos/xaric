@@ -199,6 +199,8 @@
 #define DEF_FORMAT_WHOIS_NICK "%G| %W$0 %K(%n$1@$2%K) %K(%W$3-%K)"
 #define DEF_FORMAT_WHOIS_OPER "%G| %Wo%nperator : $0 $1-"
 #define DEF_FORMAT_WHOIS_SERVER "%G| %Ws%nerver   : $0 ($1-)"
+#define DEF_FORMAT_WHOIS_SEC "%G| %Ws%ntatus   : %G$1-"
+
 #define DEF_FORMAT_WHOIS_FOOTER NULL
 #define DEF_FORMAT_WHOLEFT_HEADER "%G+------ %WWho %G---------------------- %WChannel%G--- %wServer %G------------- %wSeconds"
 #define DEF_FORMAT_WHOLEFT_USER "%G|%n $[-10]0!$[20]1 $[10]2 $[20]4 $3"

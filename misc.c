@@ -699,7 +699,6 @@ char *convert_output_format(const char *format, const char *str, ...)
     char *p;
     int old_who_level = who_level;
     int bold = 0;
-    va_list args;
     int arg_flags;
     int do_color = get_int_var(DISPLAY_ANSI_VAR);
 
@@ -708,68 +707,14 @@ char *convert_output_format(const char *format, const char *str, ...)
 
     if (cparse_recurse < 10)
 	cparse_recurse++;
-    if (str /* && !in_cparse */ ) {
 
-	p = (char *) str;
+    if (str) {
+	va_list args;
+
 	va_start(args, str);
-	while (p && *p) {
-	    if (*p == '%') {
-		switch (*++p) {
-		case 's':
-		    {
-			char *s = (char *) va_arg(args, char *);
-
-			if (s)
-			    strcat(buffer2, s);
-			break;
-		    }
-		case 'd':
-		    {
-			int d = (int) va_arg(args, int);
-
-			strcat(buffer2, ltoa((long) d));
-			break;
-		    }
-		case 'c':
-		    {
-			char c = (char) va_arg(args, int);
-
-			buffer2[strlen(buffer2)] = c;
-			break;
-		    }
-		case 'u':
-		    {
-			unsigned int d = (unsigned int) va_arg(args, unsigned int);
-
-			strcat(buffer2, ltoa(d));
-			break;
-		    }
-		case 'l':
-		    {
-			unsigned long d = (unsigned long) va_arg(args, unsigned long);
-
-			strcat(buffer2, ltoa(d));
-			break;
-		    }
-		case '%':
-		    {
-			buffer2[strlen(buffer2)] = '%';
-			p++;
-			break;
-		    }
-		default:
-		    strcat(buffer2, "%");
-		    buffer2[strlen(buffer2)] = *p;
-		}
-		p++;
-	    } else {
-		buffer2[strlen(buffer2)] = *p;
-		p++;
-	    }
-	}
+	vsnprintf(buffer2, sizeof(buffer2), str, args);
 	va_end(args);
-    } else if ( /* in_cparse && */ str)
-	strcpy(buffer2, str);
+    }
 
     s = buffer + (BIG_BUFFER_SIZE * cparse_recurse);
     memset(s, 0, BIG_BUFFER_SIZE / 4);

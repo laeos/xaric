@@ -739,7 +739,7 @@ sa_rc_t sa_addr_a2u(const sa_addr_t * saa, char **uri)
     /* export object contents */
     if (saa->nFamily == AF_LOCAL) {
 	un = (struct sockaddr_un *) ((void *) saa->saBuf);
-	if ((saa->slBuf >= (socklen_t) (&(((struct sockaddr_un *) 0)->sun_path[0]))
+	if ((saa->slBuf >= (socklen_t) (((char *)&(((struct sockaddr_un *) 0)->sun_path[0])) - (char *)0)
 	     && un->sun_path[0] == '\0')
 	    || (size_t) (saa->slBuf) < sizeof(struct sockaddr_un)) {
 	    /* in case the remote side of a Unix Domain socket was not bound, a "struct sockaddr_un" can occur with a length less than 

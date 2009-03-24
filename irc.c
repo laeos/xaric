@@ -341,7 +341,7 @@ static void load_xaric_environment(void)
 /* Make sure all the global variables are initilized. */
 static void load_xaric_finish(void)
 {
-    if (!nickname || !*nickname)
+    if (!*nickname)
 	strmcpy(nickname, username, sizeof(nickname));
 
     if (!check_nickname(nickname)) {

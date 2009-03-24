@@ -1,3 +1,8 @@
+2009-03-24  Rex Feany  <laeos@laeos.net>
+	* Fix some autoconf/automake/compile issues with new tools
+	* Probably other stuff that I forget about - check the git logs :)
+	* Released 0.13.4
+
 2006-12-28  Rex Feany  <laeos@laeos.net>
 
 	* remove alloca();

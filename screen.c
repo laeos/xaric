@@ -519,7 +519,7 @@ char **split_up_line(const char *str)
 	     * Skip over the spaces that comprised the break
 	     * between the lines.
 	     */
-	    while (buffer[word_break] == ' ' && word_break < pos)
+	    while (word_break < pos && buffer[word_break] == ' ')
 		word_break++;
 
 	    /* 

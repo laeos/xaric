@@ -39,7 +39,6 @@
 #endif
 
 # include <errno.h>
-extern int errno;
 
 #ifndef NBBY
 # define NBBY	8		/* number of bits in a byte */

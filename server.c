@@ -1294,7 +1294,8 @@ void register_server(int ssn_index, char *nick)
     send_to_server(SERVER(from_server), "USER %s %s %s :%s", username,
 		   (send_umode && *send_umode) ? send_umode :
 		   local_host_name ? local_host_name : def_hostname, username, *realname ? realname : space_str);
-    change_server_nickname(SERVER(ssn_index), nick);
+    if (nick)
+	change_server_nickname(SERVER(ssn_index), nick);
     from_server = old_from_server;
 }
 

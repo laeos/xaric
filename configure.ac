@@ -23,7 +23,7 @@ dnl ---------------------------------------------------------------
 dnl autoconf prolog
 dnl ---------------------------------------------------------------
 
-AC_INIT([Xaric],[0.13.4],[support@xaric.org],[xaric])
+AC_INIT([Xaric],[0.13.5],[support@xaric.org],[xaric])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([irc.c])
 AC_CONFIG_HEADERS([config.h])

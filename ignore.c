@@ -73,10 +73,10 @@ void add_channel_grep(char *channel, char *what, int flag)
 		}
 		new_free(&new);
 	    }
-	    new = (Ignore *) new_malloc(sizeof(Ignore));
+	    new = new_malloc(sizeof(Ignore));
 	    new->nick = m_strdup(chan);
 	    while ((s = new_next_arg(new_str, &new_str))) {
-		tmp = (Ignore *) new_malloc(sizeof(Ignore));
+		tmp = new_malloc(sizeof(Ignore));
 		tmp->nick = m_strdup(s);
 		add_to_list((struct list **) &new->looking, (struct list *) tmp);
 	    }
@@ -140,7 +140,7 @@ void ignore_nickname(char *nick, long type, int flag)
 			}
 			new_free(&new);
 		    }
-		    new = (Ignore *) new_malloc(sizeof(Ignore));
+		    new = new_malloc(sizeof(Ignore));
 		    new->nick = new_nick;
 		    add_to_list((struct list **) &ignored_nicks, (struct list *) new);
 		}

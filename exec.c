@@ -430,13 +430,13 @@ add_process(char *name, char *logical, int pid, int p_stdin, int p_stdout, int p
     Process *proc;
 
     if (process_list == NULL) {
-	process_list = (Process **) new_malloc(sizeof(Process *));
+	process_list = new_malloc(sizeof(Process *));
 	process_list[0] = NULL;
 	process_list_size = 1;
     }
     for (i = 0; i < process_list_size; i++) {
 	if (!process_list[i]) {
-	    proc = process_list[i] = (Process *) new_malloc(sizeof(Process));
+	    proc = process_list[i] = new_malloc(sizeof(Process));
 	    proc->name = m_strdup(name);
 	    proc->logical = m_strdup(logical);
 	    proc->pid = pid;
@@ -456,7 +456,7 @@ add_process(char *name, char *logical, int pid, int p_stdin, int p_stdout, int p
     process_list_size++;
     process_list = new_realloc(process_list, Process *, process_list_size - 1, process_list_size);
     process_list[process_list_size - 1] = NULL;
-    proc = process_list[i] = (Process *) new_malloc(sizeof(Process));
+    proc = process_list[i] = new_malloc(sizeof(Process));
     proc->name = m_strdup(name);
     proc->logical = m_strdup(logical);
 
@@ -593,7 +593,7 @@ void start_process(char *name, char *logical, char *redirect, char *who, unsigne
 
 		cnt = 0;
 		max = 5;
-		args = (char **) new_malloc(sizeof(char *) * max);
+		args = new_malloc(sizeof(char *) * max);
 		while ((arg = next_arg(name, &name)) != NULL) {
 		    if (cnt == max) {
 			max += 5;

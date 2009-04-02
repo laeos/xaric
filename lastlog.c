@@ -358,7 +358,7 @@ void add_to_lastlog(Window * window, const char *line)
     if (window->lastlog_level & msg_level) {
 	/* no nulls or empty lines (they contain "> ") */
 	if (line && (strlen(line) > 2)) {
-	    new = (Lastlog *) new_malloc(sizeof(Lastlog));
+	    new = new_malloc(sizeof(Lastlog));
 	    new->next = window->lastlog_head;
 	    new->prev = NULL;
 	    new->level = msg_level;

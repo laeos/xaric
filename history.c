@@ -69,7 +69,7 @@ static char *history_match(char *match)
     if (*(match + strlen(match) - 1) == '*')
 	malloc_strcpy(&match_str, match);
     else {
-	match_str = (char *) new_malloc(strlen(match) + 2);
+	match_str = new_malloc(strlen(match) + 2);
 	strcpy(match_str, match);
 	strcat(match_str, "*");
     }
@@ -127,7 +127,7 @@ static void add_to_history_list(int cnt, char *stuff)
 	    command_history_head = NULL;
     } else
 	hist_size++;
-    new = (History *) new_malloc(sizeof(History));
+    new = new_malloc(sizeof(History));
     new->stuff = NULL;
     new->number = cnt;
     new->next = command_history_head;

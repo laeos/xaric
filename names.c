@@ -163,7 +163,7 @@ struct channel *add_channel(char *channel, int server)
 	clear_bans(new);
     } else {
 	if (!(whowaschan = check_whowas_chan_buffer(channel, 1))) {
-	    new = (struct channel *) new_malloc(sizeof(struct channel));
+	    new = new_malloc(sizeof(struct channel));
 	    new->connected = 1;
 	    get_time(&new->channel_create);
 	    malloc_strcpy(&(new->channel), channel);
@@ -250,7 +250,7 @@ struct channel *add_to_channel(char *channel, char *nick, int server, int oper, 
 	}
 	if (!(new = find_nicklist_in_channellist(nick, chan, 0))) {
 	    if (!(whowas = check_whowas_buffer(nick, userhost ? userhost : "<UNKNOWN>", channel, 1))) {
-		new = (struct nick_list *) new_malloc(sizeof(struct nick_list));
+		new = new_malloc(sizeof(struct nick_list));
 
 		new->idle_time = new->kicktime = new->doptime = new->nicktime = new->floodtime = new->bantime = time(NULL);
 
@@ -427,7 +427,7 @@ char *compress_modes(int server, char *channel, char *modes)
 		} else
 		    break;
 	    } else {
-		tucm = (UserChanModes *) new_malloc(sizeof(UserChanModes));
+		tucm = new_malloc(sizeof(UserChanModes));
 		malloc_strcpy(&tucm->nick, tmp);
 		if (add && !isopped) {
 		    tucm->o_ed = 1;
@@ -463,7 +463,7 @@ char *compress_modes(int server, char *channel, char *modes)
 		} else
 		    break;
 	    } else {
-		tucm = (UserChanModes *) new_malloc(sizeof(UserChanModes));
+		tucm = new_malloc(sizeof(UserChanModes));
 		malloc_strcpy(&tucm->nick, tmp);
 		if (add && !isvoiced) {
 		    tucm->v_ed = 1;
@@ -500,7 +500,7 @@ char *compress_modes(int server, char *channel, char *modes)
 		} else
 		    break;
 	    } else {
-		tucm = (UserChanModes *) new_malloc(sizeof(UserChanModes));
+		tucm = new_malloc(sizeof(UserChanModes));
 		malloc_strcpy(&tucm->nick, tmp);
 		if (add && !isbanned) {
 		    tucm->b_ed = 1;
@@ -843,7 +843,7 @@ decifer_mode(char *from, register char *mode_string, struct channel **channel, u
 	    if (add) {
 		ThisNick = find_nicklist_in_channellist(person, *channel, 0);
 		if (!(new = (BanList *) find_in_list((struct list **) &(*channel)->bans, person, 0)) || my_stricmp(person, new->ban)) {
-		    new = (BanList *) new_malloc(sizeof(BanList));
+		    new = new_malloc(sizeof(BanList));
 		    malloc_strcpy(&new->ban, person);
 		    add_to_list((struct list **) &(*channel)->bans, (struct list *) new);
 		}
@@ -1475,7 +1475,7 @@ void add_to_join_list(char *chan, int server, int winref)
 	    return;
 	}
     }
-    tmp = (struct joinlist *) new_malloc(sizeof(struct joinlist));
+    tmp = new_malloc(sizeof(struct joinlist));
     tmp->chan = NULL;
     malloc_strcpy(&tmp->chan, chan);
     tmp->server = server;
@@ -1493,7 +1493,7 @@ static void add_to_mode_list(char *channel, int server, char *mode)
     if (!channel || !*channel || !mode || !*mode)
 	return;
 
-    mptr = (struct modelist *) new_malloc(sizeof(struct modelist));
+    mptr = new_malloc(sizeof(struct modelist));
     mptr->chan = NULL;
     malloc_strcpy(&mptr->chan, channel);
     mptr->server = server;

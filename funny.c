@@ -158,7 +158,7 @@ void funny_list(char *from, char **ArgList)
     }
     if (funny_flags & FUNNY_WIDE) {
 	if (wl_elements >= wl_size) {
-	    new_list = (WideList **) new_malloc(sizeof(WideList *) * (wl_size + 50));
+	    new_list = new_malloc(sizeof(WideList *) * (wl_size + 50));
 	    memset(new_list, 0, sizeof(WideList *) * (wl_size + 50));
 	    if (wl_size)
 		memcpy(new_list, wide_list, sizeof(WideList *) * wl_size);
@@ -166,8 +166,7 @@ void funny_list(char *from, char **ArgList)
 	    new_free(&wide_list);
 	    wide_list = new_list;
 	}
-	wide_list[wl_elements] = (WideList *)
-	    new_malloc(sizeof(WideList));
+	wide_list[wl_elements] = new_malloc(sizeof(WideList));
 	wide_list[wl_elements]->channel = NULL;
 	wide_list[wl_elements]->users = cnt;
 	malloc_strcpy(&wide_list[wl_elements]->channel, (*channel != '*') ? channel : "Prv");

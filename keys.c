@@ -469,7 +469,7 @@ void new_key(int map, int chr, int type, int change, char *stuff)
     }
 
     if (type != NOTHING) {
-	keys[map][chr] = (KeyMap *) new_malloc(sizeof(KeyMap));
+	keys[map][chr] = new_malloc(sizeof(KeyMap));
 	keys[map][chr]->key_index = type;
 	keys[map][chr]->changed = change;
 	if (stuff)

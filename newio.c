@@ -80,7 +80,7 @@ static void init_io(void)
     if (first) {
 	int c, max_fd = IO_ARRAYLEN;
 
-	io_rec = (MyIO **) new_malloc(sizeof(MyIO *) * max_fd);
+	io_rec = new_malloc(sizeof(MyIO *) * max_fd);
 	for (c = 0; c < max_fd; c++)
 	    io_rec[c] = NULL;
 	(void) dgets_timeout(-1);
@@ -102,7 +102,7 @@ int dgets(char *str, int len, int des, char *specials)
 
     init_io();
     if (io_rec[des] == NULL) {
-	io_rec[des] = (MyIO *) new_malloc(sizeof(MyIO));
+	io_rec[des] = new_malloc(sizeof(MyIO));
 	io_rec[des]->read_pos = 0;
 	io_rec[des]->write_pos = 0;
 	io_rec[des]->misc_flags = 0;
@@ -155,7 +155,7 @@ int dgets(char *str, int len, int des, char *specials)
 
     init_io();
     if (io_rec[des] == NULL) {
-	io_rec[des] = (MyIO *) new_malloc(sizeof(MyIO));
+	io_rec[des] = new_malloc(sizeof(MyIO));
 	io_rec[des]->read_pos = 0;
 	io_rec[des]->write_pos = 0;
 	io_rec[des]->misc_flags = 0;

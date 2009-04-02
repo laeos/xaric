@@ -213,7 +213,7 @@ static DCC_list *dcc_searchlist(const char *name, const char *user, int type, in
     }
     if (!flag)
 	return NULL;
-    *Client = NewClient = (DCC_list *) new_malloc(sizeof(DCC_list));
+    *Client = NewClient = new_malloc(sizeof(DCC_list));
     NewClient->flags = type;
     NewClient->read = NewClient->write = NewClient->file = -1;
     NewClient->filesize = filesize;
@@ -246,7 +246,7 @@ static void dcc_add_deadclient(register DCC_list * client)
 {
     struct deadlist *new;
 
-    new = (struct deadlist *) new_malloc(sizeof(struct deadlist));
+    new = new_malloc(sizeof(struct deadlist));
     new->next = deadlist;
     new->it = client;
     deadlist = new;

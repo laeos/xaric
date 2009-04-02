@@ -113,7 +113,7 @@ void cmd_notify(struct command *cmd, char *args)
 				new_free(&(new->host));
 				new_free(&new);
 			    }
-			    new = (NotifyList *) new_malloc(sizeof(NotifyList));
+			    new = new_malloc(sizeof(NotifyList));
 			    new->nick = m_strdup(nick);
 			    new->added = time(NULL);
 			    add_to_list((struct list **) &server_list[servnum].notify_list, (struct list *) new);
@@ -324,7 +324,7 @@ void make_notify_list(int servnum)
     server_list[servnum].notify_list = NULL;
 
     for (tmp = server_list[0].notify_list; tmp; tmp = tmp->next) {
-	NotifyList *new = (NotifyList *) new_malloc(sizeof(NotifyList));
+	NotifyList *new = new_malloc(sizeof(NotifyList));
 
 	new->nick = m_strdup(tmp->nick);
 	new->host = m_strdup(tmp->host);

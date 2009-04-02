@@ -206,7 +206,7 @@ static char *alias_uptime(void)
 }
 static char *alias_currdir(void)
 {
-    char *tmp = (char *) new_malloc(MAXPATHLEN + 1);
+    char *tmp = new_malloc(MAXPATHLEN + 1);
 
     return getcwd(tmp, MAXPATHLEN);
 }

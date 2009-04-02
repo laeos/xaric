@@ -92,7 +92,7 @@ int check_sync(int comm, char *channel, char *nick, char *whom, char *bantime, s
     case 367:			/* bans on channel */
 	{
 	    if (tmp) {
-		new = (BanList *) new_malloc(sizeof(BanList));
+		new = new_malloc(sizeof(BanList));
 		malloc_strcpy(&new->ban, nick);
 		if (bantime)
 		    new->time = strtoul(bantime, NULL, 10);

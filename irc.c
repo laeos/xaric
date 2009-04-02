@@ -537,7 +537,7 @@ void get_line(char *prompt, int new_input, void (*func) (char, char *))
 	ircpanic("Illegal call to get_line\n");
 
     /* initialize the new item. */
-    stuff = (GetLine *) new_malloc(sizeof(GetLine));
+    stuff = new_malloc(sizeof(GetLine));
     stuff->done = 0;
     stuff->func = func;
     stuff->recursive_call = (new_input == -1) ? 0 : 1;

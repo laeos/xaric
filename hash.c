@@ -98,7 +98,7 @@ void add_name_to_genericlist(char *name, struct hash_entry *list, unsigned int s
     struct list *nptr;
     unsigned long hvalue = hash_nickname(name, size);
 
-    nptr = (struct list *) new_malloc(sizeof(struct list));
+    nptr = new_malloc(sizeof(struct list));
     nptr->next = (struct list *) list[hvalue].list;
     nptr->name = m_strdup(name);
 
@@ -632,7 +632,7 @@ struct nick_list *sorted_nicklist(struct channel *chan)
     struct nick_list *tmp, *l = NULL, *list = NULL;
 
     for (tmp = next_nicklist(chan, NULL); tmp; tmp = next_nicklist(chan, tmp)) {
-	l = (struct nick_list *) new_malloc(sizeof(struct nick_list));
+	l = new_malloc(sizeof(struct nick_list));
 	memcpy(l, tmp, sizeof(struct nick_list));
 	l->next = NULL;
 	add_to_list((struct list **) &list, (struct list *) l);
@@ -655,7 +655,7 @@ struct flood *add_name_to_floodlist(char *name, char *channel, struct hash_entry
 {
     struct flood *nptr;
     unsigned long hvalue = hash_nickname(name, size);
-    nptr = (struct flood *) new_malloc(sizeof(struct flood));
+    nptr = new_malloc(sizeof(struct flood));
     nptr->next = (struct flood *) list[hvalue].list;
     strmcpy(nptr->name, name, sizeof(nptr->name) - 1);
     list[hvalue].list = (void *) nptr;

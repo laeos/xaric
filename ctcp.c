@@ -775,56 +775,6 @@ char *ctcp_quote_it(char *str, int len)
     return m_strdup(buffer);
 }
 
-#if 0
-/*
- * ctcp_unquote_it: This takes a null terminated string that had previously
- * been quoted using ctcp_quote_it and unquotes it.  Returned is a malloced
- * space pointing to the unquoted string.  NOTE: a trailing null is added for
- * convenied, but the returned data may contain nulls!.  The len is modified
- * to contain the size of the data returned. 
- */
-static char *ctcp_unquote_it(char *str, int *len)
-{
-    char *buffer;
-    char *ptr;
-    char c;
-    int i, new_size = 0;
-
-    buffer = (char *) new_malloc((sizeof(char) * *len) + 1);
-    ptr = buffer;
-    i = 0;
-    while (i < *len) {
-	if ((c = str[i++]) == CTCP_QUOTE_CHAR) {
-	    switch (c = str[i++]) {
-	    case CTCP_QUOTE_CHAR:
-		*ptr++ = CTCP_QUOTE_CHAR;
-		break;
-	    case 'a':
-		*ptr++ = CTCP_DELIM_CHAR;
-		break;
-	    case 'n':
-		*ptr++ = '\n';
-		break;
-	    case 'r':
-		*ptr++ = '\r';
-		break;
-	    case '0':
-		*ptr++ = '\0';
-		break;
-	    default:
-		*ptr++ = c;
-		break;
-	    }
-	} else
-	    *ptr++ = c;
-	new_size++;
-    }
-    *ptr = '\0';
-    *len = new_size;
-    return (buffer);
-}
-#endif
-
 int get_ctcp_val(char *str)
 {
     int i;

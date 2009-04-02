@@ -106,7 +106,7 @@ char *m_3dup(const char *str1, const char *str2, const char *str3)
 {
     size_t msize = strlen(str1) + strlen(str2) + strlen(str3) + 1;
 
-    return strcat(strcat(strcpy((char *) new_malloc(msize), str1), str2), str3);
+    return strcat(strcat(strcpy(new_malloc(msize), str1), str2), str3);
 }
 
 char *m_opendup(const char *str1, ...)
@@ -121,7 +121,7 @@ char *m_opendup(const char *str1, ...)
     while ((this_arg = va_arg(args, char *)))
 	 size += strlen(this_arg);
 
-    retval = (char *) new_malloc(size + 1);
+    retval = new_malloc(size + 1);
 
     strcpy(retval, str1);
     va_start(args, str1);
@@ -138,7 +138,7 @@ char *m_strdup(const char *str)
 
     if (!str)
 	str = empty_str;
-    ptr = (char *) new_malloc(strlen(str) + 1);
+    ptr = new_malloc(strlen(str) + 1);
     return strcpy(ptr, str);
 }
 
@@ -169,7 +169,7 @@ char *m_3cat(char **one, const char *two, const char *three)
 	len += strlen(three);
     len += 1;
 
-    str = (char *) new_malloc(len);
+    str = new_malloc(len);
     if (*one)
 	strcpy(str, *one);
     if (two)
@@ -546,7 +546,7 @@ char *strext(char *start, char *end)
 {
     char *ptr, *retval;
 
-    ptr = retval = (char *) new_malloc(end - start + 1);
+    ptr = retval = new_malloc(end - start + 1);
     while (start < end)
 	*ptr++ = *start++;
     *ptr = 0;
@@ -1413,7 +1413,7 @@ long my_atol(const char *str)
 char *m_dupchar(int i)
 {
     char c = (char) i;		/* blah */
-    char *ret = (char *) new_malloc(2);
+    char *ret = new_malloc(2);
 
     ret[0] = c;
     ret[1] = 0;

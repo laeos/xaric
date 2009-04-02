@@ -648,7 +648,7 @@ void whois_ignore_msgs(WhoisStuff * stuff, char *nick, char *text)
     int level;
 
     if (stuff) {
-	ptr = (char *) new_malloc(strlen(stuff->user) + strlen(stuff->host) + 2);
+	ptr = new_malloc(strlen(stuff->user) + strlen(stuff->host) + 2);
 	strcpy(ptr, stuff->user);
 	strcat(ptr, "@");
 	strcat(ptr, stuff->host);
@@ -700,7 +700,7 @@ void whois_ignore_notices(WhoisStuff * stuff, char *nick, char *text)
     int level;
 
     if (stuff) {
-	ptr = (char *) new_malloc(strlen(stuff->user) + strlen(stuff->host) + 2);
+	ptr = new_malloc(strlen(stuff->user) + strlen(stuff->host) + 2);
 	strcpy(ptr, stuff->user);
 	strcat(ptr, "@");
 	strcat(ptr, stuff->host);
@@ -726,7 +726,7 @@ void whois_ignore_invites(WhoisStuff * stuff, char *nick, char *text)
     char *ptr;
 
     if (stuff) {
-	ptr = (char *) new_malloc(strlen(stuff->user) + strlen(stuff->host) + 2);
+	ptr = new_malloc(strlen(stuff->user) + strlen(stuff->host) + 2);
 	strcpy(ptr, stuff->user);
 	strcat(ptr, "@");
 	strcat(ptr, stuff->host);
@@ -762,7 +762,7 @@ void whois_ignore_walls(WhoisStuff * stuff, char *nick, char *text)
     level = set_lastlog_msg_level(LOG_WALL);
     message_from(stuff->nick, LOG_WALL);
     if (stuff) {
-	ptr = (char *) new_malloc(strlen(stuff->user) + strlen(stuff->host) + 2);
+	ptr = new_malloc(strlen(stuff->user) + strlen(stuff->host) + 2);
 	strcpy(ptr, stuff->user);
 	strcat(ptr, "@");
 	strcat(ptr, stuff->host);
@@ -840,7 +840,7 @@ void typed_add_to_whois_queue(int type, char *nick, void (*func) (WhoisStuff *, 
 				 * parameters" coming from the server -Sol */
 
     if (strchr(nick, '*') == NULL) {
-	new = (WhoisQueue *) new_malloc(sizeof(WhoisQueue));
+	new = new_malloc(sizeof(WhoisQueue));
 	memset(new, 0, sizeof(WhoisQueue));
 	new->func = func;
 	new->type = type;

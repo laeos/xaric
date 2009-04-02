@@ -57,7 +57,7 @@ void add_wait_prompt(const char *prompt, void (*func) (char *, char *), const ch
 {
     WaitPrompt **AddLoc, *New;
 
-    New = (WaitPrompt *) new_malloc(sizeof(WaitPrompt));
+    New = new_malloc(sizeof(WaitPrompt));
     New->prompt = m_strdup(prompt);
     New->data = m_strdup(data);
     New->type = type;
@@ -315,7 +315,7 @@ char **split_up_line(const char *str)
     /* XXXXX BOGUS! XXXXX */
     if (!output_size) {
 	output_size = MAXIMUM_SPLITS;
-	output = new_malloc(output_size);
+	output = new_malloc(output_size * sizeof(char *));
     }
 
     *buffer = 0;
@@ -1043,7 +1043,7 @@ Screen *create_new_screen(void)
 	}
     }
     if (!new) {
-	new = (Screen *) new_malloc(sizeof(Screen));
+	new = new_malloc(sizeof(Screen));
 	memset(new, 0, sizeof(Screen));
 	new->screennum = ++refnumber;
 	new->next = screen_list;

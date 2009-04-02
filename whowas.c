@@ -99,7 +99,7 @@ void add_to_whowas_buffer(struct nick_list *nicklist, char *channel, char *serve
     if (whowas_reg_count >= whowas_reg_max) {
 	whowas_reg_count -= remove_oldest_whowas(&whowas_reg_list, 0, (whowas_reg_max + 1) - whowas_reg_count);
     }
-    new = (struct whowas_list *) new_malloc(sizeof(struct whowas_list));
+    new = new_malloc(sizeof(struct whowas_list));
     new->has_ops = nicklist->chanop;
     new->nicklist = (struct nick_list *) nicklist;
     malloc_strcpy(&(new->channel), channel);
@@ -114,10 +114,10 @@ void add_to_whosplitin_buffer(struct nick_list *nicklist, char *channel, char *s
 {
     struct whowas_list *new;
 
-    new = (struct whowas_list *) new_malloc(sizeof(struct whowas_list));
+    new = new_malloc(sizeof(struct whowas_list));
     new->has_ops = nicklist->chanop;
 
-    new->nicklist = (struct nick_list *) new_malloc(sizeof(struct nick_list));	/* nicklist; */
+    new->nicklist = new_malloc(sizeof(struct nick_list));	/* nicklist; */
     new->nicklist->nick = m_strdup(nicklist->nick);
     new->nicklist->host = m_strdup(nicklist->host);
 
@@ -177,7 +177,7 @@ void add_to_whowas_chan_buffer(struct channel *channel)
     if (whowas_chan_count >= whowas_chan_max) {
 	whowas_chan_count -= remove_oldest_chan_whowas(&whowas_chan_list, 0, (whowas_chan_max + 1) - whowas_chan_count);
     }
-    new = (struct whowas_chan_list *) new_malloc(sizeof(struct whowas_chan_list));
+    new = new_malloc(sizeof(struct whowas_chan_list));
 
     new->channellist = channel;
     new->time = time(NULL);

@@ -421,7 +421,7 @@ irc_server *add_server(irc_server ** serv1, char *channel, char *arg, int hops, 
 {
     irc_server *serv2;
 
-    serv2 = (irc_server *) new_malloc(sizeof(irc_server));
+    serv2 = new_malloc(sizeof(irc_server));
     serv2->next = *serv1;
     malloc_strcpy(&serv2->name, channel);
     malloc_strcpy(&serv2->link, arg);
@@ -958,7 +958,7 @@ void add_to_irc_map(char *server1, char *distance)
 
     if (distance)
 	dist = atoi(distance);
-    tmp = (irc_server *) new_malloc(sizeof(irc_server));
+    tmp = new_malloc(sizeof(irc_server));
     malloc_strcpy(&tmp->name, server1);
     tmp->hopcount = dist;
     if (!map) {

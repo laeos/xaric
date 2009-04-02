@@ -302,7 +302,7 @@ char *add_timer(char *refnum_want, long when, long events, int (callback) (void 
 
     if (when == 0)
 	return NULL;
-    ntimer = (TimerList *) new_malloc(sizeof(TimerList));
+    ntimer = new_malloc(sizeof(TimerList));
     ntimer->in_on_who = in_on_who;
     ntimer->time = time(NULL) + when;
     ntimer->interval = when;

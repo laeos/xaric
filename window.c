@@ -83,7 +83,7 @@ Window *new_window(void)
 	no_screens = 0;
     }
 
-    new = (Window *) new_malloc(sizeof(Window));
+    new = new_malloc(sizeof(Window));
 
     tmp = NULL;
     while (traverse_all_windows(&tmp)) {
@@ -1345,7 +1345,7 @@ void set_query_nick(char *nick, char *host, char *cmd)
 	while (nick) {
 	    if ((ptr = (char *) strchr(nick, ',')) != NULL)
 		*(ptr++) = 0;
-	    tmp = (struct nick_list *) new_malloc(sizeof(struct nick_list));
+	    tmp = new_malloc(sizeof(struct nick_list));
 	    tmp->nick = NULL;
 	    malloc_strcpy(&tmp->nick, nick);
 	    malloc_strcpy(&tmp->host, host);
@@ -1921,7 +1921,7 @@ static Window *window_add(Window * window, char **args)
 		*ptr++ = 0;
 	    if (!find_in_list((struct list **) &window->nicks, arg, !USE_WILDCARDS)) {
 		say("Added %s to window name list", arg);
-		new = (struct nick_list *) new_malloc(sizeof(struct nick_list));
+		new = new_malloc(sizeof(struct nick_list));
 		new->nick = m_strdup(arg);
 		add_to_list((struct list **) &(window->nicks), (struct list *) new);
 	    } else
@@ -2815,7 +2815,7 @@ Display *new_display_line(Display * prev)
 	stuff = recycle;
 	recycle = NULL;
     } else
-	stuff = (Display *) new_malloc(sizeof(Display));
+	stuff = new_malloc(sizeof(Display));
 
     stuff->line = NULL;
     stuff->prev = prev;

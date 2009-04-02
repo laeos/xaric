@@ -530,7 +530,7 @@ static void ignore_list(char *nick)
 	bitchsay("There are no nicknames or channels being ignored");
 }
 
-long ignore_type(char *type, int len)
+long ignore_type(const char *type, int len)
 {
     long ret = -1;
 

@@ -27,7 +27,7 @@ typedef struct hook_stru {
 
 /* HookFunc: A little structure to keep track of the various hook functions */
 typedef struct {
-    char *name;			/* name of the function */
+    const char *name;		/* name of the function */
     Hook *list;			/* pointer to head of the list for this function */
     int params;			/* number of parameters expected */
     int mark;
@@ -159,7 +159,7 @@ enum HOOK_TYPES {
 
 #define NUMBER_OF_LISTS WINDOW_KILL_LIST + 1
 
-int do_hook(int, char *, ...) __A(2);
+int do_hook(int, const char *, ...) __A(2);
 void oncmd(char *, char *, char *, char *);
 void shook(char *, char *, char *, char *);
 void save_hooks(FILE *, int);
@@ -169,7 +169,6 @@ void flush_on_hooks(void);
 
 extern char *hook_info;
 extern NumericList *numeric_list;
-extern HookFunc hook_functions[];
 
 extern int in_on_who;
 

@@ -452,7 +452,7 @@ typedef struct IgnoreStru {
 
 /* IrcVariable: structure for each variable in the variable table */
 typedef struct {
-    char *name;			/* what the user types */
+    const char *name;		/* what the user types */
     int type;			/* variable types, see below */
     int integer;		/* int value of variable */
     char *string;		/* string value of variable */

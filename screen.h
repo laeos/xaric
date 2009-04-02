@@ -34,7 +34,7 @@ Window *create_additional_screen(void);
 void scroll_window(Window *);
 Window *new_window(void);
 void update_all_windows(void);
-void add_wait_prompt(char *, void (*)(char *, char *), char *, int);
+void add_wait_prompt(const char *, void (*)(char *, char *), const char *, int);
 void clear_all_windows(int);
 void cursor_in_display(void);
 int is_cursor_in_display(Screen *);

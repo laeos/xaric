@@ -124,7 +124,7 @@ typedef struct {
 
 /* KeyMapNames: the structure of the keymap to realname array */
 typedef struct {
-    char *name;
+    const char *name;
     KeyBinding func;
 } KeyMapNames;
 

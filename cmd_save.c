@@ -53,7 +53,7 @@
 
 static int save_which;
 
-static void really_save(char *file, char *line)
+static void really_save(const char *file, const char *line)
 {
     FILE *fp;
     int save_do_all = 0;
@@ -77,7 +77,7 @@ static void really_save(char *file, char *line)
 	bitchsay("Error opening %s: %s", file, strerror(errno));
 }
 
-void save_all(char *fname)
+void save_all(const char *fname)
 {
     save_which = SFLAG_ALL;
     really_save(fname, "y");
@@ -121,5 +121,5 @@ void cmd_save(struct command *cmd, char *args)
     if (all)
 	save_which = SFLAG_ALL;
     snprintf(buffer, BIG_BUFFER_SIZE, "Really write %s? ", arg ? arg : ircrc_file);
-    add_wait_prompt(buffer, really_save, arg ? arg : ircrc_file, WAIT_PROMPT_LINE);
+    add_wait_prompt(buffer, (void (*)(char *, char *)) really_save, arg ? arg : ircrc_file, WAIT_PROMPT_LINE);
 }

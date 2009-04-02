@@ -45,7 +45,8 @@ int doing_who = 0;
 
 void cmd_who(struct command *cmd, char *args)
 {
-    char *arg, *channel = NULL;
+    const char *channel = NULL;
+    char *arg;
     int no_args = 1, len;
 
     doing_who = 1;

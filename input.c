@@ -1317,7 +1317,7 @@ void window_key_list(char dumb, char *dumber)
 {
     in_window_command = 1;
     message_from(NULL, LOG_CURRENT);
-    window_list(curr_scr_win, NULL, NULL);
+    window_list(curr_scr_win, NULL);
     in_window_command = 0;
     message_from(NULL, LOG_CRAP);
 }
@@ -1462,7 +1462,7 @@ void nick_completion(char dumb, char *dumber)
     new_free(&nick);
 }
 
-void addtabkey(char *nick, char *type)
+void addtabkey(const char *nick, const char *type)
 {
     NickTab *tmp, *new;
 

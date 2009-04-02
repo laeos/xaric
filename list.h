@@ -22,16 +22,16 @@ struct list {
 };
 
 /* TODO: last arg should be void, not char */
-typedef int (cmp_fn) (struct list *, char *);
+typedef int (cmp_fn) (struct list *, const char *);
 
 /* list.c */
-int list_strnicmp(struct list *item1, char *str);
+int list_strnicmp(struct list *item1, const char *str);
 void add_to_list_ext(struct list **list, struct list *add, cmp_fn * cmp_func);
 void add_to_list(struct list **list, struct list *add);
 struct list *find_in_list_ext(struct list **list, char *name, int wild, cmp_fn * cmp_func);
 struct list *find_in_list(struct list **list, char *name, int wild);
-struct list *remove_from_list_ext(struct list **list, char *name, cmp_fn * cmp_func);
-struct list *remove_from_list(struct list **list, char *name);
+struct list *remove_from_list_ext(struct list **list, const char *name, cmp_fn * cmp_func);
+struct list *remove_from_list(struct list **list, const char *name);
 struct list *list_lookup_ext(struct list **list, char *name, int wild, int delete, cmp_fn * cmp_func);
 struct list *list_lookup(struct list **list, char *name, int wild, int delete);
 

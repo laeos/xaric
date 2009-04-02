@@ -38,7 +38,7 @@ struct tnode {
 };
 
 /* t_insert: insert a node into the tree */
-struct tnode *t_insert(struct tnode *p, char *string, struct command *data)
+struct tnode *t_insert(struct tnode *p, const char *string, struct command *data)
 {
     if (p == NULL) {
 	p = malloc(sizeof(struct tnode));
@@ -126,7 +126,7 @@ static inline struct command *t_finish_search(struct tnode *p)
 }
 
 /* t_search: given a tree, and a string, return the command struct, NULL, or C_AMBIG */
-struct command *t_search(struct tnode *root, char *s)
+struct command *t_search(struct tnode *root, const char *s)
 {
     struct tnode *p;
 

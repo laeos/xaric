@@ -731,12 +731,12 @@ char *check_nickname(char *nick)
  * the group, and returns that position.  If the first character is a ^, then
  * this will match the first occurence not in that group.
  */
-char *sindex(char *string, char *group)
+char *sindex(char *string, const char *group)
 {
-    char *ptr;
+    const char *ptr;
 
     if (!string || !group)
-	return (char *) NULL;
+	return NULL;
     if (*group == '^') {
 	group++;
 	for (; *string; string++) {
@@ -755,7 +755,7 @@ char *sindex(char *string, char *group)
 	    }
 	}
     }
-    return (char *) NULL;
+    return NULL;
 }
 
 /* is_number: returns true if the given string is a number, false otherwise */
@@ -1402,10 +1402,10 @@ char *remove_brackets(char *name, char *args, int *arg_flag)
     return upper(rptr);
 }
 
-long my_atol(char *str)
+long my_atol(const char *str)
 {
     if (str)
-	return (long) strtol(str, NULL, 0);
+	return strtol(str, NULL, 0);
     else
 	return 0L;
 }

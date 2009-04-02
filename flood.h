@@ -9,7 +9,7 @@
 
 int check_flooding(char *, int, char *, char *);
 int is_other_flood(struct channel *, struct nick_list *, int, int *);
-int flood_prot(char *, char *, char *, int, int, char *);
+int flood_prot(char *, char *, const char *, int, int, char *);
 void clean_flood_list(void);
 
 #define MSG_FLOOD 	0x0001

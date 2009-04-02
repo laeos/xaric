@@ -77,7 +77,7 @@ extern NickTab *tabkey_array;
 extern Ignore *ignored_nicks;
 
 #ifdef REVERSE_WHITE_BLACK
-char *color_str[] = {
+static const char *color_str[] = {
     "\e[0m", "\e[0;34m", "\e[0;32m", "\e[0;36m", "\e[0;31m", "\e[0;35m", "\e[0;33m", "\e[0;30m",
     "\e[1;37m", "\e[1;34m", "\e[1;32m", "\e[1;36m", "\e[1;31m", "\e[1;35m", "\e[1;33m", "\e[1;30m", "\e[0m",
     "\e[0;47m", "\e[0;41m", "\e[0;42m", "\e[0;43m", "\e[0;44m", "\e[0;45m", "\e[0;46m", "\e[0;40m",
@@ -87,7 +87,7 @@ char *color_str[] = {
 
 #else
 
-char *color_str[] = {
+static const char *color_str[] = {
     "\e[0;30m", "\e[0;34m", "\e[0;32m", "\e[0;36m", "\e[0;31m", "\e[0;35m", "\e[0;33m", "\e[0m",
     "\e[1;30m", "\e[1;34m", "\e[1;32m", "\e[1;36m", "\e[1;31m", "\e[1;35m", "\e[1;33m", "\e[1;37m", "\e[0m",
     "\e[0;40m", "\e[0;41m", "\e[0;42m", "\e[0;43m", "\e[0;44m", "\e[0;45m", "\e[0;46m", "\e[0;47m",
@@ -162,10 +162,8 @@ int timer_unban(void *args)
     return 0;
 }
 
-char *clear_server_flags(char *userhost)
+char *clear_server_flags(char *uh)
 {
-    register char *uh = userhost;
-
     while (uh && (*uh == '~' || *uh == '#' || *uh == '+' || *uh == '-' || *uh == '=' || *uh == '^'))
 	uh++;
     return uh;
@@ -188,8 +186,8 @@ char *mircansi(char *line)
 /* map of mIRC color values to ansi color codes                 */
 /* format: ansi fg color        ansi bg color                   */
 /* modified Colten Edwards                                      */
-    struct {
-	char *fg, *bg;
+    static const struct {
+	const char *fg, *bg;
     } codes[16] = {
 	{
 	"\e[1;37m", "\e[47m"},	/* white */
@@ -355,7 +353,7 @@ void clear_array(NickTab ** tmp)
     *tmp = NULL;
 }
 
-void userage(char *command, char *use)
+void userage(const char *command, const char *use)
 {
     if (do_hook(USAGE_LIST, "%s %s", command, use ? use : "No Help Available for this command"))
 	put_it("%s",
@@ -692,11 +690,10 @@ char *convert_output_format(const char *format, const char *str, ...)
     static char buffer[10 * BIG_BUFFER_SIZE + 1];
     char buffer2[2 * BIG_BUFFER_SIZE + 1];
     enum color_attributes this_color = BLACK;
-    register char *t;
-    register char *s;
+    const char *t;
+    char *s;
     char *copy = NULL;
     char *tmpc = NULL;
-    char *p;
     int old_who_level = who_level;
     int bold = 0;
     int arg_flags;
@@ -1017,13 +1014,13 @@ void check_server_connect(int server)
     }
 }
 
-char *country(char *hostname)
+const char *country(const char *hostname)
 {
     typedef struct _domain {
-	char *code;
-	char *country;
+	const char *code;
+	const char *country;
     } Domain;
-    static Domain domain[] = {
+    static const Domain domain[] = {
 	{"AD", "Andorra"},
 	{"AE", "United Arab Emirates"},
 	{"AF", "Afghanistan"},
@@ -1281,7 +1278,7 @@ char *country(char *hostname)
 	{NULL, NULL}
     };
     static char unknown[] = "unknown";
-    char *p;
+    const char *p;
     int i = 0;
 
     if (!hostname || !*hostname || isdigit(hostname[strlen(hostname) - 1]))

@@ -97,9 +97,10 @@ extern NickTab *tabkey_array;
 
 void cmd_abort(struct command *cmd, char *args)
 {
-    char *filename = next_arg(args, &args);
+    const char *filename = next_arg(args, &args);
 
-    filename = filename ? filename : "irc.aborted";
+    if (!filename)
+	filename = "irc.aborted";
 
     save_all(filename);
     abort();
@@ -1033,7 +1034,7 @@ void cmd_reset(struct command *cmd, char *args)
 
 void cmd_generic_ch(struct command *cmd, char *args)
 {
-    char *name = cmd->rname ? cmd->rname : cmd->name;
+    const char *name = cmd->rname ? cmd->rname : cmd->name;
     char *ptr, *s;
 
     ptr = next_arg(args, &args);
@@ -1051,7 +1052,7 @@ void cmd_generic_ch(struct command *cmd, char *args)
 
 void cmd_generic(struct command *cmd, char *args)
 {
-    char *name = cmd->rname ? cmd->rname : cmd->name;
+    const char *name = cmd->rname ? cmd->rname : cmd->name;
 
     send_to_server(SERVER(from_server), "%s %s", name, args ? args : "");
 }
@@ -1227,7 +1228,7 @@ void cmd_stats(struct command *cmd, char *args)
 {
     char *flags = NULL, *serv = NULL;
     char *new_flag = empty_str;
-    char *str = NULL;
+    const char *str = NULL;
 
     server_list[from_server].stats_flags = 0;
     flags = next_arg(args, &args);
@@ -1614,7 +1615,8 @@ void cmd_users(struct command *cmd, char *args)
 {
     struct channel *chan;
     struct nick_list *nicks;
-    char *to, *spec, *rest, *temp1;
+    const char *spec, *rest, *temp1;
+    char *to;
     char modebuf[BIG_BUFFER_SIZE + 1];
     char msgbuf[BIG_BUFFER_SIZE + 1];
     int count, ops = 0, msg = 0;
@@ -1750,7 +1752,7 @@ void cmd_users(struct command *cmd, char *args)
 
 void cmd_oper_stuff(struct command *cmd, char *args)
 {
-    char *use = cmd->rname ? cmd->rname : cmd->name;
+    const char *use = cmd->rname ? cmd->rname : cmd->name;
 
     if (cmd->data && (!args || !*args)) {
 	userage(cmd->name, cmd->qhelp);
@@ -2110,8 +2112,8 @@ struct target_type {
     char *nick_list;
     char *message;
     int hook_type;
-    char *command;
-    char *format;
+    const char *command;
+    const char *format;
     int level;
     const char *output;
     const char *other_output;
@@ -2136,7 +2138,7 @@ int current_target = 0;
  * end up in one of the above mentioned buckets get sent out all
  * at once.
  */
-void send_text(char *nick_list, char *text, char *command, int hook, int log)
+void send_text(char *nick_list, char *text, const char *command, int hook, int log)
 {
     int i, old_server;
     int lastlog_level;
@@ -2300,7 +2302,7 @@ void send_text(char *nick_list, char *text, char *command, int hook, int log)
  *
  * Other than these two conventions the line is left basically untouched.
  */
-extern void parse_line(char *name, char *org_line, char *args, int hist_flag, int append_flag)
+void parse_line(char *name, const char *org_line, char *args, int hist_flag, int append_flag)
 {
     char *line = NULL, *free_line, *stuff, *s, *t;
     int args_flag = 0;
@@ -2362,7 +2364,8 @@ int parse_command(char *line, int hist_flag, char *sub_args)
 {
     static unsigned int level = 0;
     unsigned int display, old_display_var;
-    char *cmdchars, *com, *this_cmd = NULL;
+    const char *cmdchars;
+    char *com, *this_cmd = NULL;
     int add_to_hist, cmdchar_used = 0;
     int noisy = 1;
 

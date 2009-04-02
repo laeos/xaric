@@ -40,7 +40,7 @@ typedef struct WhoisQueueStru {
 } WhoisQueue;
 
 void add_to_whois_queue(char *, void (*)(WhoisStuff *, char *, char *), char *, ...);
-void add_to_userhost_queue(char *, void (*func) (WhoisStuff *, char *, char *), char *, ...);
+void add_to_userhost_queue(char *, void (*func) (WhoisStuff *, char *, char *), const char *, ...);
 void got_my_userhost(WhoisStuff *, char *, char *);
 void add_ison_to_whois(char *, void (*)());
 void whois_name(char *, char **);

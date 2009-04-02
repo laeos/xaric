@@ -39,7 +39,7 @@ extern char *last_arg(char **);
 extern char *expand_twiddle(char *);
 extern char *upper(char *);
 extern char *lower(char *);
-extern char *sindex(char *, char *);
+extern char *sindex(char *, const char *);
 extern char *path_search(char *, char *);
 extern char *double_quote(const char *, const char *, char *);
 extern char *malloc_strcpy(char **, const char *);
@@ -100,7 +100,7 @@ extern char *m_strndup(const char *, size_t);
 extern char *on_off(int);
 extern char *rfgets(char *, int, FILE *);
 extern char *strmopencat(char *, int, ...);
-extern long my_atol(char *);
+extern long my_atol(const char *);
 extern char *s_next_arg(char **);
 extern char *next_in_comma_list(char *, char **);
 
@@ -108,7 +108,7 @@ extern char *next_in_comma_list(char *, char **);
 #define SOS -32767
 #define EOS 32767
 extern char *extract_words(char *, int, int);
-extern int match(char *, char *);
+extern int match(const char *, const char *);
 
 /* Used for connect_by_number */
 #define SERVICE_SERVER 0

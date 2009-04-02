@@ -5,22 +5,22 @@
 
 struct command {
     char *name;
-    char *rname;
+    const char *rname;
 
     void *data;
     void (*fcn) (struct command * cmd, char *args);
 
-    char *qhelp;
+    const char *qhelp;
 };
 
-struct tnode *t_insert(struct tnode *p, char *string, struct command *data);
+struct tnode *t_insert(struct tnode *p, const char *string, struct command *data);
 struct tnode *t_remove(struct tnode *root, char *s, struct command **data);
-struct command *t_search(struct tnode *root, char *s);
+struct command *t_search(struct tnode *root, const char *s);
 struct tnode *t_build(struct tnode *root, struct command c[], int n);
 void t_traverse(struct tnode *p, char *s, void (*fcn) (struct command *, char *), char *data);
 void init_commands(void);
 
-void t_parse_command(char *command, char *line);
+void t_parse_command(const char *command, char *line);
 void t_bind_exec(struct command *cmd, char *line);
 int t_bind(char *string, char *command, char *args);
 int t_unbind(char *command);
@@ -55,7 +55,7 @@ void cmd_rbind(struct command *cmd, char *args);
 void cmd_type(struct command *cmd, char *args);
 
 /* in cmd_save.c */
-void save_all(char *fname);	/* used in cmd_abort to save settings before we die */
+void save_all(const char *fname);	/* used in cmd_abort to save settings before we die */
 void cmd_save(struct command *cmd, char *args);
 
 /* cmd_modes.c */

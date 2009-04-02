@@ -316,7 +316,7 @@ static int sa_mvxprintf(int (*output) (void *ctx, const char *buffer, size_t buf
 {
     /* sufficient integer buffer: <available-bits> x log_10(2) + safety */
     char ibuf[((sizeof(int) * 8) / 3) + 10];
-    char *cp;
+    const char *cp;
     char c;
     int d;
     int n;
@@ -499,7 +499,7 @@ sa_rc_t sa_addr_u2a(sa_addr_t * saa, const char *uri, ...)
     int bNumeric;
     const char *cpHost;
     const char *cpPort;
-    char *cpProto;
+    const char *cpProto;
     unsigned int nPort;
     const char *cpPath;
     char uribuf[1024];
@@ -2297,9 +2297,9 @@ sa_rc_t sa_sendf(sa_t * sa, sa_addr_t * raddr, const char *cpFmt, ...)
 }
 
 /* return error string */
-char *sa_error(sa_rc_t rv)
+const char *sa_error(sa_rc_t rv)
 {
-    char *sz;
+    const char *sz;
 
     /* translate result value into corresponding string */
     if (rv == SA_OK)

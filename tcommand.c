@@ -39,7 +39,7 @@
 struct tnode *t_commands;
 
 /* t_parse_command: given a command, and its line, we find it and exec it */
-void t_parse_command(char *command, char *line)
+void t_parse_command(const char *command, char *line)
 {
     struct command *cmd = t_search(t_commands, command);
 
@@ -101,7 +101,7 @@ static char *t_compleate_command(char *command)
  */
 void command_completion(char unused, char *not_used)
 {
-    char *line = NULL, *com, *cmdchars, *rest, *excom, firstcmdchar[2] = "/";
+    char *line = NULL, *com, *excom, *cmdchars, *rest, firstcmdchar[2] = "/";
     char buffer[BIG_BUFFER_SIZE + 1];
 
     malloc_strcpy(&line, get_input());

@@ -37,7 +37,6 @@ enum color_attributes {
 #define NEED_OP 1
 #define NO_OP 0
 
-extern char *color_str[];
 extern int split_watch;
 void clear_link(irc_server **);
 extern irc_server *tmplink, *server_last;
@@ -70,12 +69,12 @@ void do_nslookup_thread(void *arg);
 
 void update_stats(int, char *, struct nick_list *, struct channel *, int);
 int check_split(char *, char *, char *);
-void userage(char *, char *);
+void userage(const char *, const char *);
 void stats_k_grep_end(void);
 char *stripansicodes(const char *);
 char *stripansi(char *);
 NickTab *gettabkey(int, char *);
-void addtabkey(char *, char *);
+void addtabkey(const char *, const char *);
 void clear_array(NickTab **);
 char *random_str(int, int);
 int check_serverlag(void *);
@@ -114,7 +113,7 @@ irc_server *check_split_server(char *);
 void remove_split_server(char *server);
 int timer_unban(void *);
 void check_server_connect(int);
-char *country(char *);
+const char *country(const char *);
 char *str_terminate_at(char *string, const char *chars);
 char *mircansi(char *);
 

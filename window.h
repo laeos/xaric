@@ -113,7 +113,7 @@ void recalculate_window_cursor(Window *);
 int is_window_name_unique(char *);
 int get_visible_by_refnum(char *);
 void resize_window(int, Window *, int);
-Window *window_list(Window *, char **, char *);
+Window *window_list(Window *, char **);
 void move_window(Window *, int);
 int show_window(Window *);
 

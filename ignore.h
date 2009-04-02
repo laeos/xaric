@@ -19,7 +19,7 @@ int check_ignore(char *, char *, char *, long, char *);
 void ignore(char *, char *, char *, char *);
 void tignore(char *, char *, char *, char *);
 void ignore_nickname(char *, long, int);
-long ignore_type(char *, int);
+long ignore_type(const char *, int);
 int check_is_ignored(char *);
 
 extern int ignore_usernames;

@@ -19,8 +19,8 @@
 #include "ircaux.h"
 
 static int add_list_stricmp(struct list *, struct list *);
-static int list_stricmp(struct list *, char *);
-static int list_match(struct list *, char *);
+static int list_stricmp(struct list *, const char *);
+static int list_match(struct list *, const char *);
 
 /*
  * These have now been made more general. You used to only be able to
@@ -41,17 +41,17 @@ static int add_list_stricmp(struct list *item1, struct list *item2)
     return strcasecmp(item1->name, item2->name);
 }
 
-static int list_stricmp(struct list *item1, char *str)
+static int list_stricmp(struct list *item1, const char *str)
 {
     return my_stricmp(item1->name, str);
 }
 
-int list_strnicmp(struct list *item1, char *str)
+int list_strnicmp(struct list *item1, const char *str)
 {
     return my_strnicmp(item1->name, str, strlen(str));
 }
 
-static int list_match(struct list *item1, char *str)
+static int list_match(struct list *item1, const char *str)
 {
     return wild_match(item1->name, str);
 }
@@ -136,7 +136,7 @@ struct list *find_in_list(struct list **list, char *name, int wild)
  * described above).  If found, it is removed from the list and returned
  * (memory is not deallocated).  If not found, null is returned. 
  */
-struct list *remove_from_list_ext(struct list **list, char *name, cmp_fn * cmp_func)
+struct list *remove_from_list_ext(struct list **list, const char *name, cmp_fn * cmp_func)
 {
     struct list *tmp;
     struct list *last;
@@ -157,7 +157,7 @@ struct list *remove_from_list_ext(struct list **list, char *name, cmp_fn * cmp_f
     return NULL;
 }
 
-struct list *remove_from_list(struct list **list, char *name)
+struct list *remove_from_list(struct list **list, const char *name)
 {
     return remove_from_list_ext(list, name, NULL);
 }

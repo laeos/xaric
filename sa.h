@@ -207,6 +207,6 @@ extern sa_rc_t sa_send(sa_t * __sa, sa_addr_t * __raddr, const char *__buf, size
 extern sa_rc_t sa_sendf(sa_t * __sa, sa_addr_t * __raddr, const char *__fmt, ...);
 
 /* error handling operations */
-extern char *sa_error(sa_rc_t __rv);
+extern const char *sa_error(sa_rc_t __rv);
 
 #endif				/* __SA_H__ */

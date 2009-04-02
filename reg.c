@@ -88,10 +88,10 @@ int match(register char *pattern, register char *string)
  * ircii because i am not convinced that it is 1) better * and 
  * 2) i think the \\[ \\] stuff is important.
  */
-int wild_match(register char *pattern, register char *str)
+int wild_match(const char *pattern, const char *str)
 {
-    register char *ptr;
-    char *ptr2 = pattern;
+    char *ptr;
+    const char *ptr2 = pattern;
     int nest = 0;
     char my_buff[2048];
     char *arg;
@@ -190,12 +190,12 @@ int wild_match(register char *pattern, register char *str)
 
 #include "ircaux.h"
 
-static int _wild_match(char *, char *);
+static int _wild_match(const char *, const char *);
 
 #define RETURN_FALSE -1
 #define RETURN_TRUE count
 
-u_char lower_tab[256] = {
+static const u_char lower_tab[256] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
     32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
@@ -226,10 +226,9 @@ u_char lower_tab[256] = {
  * of the routine will do that for us.
  */
 
-static int _wild_match(mask, string)
-char *mask, *string;
+static int _wild_match(const char *mask, const char *string)
 {
-    char *m = mask, *n = string, *ma = NULL, *na = NULL, *mp = NULL, *np = NULL;
+    const char *m = mask, *n = string, *ma = NULL, *na = NULL, *mp = NULL, *np = NULL;
     int just = 0, pcount = 0, acount = 0, count = 0;
 
     for (;;) {
@@ -315,14 +314,13 @@ char *mask, *string;
     }
 }
 
-int match(char *pattern, char *string)
+int match(const char *pattern, const char *string)
 {
 /* -1 on false >= 0 on true */
     return ((_wild_match(pattern, string) >= 0) ? 1 : 0);
 }
 
-int wild_match(pattern, str)
-char *pattern, *str;
+int wild_match(const char *pattern, const char *str)
 {
     /* assuming a -1 return of false */
     return _wild_match(pattern, str) + 1;

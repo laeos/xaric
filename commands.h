@@ -12,10 +12,10 @@ extern char *sent_nick;
 extern char *sent_body;
 extern char *recv_nick;
 
-void send_text(char *, char *, char *, int, int);
+void send_text(char *, char *, const char *, int, int);
 void eval_inputlist(char *, char *);
 int parse_command(char *, int, char *);
-void parse_line(char *, char *, char *, int, int);
+void parse_line(char *, const char *, char *, int, int);
 void edit_char(unsigned char);
 void execute_timer(void);
 void ison_now(char *, char *);

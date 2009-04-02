@@ -369,7 +369,6 @@ void cmd_type(struct command *cmd, char *args)
     }
 }
 
-extern void dcc_stats(char *);
 KeyMapNames key_names[] = {
     {"BACKSPACE", input_backspace},
     {"BACKWARD_CHARACTER", backward_character},

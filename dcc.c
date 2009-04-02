@@ -52,12 +52,12 @@ DCC_list *ClientList = NULL;
 
 static char DCC_current_transfer_buffer[BIG_BUFFER_SIZE / 4];
 static void dcc_add_deadclient(register DCC_list *);
-static void dcc_close(char *, char *);
-static void dcc_getfile(char *, char *);
+static void dcc_close(const char *, char *);
+static void dcc_getfile(const char *, char *);
 int dcc_open(DCC_list *);
 static void dcc_really_erase(void);
-static void dcc_rename(char *, char *);
-static void dcc_send_raw(char *, char *);
+static void dcc_rename(const char *, char *);
+static void dcc_send_raw(const char *, char *);
 static void add_to_dcc_buffer(DCC_list * Client, char *buf);
 static void output_reject_ctcp(char *, char *);
 static void process_incoming_chat(register DCC_list *);
@@ -66,31 +66,31 @@ static void process_incoming_raw(register DCC_list *);
 static void process_outgoing_file(register DCC_list *, int);
 static void process_incoming_file(register DCC_list *);
 static void DCC_close_filesend(DCC_list *, char *);
-static void update_transfer_buffer(char *format, ...);
+static void update_transfer_buffer(const char *format, ...);
 
 static void dcc_got_connected(DCC_list *);
 
-static void dcc_set_paths(char *, char *);
-static void dcc_set_quiet(char *, char *);
-static void dcc_show_active(char *, char *);
-static void dcc_help1(char *, char *);
+static void dcc_set_paths(const char *, char *);
+static void dcc_set_quiet(const char *, char *);
+static void dcc_show_active(const char *, char *);
+static void dcc_help1(const char *, char *);
 
 static unsigned char byteordertest(void);
 static void dcc_reject_notify(char *, char *, const char *);
 static int get_to_from(const char *);
 
 static char *strip_path(char *);
-static void dcc_tog_rename(char *, char *);
+static void dcc_tog_rename(const char *, char *);
 static char *check_paths(char *);
-static void dcc_overwrite_toggle(char *, char *);
+static void dcc_overwrite_toggle(const char *, char *);
 
-typedef void (*dcc_function) (char *, char *);
+typedef void (*dcc_function) (const char *, char *);
 typedef struct {
-    char *name;
+    const char *name;
     dcc_function function;
 } DCC_commands;
 
-DCC_commands dcc_commands[] = {
+static const DCC_commands dcc_commands[] = {
     {"ACTIVE", dcc_show_active},
     {"AUTO_RENAME", dcc_tog_rename},
     {"CHAT", dcc_chat},
@@ -165,14 +165,14 @@ static int dccBlockSize(void)
  * dcc_searchlist searches through the dcc_list and finds the client
  * with the the flag described in type set.
  */
-DCC_list *dcc_searchlist(char *name, char *user, int type, int flag, char *othername, char *userhost, int active)
+static DCC_list *dcc_searchlist(const char *name, const char *user, int type, int flag, char *othername, char *userhost, int active)
 {
-    register DCC_list **Client = NULL, *NewClient = NULL;
+    DCC_list **Client = NULL, *NewClient = NULL;
     int dcc_num = 0;
 
     if (user && *user == '#' && my_atol(user + 1)) {
 	/* we got a number so find that instead */
-	char *p;
+	const char *p;
 
 	p = user;
 	p++;
@@ -563,7 +563,7 @@ void add_userhost_to_dcc(WhoisStuff * stuff, char *nick, char *args)
     return;
 }
 
-void dcc_chat(char *command, char *args)
+void dcc_chat(const char *command, char *args)
 {
     char *user;
     char *port = NULL;
@@ -721,7 +721,7 @@ void real_dcc_filesend(char *filename, char *real_file, char *user, int type, in
     }
 }
 
-void dcc_resend(char *command, char *args)
+void dcc_resend(const char *command, char *args)
 {
     char *user = NULL;
     char *filename = NULL, *fullname = NULL;
@@ -770,7 +770,7 @@ void dcc_resend(char *command, char *args)
     new_free(&FileBuf);
 }
 
-void dcc_filesend(char *command, char *args)
+void dcc_filesend(const char *command, char *args)
 {
     char *user = NULL;
     char *filename = NULL, *fullname = NULL;
@@ -841,7 +841,7 @@ void multiget(char *usern, char *filen)
     doing_multi = 0;
 }
 
-static void dcc_getfile(char *command, char *args)
+static void dcc_getfile(const char *command, char *args)
 {
     char *user;
     char *filename = NULL;
@@ -899,7 +899,7 @@ static void dcc_getfile(char *command, char *args)
     new_free(&tmp);
 }
 
-void dcc_regetfile(char *command, char *args)
+void dcc_regetfile(const char *command, char *args)
 {
     char *user;
     char *tmp = NULL;
@@ -1464,7 +1464,7 @@ static void process_incoming_file(DCC_list * Client)
 
 /* flag == 1 means show it.  flag == 0 used by redirect (and /ctcp) */
 
-void dcc_message_transmit(char *user, char *text, char *text_display, int type, int flag, char *cmd, int check_host)
+static void dcc_message_transmit(const char *user, char *text, const char *text_display, int type, int flag, const char *cmd, int check_host)
 {
     DCC_list *Client;
     char tmp[MAX_DCC_BLOCK_SIZE + 1];
@@ -1528,19 +1528,14 @@ void dcc_message_transmit(char *user, char *text, char *text_display, int type, 
     return;
 }
 
-void dcc_chat_transmit(char *user, char *text, char *orig, char *type)
+void dcc_chat_transmit(const char *user, char *text, const char *orig, const char *type)
 {
     dcc_message_transmit(user, text, orig, DCC_CHAT, 1, type, 0);
 }
 
-void dcc_raw_transmit(char *user, char *text, char *type)
+void dcc_raw_transmit(const char *user, char *text, const char *type)
 {
     dcc_message_transmit(user, text, NULL, DCC_RAW, 0, type, 0);
-}
-
-void dcc_chat_transmit_quiet(char *user, char *text, char *type)
-{
-    dcc_message_transmit(user, text, NULL, DCC_CHAT, 0, type, 0);
 }
 
 void dcc_chat_crash_transmit(char *user, char *text)
@@ -1563,7 +1558,7 @@ void dcc_chat_crash_transmit(char *user, char *text)
     return;
 }
 
-static void dcc_send_raw(char *command, char *args)
+static void dcc_send_raw(const char *command, char *args)
 {
     char *name;
 
@@ -1583,7 +1578,7 @@ char *dcc_time(time_t time)
 {
     struct tm *btime;
     char *buf = NULL;
-    static char *months[] = {
+    static const char *months[] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     };
@@ -1603,7 +1598,7 @@ static char *get_dcc_type(unsigned long flag)
     return ret;
 }
 
-void dcc_list(char *command, char *args)
+void dcc_list(const char *command, char *args)
 {
     DCC_list *Client;
     static char *format = "%-5.5s%-3.3s %-9.9s %-8.8s %-20.20s %-8.8s %-8.8s %s";
@@ -1648,13 +1643,13 @@ void dcc_list(char *command, char *args)
     }
 }
 
-void dcc_glist(char *command, char *args)
+void dcc_glist(const char *command, char *args)
 {
     DCC_list *Client = ClientList;
 
-    static char *dformat = "#$[2]0 $[6]1%Y$2%n $[11]3 $[25]4 $[7]5 $6";
-    static char *d1format = "#$[2]0 $[6]1%Y$2%n $[11]3 $4 $[11]5 $[10]6 $[7]7 $8-";
-    static char *c1format = "#$[2]0 $[6]1%Y$2%n $[11]3 $4 $[-4]5 $[-4]6 $[-3]7 $[-3]8  $[7]9 $10";
+    static const char *dformat = "#$[2]0 $[6]1%Y$2%n $[11]3 $[25]4 $[7]5 $6";
+    static const char *d1format = "#$[2]0 $[6]1%Y$2%n $[11]3 $4 $[11]5 $[10]6 $[7]7 $8-";
+    static const char *c1format = "#$[2]0 $[6]1%Y$2%n $[11]3 $4 $[-4]5 $[-4]6 $[-3]7 $[-3]8  $[7]9 $10";
 
     unsigned flags;
     unsigned count = 0;
@@ -1722,7 +1717,8 @@ void dcc_glist(char *command, char *args)
 	char stats[80];
 	int seconds = 0, minutes = 0;
 	int iperc = 0;
-	char *_dcc_offer[12] = { "%K-.........%n",	/* 0 */
+	static const char *dcc_offer[12] = {
+	    "%K-.........%n",	/* 0 */
 	    "%K-.........%n",	/* 10 */
 	    "%K-=........%n",	/* 20 */
 	    "%K-=*.......%n",	/* 30 */
@@ -1779,7 +1775,7 @@ void dcc_glist(char *command, char *args)
 	    if (Client->filesize == 0)
 		size = barlen;
 	    sprintf(stats, "%4.1f", perc);
-	    sprintf(spec, "%s %s%s %02d:%02d", _dcc_offer[iperc], stats, "%%", minutes, seconds);
+	    sprintf(spec, "%s %s%s %02d:%02d", dcc_offer[iperc], stats, "%%", minutes, seconds);
 	    sprintf(spec, "%s", convert_output_format(spec, NULL, NULL));
 	}
 	type = get_dcc_type(flags & DCC_TYPES);
@@ -1791,7 +1787,7 @@ void dcc_glist(char *command, char *args)
 		    Client->flags & DCC_ACTIVE ? "Active" :
 		    Client->flags & DCC_WAIT ? "Wait" :
 		    Client->flags & DCC_CNCT_PEND ? "Connect" : "Unknown", kilobytes, check_paths(Client->description))) {
-	    char *s;
+	    const char *s;
 
 	    if (get_int_var(DISPLAY_ANSI_VAR)) {
 		if (!get_int_var(DCC_BAR_TYPE_VAR))
@@ -2066,7 +2062,7 @@ void dcc_close_filename(char *filename, char *user, char *Type, int CType)
 }
 
 /* completely rewritten by Patch */
-void dcc_close(char *command, char *args)
+static void dcc_close(const char *command, char *args)
 {
     char *Type;
     char *user;
@@ -2198,7 +2194,7 @@ void dcc_reject(char *from, char *type, char *args)
     }
 }
 
-static void dcc_rename(char *command, char *args)
+static void dcc_rename(const char *command, char *args)
 {
     DCC_list *Client;
     char *user;
@@ -2311,7 +2307,7 @@ static void DCC_close_filesend(DCC_list * Client, char *type)
     char lame_ultrix2[30];
     char lame_ultrix3[30];
     char buffer[200];
-    char *tofrom = NULL;
+    const char *tofrom = NULL;
     time_t xtime;
     double xfer;
 
@@ -2362,7 +2358,7 @@ static void DCC_close_filesend(DCC_list * Client, char *type)
 
 char transfer_buffer[BIG_BUFFER_SIZE];
 
-static void update_transfer_buffer(char *format, ...)
+static void update_transfer_buffer(const char *format, ...)
 {
     register DCC_list *Client = ClientList;
     unsigned count = 0;
@@ -2420,7 +2416,7 @@ static int get_to_from(const char *type)
 	return -1;
 }
 
-static void dcc_help1(char *command, char *args)
+static void dcc_help1(const char *command, char *args)
 {
     put_it("%s", convert_output_format("$G %RDCC%n help -", NULL, NULL));
     put_it("%s", convert_output_format("   Active    Stats    List     GList   ?", NULL, NULL));
@@ -2428,12 +2424,12 @@ static void dcc_help1(char *command, char *args)
     put_it("%s", convert_output_format("   Auto   Quiet   Paths   Quiet   Overwrite  Auto_Rename", NULL, NULL));
 }
 
-static void dcc_show_active(char *command, char *args)
+static void dcc_show_active(const char *command, char *args)
 {
     put_it("%s", convert_output_format("$G %RDCC%n  DCC Active = \002$0\002", "%d", dcc_active_count));
 }
 
-static void dcc_set_quiet(char *command, char *args)
+static void dcc_set_quiet(const char *command, char *args)
 {
     dcc_quiet ^= 1;
     put_it("%s", convert_output_format("$G %RDCC%n  DCC Quiet = \002$0\002", "%s", on_off(dcc_quiet)));
@@ -2460,14 +2456,14 @@ static char *check_paths(char *str)
 	return str;
 }
 
-static void dcc_set_paths(char *command, char *args)
+static void dcc_set_paths(const char *command, char *args)
 {
     dcc_paths ^= 1;
 
     put_it("%s", convert_output_format("$G %RDCC%n  DCC paths is now \002$0\002", "%s", on_off(dcc_paths)));
 }
 
-static void dcc_tog_rename(char *command, char *args)
+static void dcc_tog_rename(const char *command, char *args)
 {
     int arename = get_int_var(DCC_AUTORENAME_VAR);
 
@@ -2477,7 +2473,7 @@ static void dcc_tog_rename(char *command, char *args)
 	   convert_output_format("$G %RDCC%n  DCC auto rename is now \002$0\002", "%s", on_off(get_int_var(DCC_AUTORENAME_VAR))));
 }
 
-static void dcc_overwrite_toggle(char *command, char *args)
+static void dcc_overwrite_toggle(const char *command, char *args)
 {
     dcc_overwrite_var ^= 1;
 

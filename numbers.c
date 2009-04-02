@@ -111,8 +111,8 @@ int check_sync(int comm, char *channel, char *nick, char *whom, char *bantime, s
 
 static int handle_stats(int comm, char *from, char **ArgList)
 {
-    char *format_str = NULL;
-    char *format2_str = NULL;
+    const char *format_str = NULL;
+    const char *format2_str = NULL;
     char *args;
 
     args = PasteArgs(ArgList, 0);

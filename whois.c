@@ -806,7 +806,7 @@ void add_to_whois_queue(char *nick, void (*func) (WhoisStuff *, char *, char *),
     }
 }
 
-void add_to_userhost_queue(char *nick, void (*func) (WhoisStuff *, char *, char *), char *format, ...)
+void add_to_userhost_queue(char *nick, void (*func) (WhoisStuff *, char *, char *), const char *format, ...)
 {
     if (format) {
 	char blah[BIG_BUFFER_SIZE + 1];

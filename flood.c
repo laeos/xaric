@@ -33,7 +33,7 @@
 #include "fset.h"
 #include "tcommand.h"
 
-static char *ignore_types[] = {
+static const char *ignore_types[] = {
     "",
     "MSG",
     "PUBLIC",
@@ -292,7 +292,7 @@ int is_other_flood(struct channel *channel, struct nick_list *tmpnick, int type,
     return 0;
 }
 
-char *get_ignore_types(unsigned int type)
+static const char *get_ignore_types(unsigned int type)
 {
     int x = 0;
 
@@ -381,7 +381,7 @@ int check_flooding(char *nick, int type, char *line, char *channel)
     return 1;
 }
 
-int flood_prot(char *nick, char *userhost, char *type, int ctcp_type, int ignoretime, char *channel)
+int flood_prot(char *nick, char *userhost, const char *type, int ctcp_type, int ignoretime, char *channel)
 {
     struct channel *chan;
     struct nick_list *Nick;

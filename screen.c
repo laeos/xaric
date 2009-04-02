@@ -53,7 +53,7 @@ Display *new_display_line(Display *);
  * this to the prompt_list for the current screen..  and set the
  * input prompt accordingly.
  */
-void add_wait_prompt(char *prompt, void (*func) (char *, char *), char *data, int type)
+void add_wait_prompt(const char *prompt, void (*func) (char *, char *), const char *data, int type)
 {
     WaitPrompt **AddLoc, *New;
 

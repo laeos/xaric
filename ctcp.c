@@ -60,10 +60,10 @@ struct _CtcpEntry;
 typedef char *(*CTCP_Handler) (struct _CtcpEntry *, char *, char *, char *);
 
 typedef struct _CtcpEntry {
-    char *name;			/* name of ctcp datatag */
+    const char *name;		/* name of ctcp datatag */
     int id;			/* index of this ctcp command */
     int flag;			/* Action modifiers */
-    char *desc;			/* description returned by ctcp clientinfo */
+    const char *desc;		/* description returned by ctcp clientinfo */
     CTCP_Handler func;		/* function that does the dirty deed */
     CTCP_Handler repl;		/* Function that is called for reply */
 } CtcpEntry;

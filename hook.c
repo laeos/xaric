@@ -52,7 +52,7 @@ int in_on_who = 0;
 NumericList *numeric_list = NULL;
 
 /* hook_functions: the list of all hook functions available */
-HookFunc hook_functions[] = {
+static HookFunc hook_functions[] = {
     {"ACTION", NULL, 3, 0, 0},
     {"AR_PUBLIC", NULL, 3, 0, 0},
     {"AR_PUBLIC_OTHER", NULL, 3, 0, 0},
@@ -227,7 +227,7 @@ static void setup_struct(int ServReq, int SkipSer, int SerNum, int flags)
     cmp_info.Flags = flags;
 }
 
-static int Add_Remove_Check(Hook * Item, char *Name)
+static int Add_Remove_Check(Hook * Item, const char *Name)
 {
     int comp;
 
@@ -295,7 +295,7 @@ static void add_hook(int which, char *nick, char *stuff, int noisy, int not, int
     setup_struct((server == -1) ? -1 : (server & ~HS_NOGENERIC), sernum - 1, sernum, 0);
     if ((new =
 	 (Hook *) remove_from_list_ext((struct list **) &(hook_functions[which].list), nick,
-				       (int (*)(struct list *, char *)) Add_Remove_Check)) != NULL) {
+				       (cmp_fn *) Add_Remove_Check)) != NULL) {
 	new->not = 1;
 	new_free(&(new->nick));
 	new_free(&(new->stuff));
@@ -409,10 +409,11 @@ static int show_list(int which)
  * the value of the noisy field of the found entry, or -1 if not found. 
  */
 /* huh-huh.. this sucks.. im going to re-write it so that it works */
-extern int do_hook(int which, char *format, ...)
+extern int do_hook(int which, const char *format, ...)
 {
     Hook *tmp, **list;
-    char buffer[BIG_BUFFER_SIZE * 10 + 1], *name = NULL;
+    char buffer[BIG_BUFFER_SIZE * 10 + 1];
+    const char *name = NULL;
     int RetVal = 1;
     unsigned int display;
     int i, old_in_on_who;
@@ -626,7 +627,7 @@ extern void remove_hook(int which, char *nick, int server, int sernum, int quiet
 	setup_struct((server == -1) ? -1 : (server & ~HS_NOGENERIC), sernum - 1, sernum, 0);
 
 	if ((tmp = (Hook *) remove_from_list_ext((struct list **) &(hook_functions[which].list), nick,
-						 (int (*)(struct list *, char *)) Add_Remove_Check)) != NULL) {
+						 (cmp_fn *) Add_Remove_Check)) != NULL) {
 	    if (!quiet)
 		say("%c%s%c removed from %s list",
 		    (tmp->flexible ? '\'' : '"'), nick, (tmp->flexible ? '\'' : '"'), hook_functions[which].name);
@@ -667,7 +668,7 @@ extern void remove_hook(int which, char *nick, int server, int sernum, int quiet
     }
 }
 
-static void write_hook(FILE * fp, Hook * hook, char *name)
+static void write_hook(FILE * fp, Hook * hook, const char *name)
 {
     char *stuff = NULL;
     char flexi = '"';

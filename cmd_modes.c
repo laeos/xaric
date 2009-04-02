@@ -92,7 +92,7 @@ void flush_mode_all(struct channel *chan)
     flush_mode(chan);
 }
 
-static void add_mode(struct channel *chan, char *mode, int plus, char *nick, char *reason, int max_modes)
+static void add_mode(struct channel *chan, const char *mode, int plus, const char *nick, const char *reason, int max_modes)
 {
     char buffer[BIG_BUFFER_SIZE + 1];
     int len;
@@ -616,7 +616,7 @@ void cmd_tban(struct command *cmd, char *args)
     }
 }
 
-static void set_default_bantype(char value, char *helparg)
+static void set_default_bantype(char value, const char *helparg)
 {
     int bant;
 

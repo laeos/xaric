@@ -42,7 +42,7 @@
 
 
 
-char *var_settings[] =
+const char *var_settings[] =
 {
 	"OFF", "ON", "TOGGLE"
 };
@@ -255,7 +255,7 @@ get_int_var (enum VAR_TYPES var)
  * of the string variable is freed and set to null 
  */
 void 
-set_string_var (enum VAR_TYPES var, char *string)
+set_string_var (enum VAR_TYPES var, const char *string)
 {
 	if (string)
 		malloc_strcpy (&(irc_variable[var].string), string);

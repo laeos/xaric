@@ -179,7 +179,7 @@ extern char *prog_name;
 extern struct channel *statchan_list;
 extern int cpu_saver;
 
-int wild_match(char *, char *);
+int wild_match(const char *, const char *);
 
 char get_a_char(void);
 void free_display(Window *);

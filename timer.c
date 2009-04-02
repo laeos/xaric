@@ -26,7 +26,7 @@
 #include "fset.h"
 #include "tcommand.h"
 
-static void show_timer(char *command);
+static void show_timer(const char *command);
 void delete_all_timers(void);
 
 /*
@@ -162,7 +162,7 @@ extern void ExecuteTimers(void)
  * show_timer:  Display a list of all the TIMER commands that are
  * pending to be executed.
  */
-static void show_timer(char *command)
+static void show_timer(const char *command)
 {
     TimerList *tmp;
     time_t current, time_left;

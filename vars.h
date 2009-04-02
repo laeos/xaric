@@ -26,7 +26,7 @@ enum VAR_TYPES {
 
 char *get_string_var(enum VAR_TYPES);
 int get_int_var(enum VAR_TYPES);
-void set_string_var(enum VAR_TYPES, char *);
+void set_string_var(enum VAR_TYPES, const char *);
 void set_int_var(enum VAR_TYPES, unsigned int);
 void init_variables(void);
 int do_boolean(char *, int *);
@@ -37,7 +37,7 @@ int charset_size(void);
 void clear_sets(void);
 void set_highlight_char(Window *, char *, int);
 
-extern char *var_settings[];
+extern const char *var_settings[];
 
 	/* in keys.c */
 void clear_bindings(void);

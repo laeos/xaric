@@ -334,6 +334,17 @@ static void load_xaric_environment(void)
     if ((ptr = getenv("IRCPORT")))
 	irc_port = my_atol(ptr);
 
+    if ((ptr = getenv ("IRCPATH"))) {
+	set_string_var(LOAD_PATH_VAR, ptr);
+    } else {
+	malloc_strcpy (&ptr, ".:~/.irc:");
+	puts(XARIC_DATA_PATH);
+	malloc_strcat (&ptr, XARIC_DATA_PATH);
+	malloc_strcat (&ptr, "script");
+	set_string_var(LOAD_PATH_VAR, ptr);
+	new_free(&ptr);
+    }
+
     if ((ptr = getenv("IRCSERVER")))
 	build_server_list(ptr);
 }

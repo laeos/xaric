@@ -667,7 +667,6 @@ char *m_strcat_ues(char **dest, char *src, int unescape)
 char *expand_twiddle(char *str)
 {
     char buffer[BIG_BUFFER_SIZE + 1];
-    char *str2;
 
     if (*str == '~') {
 	str++;
@@ -687,15 +686,12 @@ char *expand_twiddle(char *str)
 		    strmcat(buffer, rest, BIG_BUFFER_SIZE);
 		}
 	    } else
-		return (char *) NULL;
+		return NULL;
 	}
     } else
 	strmcpy(buffer, str, BIG_BUFFER_SIZE);
 
-    /* This isnt legal! */
-    str2 = NULL;
-    malloc_strcpy(&str2, buffer);
-    return (str2);
+    return m_strdup(buffer);
 }
 
 /* islegal: true if c is a legal nickname char anywhere but first char */

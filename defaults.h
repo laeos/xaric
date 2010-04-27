@@ -251,7 +251,7 @@
 #define DEFAULT_OPERMODE "swfck"
 
 /* File in home directory to contain specific stuff */
-#define IRCRC_NAME ".ircrc"
+#define IRCRC_NAME "~/.ircrc"
 
 /* File in home directory that has your list of servers */
 #define IRCSERVERS_NAME ".ircservers"

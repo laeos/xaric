@@ -87,6 +87,7 @@ void save_all(const char *fname)
 void cmd_save(struct command *cmd, char *args)
 {
     char *arg = NULL;
+    char *fname = NULL;
     int all = 1;
     char buffer[BIG_BUFFER_SIZE + 1];
 
@@ -113,13 +114,21 @@ void cmd_save(struct command *cmd, char *args)
 	    }
 	    continue;
 	}
-	if (!(arg = expand_twiddle(ircrc_file))) {
+	if (fname)
+	    new_free(&fname);
+	if (!(fname = expand_twiddle(arg))) {
+	    bitchsay("Unknown user");
+	    return;
+	}
+    }
+    if (!fname) {
+	if (!(fname = expand_twiddle(ircrc_file))) {
 	    bitchsay("Unknown user");
 	    return;
 	}
     }
     if (all)
 	save_which = SFLAG_ALL;
-    snprintf(buffer, BIG_BUFFER_SIZE, "Really write %s? ", arg ? arg : ircrc_file);
-    add_wait_prompt(buffer, (void (*)(char *, char *)) really_save, arg ? arg : ircrc_file, WAIT_PROMPT_LINE);
+    snprintf(buffer, BIG_BUFFER_SIZE, "Really write %s? ", fname);
+    add_wait_prompt(buffer, (void (*)(char *, char *)) really_save, fname, WAIT_PROMPT_LINE);
 }

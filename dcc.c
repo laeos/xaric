@@ -2394,7 +2394,7 @@ static void update_transfer_buffer(const char *format, ...)
     if (count) {
 	chop(transfer_buffer, 1);
 	if (get_fset_var(FORMAT_DCC_FSET)) {
-	    sprintf(DCC_current_transfer_buffer, convert_output_format(get_fset_var(FORMAT_DCC_FSET), "%s", transfer_buffer));
+	    sprintf(DCC_current_transfer_buffer, "%s", convert_output_format(get_fset_var(FORMAT_DCC_FSET), "%s", transfer_buffer));
 	    chop(DCC_current_transfer_buffer, 4);
 	} else
 	    sprintf(DCC_current_transfer_buffer, "[%s]", transfer_buffer);

@@ -1,4 +1,3 @@
-#ident "@(#)ctcp.c 1.11"
 /*
  * ctcp.c:handles the client-to-client protocol(ctcp). 
  *

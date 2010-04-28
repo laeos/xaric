@@ -1,4 +1,3 @@
-#ident "@(#)cmd_help.c 1.8"
 /*
  * cmd_help.c -- Xaric help system
  * Copyright (c) 2000 Rex Feany (laeos@laeos.net) 

@@ -1,4 +1,3 @@
-#ident "@(#)vars.c 1.13"
 /*
  * vars.c: All the dealing of the irc variables are handled here. 
  *

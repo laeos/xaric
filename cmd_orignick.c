@@ -1,4 +1,3 @@
-#ident "@(#)cmd_orignick.c 1.5"
 /*
  * cmd_hostname.c : virtual host support 
  *

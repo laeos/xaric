@@ -1,4 +1,3 @@
-#ident "@(#)ircterm.c 1.10"
 /*
  * ircterm.c - terminal-related functions for xaric
  *

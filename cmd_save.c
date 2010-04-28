@@ -1,4 +1,3 @@
-#ident "@(#)cmd_save.c 1.7"
 /*
  * cmd_save.c : save Xaric settings 
  *

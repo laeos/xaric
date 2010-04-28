@@ -1,4 +1,3 @@
-#ident "@(#)fset.c 1.10"
 /*
  * fset.c - keep track of all our format strings
  * Modified by Rex Feany (laeos@laeos.net) for Xaric

@@ -1,4 +1,3 @@
-#ident "@(#)tcommand.c 1.5"
 /*
  * tcommand.c : new implementation of command,searching,aliases for Xaric.
  * (c) 1998 Rex Feany <laeos@ptw.com> 

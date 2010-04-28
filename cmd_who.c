@@ -1,4 +1,3 @@
-#ident "@(#)cmd_who.c 1.7"
 /*
  * cmd_who.c : the who command 
  *

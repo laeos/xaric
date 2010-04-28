@@ -1,4 +1,3 @@
-#ident "$Id$"
 /*
  * alist.c -- resizeable arrays.
  * Written by Jeremy Nelson

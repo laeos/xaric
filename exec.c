@@ -1,4 +1,3 @@
-#ident "@(#)exec.c 1.8"
 /*
  * exec.c: handles exec'd process for IRCII 
  *

@@ -1,4 +1,3 @@
-#ident "@(#)window.c 1.13"
 /*
  * window.c: Handles the Main Window stuff for irc.  This includes proper
  * scrolling, saving of screen memory, refreshing, clearing, etc. 

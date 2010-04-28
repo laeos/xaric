@@ -1,4 +1,3 @@
-#ident "@(#)irc.c 1.23"
 /*
  * Original from ircII: a new irc client.  I like it.  I hope you will too!
  * Written By Michael Sandrof

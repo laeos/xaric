@@ -1,4 +1,3 @@
-#ident "@(#)output.c 1.9"
 /*
  * output.c: handles a variety of tasks dealing with the output from the irc
  * program 

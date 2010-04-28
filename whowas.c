@@ -1,4 +1,3 @@
-#ident "@(#)whowas.c 1.5"
 /*
  * whowas.c   a linked list buffer of people who have left your channel 
  * mainly used for ban prot and stats stuff.

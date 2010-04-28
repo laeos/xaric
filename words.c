@@ -1,4 +1,3 @@
-#ident "@(#)words.c 1.6"
 /*
  * words.c -- right now it just holds the stuff i wrote to replace
  * that beastie arg_number().  Eventually, i may move all of the

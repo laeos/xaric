@@ -1,4 +1,3 @@
-#ident "@(#)lister.c 1.2"
 /*
  * lister.c - display a list of things
  * Copyright (C) 2000 Rex Feany <laeos@laeos.net>

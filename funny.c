@@ -1,4 +1,3 @@
-#ident "@(#)funny.c 1.8"
 /*
  * funny.c: Well, I put some stuff here and called it funny.  So sue me. 
  *

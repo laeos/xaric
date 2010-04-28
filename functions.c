@@ -1,4 +1,3 @@
-#ident "@(#)functions.c 1.13"
 /*
  * functions.c -- Built-in functions for ircII
  *

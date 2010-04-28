@@ -1,4 +1,3 @@
-#ident "%W%"
 /*
  * numbers.c:handles all those strange numeric response dished out by that
  * wacky, nutty program we call ircd 

@@ -1,4 +1,3 @@
-#ident "@(#)freeaddrinfo.c 1.3"
 /*
  * freeaddrinfo.c - freeaddrinfo()
  *

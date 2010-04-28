@@ -1,4 +1,3 @@
-#ident "@(#)iflist.c 1.5"
 /*
  * iflist.c - figure out interface information
  * Copyright (C) 2000 Rex Feany <laeos@laeos.net>

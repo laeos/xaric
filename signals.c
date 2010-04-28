@@ -1,4 +1,3 @@
-#ident "@(#)signals.c 1.6"
 /*
  * signals.c: handle signals for xaric!
  * written by matthew green, 1993.

@@ -1,4 +1,3 @@
-#ident "@(#)xscandir.c 1.1"
 /*
  * xscandir.c - wrapper for scandir 
  * Copyright (C) 1999, 2000 Rex Feany <laeos@laeos.net>
@@ -65,9 +64,6 @@
 #include "fset.h"
 #include "output.h"
 #include "lister.h"
-
-/* sneeky */
-typedef int (*scan_cmp_func) (const void *, const void *);
 
 /* used by scandir to sort help entries */
 static int dcompare(const struct dirent **d1, const struct dirent **d2)
@@ -138,7 +134,7 @@ int xscandir(char *dir, char *prefix, char **ret)
     }
 
     the_longest = 0;
-    cnt = retval = scandir(dir, &list, (void *)dselect, (scan_cmp_func) dcompare);
+    cnt = retval = scandir(dir, &list, (void *)dselect, dcompare);
 
     switch (retval) {
 

@@ -1,4 +1,3 @@
-#ident "@(#)cmd_hostname.c 1.6"
 /*
  * cmd_hostname.c : virtual host support 
  * Copyright (C) 2000 Rex Feany <laeos@laeos.net>

@@ -1,4 +1,3 @@
-#ident "%W%"
 /*
  * alias.c Handles command aliases for irc.c 
  * expr.c -- The expression mode parser and the textual mode parser

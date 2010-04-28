@@ -1,4 +1,3 @@
-#ident "@(#)cmd_scan.c 1.8"
 /*
  * cmd_scan.c : the /scan command
  *

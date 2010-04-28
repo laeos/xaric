@@ -1,4 +1,3 @@
-#ident "@(#)network.c 1.6"
 /*
  * network.c -- handles stuff dealing with connecting and name resolving
  *

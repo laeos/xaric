@@ -1,4 +1,3 @@
-#ident "@(#)cmd_modes.c 1.6"
 /*
  * cmd_modes.c : commands that have to do with modes?!
  *

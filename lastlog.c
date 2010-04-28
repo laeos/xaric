@@ -1,4 +1,3 @@
-#ident "@(#)lastlog.c 1.5"
 /*
  * lastlog.c: handles the lastlog features of irc. 
  *

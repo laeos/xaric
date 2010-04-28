@@ -1,4 +1,3 @@
-#ident "@(#)dcc.c 1.8"
 /*
  * dcc.c: Things dealing client to client connections. 
  *

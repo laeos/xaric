@@ -1,4 +1,3 @@
-#ident "$Id: ncommand.c,v 1.4 1999/12/02 03:30:51 laeos Exp $"
 /*
  * ncommand.c : new commands for Xaric
  * (c) 1998 Rex Feany <laeos@ptw.com> 

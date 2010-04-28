@@ -1,4 +1,3 @@
-#ident "@(#)flood.c 1.6"
 /*
  * flood.c: handle channel flooding. 
  *

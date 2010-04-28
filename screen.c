@@ -1,4 +1,3 @@
-#ident "@(#)screen.c 1.9"
 /*
  * screen.c
  *

@@ -432,7 +432,7 @@ char *compress_modes(int server, char *channel, char *modes)
 		if (add && !isopped) {
 		    tucm->o_ed = 1;
 		    tucm->deo_ed = 0;
-		} else if (!add & isopped) {
+		} else if (!add && isopped) {
 		    tucm->o_ed = 0;
 		    tucm->deo_ed = 1;
 		} else
@@ -457,7 +457,7 @@ char *compress_modes(int server, char *channel, char *modes)
 		if (add && !isvoiced) {
 		    tucm->v_ed = 1;
 		    tucm->dev_ed = 0;
-		} else if (!add & isvoiced) {
+		} else if (!add && isvoiced) {
 		    tucm->v_ed = 0;
 		    tucm->dev_ed = 1;
 		} else

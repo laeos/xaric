@@ -1,4 +1,3 @@
-#ident "@(#)status.c 1.11"
 /*
  * status.c: handles the status line updating, etc for IRCII 
  *

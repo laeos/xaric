@@ -1,4 +1,3 @@
-#ident "@(#)ternary.c 1.5"
 /*
  * ternary.c : ternary search tree, for commands.
  * (c) 1998 Rex Feany <laeos@ptw.com> 

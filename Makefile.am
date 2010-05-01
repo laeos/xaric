@@ -53,3 +53,6 @@ install-data-hook:
 	for i in $(HELP_FILES) ; do \
 		cp $(srcdir)/$$i $(helpdir) ; \
 	done
+
+version:
+	@echo $(PACKAGE_VERSION)

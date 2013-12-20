@@ -193,7 +193,7 @@ void print_funny_names(char *line)
 	if (get_fset_var(FORMAT_NAMES_BANNER_FSET))
 	    malloc_strcpy(&buffer, get_fset_var(FORMAT_NAMES_BANNER_FSET));
 	do {
-	    if (*t == '@' || *t == '+' || *t == '~' || *t == '-') {
+	    if (*t == '@' || *t == '+' || *t == '~' || *t == '!' || *t == '&' || *t == '%') {
 		special = *t;
 		if (special == '+')
 		    malloc_strcat(&buffer, convert_output_format(get_fset_var(FORMAT_NAMES_VOICECOLOR_FSET), "%c %s", special, ++t));

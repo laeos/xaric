@@ -360,32 +360,12 @@ fi
 dnl ----------------------------------------------------------
 dnl OpenSSL!
 dnl ----------------------------------------------------------
+AX_CHECK_OPENSSL([
+	AC_DEFINE(HAVE_SSL, 1, Defined if your system has OpenSSL)
+    ], [
+	AC_ERROR(failed to find OpenSSL)
+    ])
 
-AC_MSG_CHECKING(for OpenSSL)
-for dir in $withval /usr/local/ssl /usr/lib/ssl /usr/ssl /usr/pkg /usr/local /usr; do
-    ssldir="$dir"
-    if test -f "$dir/include/openssl/ssl.h"; then
-	found_ssl="yes";
-	CFLAGS="$CFLAGS -I$ssldir/include -DHAVE_SSL";
-	CXXFLAGS="$CXXFLAGS -I$ssldir/include -DHAVE_SSL";
-	break;
-    fi
-    if test -f "$dir/include/ssl.h"; then
-	found_ssl="yes";
-	CFLAGS="$CFLAGS -I$ssldir/include/ -DHAVE_SSL";
-	CXXFLAGS="$CXXFLAGS -I$ssldir/include/ -DHAVE_SSL";
-	break
-    fi
-done
-if test x_$found_ssl != x_yes; then
-    AC_MSG_ERROR(Cannot find ssl libraries)
-else
-    printf "OpenSSL found in $ssldir\n";
-    LIBS="$LIBS -lssl -lcrypto";
-    LDFLAGS="$LDFLAGS -L$ssldir/lib";
-    HAVE_SSL=yes
-fi
-AC_SUBST(HAVE_SSL)
 
 dnl ----------------------------------------------------------
 dnl All done!

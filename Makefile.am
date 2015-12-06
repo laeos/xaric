@@ -27,8 +27,9 @@ EXTRA_xaric_SOURCES = freeaddrinfo.c ga_aistruct.c ga_echeck.c		\
 		      inet_ntop.c inet_pton.c setenv.c strtoul.c
 
 HELP_FILES= help/copying help/help help/warranty
-xaric_LDADD = @EXTRA_OBJS@ 
-xaric_CFLAGS = -Wall -ggdb3
+xaric_LDADD = @EXTRA_OBJS@  @OPENSSL_LIBS@
+xaric_CFLAGS = -Wall -ggdb3 @OPENSSL_INCLUDES@
+xaric_LDFLAGS = @OPENSSL_LDFLAGS@
 man_MANS = xaric.1
 EXTRA_DIST = $(man_MANS) $(HELP_FILES) xaric.xpm
 

@@ -5,7 +5,7 @@ set -x
 root=`pwd`
 today=`date +%d-%b-%Y`
 
-function cleanup() {
+cleanup() {
     cd ${root}
     rm -rf build-dist/
 }

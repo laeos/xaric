@@ -22,23 +22,5 @@ find . -type f \( -name missing -o -name install-sh -o -name mkinstalldirs \
 	-o -name Makefile.in \) -print0 | xargs -0 rm -f
 
 echo Running autoreconf...
-autoreconf --force --install
+autoreconf --verbose --force --install
 
-# For the Debian package build
-test -d debian && {
-	# link these in Debian builds
-	rm -f config.sub config.guess
-	ln -s /usr/share/misc/config.sub .
-	ln -s /usr/share/misc/config.guess .
-
-	# refresh list of executable scripts, to avoid possible breakage if
-	# upstream tarball does not include the file or if it is mispackaged
-	# for whatever reason.
-	[ "$1" == "updateexec" ] && {
-		echo Generating list of executable files...
-		rm -f debian/executable.files
-		find . -type f -perm +111 ! -name '.*' -fprint debian/executable.files
-	}
-}
-
-exit 0

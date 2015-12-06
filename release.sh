@@ -42,7 +42,7 @@ md5sum xaric-${V}.tar.gz > xaric-${V}.tar.gz.md5
 sed -e "s/VERSION/${V}/g" -e "s/RELEASEDATE/${today}/" ${root}/www/index.html > index.html
 
 host=rfeany@tonya.fnordsoft.com
-rr=~xaric/sandbox/html
+rr=~xaric
 sw=${rr}/software/xaric/releases/
 idx=${rr}/index.html
 

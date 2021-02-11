@@ -76,17 +76,17 @@ int main(void)
     timeo.tv_usec = 3;
 
 #ifndef $1
-    exit(3);
+    return 3;
 #else
     if ((s = socket(PF_INET, SOCK_STREAM, 0)) == -1)
-        exit(2);
+        return 2;
 
     /* fails on Solaris 2.6,8,9,10 and Debian 2.2 because
        SO_RCVTIMEO|SO_SNDTIMEO are defined but not implemented */
     if (setsockopt(s, SOL_SOCKET, $1, (void *)&timeo, sizeof(timeo)) == -1)
-        exit(1);
+        return 1;
 
-    exit(0);
+    return 0;
 #endif
 }
 

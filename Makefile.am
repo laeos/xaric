@@ -20,7 +20,7 @@ xaric_SOURCES = alist.c cmd_modes.c ctcp.c dcc.c exec.c expr.c flood.c	\
 
 nodist_xaric_SOURCES = fset_gen.h vars_gen.h build.h
 BUILT_SOURCES = fset_gen.h vars_gen.h build.h
-CLEANFILES = fset_gen.h build.h stamp-h vars_gen.h config.log
+CLEANFILES = fset_gen.h build.h vars_gen.h config.log
 EXTRA_xaric_SOURCES = freeaddrinfo.c ga_aistruct.c ga_echeck.c		\
 		      ga_nsearch.c ga_port.c ga_serv.c gai_strerror.c	\
 		      getaddrinfo.c getnameinfo.c gn_ipv46.c		\

@@ -75,7 +75,7 @@
 #include <limits.h>
 
 /* signal handler stuff */
-typedef RETSIGTYPE sigfunc(int);
+typedef void sigfunc(int);
 sigfunc *my_signal(int, sigfunc *);
 
 extern volatile int cntl_c_hit;	/* ctl-c was pressed */

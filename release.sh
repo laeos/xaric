@@ -18,7 +18,7 @@ mkdir build-dist/
 
 cd build-dist
 
-../configure --enable-maintainer-mode --enable-dependency-tracking
+../configure
 
 V=`make version`
 
@@ -54,5 +54,5 @@ scp index.html ${host}:${idx}
 echo ""
 echo "Make sure you tag ... "
 echo ""
-echo "git tag ${V}"
+echo "git tag -a ${V}"
 echo "git push --tags"

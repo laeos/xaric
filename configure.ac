@@ -23,14 +23,13 @@ dnl ---------------------------------------------------------------
 dnl autoconf prolog
 dnl ---------------------------------------------------------------
 
-AC_INIT([Xaric],[0.13.8],[support@xaric.org],[xaric])
-AM_INIT_AUTOMAKE
+AC_INIT([Xaric],[0.13.9],[support@xaric.org],[xaric])
+AC_PREREQ([2.69])
+AC_CONFIG_AUX_DIR([build-aux])
+AM_INIT_AUTOMAKE([1.9])
 AC_CONFIG_SRCDIR([irc.c])
 AC_CONFIG_HEADERS([config.h])
 AC_PREFIX_DEFAULT(/usr/local)
-AM_MAINTAINER_MODE
-
-CFLAGS="$CFLAGS -D_GNU_SOURCE"
 
 dnl ----------------------------------------------------------------
 dnl build tools
@@ -41,8 +40,8 @@ AM_PROG_CC_C_O
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_ISC_POSIX
-AC_AIX
+AC_SEARCH_LIBS([strerror],[cposix])
+AC_USE_SYSTEM_EXTENSIONS
 
 dnl ----------------------------------------------------------
 dnl Stuff we need
@@ -151,7 +150,6 @@ dnl ----------------------------------------------------------
 dnl Data Types
 dnl ----------------------------------------------------------
 
-AC_TYPE_SIGNAL
 AC_TYPE_MODE_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
@@ -371,9 +369,7 @@ dnl ----------------------------------------------------------
 dnl All done!
 dnl ----------------------------------------------------------
 
-AC_CACHE_SAVE
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_COMMANDS(stamp-h, [date > stamp-h])
 AC_OUTPUT
 
 echo ""

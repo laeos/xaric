@@ -47,31 +47,31 @@ static sigfunc *old_sigchild __attribute__ ((unused));
  */
 
 /* sig_refresh_screen: the signal-callable version of refresh_screen */
-static RETSIGTYPE sig_refresh_screen(int unused)
+static void sig_refresh_screen(int unused)
 {
     refresh_screen(0, NULL);
 }
 
 /* sig_continue: reset term paramaters and redraw screen */
-static RETSIGTYPE sig_continue(int unused)
+static void sig_continue(int unused)
 {
     term_continue();
 }
 
 /* sig_quit_irc: cleans up and leaves */
-static RETSIGTYPE sig_quit_irc(int unused)
+static void sig_quit_irc(int unused)
 {
     irc_exit(get_string_var(SIGNOFF_REASON_VAR), NULL);
 }
 
 /* sig_nothing: don't do anything! */
-static RETSIGTYPE sig_nothing(int sig)
+static void sig_nothing(int sig)
 {
     /* nothing to do! */
 }
 
 /* sig_coredump: handle segfaults in a nice way */
-static RETSIGTYPE sig_coredump(int sig)
+static void sig_coredump(int sig)
 {
     static volatile int segv_recurse = 0;
 
@@ -94,7 +94,7 @@ static RETSIGTYPE sig_coredump(int sig)
 
 /* sig_int: if somehow everything else freezes up, hitting ctrl-c
  *          five times should kill the program.  */
-static RETSIGTYPE sig_int(int sig)
+static void sig_int(int sig)
 {
     OLD_HANDLER(old_sigint, sig);
 
@@ -105,7 +105,7 @@ static RETSIGTYPE sig_int(int sig)
 }
 
 /* sig_child: so we can reap our dead children */
-static RETSIGTYPE sig_child(int sig)
+static void sig_child(int sig)
 {
     got_sigchild++;
 

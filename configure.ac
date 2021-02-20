@@ -90,7 +90,7 @@ AC_CACHE_VAL(ac_cv_ipv4,
 		int fd;
 		struct sockaddr_in foo;
 		fd = socket(AF_INET, SOCK_STREAM, 0);
-		exit(fd >= 0 ? 0 : 1);
+		return fd >= 0 ? 0 : 1;
 	}]])],[ac_cv_ipv4=yes],[ac_cv_ipv4=no],[ac_cv_ipv4=no]))
 AC_MSG_RESULT($ac_cv_ipv4)
 if test $ac_cv_ipv4 = yes ; then
@@ -113,7 +113,7 @@ AC_CACHE_VAL(ac_cv_ipv6,
 		int fd;
 		struct sockaddr_in6 foo;
 		fd = socket(AF_INET6, SOCK_STREAM, 0);
-		exit(fd >= 0 ? 0 : 1);
+		return fd >= 0 ? 0 : 1;
 	}]])],[ac_cv_ipv6=yes],[ac_cv_ipv6=no],[ac_cv_ipv6=no]))
 AC_MSG_RESULT($ac_cv_ipv6)
 if test $ac_cv_ipv6 = yes ; then
@@ -259,8 +259,8 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <signal.h>
 main()
 {
-	char *s = sys_siglist[0];
-	exit(0);
+	const char *s = sys_siglist[0];
+	return 0;
 }
 ]])],[AC_MSG_RESULT(yes) 
   sys_siglist="1"
@@ -363,7 +363,7 @@ dnl ----------------------------------------------------------
 AX_CHECK_OPENSSL([
 	AC_DEFINE(HAVE_SSL, 1, Defined if your system has OpenSSL)
     ], [
-	AC_ERROR(failed to find OpenSSL)
+	AC_MSG_ERROR([failed to find OpenSSL])
     ])
 
 

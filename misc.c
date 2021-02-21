@@ -129,8 +129,8 @@ int check_serverlag(void *args)
 	    if ((!my_stricmp(servern, get_server_itsname(i)) || !my_stricmp(servern, get_server_name(i)))
 		&& is_server_connected(i)) {
 		server_list[i].lag_time = time(NULL);
-		send_to_server(SERVER(from_server), "PING %lu %s", server_list[i].lag_time, servern);
 		in_server_ping++;
+		send_to_server(SERVER(from_server), "PING %lu %s", server_list[i].lag_time, servern);
 		server_list[i].lag = -1;
 		break;
 	    }

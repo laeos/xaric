@@ -548,7 +548,7 @@ static void p_pong(char *from, char **ArgList)
     if (!ArgList[0])
 	return;
     is_server = match("*.*", ArgList[0]);
-    if (in_server_ping && is_server) ;
+    if (in_server_ping && is_server)
     {
 	int old_from_server = from_server;
 

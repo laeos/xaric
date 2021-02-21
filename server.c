@@ -701,9 +701,9 @@ static void login_to_server(int refnum, int c_server)
     if (!server_list[refnum].d_nickname)
 	malloc_strcpy(&(server_list[refnum].d_nickname), nickname);
 
+    server_list[refnum].flags |= LOGGED_IN;
     if (server_list[refnum].password)
 	send_to_server(SERVER(refnum), "PASS %s", server_list[refnum].password);
-    server_list[refnum].flags |= LOGGED_IN;
     register_server(refnum, server_list[refnum].d_nickname);
 
     server_list[refnum].last_msg = time(NULL);

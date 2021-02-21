@@ -1008,7 +1008,7 @@ extern int timed_server(void *);
 extern int in_timed_server;
 void check_server_connect(int server)
 {
-    if ((from_server == -1) || (!in_timed_server && server_list[from_server].last_msg + 50 < time(NULL))) {
+    if ((server == -1) || (!in_timed_server && server_list[server].last_msg + 50 < time(NULL))) {
 	add_timer("", 10, 1, timed_server, m_strdup("0"), NULL);
 	in_timed_server++;
     }

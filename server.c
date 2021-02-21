@@ -1039,7 +1039,7 @@ void set_server_away(int ssa_index, char *message)
 	    send_to_server(SERVER(from_server), "%s :%s", "AWAY",
 			   stripansicodes(convert_output_format
 					  (get_fset_var(FORMAT_AWAY_FSET), "%s %s", update_clock(GET_TIME), message)));
-	    strncpy(buffer, convert_output_format("%Kð %W$N%n is away: ", NULL, NULL), BIG_BUFFER_SIZE);
+	    strncpy(buffer, convert_output_format("%K*** %W$N%n ", NULL, NULL), BIG_BUFFER_SIZE);
 	    strncat(buffer,
 		    convert_output_format(get_fset_var(FORMAT_AWAY_FSET), "%s %s", update_clock(GET_TIME), message), BIG_BUFFER_SIZE);
 	    put_it("%s", buffer);

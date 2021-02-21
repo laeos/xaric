@@ -1097,8 +1097,8 @@ FILE *uzfopen(char **filename, char *path)
     }
 
     /* Its not a compressed file... Try to open it regular-like. */
-    if ((doh = fopen(filename_path, "r")) != NULL) ;
-    return doh;
+    if ((doh = fopen(filename_path, "r")) != NULL)
+	return doh;
 
     /* nope.. we just cant seem to open this file... */
     bitchsay("Cannot open file %s: %s", filename_path, strerror(errno));

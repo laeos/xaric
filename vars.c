@@ -515,7 +515,7 @@ set_var_value (int var_index, char *value)
 					else
 						say ("SET: no such user");
 				}
-				if ((!var->int_flags & VIF_CHANGED))
+				if (!(var->int_flags & VIF_CHANGED))
 				{
 					if ((var->string && !value) ||
 					    (!var->string && value) ||

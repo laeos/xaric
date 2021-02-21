@@ -559,22 +559,15 @@ void parse_server_info(char *name, char **port, char **password, char **nick)
     *port = *password = *nick = NULL;
     if ((ptr = (char *) index(name, ':')) != NULL) {
 	*(ptr++) = (char) 0;
-	if (strlen(ptr) == 0)
-	    *port = NULL;
-	else {
+	if (*ptr) {
 	    *port = ptr;
 	    if ((ptr = (char *) index(ptr, ':')) != NULL) {
 		*(ptr++) = (char) 0;
-		if (strlen(ptr) == 0)
-		    *password = '\0';
-		else {
+		if (*ptr) {
 		    *password = ptr;
-		    if ((ptr = (char *) index(ptr, ':'))
-			!= NULL) {
+		    if ((ptr = (char *) index(ptr, ':')) != NULL) {
 			*(ptr++) = '\0';
-			if (!strlen(ptr))
-			    *nick = NULL;
-			else
+			if (*ptr)
 			    *nick = ptr;
 		    }
 		}

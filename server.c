@@ -264,8 +264,8 @@ static int read_data(int i, time_t * last_timeout)
 			times = 0;
 			i = 0;
 		    }
-
-		    get_connected(i);
+		    window_check_servers();
+		    check_server_connect(-1);
 		    return 0;
 		} else {
 		    if (times++ > 3) {
@@ -276,7 +276,8 @@ static int read_data(int i, time_t * last_timeout)
 							 "No connection"));
 			times = 0;
 		    }
-		    get_connected(i);
+		    window_check_servers();
+		    check_server_connect(-1);
 		    return 0;
 		}
 	    } else if (server_list[i].eof) {

@@ -61,9 +61,9 @@ int term_eight_bit(void);
 void term_set_eight_bit(int value);
 
 /* strange function pointers, filled in at runtime */
-int (*term_scroll) (int, int, int);	/* best scroll available */
-int (*term_insert) (char);	/* best insert available */
-int (*term_delete) (void);	/* best delete available */
-int (*term_cursor_left) (void);	/* best left available */
+extern int (*term_scroll) (int, int, int);	/* best scroll available */
+extern int (*term_insert) (char);	/* best insert available */
+extern int (*term_delete) (void);	/* best delete available */
+extern int (*term_cursor_left) (void);	/* best left available */
 
 #endif				/* ircterm_h__ */

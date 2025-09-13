@@ -1181,8 +1181,6 @@ void dcc_plist(char dumb, char *dumber)
     extended_handled = 1;
 }
 
-int in_window_command;
-
 static void handle_swap(int windownum)
 {
     char *p = NULL;

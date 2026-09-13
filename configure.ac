@@ -29,6 +29,8 @@ AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([1.9])
 AC_CONFIG_SRCDIR([irc.c])
 AC_CONFIG_HEADERS([config.h])
+dnl must come before the first compiler test
+AC_USE_SYSTEM_EXTENSIONS
 AC_PREFIX_DEFAULT(/usr/local)
 
 dnl ----------------------------------------------------------------
@@ -41,14 +43,10 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_SEARCH_LIBS([strerror],[cposix])
-AC_USE_SYSTEM_EXTENSIONS
 
 dnl ----------------------------------------------------------
 dnl Stuff we need
 dnl ----------------------------------------------------------
-
-AC_HEADER_STDC
-AC_HEADER_TIME
 
 AC_CHECK_HEADERS(
  	stdio.h stdlib.h stdarg.h string.h unistd.h fcntl.h dnl

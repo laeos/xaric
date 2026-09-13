@@ -333,7 +333,7 @@ void whoreply(char *from, char **ArgList)
 /*      
    else if ((who_mask && WHO_KILL) && !ok)
    {
-   put_it("%s", convert_output_format("$G No such match for /whokill", NULL, NULL));
+   put_it("%s", convert_output_format("$G No such match for /whokill", NULL));
    }
  */
     message_from(NULL, LOG_CRAP);

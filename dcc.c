@@ -574,7 +574,7 @@ void dcc_chat(const char *command, char *args)
     DCC_list *Client;
 
     if ((user = next_arg(args, &args)) == NULL) {
-	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname for DCC chat", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname for DCC chat", NULL));
 	return;
     }
     while (args && *args) {
@@ -615,7 +615,7 @@ char *dcc_raw_listen(int port)
 
     lastlog_level = set_lastlog_msg_level(LOG_DCC);
     if (port && port < 1025) {
-	put_it("%s", convert_output_format("$G %RDCC%n Cannot bind to a privileged port", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n Cannot bind to a privileged port", NULL));
 	(void) set_lastlog_msg_level(lastlog_level);
 	return NULL;
     }
@@ -705,7 +705,7 @@ void real_dcc_filesend(char *filename, char *real_file, char *user, int type, in
     stat(filename, &stat_buf);
 #ifdef S_IFDIR
     if (stat_buf.st_mode & S_IFDIR) {
-	put_it("%s", convert_output_format("$G %RDCC%n Cannot send a directory", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n Cannot send a directory", NULL));
 	return;
     }
 #endif
@@ -770,7 +770,7 @@ void dcc_resend(const char *command, char *args)
     int portnum = 0;
 
     if (!(user = next_arg(args, &args)) || !(filename = next_arg(args, &args))) {
-	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname and a filename for DCC resend", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname and a filename for DCC resend", NULL));
 	return;
     }
     if (*filename == '/') {
@@ -819,7 +819,7 @@ void dcc_filesend(const char *command, char *args)
     int portnum = 0;
 
     if (!(user = next_arg(args, &args)) || !(filename = next_arg(args, &args))) {
-	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname and a filename for DCC send", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname and a filename for DCC send", NULL));
 	return;
     }
 
@@ -891,7 +891,7 @@ static void dcc_getfile(const char *command, char *args)
     char *fullname = NULL;
 
     if (0 == (user = next_arg(args, &args))) {
-	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname for DCC get", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname for DCC get", NULL));
 	return;
     }
     if (args && *args) {
@@ -949,7 +949,7 @@ void dcc_regetfile(const char *command, char *args)
     struct stat buf;
 
     if (0 == (user = next_arg(args, &args))) {
-	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname for DCC reget", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname for DCC reget", NULL));
 	return;
     }
     filename = next_arg(args, &args);
@@ -1082,7 +1082,7 @@ void register_dcc_offer(char *user, char *type, char *description, char *address
 	u_32int_t compare3, compare4;
 	struct hostent *hostent_fromhost;
 
-	strncpy(tmpbuf, FromUserHost, 127);
+	strmcpy(tmpbuf, FromUserHost, 127);
 	fromhost = strchr(tmpbuf, '@');
 	fromhost++;
 	alarm(1);		/* dont block too long... */
@@ -1159,7 +1159,7 @@ static void process_incoming_chat(DCC_list * Client)
 	close(Client->read);
 	Client->read = -1;
 	if ((Client->read = Client->write) <= 0) {
-	    put_it("%s", convert_output_format("$G %RDCC error: accept() failed. punt!!", NULL, NULL));
+	    put_it("%s", convert_output_format("$G %RDCC error: accept() failed. punt!!", NULL));
 	    Client->flags |= DCC_DELETE;
 	    return;
 	}
@@ -1180,10 +1180,10 @@ static void process_incoming_chat(DCC_list * Client)
     if (s && *s) {
 	len = strlen(s);
 	if (len > (MAX_DCC_BLOCK_SIZE / 2) - 1) {
-	    put_it("%s", convert_output_format("$G %RDCC buffer overrun. Data lost", NULL, NULL));
+	    put_it("%s", convert_output_format("$G %RDCC buffer overrun. Data lost", NULL));
 	    new_free(&(Client->buffer));
 	} else {
-	    strncpy(tmp, s, len);
+	    strmcpy(tmp, s, len);
 	    bufptr += len;
 	}
     }
@@ -1256,7 +1256,7 @@ static void process_incoming_listen(DCC_list * Client)
 {
     struct sockaddr_in remaddr;
     socklen_t sra;
-    char FdName[10];
+    char FdName[16];
     DCC_list *NewClient;
     int new_socket;
     struct hostent *hp;
@@ -1270,7 +1270,7 @@ static void process_incoming_listen(DCC_list * Client)
     sra = sizeof(struct sockaddr_in);
     new_socket = accept(Client->read, (struct sockaddr *) &remaddr, &sra);
     if (new_socket < 0) {
-	put_it("%s", convert_output_format("$G %RDCC error: accept() failed. punt!!", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC error: accept() failed. punt!!", NULL));
 	return;
     }
     if (0 != (hp = gethostbyaddr((char *) &remaddr.sin_addr, sizeof(remaddr.sin_addr), remaddr.sin_family)))
@@ -1306,10 +1306,10 @@ static void process_incoming_raw(DCC_list * Client)
     if (s && *s) {
 	len = strlen(s);
 	if (len > MAX_DCC_BLOCK_SIZE - 1) {
-	    put_it("%s", convert_output_format("$G %RDCC raw buffer overrun. Data lost", NULL, NULL));
+	    put_it("%s", convert_output_format("$G %RDCC raw buffer overrun. Data lost", NULL));
 	    new_free(&Client->buffer);
 	} else {
-	    strncpy(tmp, s, len);
+	    strmcpy(tmp, s, len);
 	    bufptr += len;
 	}
     }
@@ -1379,7 +1379,7 @@ static void process_outgoing_file(DCC_list * Client, int readwaiting)
 		memcpy(&Client->transfer_orders, packet, sizeof(struct transfer_struct));
 
 	    if (Client->transfer_orders.packet_id != DCC_PACKETID)
-		put_it("%s", convert_output_format("$G %RDCC%n reget packet is invalid!!", NULL, NULL));
+		put_it("%s", convert_output_format("$G %RDCC%n reget packet is invalid!!", NULL));
 	    else
 		put_it("%s", convert_output_format("$G %RDCC%n reget starting at $0", "%u", Client->transfer_orders.byteoffset));
 	}
@@ -1387,7 +1387,7 @@ static void process_outgoing_file(DCC_list * Client, int readwaiting)
 	close(Client->read);
 
 	if ((Client->read = Client->write) < 0) {
-	    put_it("%s", convert_output_format("$G %RDCC error: accept() failed. punt!!", NULL, NULL));
+	    put_it("%s", convert_output_format("$G %RDCC error: accept() failed. punt!!", NULL));
 
 	    Client->flags |= DCC_DELETE;
 	    if (get_to_from(type) != -1 && dcc_active_count)
@@ -1479,8 +1479,8 @@ static void process_incoming_file(DCC_list * Client)
 /* TAKE THIS OUT IF IT CAUSES PROBLEMS */
 	if (Client->filesize) {
 	    if (Client->bytes_read > Client->filesize) {
-		put_it("%s", convert_output_format("$G %RDCC%n Warning: incoming file is larger than the handshake said", NULL, NULL));
-		put_it("%s", convert_output_format("$G %RDCC%n Warning: GET: closing connection", NULL, NULL));
+		put_it("%s", convert_output_format("$G %RDCC%n Warning: incoming file is larger than the handshake said", NULL));
+		put_it("%s", convert_output_format("$G %RDCC%n Warning: GET: closing connection", NULL));
 		if (dcc_active_count)
 		    dcc_active_count--;
 		Client->flags |= DCC_DELETE;
@@ -1517,7 +1517,7 @@ static void dcc_message_transmit(const char *user, char *text, const char *text_
     case DCC_RAW:
 	if (check_host) {
 	    if (!(host = next_arg(text, &text))) {
-		put_it("%s", convert_output_format("$G %RDCC%n No host specified for DCC RAW", NULL, NULL));
+		put_it("%s", convert_output_format("$G %RDCC%n No host specified for DCC RAW", NULL));
 		return;
 	    }
 	}
@@ -1598,7 +1598,7 @@ static void dcc_send_raw(const char *command, char *args)
     char *name;
 
     if (!(name = next_arg(args, &args))) {
-	put_it("%s", convert_output_format("$G %RDCC%n No name specified for DCC raw", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n No name specified for DCC raw", NULL));
 	return;
     }
     dcc_message_transmit(name, args, NULL, DCC_RAW, 1, NULL, 1);
@@ -1642,8 +1642,8 @@ void dcc_list(const char *command, char *args)
     char *filename = NULL;
 
     for (Client = ClientList; Client != NULL; Client = Client->next) {
-	char completed[9];
-	char size[9];
+	char completed[16];
+	char size[16];
 	char *stime = NULL;
 
 	if (Client->filesize) {
@@ -1701,10 +1701,9 @@ void dcc_glist(const char *command, char *args)
     if (ClientList && do_hook(DCC_HEADER_LIST, "%s %s %s %s %s %s", "Dnum", "Type", "Nick", "Status", "K/s", "File")) {
 	put_it("%s",
 	       convert_output_format
-	       ("%G#  %W|%n %GT%gype  %W|%n %GN%gick      %W|%n %GP%gercent %GC%gomplete        %W|%n %GK%g/s   %W|%n %GF%gile", NULL,
-		NULL));
+	       ("%G#  %W|%n %GT%gype  %W|%n %GN%gick      %W|%n %GP%gercent %GC%gomplete        %W|%n %GK%g/s   %W|%n %GF%gile", NULL));
 	put_it("%s",
-	       convert_output_format("%W---------------------------------------------------------------------------", NULL, NULL));
+	       convert_output_format("%W---------------------------------------------------------------------------", NULL));
 
     }
     for (Client = ClientList; Client != NULL; Client = Client->next) {
@@ -1811,7 +1810,7 @@ void dcc_glist(const char *command, char *args)
 		size = barlen;
 	    sprintf(stats, "%4.1f", perc);
 	    sprintf(spec, "%s %s%s %02d:%02d", dcc_offer[iperc], stats, "%%", minutes, seconds);
-	    sprintf(spec, "%s", convert_output_format(spec, NULL, NULL));
+	    sprintf(spec, "%s", convert_output_format(spec, NULL));
 	}
 	type = get_dcc_type(flags & DCC_TYPES);
 	if (do_hook(DCC_STATF_LIST, "%d %s %s %s %s %s",
@@ -1864,7 +1863,7 @@ void dcc_glist(const char *command, char *args)
     if (ClientList && count)
 	do_hook(DCC_POST_LIST, "%s %s %s %s %s %s", "DCCnum", "Type", "Nick", "Status", "K/s", "File");
     if (count == 0)
-	put_it("%s", convert_output_format("$G %RDCC%n Nothing on DCC list.", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n Nothing on DCC list.", NULL));
 }
 
 static char DCC_reject_type[12];
@@ -2114,7 +2113,7 @@ static void dcc_close(const char *command, char *args)
 *****************************************************************************/
 
     if (!Type) {
-	put_it("%s", convert_output_format("$G %RDCC%n You must specify a type|dcc_num for DCC close", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n You must specify a type|dcc_num for DCC close", NULL));
 	return;
     }
 
@@ -2129,7 +2128,7 @@ static void dcc_close(const char *command, char *args)
 	closenum = atol(Type + 1);
 
 	if (closenum == 0) {
-	    put_it("%s", convert_output_format("$G %RDCC%n close invalid number", NULL, NULL));
+	    put_it("%s", convert_output_format("$G %RDCC%n close invalid number", NULL));
 	    return;
 	}
 
@@ -2143,7 +2142,7 @@ static void dcc_close(const char *command, char *args)
 *****************************************************************************/
 
     if (!user) {
-	put_it("%s", convert_output_format("$G %RDCC%n specify a type and a nick for DCC close", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n specify a type and a nick for DCC close", NULL));
 	return;
     }
 
@@ -2160,7 +2159,7 @@ static void dcc_close(const char *command, char *args)
 	    update_all_status(curr_scr_win, NULL, 0);
 	    return;
 	}
-	put_it("%s", convert_output_format("$G %RDCC%n close invalid number", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n close invalid number", NULL));
 	return;
     }
 
@@ -2172,14 +2171,14 @@ static void dcc_close(const char *command, char *args)
 	if (!my_stricmp(description, "-all"))
 	    dcc_close_type_nick_all(Type, user);
 	else
-	    put_it("%s", convert_output_format("$G %RDCC%n CLOSE invalid description", NULL, NULL));
+	    put_it("%s", convert_output_format("$G %RDCC%n CLOSE invalid description", NULL));
 	return;
     }
 
     if (dcc_types[CType])
 	dcc_close_filename(description, user, Type, CType);
     else
-	put_it("%s", convert_output_format("$G %RDCC%n Unknown type [$0]", "%s", dcc_types[CType]));
+	put_it("%s", convert_output_format("$G %RDCC%n Unknown type [$0]", "%s", Type));
 }
 
 void dcc_reject_notify(char *description, char *user, const char *type)
@@ -2238,7 +2237,7 @@ static void dcc_rename(const char *command, char *args)
     char *temp;
 
     if (!(user = next_arg(args, &args)) || !(temp = next_arg(args, &args))) {
-	put_it("%s", convert_output_format("$G %RDCC%n You must specify a nick and a new filename", NULL, NULL));
+	put_it("%s", convert_output_format("$G %RDCC%n You must specify a nick and a new filename", NULL));
 	return;
     }
     if ((newdesc = next_arg(args, &args)) != NULL)
@@ -2251,7 +2250,7 @@ static void dcc_rename(const char *command, char *args)
     if ((Client = dcc_searchlist(description, user, DCC_FILEREAD, 0, NULL, NULL, 0))) {
 	/* Is this needed now? */
 	if (!(Client->flags & DCC_OFFER)) {
-	    put_it("%s", convert_output_format("$G %RDCC Too late to rename that file", NULL, NULL));
+	    put_it("%s", convert_output_format("$G %RDCC Too late to rename that file", NULL));
 	    return;
 	}
 	new_free(&(Client->description));
@@ -2453,10 +2452,10 @@ static int get_to_from(const char *type)
 
 static void dcc_help1(const char *command, char *args)
 {
-    put_it("%s", convert_output_format("$G %RDCC%n help -", NULL, NULL));
-    put_it("%s", convert_output_format("   Active    Stats    List     GList   ?", NULL, NULL));
-    put_it("%s", convert_output_format("   Resend/Reget    Send/Get    Chat    Raw   Close  Rename", NULL, NULL));
-    put_it("%s", convert_output_format("   Auto   Quiet   Paths   Quiet   Overwrite  Auto_Rename", NULL, NULL));
+    put_it("%s", convert_output_format("$G %RDCC%n help -", NULL));
+    put_it("%s", convert_output_format("   Active    Stats    List     GList   ?", NULL));
+    put_it("%s", convert_output_format("   Resend/Reget    Send/Get    Chat    Raw   Close  Rename", NULL));
+    put_it("%s", convert_output_format("   Auto   Quiet   Paths   Quiet   Overwrite  Auto_Rename", NULL));
 }
 
 static void dcc_show_active(const char *command, char *args)

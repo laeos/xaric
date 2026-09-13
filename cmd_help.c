@@ -286,8 +286,8 @@ static void display_topic(char *topic)
     }
 
     create_help_window();
-    strncpy(query, topic, MAXPATHLEN);
-    strncpy(path, help_me, MAXPATHLEN);
+    strmcpy(query, topic, sizeof(query) - 1);
+    strmcpy(path, help_me, sizeof(path) - 1);
     dir[0] = '\0';
 
     next = next_arg(topic, &topic);

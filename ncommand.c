@@ -1272,7 +1272,7 @@ void cmd_stats(struct command *cmd, char *args)
     else
 	serv = get_server_itsname(from_server);
     if (str)
-	put_it("%s", convert_output_format(str, NULL, NULL));
+	put_it("%s", convert_output_format(str, NULL));
     send_to_server(SERVER(from_server), "%s %s %s", cmd->name, new_flag, serv);
 }
 
@@ -1389,10 +1389,11 @@ static void userhost_ignore(WhoisStuff * stuff, char *nick1, char *args)
     if (!stuff || !stuff->nick || !nick1 || !strcmp(stuff->user, "<UNKNOWN>") || my_stricmp(stuff->nick, nick1)) {
 	if ((whowas = check_whowas_nick_buffer(nick1, arg, 0))) {
 	    bitchsay("Using WhoWas info for %s of %s ", arg, nick1);
-	    user = host;
-	    host = strchr(host, '@');
-	    *host++ = 0;
 	    nick = whowas->nicklist->nick;
+	    user = clear_server_flags(whowas->nicklist->host);
+	    host = strchr(user, '@');
+	    if (host)
+		*host++ = 0;
 	} else {
 	    say("No match for user %s", nick1);
 	    return;
@@ -1435,7 +1436,7 @@ static void userhost_ignore(WhoisStuff * stuff, char *nick1, char *args)
     window_display = 0;
     t_parse_command("IGNORE", ignorebuf);
     if ((arg = next_arg(args, &args))) {
-	char tmp[BIG_BUFFER_SIZE + 1];
+	char tmp[BIG_BUFFER_SIZE * 2 + 32];
 
 	sprintf(tmp, "%s ^IGNORE %s NONE", arg, ignorebuf);
 	t_parse_command("TIMER", tmp);

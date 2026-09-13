@@ -356,7 +356,7 @@ extern int do_hook(int which, const char *format, ...)
     }
     if (which < 0) {
 	NumericList *hook;
-	char foo[10];
+	char foo[16];
 
 	sprintf(foo, "%3.3u", -which);
 	if ((hook = (NumericList *) find_in_list((struct list **) &numeric_list, foo, 0)) != NULL) {

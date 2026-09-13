@@ -618,7 +618,7 @@ extern void set_screens(fd_set *, fd_set *);
 void io(const char *what)
 {
     static int first_time = 1, level = 0;
-    static struct timeval cursor_timeout, clock_timeout, right_away, timer, *timeptr = NULL;
+    static struct timeval cursor_timeout, clock_timeout, timer, *timeptr = NULL;
     int hold_over;
     fd_set rd, wd;
     static int old_level = 0;
@@ -668,9 +668,6 @@ void io(const char *what)
 	 */
 	clock_timeout.tv_usec = 0L;
 
-	right_away.tv_usec = 0L;
-	right_away.tv_sec = 0L;
-
 	timer.tv_usec = 0L;
     }
 
@@ -695,12 +692,7 @@ void io(const char *what)
     timer.tv_sec = TimerTimeout();
     if (timer.tv_sec <= timeptr->tv_sec)
 	timeptr = &timer;
-#if 0
-    if ((hold_over = unhold_windows()) != 0)
-	timeptr = &right_away;
-#else
     hold_over = 0;
-#endif
 
     /* go ahead and wait for some data to come in */
     switch (new_select(&rd, &wd, timeptr)) {

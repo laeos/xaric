@@ -358,7 +358,7 @@ void userage(const char *command, const char *use)
     if (do_hook(USAGE_LIST, "%s %s", command, use ? use : "No Help Available for this command"))
 	put_it("%s",
 	       convert_output_format(get_fset_var(FORMAT_USAGE_FSET), "%s %s", command,
-				     convert_output_format(use ? use : "%WNo Help available for this command", NULL, NULL)));
+				     convert_output_format(use ? use : "%WNo Help available for this command", NULL)));
 }
 
 char *random_str(int min, int max)

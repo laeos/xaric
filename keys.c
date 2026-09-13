@@ -464,7 +464,7 @@ void new_key(int map, int chr, int type, int change, char *stuff)
     if (keys[map][chr]) {
 	if (keys[map][chr]->stuff)
 	    new_free(&(keys[map][chr]->stuff));
-	new_free((char **) &(keys[map][chr]));
+	free(keys[map][chr]);
 	keys[map][chr] = NULL;
     }
 
@@ -686,7 +686,9 @@ void clear_bindings(void)
 	for (j = 0; j < charsize; j++) {
 	    if (keys[i][j] && keys[i][j]->stuff)
 		new_free(&(keys[i][j]->stuff));
-	    if (keys[i][j])
-		new_free((char **) &(keys[i][j]));
+	    if (keys[i][j]) {
+		free(keys[i][j]);
+		keys[i][j] = NULL;
+	    }
 	}
 }

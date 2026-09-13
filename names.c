@@ -311,7 +311,7 @@ char *get_channel_key(char *channel, int server)
 char *recreate_mode(struct channel *chan)
 {
     int mode_pos = 0, mode;
-    static char *s;
+    char *s;
     char buffer[BIG_BUFFER_SIZE + 1];
 
     chan->i_mode = chan->mode;

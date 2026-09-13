@@ -656,11 +656,9 @@ void whois_ignore_msgs(WhoisStuff * stuff, char *nick, char *text)
 	    message_from(stuff->nick, LOG_MSG);
 	    if (do_hook(MSG_LIST, "%s %s", stuff->nick, text)) {
 		if (away_set) {
-		    char *msg = NULL;
-
 		    put_it("%s",
 			   convert_output_format(get_fset_var(FORMAT_IGNORE_MSG_AWAY_FSET), "%s %s %s", update_clock(GET_TIME),
-						 stuff->nick, msg));
+						 stuff->nick, empty_str));
 		    beep_em(get_int_var(BEEP_WHEN_AWAY_VAR));
 		} else {
 		    put_it("%s",

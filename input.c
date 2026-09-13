@@ -348,7 +348,7 @@ void set_input_prompt(Window * win, char *prompt, int unused)
     if (prompt) {
 	if (input_prompt && !strcmp(prompt, input_prompt))
 	    return;
-	malloc_strcpy(&input_prompt, convert_output_format(prompt, NULL, NULL));
+	malloc_strcpy(&input_prompt, convert_output_format(prompt, NULL));
     } else {
 	if (!input_prompt)
 	    return;

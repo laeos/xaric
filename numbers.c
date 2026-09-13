@@ -388,7 +388,7 @@ static int handle_server_ping(int comm, char *from, char **ArgList)
 	in_sping = 0;
 #endif
     } else
-	put_it("%s", convert_output_format("No such server to ping", NULL, NULL));
+	put_it("%s", convert_output_format("No such server to ping", NULL));
     return 1;
 }
 

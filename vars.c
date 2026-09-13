@@ -740,7 +740,7 @@ set_numeric_string (Window * win, char *value, int unused)
 {
 	malloc_strcpy(&line_thing, 
 			convert_output_format(value ? value : DEFAULT_SHOW_NUMERICS_STR,
-				NULL, NULL));
+				NULL));
 }
 
 static void 

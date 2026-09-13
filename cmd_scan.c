@@ -131,7 +131,7 @@ void cmd_scan(struct command *cmd, char *args)
 	    malloc_strcat(&buffer, space_str);
 	    if (count++ == 4) {
 		if (get_format(FORMAT_NAMES_BANNER_FSET))
-		    put_it("%s%s", convert_output_format(get_format(FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
+		    put_it("%s%s", convert_output_format(get_format(FORMAT_NAMES_BANNER_FSET), NULL), buffer);
 		else
 		    put_it("%s", buffer);
 		new_free(&buffer);
@@ -140,12 +140,12 @@ void cmd_scan(struct command *cmd, char *args)
 	}
 	if (count && buffer) {
 	    if (get_format(FORMAT_NAMES_BANNER_FSET))
-		put_it("%s%s", convert_output_format(get_format(FORMAT_NAMES_BANNER_FSET), NULL, NULL), buffer);
+		put_it("%s%s", convert_output_format(get_format(FORMAT_NAMES_BANNER_FSET), NULL), buffer);
 	    else
 		put_it("%s", buffer);
 	}
 	if (get_format(FORMAT_NAMES_FOOTER_FSET))
-	    put_it("%s", convert_output_format(get_format(FORMAT_NAMES_FOOTER_FSET), NULL, NULL));
+	    put_it("%s", convert_output_format(get_format(FORMAT_NAMES_FOOTER_FSET), NULL));
 	new_free(&buffer);
     }
     clear_sorted_nicklist(&snick);

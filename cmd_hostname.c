@@ -64,7 +64,7 @@ static void set_hostname(char *host)
 static void iface_callback(void *data, struct iflist *list)
 {
     if (list == NULL && errno == 0) {
-	put_it("%s", convert_output_format("%G Unable to find anything!", NULL, NULL));
+	put_it("%s", convert_output_format("%G Unable to find anything!", NULL));
     } else if (list == NULL) {
 	yell("Error fetching interface info: %s", strerror(errno));
     } else {

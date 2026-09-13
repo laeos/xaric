@@ -261,7 +261,7 @@ void show_notify_list(void)
     if (from_server == -1)
 	return;
 
-    put_it("%s", convert_output_format("%G---[ %COnline Users %G]---", NULL, NULL));
+    put_it("%s", convert_output_format("%G---[ %COnline Users %G]---", NULL));
     for (tmp = server_list[from_server].notify_list; tmp; tmp = tmp->next) {
 	if (tmp->flag) {
 	    if (count == 0)
@@ -275,7 +275,7 @@ void show_notify_list(void)
 	    count++;
 	}
     }
-    put_it("%s", convert_output_format("%G---[ %COffline Users %G]---", NULL, NULL));
+    put_it("%s", convert_output_format("%G---[ %COffline Users %G]---", NULL));
     count = 0;
     for (tmp = server_list[from_server].notify_list; tmp; tmp = tmp->next) {
 	if (!(tmp->flag)) {

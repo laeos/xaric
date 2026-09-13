@@ -362,6 +362,15 @@ AX_CHECK_OPENSSL([
 	AC_MSG_ERROR([failed to find OpenSSL])
     ])
 
+dnl Embed the OpenSSL library directory as a runtime path so the binary
+dnl keeps working where the loader does not search it by default
+dnl (NetBSD does not search /usr/pkg/lib, Solaris not /usr/local/lib).
+for dir in $OPENSSL_LDFLAGS; do
+    case $dir in
+	-L*) OPENSSL_LDFLAGS="$OPENSSL_LDFLAGS -Wl,-rpath,${dir#-L}" ;;
+    esac
+done
+
 
 dnl ----------------------------------------------------------
 dnl All done!

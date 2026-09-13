@@ -751,7 +751,12 @@ int connect_to_server_by_refnum(int refnum, int c_server)
 	}
 
 	if ((ret = make_address(sname, sport, &server_list[refnum].rem_addr)) != SA_OK) {
-	    say("Couldn't figure out address %s:%d: %s", sname, sport, sa_error(ret));
+	    int os_errno = errno;
+
+	    if (ret == SA_ERR_SYS)
+		say("Couldn't figure out address %s:%d: %s (errno %d: %s)", sname, sport, sa_error(ret), os_errno, strerror(os_errno));
+	    else
+		say("Couldn't figure out address %s:%d: %s", sname, sport, sa_error(ret));
 	    return -1;
 	}
 	sa_create(&server_list[refnum].sock);
@@ -764,7 +769,12 @@ int connect_to_server_by_refnum(int refnum, int c_server)
 	    }
 	}
 	if ((ret = sa_connect(server_list[refnum].sock, server_list[refnum].rem_addr)) != SA_OK) {
-	    say("Couldn't connect to %s:%d: %s", sname, sport, sa_error(ret));
+	    int os_errno = errno;
+
+	    if (ret == SA_ERR_SYS)
+		say("Couldn't connect to %s:%d: %s (errno %d: %s)", sname, sport, sa_error(ret), os_errno, strerror(os_errno));
+	    else
+		say("Couldn't connect to %s:%d: %s", sname, sport, sa_error(ret));
 	    sa_destroy(server_list[refnum].sock);
 	    server_list[refnum].sock = NULL;
 	    return -1;

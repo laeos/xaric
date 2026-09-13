@@ -883,10 +883,6 @@ sa_rc_t sa_addr_match(const sa_addr_t * saa1, const sa_addr_t * saa2, int prefix
     else
 	return SA_RC(SA_ERR_INT);
 
-    /* make sure we do not compare than possible */
-    if (prefixlen > (nBits + 1))
-	return SA_RC(SA_ERR_ARG);
-
     /* support equal matching (= all bits plus optionally port) */
     bMatchPort = FALSE;
     if (prefixlen < 0) {
@@ -894,6 +890,11 @@ sa_rc_t sa_addr_match(const sa_addr_t * saa1, const sa_addr_t * saa2, int prefix
 	    bMatchPort = TRUE;
 	prefixlen = nBits;
     }
+
+    /* make sure we do not compare than possible; compare unsigned so gcc
+     * does not have to assume the absence of signed overflow */
+    if ((unsigned int) prefixlen > (unsigned int) nBits + 1)
+	return SA_RC(SA_ERR_ARG);
 
     /* perform address representation comparison (assumption guaranteed by API: network byte order is used) */
     nBytes = (prefixlen / 8);

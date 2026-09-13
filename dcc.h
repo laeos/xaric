@@ -59,6 +59,7 @@ void close_all_dcc(void);
 void dcc_check(fd_set *, fd_set *);
 int dcc_active(char *);
 void dcc_reject(char *, char *, char *);
+void dcc_resume_request(char *, char *, char *, char *);
 void set_dcc_bits(fd_set *, fd_set *);
 void dcc_sendfrom_queue(void);
 void dcc_check_idle(void);

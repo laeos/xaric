@@ -99,6 +99,7 @@ typedef struct DCC_struct {
     char *othername;
     struct in_addr remote;
     u_short remport;
+    u_short listen_port;	/* port we bound for a pending offer */
     u_32int_t bytes_read;
     u_32int_t bytes_sent;
 

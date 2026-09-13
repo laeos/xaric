@@ -215,6 +215,7 @@ static DCC_list *dcc_searchlist(const char *name, const char *user, int type, in
     *Client = NewClient = new_malloc(sizeof(DCC_list));
     NewClient->flags = type;
     NewClient->read = NewClient->write = NewClient->file = -1;
+    NewClient->listen_port = 0;
     NewClient->filesize = filesize;
     malloc_strcpy(&NewClient->description, name);
     malloc_strcpy(&NewClient->user, user);
@@ -522,6 +523,9 @@ int dcc_open(DCC_list * Client)
 	    from_server = old_server;
 	    return 0;
 	}
+	/* portnum is the port we actually bound, which is what the offer
+	 * advertises and what a DCC RESUME will quote back at us */
+	Client->listen_port = portnum;
 	if (get_to_from(type) != -1)
 	    dcc_active_count++;
 	if (Client->flags & DCC_TWOCLIENTS) {
@@ -717,6 +721,44 @@ void real_dcc_filesend(char *filename, char *real_file, char *user, int type, in
 	    dcc_open(Client);
 	} else
 	    put_it("%s", convert_output_format("$G %RDCC%n A previous DCC send:$0 to $1 exists", "%s %s", filename, nick));
+    }
+}
+
+/*
+ * dcc_resume_request: the getter has sent us a CTCP DCC RESUME for one of
+ * our pending SEND offers.  Find the offer by listening port, acknowledge
+ * with DCC ACCEPT, and pick up the transfer from the getter's position
+ * once it connects (process_outgoing_file lseeks by byteoffset).
+ */
+void dcc_resume_request(char *from, char *file, char *portstr, char *position)
+{
+    DCC_list *Client;
+    unsigned port;
+    u_32int_t offset;
+
+    if (!from || !*from || !portstr || !*portstr)
+	return;
+    port = (unsigned) my_atol(portstr);
+    if (!port || port > 65535)
+	return;
+    offset = strtoul(position, NULL, 10);
+
+    for (Client = ClientList; Client; Client = Client->next) {
+	if ((Client->flags & DCC_DELETE) || (Client->flags & DCC_ACTIVE) || !(Client->flags & DCC_WAIT))
+	    continue;
+	if ((Client->flags & DCC_TYPES) != DCC_FILEOFFER)
+	    continue;
+	if (my_stricmp(Client->user, from) || Client->listen_port != port)
+	    continue;
+
+	if (Client->filesize && offset > Client->filesize)
+	    offset = 0;		/* nonsense position, resend from the start */
+	Client->transfer_orders.byteoffset = offset;
+	Client->bytes_sent = offset;	/* the getter acks cumulative bytes */
+	send_ctcp(CTCP_PRIVMSG, from, CTCP_DCC, "ACCEPT %s %u %u", file, port, (unsigned) offset);
+	if (!dcc_quiet)
+	    put_it("%s", convert_output_format("$G %RDCC%Y RESUME%n %W$0%n to $1 from byte $2", "%s %s %u", file, from, (unsigned) offset));
+	return;
     }
 }
 

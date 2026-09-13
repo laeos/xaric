@@ -219,8 +219,22 @@ CTCP_HANDLER(do_dcc)
     if (my_stricmp(to, get_server_nickname(from_server)))
 	return NULL;
 
-    if (!(type = next_arg(cmd, &cmd)) ||
-	!(description = next_arg(cmd, &cmd)) || !(inetaddr = next_arg(cmd, &cmd)) || !(port = next_arg(cmd, &cmd)))
+    if (!(type = next_arg(cmd, &cmd)))
+	return NULL;
+
+    /* the getter wants to continue a SEND we have pending; it echoes
+     * only the basename of the file, so match the offer by port */
+    if (!my_stricmp(type, "RESUME")) {
+	char *file = next_arg(cmd, &cmd);
+	char *port = next_arg(cmd, &cmd);
+	char *position = next_arg(cmd, &cmd);
+
+	if (file && port && position)
+	    dcc_resume_request(from, file, port, position);
+	return NULL;
+    }
+
+    if (!(description = next_arg(cmd, &cmd)) || !(inetaddr = next_arg(cmd, &cmd)) || !(port = next_arg(cmd, &cmd)))
 	return NULL;
 
     size = next_arg(cmd, &cmd);

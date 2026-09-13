@@ -269,7 +269,7 @@ void show_notify_list(void)
 		       convert_output_format(get_fset_var(FORMAT_NOTIFY_ON_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times",
 					     "Period", "Last seen"));
 	    put_it("%s",
-		   convert_output_format(get_fset_var(FORMAT_NOTIFY_ON_FSET), "%s %s@%s %d %l %l", tmp->nick,
+		   convert_output_format(get_fset_var(FORMAT_NOTIFY_ON_FSET), "%s %s@%s %d %ld %ld", tmp->nick,
 					 tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times,
 					 tmp->offline, tmp->lastseen));
 	    count++;
@@ -284,7 +284,7 @@ void show_notify_list(void)
 		       convert_output_format(get_fset_var(FORMAT_NOTIFY_OFF_FSET), "%s %s %s %s %s", "Nick", "UserHost", "Times",
 					     "Period", "Last seen"));
 	    put_it("%s",
-		   convert_output_format(get_fset_var(FORMAT_NOTIFY_OFF_FSET), "%s %s@%s %d %l %l", tmp->nick,
+		   convert_output_format(get_fset_var(FORMAT_NOTIFY_OFF_FSET), "%s %s@%s %d %ld %ld", tmp->nick,
 					 tmp->user ? tmp->user : "unknown", tmp->host ? tmp->host : "unknown", tmp->times,
 					 tmp->offline, tmp->lastseen));
 	    count++;

@@ -344,9 +344,7 @@ extern int do_hook(int which, const char *format, ...)
     int i, old_in_on_who;
     Hook *hook_array[2048];
     int hook_num = 0;
-    static int hook_level = 0;
 
-    hook_level++;
     *buffer = 0;
 
     if (format) {

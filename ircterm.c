@@ -28,6 +28,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -94,12 +95,6 @@ static int term_DC_delete(void);
 static int term_BS_cursor_left(void);
 static int term_LE_cursor_left(void);
 static int term_null_function(void);
-
-/* these are missing on some systems */
-extern char *tgetstr();
-extern int tgetent();
-extern char *getenv();
-extern char *tgoto(const char *, int, int);
 
 /* Setup the low level terminal disipline */
 static void setup_tty(void)

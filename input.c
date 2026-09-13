@@ -141,7 +141,7 @@ void update_input(int update)
     int old_start;
     static int co = 0, li = 0;
     char *ptr;
-    int len, free_it = 1, cnt, ansi_count, max;
+    int len, free_it = 1, ansi_count, max;
 
     char *prompt;
 
@@ -241,21 +241,20 @@ void update_input(int update)
 		len = term_cols - WIDTH - 1 /* + ansi_count */ ;
 	    else
 		len = MIN_POS;
-	    cnt = /* term_puts */ safe_puts(&(INPUT_BUFFER[str_start]), len);
+	    /* term_puts */ safe_puts(&(INPUT_BUFFER[str_start]), len);
 	    term_echo(echo);
-	    cnt += /* term_puts */ safe_puts(&(current_screen->input_buffer[
+	    /* term_puts */ safe_puts(&(current_screen->input_buffer[
 									       str_start + len]), term_cols - len + ansi_count);
 	} else
-	    cnt = /* term_puts */ safe_puts(&(INPUT_BUFFER[str_start]), term_cols);
+	    /* term_puts */ safe_puts(&(INPUT_BUFFER[str_start]), term_cols);
 	term_clear_to_eol();
 	term_move_cursor(cursor, input_line);
     } else if (update == UPDATE_FROM_CURSOR) {
 	term_move_cursor(cursor, input_line);
-	cnt = cursor;
 	max = term_cols - (current_screen->buffer_pos - str_start) + ansi_count;
 	if ((len = strlen(&(THIS_CHAR))) > max)
 	    len = max;
-	cnt += /* term_puts */ safe_puts(&(THIS_CHAR), len);
+	/* term_puts */ safe_puts(&(THIS_CHAR), len);
 	term_clear_to_eol();
 	term_move_cursor(cursor, input_line);
     } else if (update == UPDATE_JUST_CURSOR)
@@ -491,11 +490,9 @@ void input_end_of_line(char unused, char *not_used)
 void input_delete_to_previous_space(char key, char *blah)
 {
     int old_pos;
-    char c;
 
     cursor_to_input();
     old_pos = THIS_POS;
-    c = THIS_CHAR;
 
     while (!my_isspace(THIS_CHAR) && THIS_POS >= MIN_POS)
 	THIS_POS--;

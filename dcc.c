@@ -58,7 +58,7 @@ static void dcc_really_erase(void);
 static void dcc_rename(const char *, char *);
 static void dcc_send_raw(const char *, char *);
 static void add_to_dcc_buffer(DCC_list * Client, char *buf);
-static void output_reject_ctcp(char *, char *);
+static void output_reject_ctcp(WhoisStuff *, char *, char *);
 static void process_incoming_chat(register DCC_list *);
 static void process_incoming_listen(register DCC_list *);
 static void process_incoming_raw(register DCC_list *);
@@ -355,7 +355,7 @@ static void dcc_got_connected(DCC_list * client)
 	if (((client->flags & DCC_TYPES) == DCC_REGETFILE)) {
 	    /* send a packet to the sender with transfer resume instructions */
 	    put_it("%s",
-		   convert_output_format("$G %RDCC %YTelling uplink we want to start at%n: $0", "%l",
+		   convert_output_format("$G %RDCC %YTelling uplink we want to start at%n: $0", "%u",
 					 client->transfer_orders.byteoffset));
 	    send(client->read, (const char *) &client->transfer_orders, sizeof(struct transfer_struct), 0);
 	}
@@ -847,7 +847,6 @@ static void dcc_getfile(const char *command, char *args)
     char *tmp = NULL;
     DCC_list *Client;
     char *fullname = NULL;
-    char *argument = NULL;
 
     if (0 == (user = next_arg(args, &args))) {
 	put_it("%s", convert_output_format("$G %RDCC%n You must supply a nickname for DCC get", NULL, NULL));
@@ -858,7 +857,7 @@ static void dcc_getfile(const char *command, char *args)
 	    if (*args != '-' && *(args + 1) != 'e')
 		filename = next_arg(args, &args);
 	    else if (args && *args == '-' && *(args + 1) == 'e') {
-		argument = next_arg(args, &args);
+		next_arg(args, &args);
 	    }
 	}
     }
@@ -967,7 +966,6 @@ void register_dcc_offer(char *user, char *type, char *description, char *address
     char *c = NULL;
     u_long TempLong;
     unsigned TempInt;
-    long packets = 0;
 
     if ((c = strrchr(description, '/')))
 	description = c + 1;
@@ -983,11 +981,10 @@ void register_dcc_offer(char *user, char *type, char *description, char *address
     }
 
     message_from(NULL, LOG_DCC);
-    if (size && *size) {
+    if (size && *size)
 	filesize = my_atol(size);
-	packets = filesize / dccBlockSize() + 1;
-    } else
-	packets = filesize = 0;
+    else
+	filesize = 0;
 
     if (!my_stricmp(type, "CHAT"))
 	CType = DCC_CHAT;
@@ -1053,7 +1050,7 @@ void register_dcc_offer(char *user, char *type, char *description, char *address
 	    yell("Incoming handshake has an address [%s] that could not be figured out!", fromhost);
 	    yell("Please use caution in deciding whether to accept it or not");
 	} else {
-	    compare = *((u_32int_t *) hostent_fromhost->h_addr_list[0]);
+	    compare = ((struct in_addr *) hostent_fromhost->h_addr_list[0])->s_addr;
 	    compare2 = inet_addr(fromhost);
 	    compare3 = htonl(0x00000000);
 	    compare4 = htonl(0xffffffff);
@@ -1076,7 +1073,7 @@ void register_dcc_offer(char *user, char *type, char *description, char *address
 	Client->flags = DCC_DELETE;
 	message_from(NULL, LOG_CRAP);
 	return;
-    } else if (do_hook(DCC_REQUEST_LIST, "%s %s %s %d", user, type, description, Client->filesize)) {
+    } else if (do_hook(DCC_REQUEST_LIST, "%s %s %s %u", user, type, description, Client->filesize)) {
 	if (!dcc_quiet) {
 
 	    char buf[40];
@@ -1126,7 +1123,7 @@ static void process_incoming_chat(DCC_list * Client)
 	}
 	Client->flags &= ~DCC_WAIT;
 	Client->flags |= DCC_ACTIVE;
-	if (do_hook(DCC_CONNECT_LIST, "%s CHAT %s %d", Client->user, inet_ntoa(remaddr.sin_addr)), ntohs(remaddr.sin_port))
+	if (do_hook(DCC_CONNECT_LIST, "%s CHAT %s %d", Client->user, inet_ntoa(remaddr.sin_addr), ntohs(remaddr.sin_port)))
 	    put_it("%s", convert_output_format(get_fset_var(FORMAT_DCC_CONNECT_FSET),
 					       "%s %s %s %s %s %d", update_clock(GET_TIME),
 					       "CHAT",
@@ -1342,7 +1339,7 @@ static void process_outgoing_file(DCC_list * Client, int readwaiting)
 	    if (Client->transfer_orders.packet_id != DCC_PACKETID)
 		put_it("%s", convert_output_format("$G %RDCC%n reget packet is invalid!!", NULL, NULL));
 	    else
-		put_it("%s", convert_output_format("$G %RDCC%n reget starting at $0", "%d", Client->transfer_orders.byteoffset));
+		put_it("%s", convert_output_format("$G %RDCC%n reget starting at $0", "%u", Client->transfer_orders.byteoffset));
 	}
 
 	close(Client->read);
@@ -1378,16 +1375,16 @@ static void process_outgoing_file(DCC_list * Client, int readwaiting)
 	    if (do_hook(DCC_CONNECT_LIST, "%s %s %s %d", Client->user, "SEND", inet_ntoa(remaddr.sin_addr), ntohs(remaddr.sin_port)))
 		if (!dcc_quiet)
 		    put_it("%s", convert_output_format(get_fset_var(FORMAT_DCC_CONNECT_FSET),
-						       "%s %s %s %s %s %d %d", update_clock(GET_TIME), "RESEND",
+						       "%s %s %s %s %s %d %u", update_clock(GET_TIME), "RESEND",
 						       Client->user, Client->userhost ? Client->userhost : "u@h",
 						       inet_ntoa(remaddr.sin_addr), ntohs(remaddr.sin_port),
 						       Client->transfer_orders.byteoffset));
 	} else {
-	    if (do_hook(DCC_CONNECT_LIST, "%s %s %s %d %s %d", Client->user, "SEND",
+	    if (do_hook(DCC_CONNECT_LIST, "%s %s %s %d %s %u", Client->user, "SEND",
 			inet_ntoa(remaddr.sin_addr), ntohs(remaddr.sin_port), Client->description, Client->filesize))
 		if (!dcc_quiet)
 		    put_it("%s", convert_output_format(get_fset_var(FORMAT_DCC_CONNECT_FSET),
-						       "%s %s %s %s %s %d %d", update_clock(GET_TIME), "SEND",
+						       "%s %s %s %s %s %d %u", update_clock(GET_TIME), "SEND",
 						       Client->user, Client->userhost ? Client->userhost : "u@h",
 						       inet_ntoa(remaddr.sin_addr), ntohs(remaddr.sin_port),
 						       Client->transfer_orders.byteoffset));
@@ -1424,9 +1421,6 @@ static void process_incoming_file(DCC_list * Client)
     char tmp[MAX_DCC_BLOCK_SIZE + 1];
     u_32int_t bytestemp;
     int bytesread;
-    const char *type;
-
-    type = dcc_types[Client->flags & DCC_TYPES];
 
     if ((bytesread = read(Client->read, tmp, MAX_DCC_BLOCK_SIZE)) <= 0) {
 	if (Client->bytes_read + Client->transfer_orders.byteoffset < Client->filesize)
@@ -1662,7 +1656,7 @@ void dcc_glist(const char *command, char *args)
     barsize = 0.0;
     memset(spec, 0, sizeof(spec) - 1);
 
-    if (ClientList && do_hook(DCC_HEADER_LIST, "%s %s %s %s %s %s %s", "Dnum", "Type", "Nick", "Status", "K/s", "File")) {
+    if (ClientList && do_hook(DCC_HEADER_LIST, "%s %s %s %s %s %s", "Dnum", "Type", "Nick", "Status", "K/s", "File")) {
 	put_it("%s",
 	       convert_output_format
 	       ("%G#  %W|%n %GT%gype  %W|%n %GN%gick      %W|%n %GP%gercent %GC%gomplete        %W|%n %GK%g/s   %W|%n %GF%gile", NULL,
@@ -1826,7 +1820,7 @@ void dcc_glist(const char *command, char *args)
 	count++;
     }
     if (ClientList && count)
-	do_hook(DCC_POST_LIST, "%s %s %s %s %s %s %s", "DCCnum", "Type", "Nick", "Status", "K/s", "File");
+	do_hook(DCC_POST_LIST, "%s %s %s %s %s %s", "DCCnum", "Type", "Nick", "Status", "K/s", "File");
     if (count == 0)
 	put_it("%s", convert_output_format("$G %RDCC%n Nothing on DCC list.", NULL, NULL));
 }
@@ -1834,7 +1828,7 @@ void dcc_glist(const char *command, char *args)
 static char DCC_reject_type[12];
 static char DCC_reject_description[40];
 
-static void output_reject_ctcp(char *notused, char *nicklist)
+static void output_reject_ctcp(WhoisStuff *notused, char *nick, char *nicklist)
 {
     if (nicklist && *nicklist && *DCC_reject_description)
 	send_ctcp(CTCP_NOTICE, nicklist, CTCP_DCC, "REJECT %s %s", DCC_reject_type, DCC_reject_description);

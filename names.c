@@ -731,19 +731,14 @@ decifer_mode(char *from, register char *mode_string, struct channel **channel, u
     int add = 0;
     int limit_set = 0;
     int limit_reset = 0;
-    int splitter = 0;
     char *rest, *the_key;
 
     struct nick_list *ThisNick = NULL;
     BanList *new;
     unsigned int value = 0;
-    int its_me = 0;
 
     if (!(mode_string = next_arg(mode_string, &rest)))
 	return -1;
-
-    its_me = !my_stricmp(from, get_server_nickname(from_server)) ? 1 : 0;
-    splitter = match("*.*.*", from);
 
     for (; *mode_string; mode_string++) {
 	switch (*mode_string) {
@@ -1123,7 +1118,7 @@ static void show_channel(struct channel *chan)
 void list_channels(void)
 {
     struct channel *tmp;
-    int server, no = 1;
+    int server;
 
     if (server_list[from_server].chan_list) {
 	if (get_current_channel_by_refnum(0))
@@ -1133,7 +1128,6 @@ void list_channels(void)
 	if ((tmp = server_list[get_window_server(0)].chan_list)) {
 	    for (; tmp; tmp = tmp->next)
 		show_channel(tmp);
-	    no = 0;
 	}
 	if (connected_to_server != 1) {
 	    for (server = 0; server < number_of_servers; server++) {
@@ -1142,7 +1136,6 @@ void list_channels(void)
 		say("Other servers:");
 		for (tmp = server_list[server].chan_list; tmp; tmp = tmp->next)
 		    show_channel(tmp);
-		no = 0;
 	    }
 	}
     } else

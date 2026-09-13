@@ -266,7 +266,7 @@ static void channel_topic(char *from, char **ArgList, int what)
 	message_from(channel, LOG_CRAP);
 	if (what == 333 && ArgList[2])
 	    put_it("%s",
-		   convert_output_format(get_format(FORMAT_TOPIC_SETBY_FSET), "%s %s %s %l", update_clock(GET_TIME), channel, topic,
+		   convert_output_format(get_format(FORMAT_TOPIC_SETBY_FSET), "%s %s %s %lu", update_clock(GET_TIME), channel, topic,
 					 strtoul(ArgList[2], NULL, 10)));
 	else if (what != 333) {
 	    if ((chan = lookup_channel(channel, from_server, 0)))
@@ -800,11 +800,11 @@ void numbered_command(char *from, int comm, char **ArgList)
 
 	    if (do_hook(current_numeric, "%s %s %s %s %s", from, ArgList[0], ArgList[1], ArgList[2], ArgList[3]))
 		put_it("%s",
-		       convert_output_format(get_format(FORMAT_BANS_FSET), "%d %s %s %s %l", number_of_bans, ArgList[0], ArgList[1],
+		       convert_output_format(get_format(FORMAT_BANS_FSET), "%d %s %s %s %ld", number_of_bans, ArgList[0], ArgList[1],
 					     ArgList[2], tme));
 	} else if (do_hook(current_numeric, "%s %s %s", from, ArgList[0], ArgList[1]))
 	    put_it("%s",
-		   convert_output_format(get_format(FORMAT_BANS_FSET), "%d %s %s %s %l", number_of_bans, ArgList[0], ArgList[1],
+		   convert_output_format(get_format(FORMAT_BANS_FSET), "%d %s %s %s %ld", number_of_bans, ArgList[0], ArgList[1],
 					 "unknown", time(NULL)));
 	break;
     case 368:			/* #define RPL_ENDOFBANLIST 368 */

@@ -74,9 +74,9 @@ static int whois_type_head(int server_index)
 	return -1;
 }
 
-static void (*whois_func_head(int server_index)) () {
+static void (*whois_func_head(int server_index)) (WhoisStuff *, char *, char *) {
     if ((WQ_head = (WhoisQueue *) get_server_qhead(server_index)) != NULL)
-	return ((void *) WQ_head->func);
+	return (WQ_head->func);
     else
 	return NULL;
 }
@@ -128,12 +128,12 @@ void ison_returned(char *from, char **ArgList)
 
     if (whois_type_head(from_server) == WHOIS_ISON) {
 	thing = remove_from_whois_queue(from_server);
-	thing->func(thing->nick, ArgList[0] ? ArgList[0] : empty_str);
+	thing->func(NULL, thing->nick, ArgList[0] ? ArgList[0] : empty_str);
 	new_free(&thing->nick);
 	new_free(&thing->text);
 	new_free(&thing);
     } else
-	ison_now(NULL, ArgList[0] ? ArgList[0] : empty_str);
+	ison_now(NULL, NULL, ArgList[0] ? ArgList[0] : empty_str);
 }
 
 /* userhost_returned: this is called when numeric 302 is received in
@@ -175,7 +175,7 @@ void userhost_returned(char *from, char **ArgList)
 	return;
 
     if (whois_type_head(from_server) == WHOIS_USERHOST) {
-	isuser = ((void *) whois_func_head(from_server) == USERHOST_USERHOST);
+	isuser = (whois_func_head(from_server) == USERHOST_USERHOST);
 	whois_stuff = get_server_whois_stuff(from_server);
 	thing = remove_from_whois_queue(from_server);
 	queue_nicks = thing->nick;
@@ -656,10 +656,8 @@ void whois_ignore_msgs(WhoisStuff * stuff, char *nick, char *text)
 	    message_from(stuff->nick, LOG_MSG);
 	    if (do_hook(MSG_LIST, "%s %s", stuff->nick, text)) {
 		if (away_set) {
-		    time_t t;
 		    char *msg = NULL;
 
-		    t = time(NULL);
 		    put_it("%s",
 			   convert_output_format(get_fset_var(FORMAT_IGNORE_MSG_AWAY_FSET), "%s %s %s", update_clock(GET_TIME),
 						 stuff->nick, msg));
@@ -819,7 +817,7 @@ void add_to_userhost_queue(char *nick, void (*func) (WhoisStuff *, char *, char 
     }
 }
 
-void add_ison_to_whois(char *nick, void (*func) ())
+void add_ison_to_whois(char *nick, void (*func) (WhoisStuff *, char *, char *))
 {
     typed_add_to_whois_queue(WHOIS_ISON, nick, func, NULL);
 }

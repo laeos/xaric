@@ -375,9 +375,7 @@ init_variables ()
  * TOGGLE 
  */
 int 
-do_boolean (str, value)
-     char *str;
-     int *value;
+do_boolean (char *str, int *value)
 {
 	upper (str);
 	if (strcmp (str, var_settings[ON]) == 0)

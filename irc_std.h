@@ -33,8 +33,7 @@
 #define __A(x)
 #define __N
 #else
-#define __A(x)
-/*__attribute__ ((format (printf, x, x + 1))) */
+#define __A(x)  __attribute__ ((format (printf, x, x + 1)))
 #define __N    __attribute__ ((noreturn))
 #endif
 
@@ -107,21 +106,13 @@ extern int gettimeofday(struct timeval *tv, struct timezone *tz);
 
 /* we need an unsigned 32 bit integer for dcc, how lame */
 
-#ifdef UNSIGNED_LONG32
-
-typedef unsigned long u_32int_t;
-
-#else
-# ifdef UNSIGNED_INT32
-
+#if defined(UNSIGNED_INT32)
 typedef unsigned int u_32int_t;
-
-# else
-
+#elif defined(UNSIGNED_LONG32) || ULONG_MAX == 0xffffffffUL
 typedef unsigned long u_32int_t;
-
-# endif				/* UNSIGNED_INT32 */
-#endif				/* UNSIGNED_LONG32 */
+#else
+typedef unsigned int u_32int_t;
+#endif
 
 #ifdef __STDC__
 #define BUILT_IN_COMMAND(x) \

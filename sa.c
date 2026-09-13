@@ -576,6 +576,8 @@ sa_rc_t sa_addr_u2a(sa_addr_t * saa, const char *uri, ...)
 		return SA_RC(SA_ERR_ARG);
 	    *cp++ = '\0';
 	}
+	/* bIPv6 is only consulted in the !HAVE_GETADDRINFO path below */
+	(void) bIPv6;
 	cpPort = cp;
 	cpProto = "tcp";
 	if ((cp = strchr(cpPort, '#')) != NULL) {

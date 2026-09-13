@@ -234,7 +234,6 @@ static void userhost_unban(WhoisStuff * stuff, char *nick1, char *args)
 
 static void userhost_ban(WhoisStuff * stuff, char *nick1, char *args)
 {
-    char *temp;
     char *channel;
 
     char *ob = "-o+b";
@@ -244,7 +243,7 @@ static void userhost_ban(WhoisStuff * stuff, char *nick1, char *args)
     struct whowas_list *whowas = NULL;
 
     channel = next_arg(args, &args);
-    temp = next_arg(args, &args);
+    next_arg(args, &args);
 
     /* nasty */
     if (!stuff || !stuff->nick || !nick1 || !strcmp(stuff->user, "<UNKNOWN>") || my_stricmp(stuff->nick, nick1)) {
@@ -535,7 +534,7 @@ void cmd_banstat(struct command *cmd, char *args)
 		(BANS_LIST, "%d %s %s %s %lu", count, chan->channel, tmpc->ban,
 		 tmpc->setby ? tmpc->setby : get_server_name(from_server), (unsigned long) tmpc->time))
 		put_it("%s",
-		       convert_output_format(get_fset_var(FORMAT_BANS_FSET), "%d %s %s %s %l", count, chan->channel, tmpc->ban,
+		       convert_output_format(get_fset_var(FORMAT_BANS_FSET), "%d %s %s %s %ld", count, chan->channel, tmpc->ban,
 					     tmpc->setby ? tmpc->setby : get_server_name(from_server), tmpc->time));
 	}
 	new_free(&check);
@@ -609,7 +608,7 @@ void cmd_tban(struct command *cmd, char *args)
 		(BANS_LIST, "%d %s %s %s %lu", count, chan->channel, tmpc->ban,
 		 tmpc->setby ? tmpc->setby : get_server_name(from_server), (unsigned long) tmpc->time))
 		put_it("%s",
-		       convert_output_format(get_fset_var(FORMAT_BANS_FSET), "%d %s %s %s %l", count, chan->channel, tmpc->ban,
+		       convert_output_format(get_fset_var(FORMAT_BANS_FSET), "%d %s %s %s %ld", count, chan->channel, tmpc->ban,
 					     tmpc->setby ? tmpc->setby : get_server_name(from_server), tmpc->time));
 	add_wait_prompt("Which ban to delete (-2, 2-5, ...) ? ", remove_bans, chan->channel, WAIT_PROMPT_LINE);
     }
@@ -661,13 +660,12 @@ void cmd_bantype(struct command *cmd, char *args)
 void cmd_deop(struct command *cmd, char *args)
 {
     char *to = NULL, *temp;
-    int count, max;
+    int max;
     struct channel *chan;
     char buffer[BIG_BUFFER_SIZE + 1];
     int isvoice = 0;
     int server = from_server;
 
-    count = 0;
     temp = NULL;
     max = get_int_var(NUM_OPMODES_VAR);
 
@@ -690,7 +688,6 @@ void cmd_deop(struct command *cmd, char *args)
 	temp = next_arg(args, &args);
 
     while (temp && *temp) {
-	count++;
 	add_mode(chan, isvoice ? "v" : "o", 0, temp, NULL, max);
 	temp = next_arg(args, &args);
     }
@@ -706,14 +703,13 @@ void cmd_op(struct command *cmd, char *args)
 {
     char *to = NULL, *temp = NULL;
     struct channel *chan = NULL;
-    int count, max = get_int_var(NUM_OPMODES_VAR);
+    int max = get_int_var(NUM_OPMODES_VAR);
     char buffer[BIG_BUFFER_SIZE + 1];
     int old_server = from_server;
     int voice = 0;
 
     if (cmd->rname)
 	voice = 1;
-    count = 0;
     *buffer = 0;
 
     if (to && !is_channel(to)) {
@@ -728,7 +724,6 @@ void cmd_op(struct command *cmd, char *args)
 	temp = next_arg(args, &args);
 
     while (temp && *temp) {
-	count++;
 	add_mode(chan, voice ? "v" : "o", 1, temp, NULL, max);
 	temp = next_arg(args, &args);
     }

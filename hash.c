@@ -569,7 +569,7 @@ int show_wholeft_hashtable(struct whowas_list_head *cptr, time_t ltime, int *tot
 		    (WHOLEFT_LIST, "%s %s %s %ld %s %s", ptr->nicklist->nick, ptr->nicklist->host, ptr->channel, ltime - ptr->time,
 		     ptr->server1 ? ptr->server1 : "Unknown", ptr->server2 ? ptr->server2 : "Unknown"))
 		    put_it("%s",
-			   convert_output_format(get_fset_var(FORMAT_WHOLEFT_USER_FSET), "%s %s %s %l %s", ptr->nicklist->nick,
+			   convert_output_format(get_fset_var(FORMAT_WHOLEFT_USER_FSET), "%s %s %s %ld %s", ptr->nicklist->nick,
 						 ptr->nicklist->host, ptr->channel, (long) ltime - ptr->time,
 						 ptr->server1 ? ptr->server1 : ""));
 	    }

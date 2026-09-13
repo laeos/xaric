@@ -385,7 +385,6 @@ char *alias_special_char(char **buffer, char *ptr, char *args, char *quote_em, i
 		return (ptr ? ptr : empty_str);
 	    } else {
 		char *rest, lch = (char) 0;
-		int function_call = 0;
 
 		/* 
 		 * Why use ptr+1?  Cause try to maintain backward compatability
@@ -420,12 +419,9 @@ char *alias_special_char(char **buffer, char *ptr, char *args, char *quote_em, i
 			else if (*rest == LEFT_PAREN) {
 			    char *saver;
 
-			    function_call = 1;
 			    *rest++ = 0;
 			    saver = rest;
-			    if (!(tmp = MatchingBracket(rest, LEFT_PAREN, RIGHT_PAREN)))
-				function_call = 0;
-			    else {
+			    if ((tmp = MatchingBracket(rest, LEFT_PAREN, RIGHT_PAREN))) {
 				*tmp++ = 0;
 				rest = tmp;
 			    }

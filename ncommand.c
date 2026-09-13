@@ -149,7 +149,6 @@ void cmd_alias(struct command *cmd, char *args)
 
 void cmd_away(struct command *cmd, char *args)
 {
-    int len;
     char *arg = NULL;
     int flag = AWAY_ONE;
     int i;
@@ -161,7 +160,6 @@ void cmd_away(struct command *cmd, char *args)
 		*arg++ = '\0';
 	    else
 		arg = empty_str;
-	    len = strlen(args);
 	    if (0 == my_strnicmp(args + 1, "A", 1)) {	/* all */
 		flag = AWAY_ALL;
 		args = arg;
@@ -657,13 +655,11 @@ void cmd_flush(struct command *cmd, char *args)
 void cmd_join(struct command *cmd, char *args)
 {
     char *chan;
-    int len;
     char *buffer = NULL;
 
     message_from(NULL, LOG_CURRENT);
 
     if ((chan = next_arg(args, &args)) != NULL) {
-	len = strlen(chan);
 	if (my_strnicmp(chan, "-i", 2) == 0) {
 	    if (invite_channel)
 		send_to_server(SERVER(from_server), "JOIN %s %s", invite_channel, args);
@@ -1284,7 +1280,6 @@ void cmd_showidle(struct command *cmd, char *args)
 {
     struct channel *tmp;
     char *channel = NULL;
-    int count = 0;
     struct nick_list *nick;
     time_t ltime;
     int server;
@@ -1298,7 +1293,6 @@ void cmd_showidle(struct command *cmd, char *args)
     for (nick = next_nicklist(tmp, NULL); nick; nick = next_nicklist(tmp, nick)) {
 	ltime = time(NULL) - nick->idle_time;
 	put_it("%s", convert_output_format("%G| %n$[20]0 Idle%W: %K[%n$1- %K]", "%s %s", nick->nick, convert_time(ltime)));
-	count++;
     }
 }
 
@@ -1496,7 +1490,7 @@ void cmd_doig(struct command *cmd, char *args)
     userage(cmd->name, cmd->qhelp);
 }
 
-void ison_now(char *notused, char *nicklist)
+void ison_now(WhoisStuff *notused, char *nick, char *nicklist)
 {
     if (do_hook(current_numeric, "%s", nicklist))
 	put_it("%s Currently online: %s", line_thing, nicklist);
@@ -1560,10 +1554,7 @@ void cmd_userhost(struct command *cmd, char *args)
     char buffer[BIG_BUFFER_SIZE + 1];
 
     while ((nick = next_arg(args, &args)) != NULL) {
-	int len;
-
 	++total;
-	len = strlen(nick);
 	if ((*nick == '-' || *nick == '/') && !my_strnicmp(nick + 1, "C", 1)) {
 	    if (total < 2) {
 		userage(cmd->name, cmd->qhelp);
@@ -1614,7 +1605,7 @@ void cmd_users(struct command *cmd, char *args)
 {
     struct channel *chan;
     struct nick_list *nicks;
-    const char *spec, *rest, *temp1;
+    const char *spec, *temp1;
     char *to;
     char modebuf[BIG_BUFFER_SIZE + 1];
     char msgbuf[BIG_BUFFER_SIZE + 1];
@@ -1622,7 +1613,6 @@ void cmd_users(struct command *cmd, char *args)
     int hook = 0;
     int server = from_server;
 
-    rest = NULL;
     spec = NULL;
     temp1 = NULL;
     *msgbuf = 0;
@@ -1725,7 +1715,7 @@ void cmd_users(struct command *cmd, char *args)
 						       0,
 						       0,
 						       chan->channel, nicks->nick,
-						       nicks->host, nicks->chanop ? "@" : (nicks->voice ? "v" : "ÿ")));
+						       nicks->host, nicks->chanop ? "@" : (nicks->voice ? "v" : " ")));
 		}
 	    }
 	    count++;

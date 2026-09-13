@@ -116,15 +116,12 @@ void cmd_readlog(struct command *cmd, char *args)
  */
 static int show_log(Window * window, char *name)
 {
-    Window *old_window;
     int rows = 0;
     char line[300];
 
     if (window) {
-	old_window = curr_scr_win;
 	curr_scr_win = window;
     } else {
-	old_window = NULL;
 	window = curr_scr_win;
     }
     rows = window->display_size - (window->w_status_size + 1);

@@ -35,14 +35,14 @@ typedef struct WhoisQueueStru {
     /* 
      * called with func((WhoisStuff *)stuff,(char *) nick, (char *) text) 
      */
-    void (*func) ();
+    void (*func) (WhoisStuff *, char *, char *);
     struct WhoisQueueStru *next;	/* next element in queue */
 } WhoisQueue;
 
 void add_to_whois_queue(char *, void (*)(WhoisStuff *, char *, char *), char *, ...);
 void add_to_userhost_queue(char *, void (*func) (WhoisStuff *, char *, char *), const char *, ...);
 void got_my_userhost(WhoisStuff *, char *, char *);
-void add_ison_to_whois(char *, void (*)());
+void add_ison_to_whois(char *, void (*)(WhoisStuff *, char *, char *));
 void whois_name(char *, char **);
 void whowas_name(char *, char **);
 void whois_channels(char *, char **);

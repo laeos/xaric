@@ -8,6 +8,8 @@
 
 #include "irc_std.h"
 
+struct WhoisStuffStru;
+
 extern char *sent_nick;
 extern char *sent_body;
 extern char *recv_nick;
@@ -18,7 +20,7 @@ int parse_command(char *, int, char *);
 void parse_line(char *, const char *, char *, int, int);
 void edit_char(unsigned char);
 void execute_timer(void);
-void ison_now(char *, char *);
+void ison_now(struct WhoisStuffStru *, char *, char *);
 void quote_char(char, char *);
 void type_text(char, char *);
 void parse_text(char, char *);

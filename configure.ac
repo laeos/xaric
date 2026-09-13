@@ -352,7 +352,7 @@ sig_name="ZERO $*"
 if test -f sig.inc; then
   /bin/rm -f sig.inc
 fi
-[echo $sig_name | sed -e 's/$/"};/' -e 's/ /", "/g' -e 's/^/char *sys_siglist[] = { "/' >> sig.inc]
+[echo $sig_name | sed -e 's/$/"};/' -e 's/ /", "/g' -e 's/^/const char * const sys_siglist[] = { "/' >> sig.inc]
 fi
 
 dnl ----------------------------------------------------------

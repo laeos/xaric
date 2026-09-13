@@ -158,7 +158,6 @@ static char *convert_sub_format(char *format, char c)
     char buffer[BIG_BUFFER_SIZE + 1];
     static char bletch[] = "%% ";
     char *ptr = NULL;
-    int dont_got_it = 1;
 
     if (format == NULL)
 	return (NULL);
@@ -169,8 +168,7 @@ static char *convert_sub_format(char *format, char c)
 	    *ptr = (char) 0;
 	    strmcat(buffer, format, BIG_BUFFER_SIZE);
 	    *(ptr++) = '%';
-	    if ((*ptr == c) /* && dont_got_it */ ) {
-		dont_got_it = 0;
+	    if (*ptr == c) {
 		strmcat(buffer, "%s", BIG_BUFFER_SIZE);
 	    } else {
 		bletch[2] = *ptr;
@@ -339,7 +337,7 @@ char *alias_special_char(char **, char *, char *, char *, int *);
 static void fix_status_buffer(char *buffer, int ansi)
 {
     char rhs_buffer[3 * BIG_BUFFER_SIZE + 1];
-    int in_rhs = 0, ch_lhs = 0, ch_rhs = 0, pr_lhs = 0, pr_rhs = 0, start_rhs = -1, i;
+    int in_rhs = 0, ch_lhs = 0, pr_lhs = 0, pr_rhs = 0, start_rhs = -1, i;
 
     int len = 0;
 
@@ -367,8 +365,6 @@ static void fix_status_buffer(char *buffer, int ansi)
 		 buffer[i] == UND_TOG || buffer[i] == ALL_OFF || buffer[i] == BOLD_TOG || (ansi && vt100_decode(buffer[i]))) {
 	    if (!in_rhs)
 		ch_lhs++;
-	    else
-		ch_rhs++;
 	}
 	/* 
 	 * So it is a printable character.
@@ -377,7 +373,7 @@ static void fix_status_buffer(char *buffer, int ansi)
 	    if (!in_rhs)
 		ch_lhs++, pr_lhs++;
 	    else
-		ch_rhs++, pr_rhs++;
+		pr_rhs++;
 	}
 
 	/* 

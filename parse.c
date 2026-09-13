@@ -227,16 +227,13 @@ static void p_wallops(char *from, char **ArgList)
     if (from_server || check_flooding(from, WALLOP_FLOOD, line, NULL)) {
 	/* The old server check, don't use the whois stuff for servers */
 	int level;
-	char *high;
 
 	switch (check_ignore(from, FromUserHost, NULL, IGNORE_WALLOPS, NULL)) {
 	case (IGNORED):
 	    return;
 	case (HIGHLIGHTED):
-	    high = highlight_char;
 	    break;
 	default:
-	    high = empty_str;
 	    break;
 	}
 	message_from(from, LOG_WALLOP);
@@ -257,7 +254,6 @@ void whoreply(char *from, char **ArgList)
     static int last_width = -1;
     int ok = 1, voice = 0, opped = 0;
     char *channel, *user, *host, *server, *nick, *stat, *name;
-    struct channel *chan = NULL;
     char buf_data[BIG_BUFFER_SIZE + 1];
 
     if (!ArgList[5])
@@ -325,7 +321,7 @@ void whoreply(char *from, char **ArgList)
 	char buffer[BIG_BUFFER_SIZE + 1];
 
 	snprintf(buffer, BIG_BUFFER_SIZE, "%s %s %s %s %s %s %s", channel, nick, stat, user, host, server, name);
-	chan = add_to_channel(channel, nick, from_server, opped, voice, buf_data, server, stat);
+	add_to_channel(channel, nick, from_server, opped, voice, buf_data, server, stat);
 	if (do_hook(WHO_LIST, "%s", buffer)) {
 	    if (!get_int_var(SHOW_WHO_HOPCOUNT_VAR))
 		next_arg(name, &name);
@@ -349,7 +345,6 @@ static void p_privmsg(char *from, char **Args)
 
     unsigned char ignore_type;
     char *ptr = NULL, *to;
-    char *high;
     struct channel *channel = NULL;
     struct nick_list *tmpnick = NULL;
 
@@ -402,13 +397,10 @@ static void p_privmsg(char *from, char **Args)
 	doing_privmsg = 0;
 	return;
     case HIGHLIGHTED:
-	high = highlight_char;
 	break;
     case CHANNEL_GREP:
-	high = highlight_char;
 	break;
     default:
-	high = empty_str;
 	break;
     }
 
@@ -466,7 +458,7 @@ static void p_privmsg(char *from, char **Args)
 		if (from_server > -1 && get_server_away(from_server) && get_int_var(SEND_AWAY_MSG_VAR)) {
 		    send_to_server(SERVER(from_server), "NOTICE %s :%s", from,
 				   stripansicodes(convert_output_format
-						  (get_format(FORMAT_SEND_AWAY_FSET), "%l %l %s", time(NULL),
+						  (get_format(FORMAT_SEND_AWAY_FSET), "%ld %ld %s", time(NULL),
 						   server_list[from_server].awaytime, get_int_var(MSGLOG_VAR) ? "On" : "Off")));
 		}
 		break;
@@ -595,7 +587,6 @@ static void p_channel(char *from, char **ArgList)
     char *user, *host;
     struct channel *chan = NULL;
     struct whowas_list *whowas = NULL;
-    int its_me = 0;
 
     if (!strcmp(ArgList[0], "0")) {
 	fake();
@@ -625,7 +616,6 @@ static void p_channel(char *from, char **ArgList)
 	    send_to_server(SERVER(from_server), "MODE %s\r\nMODE %s b", channel, channel, channel);
 
 	(void) do_hook(JOIN_ME_LIST, "%s", channel);
-	its_me = 1;
 	chan = add_channel(channel, from_server);
 	if (*channel == '+') {
 	    got_info(channel, from_server, GOTBANS);
@@ -687,18 +677,14 @@ static void p_channel(char *from, char **ArgList)
 
 static void p_invite(char *from, char **ArgList)
 {
-    char *high;
-
     switch (check_ignore(from, FromUserHost, ArgList[1] ? ArgList[1] : NULL, IGNORE_INVITES, NULL)) {
     case IGNORED:
 	if (get_int_var(SEND_IGNORE_MSG_VAR))
 	    send_to_server(SERVER(from_server), "NOTICE %s :%s is ignoring you", from, get_server_nickname(from_server));
 	return;
     case HIGHLIGHTED:
-	high = highlight_char;
 	break;
     default:
-	high = empty_str;
 	break;
     }
     if (ArgList[0] && ArgList[1]) {

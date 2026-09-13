@@ -66,9 +66,7 @@ static void parse_server_notice(char *from, char *line)
     if (do_hook(SERVER_NOTICE_LIST, flag ? "%s *** %s" : "%s %s", from, line)) {
 	if (strstr(line, "***")) {
 	    if (do_hook(SERVER_NOTICE_LIST, flag ? "%s *** %s" : "%s %s", from, line)) {
-		char *for_;
-
-		for_ = next_arg(line, &line);
+		next_arg(line, &line);
 		put_it("%s",
 		       convert_output_format(get_fset_var(FORMAT_SERVER_NOTICE_FSET), "%s %s %s", update_clock(GET_TIME), from,
 					     stripansicodes(line)));
@@ -95,11 +93,8 @@ void parse_notice(char *from, char **Args)
     char *to;
     int no_flooding;
     int flag;
-    char *high, not_from_server = 1;
+    char not_from_server = 1;
     char *line;
-
-    struct nick_list *nick = NULL;
-    struct channel *tmpc;
 
     PasteArgs(Args, 1);
     to = Args[0];
@@ -116,8 +111,6 @@ void parse_notice(char *from, char **Args)
 	    message_from(from, LOG_NOTICE);
 	    type = NOTICE_LIST;
 	}
-	if ((tmpc = lookup_channel(to, from_server, CHAN_NOUNLINK)))
-	    nick = find_nicklist_in_channellist(from, tmpc, 0);
 	if (from && *from && strcmp(get_server_itsname(from_server), from)) {
 	    char *newline = NULL;
 
@@ -128,10 +121,9 @@ void parse_notice(char *from, char **Args)
 		    return;
 		}
 	    case HIGHLIGHTED:
-		high = highlight_char;
 		break;
 	    default:
-		high = empty_str;
+		break;
 	    }
 	    /* 
 	     * only dots in servernames, right ?

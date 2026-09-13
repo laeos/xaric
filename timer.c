@@ -40,7 +40,6 @@ void cmd_timer(struct command *cmd, char *args)
     char *waittime, *flag;
     char *want = empty_str;
     char *ptr;
-    int repeat = 0;
     long events = 1;
 
     if (*args == '-' || *args == '/') {
@@ -60,13 +59,12 @@ void cmd_timer(struct command *cmd, char *args)
 	} else if (!my_strnicmp(flag + 1, "REP", 3)) {
 	    char *na = next_arg(args, &args);
 
-	    repeat = 0;
 	    if (!na || !*na) {
 		say("%s: Missing arguement to -REPEAT", cmd->name);
 		return;
 	    }
 	    if (!strcmp(na, "*") || !strcmp(na, "-1"))
-		repeat = -1, events = -1;
+		events = -1;
 	    else if ((events = my_atol(na)) == 0)
 		return;
 	} else if (!my_strnicmp(flag + 1, "REF", 3)) {	/* REFNUM */
@@ -188,7 +186,7 @@ static void show_timer(const char *command)
 	    continue;
 #endif
 	put_it("%s",
-	       convert_output_format(get_fset_var(FORMAT_TIMER_FSET), "%s %l %d %s", tmp->ref, time_left, tmp->events,
+	       convert_output_format(get_fset_var(FORMAT_TIMER_FSET), "%s %ld %d %s", tmp->ref, time_left, tmp->events,
 				     tmp->callback ? "(internal callback)" : (tmp->command ? tmp->command : "")));
     }
 }

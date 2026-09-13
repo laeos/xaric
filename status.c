@@ -606,7 +606,7 @@ static char *status_notify_windows(Window * window)
 #ifdef NEW_NOTIFY
 	char *p;
 
-	p = convert_output_format(buf2, NULL, NULL);
+	p = convert_output_format(buf2, NULL);
 	chop(p, 4);
 	snprintf(my_buffer, MY_BUFFER, notify_format, p);
 #else

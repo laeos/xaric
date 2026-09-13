@@ -313,7 +313,7 @@ get_format_len(xformat which)
 		return formatset_array[which].len;
 
 	/* XXX */
-	conv = convert_output_format(formatset_array[which].value, NULL, NULL);
+	conv = convert_output_format(formatset_array[which].value, NULL);
 	conv = stripansicodes(conv);
 
 	return (formatset_array[which].len = strlen(conv));

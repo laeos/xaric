@@ -382,11 +382,16 @@ typedef struct _UserChanModes {
 char *compress_modes(int server, char *channel, char *modes)
 {
     int add = 0, isbanned = 0, isopped = 0, isvoiced = 0, mod = -1;
-    char *tmp, *rest, nmodes[16], nargs[100];
+    char *tmp, *rest, nmodes[BIG_BUFFER_SIZE + 1], nargs[BIG_BUFFER_SIZE + 1];
     UserChanModes *ucm = NULL, *tucm = NULL;
     BanList *tbl = NULL;
     struct nick_list *tnl = NULL;
     struct channel *chan;
+
+    /* every append below is bounded; the mode string and its arguments
+       come from one server line, so BIG_BUFFER_SIZE cannot be exceeded */
+#define NM_CAT(s) strmcat(nmodes, (s), BIG_BUFFER_SIZE)
+#define NA_CAT(s) strmcat(nargs, (s), BIG_BUFFER_SIZE)
 
     /* now, modes contains the actual modes, and rest contains the arguments to those modes */
 
@@ -408,6 +413,8 @@ char *compress_modes(int server, char *channel, char *modes)
 	    break;
 	case 'o':
 	    tmp = next_arg(rest, &rest);
+	    if (!tmp)
+		break;
 	    tucm = (UserChanModes *) find_in_list((struct list **) &ucm, tmp, 0);
 
 /*                  tnl = (struct nick_list *)find_in_list((struct list **)&chan->nicks, tmp, 0); */
@@ -444,6 +451,8 @@ char *compress_modes(int server, char *channel, char *modes)
 	    break;
 	case 'v':
 	    tmp = next_arg(rest, &rest);
+	    if (!tmp)
+		break;
 	    tucm = (UserChanModes *) find_in_list((struct list **) &ucm, tmp, 0);
 
 /*                  tnl = (struct nick_list *)find_in_list((struct list **)&chan->nicks, tmp, 0); */
@@ -480,6 +489,8 @@ char *compress_modes(int server, char *channel, char *modes)
 	    break;
 	case 'b':
 	    tmp = next_arg(rest, &rest);
+	    if (!tmp)
+		break;
 	    tucm = (UserChanModes *) find_in_list((struct list **) &ucm, tmp, 0);
 	    isbanned = 0;
 	    for (tbl = chan->bans; tbl && !isbanned; tbl = tbl->next) {
@@ -518,49 +529,53 @@ char *compress_modes(int server, char *channel, char *modes)
 	case 'l':
 	    if (add) {
 		tmp = next_arg(rest, &rest);
+		if (!tmp)
+		    break;
 
 		if (mod == 1) {
-		    strcat(nmodes, "l");
-		    strcat(nargs, " ");
-		    strcat(nargs, tmp);
+		    NM_CAT("l");
+		    NA_CAT(" ");
+		    NA_CAT(tmp);
 		} else {
-		    strcat(nmodes, "+l");
-		    strcat(nargs, " ");
-		    strcat(nargs, tmp);
+		    NM_CAT("+l");
+		    NA_CAT(" ");
+		    NA_CAT(tmp);
 		    mod = 1;
 		}
 	    } else {
 		if (mod == 0) {
-		    strcat(nmodes, "l");
+		    NM_CAT("l");
 		} else {
-		    strcat(nmodes, "-l");
+		    NM_CAT("-l");
 		    mod = 0;
 		}
 	    }
 	    break;
 	case 'k':
 	    tmp = next_arg(rest, &rest);
+	    if (!tmp)
+		break;
 
 	    if (add) {
 		if (mod == 1) {
-		    strcat(nmodes, "k");
-		    strcat(nargs, " ");
-		    strcat(nargs, tmp);
+		    NM_CAT("k");
+		    NA_CAT(" ");
+		    NA_CAT(tmp);
 		} else {
-		    strcat(nmodes, "+k");
-		    strcat(nargs, " ");
-		    strcat(nargs, tmp);
+		    NM_CAT("+k");
+		    NA_CAT(" ");
+		    NA_CAT(tmp);
 		    mod = 1;
 		}
 	    } else {
 		if (mod == 0) {
-		    strcat(nmodes, "k");
-		    strcat(nargs, " ");
-		    strcat(nargs, tmp);
+		    NM_CAT("k");
+		    NA_CAT(" ");
+		    NA_CAT(tmp);
 		} else {
-		    strcat(nmodes, "-k");
-		    strcat(nargs, " ");
-		    strcat(nargs, tmp);
+		    NM_CAT("-k");
+		    NA_CAT(" ");
+		    NA_CAT(tmp);
 		    mod = 0;
 		}
 	    }
@@ -568,16 +583,16 @@ char *compress_modes(int server, char *channel, char *modes)
 	case 'i':
 	    if (add) {
 		if (mod == 1) {
-		    strcat(nmodes, "i");
+		    NM_CAT("i");
 		} else {
-		    strcat(nmodes, "+i");
+		    NM_CAT("+i");
 		    mod = 1;
 		}
 	    } else {
 		if (mod == 0) {
-		    strcat(nmodes, "i");
+		    NM_CAT("i");
 		} else {
-		    strcat(nmodes, "-i");
+		    NM_CAT("-i");
 		    mod = 0;
 		}
 	    }
@@ -585,16 +600,16 @@ char *compress_modes(int server, char *channel, char *modes)
 	case 'n':
 	    if (add) {
 		if (mod == 1) {
-		    strcat(nmodes, "n");
+		    NM_CAT("n");
 		} else {
-		    strcat(nmodes, "+n");
+		    NM_CAT("+n");
 		    mod = 1;
 		}
 	    } else {
 		if (mod == 0) {
-		    strcat(nmodes, "n");
+		    NM_CAT("n");
 		} else {
-		    strcat(nmodes, "-n");
+		    NM_CAT("-n");
 		    mod = 0;
 		}
 	    }
@@ -602,16 +617,16 @@ char *compress_modes(int server, char *channel, char *modes)
 	case 's':
 	    if (add) {
 		if (mod == 1) {
-		    strcat(nmodes, "s");
+		    NM_CAT("s");
 		} else {
-		    strcat(nmodes, "+s");
+		    NM_CAT("+s");
 		    mod = 1;
 		}
 	    } else {
 		if (mod == 0) {
-		    strcat(nmodes, "s");
+		    NM_CAT("s");
 		} else {
-		    strcat(nmodes, "-s");
+		    NM_CAT("-s");
 		    mod = 0;
 		}
 	    }
@@ -619,16 +634,16 @@ char *compress_modes(int server, char *channel, char *modes)
 	case 't':
 	    if (add) {
 		if (mod == 1) {
-		    strcat(nmodes, "t");
+		    NM_CAT("t");
 		} else {
-		    strcat(nmodes, "+t");
+		    NM_CAT("+t");
 		    mod = 1;
 		}
 	    } else {
 		if (mod == 0) {
-		    strcat(nmodes, "t");
+		    NM_CAT("t");
 		} else {
-		    strcat(nmodes, "-t");
+		    NM_CAT("-t");
 		    mod = 0;
 		}
 	    }
@@ -641,70 +656,70 @@ char *compress_modes(int server, char *channel, char *modes)
     for (tucm = ucm; tucm; tucm = tucm->next) {
 	if (tucm->o_ed) {
 	    if (mod == 1) {
-		strcat(nmodes, "o");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("o");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 	    } else {
-		strcat(nmodes, "+o");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("+o");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 		mod = 1;
 	    }
 	} else if (tucm->deo_ed) {
 	    if (mod == 0) {
-		strcat(nmodes, "o");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("o");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 	    } else {
-		strcat(nmodes, "-o");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("-o");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 		mod = 0;
 	    }
 	}
 	if (tucm->v_ed) {
 	    if (mod == 1) {
-		strcat(nmodes, "v");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("v");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 	    } else {
-		strcat(nmodes, "+v");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("+v");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 		mod = 1;
 	    }
 	} else if (tucm->dev_ed) {
 	    if (mod == 0) {
-		strcat(nmodes, "v");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("v");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 	    } else {
-		strcat(nmodes, "-v");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("-v");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 		mod = 0;
 	    }
 	}
 	if (tucm->b_ed) {
 	    if (mod == 1) {
-		strcat(nmodes, "b");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("b");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 	    } else {
-		strcat(nmodes, "+b");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("+b");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 		mod = 1;
 	    }
 	} else if (tucm->deb_ed) {
 	    if (mod == 0) {
-		strcat(nmodes, "b");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("b");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 	    } else {
-		strcat(nmodes, "-b");
-		strcat(nargs, " ");
-		strcat(nargs, tucm->nick);
+		NM_CAT("-b");
+		NA_CAT(" ");
+		NA_CAT(tucm->nick);
 		mod = 0;
 	    }
 	}
@@ -714,6 +729,8 @@ char *compress_modes(int server, char *channel, char *modes)
 	return m_sprintf("%s%s", nmodes, nargs);
     }
     return NULL;
+#undef NM_CAT
+#undef NA_CAT
 }
 #endif
 

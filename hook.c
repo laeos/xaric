@@ -344,6 +344,15 @@ extern int do_hook(int which, const char *format, ...)
     int i, old_in_on_who;
     Hook *hook_array[2048];
     int hook_num = 0;
+    char *name_copy = NULL;
+
+    /* parse_line() below can remove hooks (freeing the Hook structs and,
+       for numeric hooks, the name), so snapshot everything the execution
+       loop needs before any hook body runs */
+    typedef struct {
+	int not, noisy, flexible, sernum;
+	char *stuff;
+    } HookSnap;
 
     *buffer = 0;
 
@@ -393,7 +402,7 @@ extern int do_hook(int which, const char *format, ...)
 	    if (currser != oldser) {	/* new serial number */
 		oldser = currser;
 		currmatch = oldmatch = nomorethisserial = 0;
-		if (bestmatch)
+		if (bestmatch && hook_num < 2048)
 		    hook_array[hook_num++] = bestmatch;
 		bestmatch = NULL;
 	    }
@@ -421,27 +430,41 @@ extern int do_hook(int which, const char *format, ...)
 	    if (tmp->flexible)
 		new_free(&tmpnick);
 	}
-	if (bestmatch)
+	if (bestmatch && hook_num < 2048)
 	    hook_array[hook_num++] = bestmatch;
+    }
+
+    HookSnap snaps[hook_num ? hook_num : 1];
+    name_copy = name ? m_strdup(name) : NULL;
+
+    for (i = 0; i < hook_num; i++) {
+	if (!(tmp = hook_array[i])) {
+	    hook_num = i;	/* should not happen; bestmatch is never NULL */
+	    break;
+	}
+	snaps[i].not = tmp->not;
+	snaps[i].noisy = tmp->noisy;
+	snaps[i].flexible = tmp->flexible;
+	snaps[i].sernum = tmp->sernum;
+	snaps[i].stuff = (tmp->stuff && *tmp->stuff) ? m_strdup(tmp->stuff) : NULL;
     }
 
     for (i = 0; i < hook_num; i++) {
 	char *saved_who_from = NULL;
 	int saved_who_level;
+	char *stuff_val = snaps[i].stuff;
 
-	if (!(tmp = hook_array[i])) {
-	    if (which >= 0)
-		hook_functions[which].mark--;
-	    return RetVal;
-	}
-	if (tmp->not)
+	if (snaps[i].not) {
+	    new_free(&stuff_val);
 	    continue;
+	}
 
 	current_on_hook = which;
-	if (tmp->noisy > QUIET)
-	    say("%s activated by %c%s%c", name, (tmp->flexible ? '\'' : '"'), buffer, (tmp->flexible ? '\'' : '"'));
+	if (snaps[i].noisy > QUIET)
+	    say("%s activated by %c%s%c", name_copy ? name_copy : "",
+		(snaps[i].flexible ? '\'' : '"'), buffer, (snaps[i].flexible ? '\'' : '"'));
 	display = window_display;
-	if (tmp->noisy < NOISY)
+	if (snaps[i].noisy < NOISY)
 	    window_display = 0;
 
 	save_message_from(&saved_who_from, &saved_who_level);
@@ -453,22 +476,24 @@ extern int do_hook(int which, const char *format, ...)
 #else
 	in_on_who = 0;
 #endif
-	if (!tmp->noisy && !tmp->sernum)
+	if (!snaps[i].noisy && !snaps[i].sernum)
 	    RetVal = 0;
-	if (tmp->stuff && *tmp->stuff) {
-	    char *name2 = strdup(name);
-	    char *stuff2 = strdup(tmp->stuff);
+	if (stuff_val) {
+	    char *name2 = m_strdup(name_copy ? name_copy : empty_str);
+	    char *stuff2 = m_strdup(stuff_val);
 
 	    parse_line(name2, stuff2, buffer, 0, 0);
 
-	    free(name2);
-	    free(stuff2);
+	    new_free(&name2);
+	    new_free(&stuff2);
 	}
+	new_free(&stuff_val);
 	in_on_who = old_in_on_who;
 	window_display = display;
 	current_on_hook = -1;
 	restore_message_from(saved_who_from, saved_who_level);
     }
+    new_free(&name_copy);
     if (which >= 0)
 	hook_functions[which].mark--;
 
@@ -479,7 +504,7 @@ static void remove_numeric_hook(int numeric, char *nick, int server, int sernum,
 {
     NumericList *hook;
     Hook *tmp, *next;
-    char buf[5];
+    char buf[16];	/* %3.3u of an out-of-range numeric needs more than 5 */
 
     sprintf(buf, "%3.3u", numeric);
     if ((hook = (NumericList *) find_in_list((struct list **) &numeric_list, buf, 0)) != NULL) {

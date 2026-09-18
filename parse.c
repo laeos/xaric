@@ -191,6 +191,8 @@ static void p_topic(char *from, char **ArgList)
 	return;
     }
     tmp = lookup_channel(ArgList[0], from_server, CHAN_NOUNLINK);
+    if (!tmp)
+	return;			/* TOPIC for a channel we are not on */
     malloc_strcpy(&tmp->topic, ArgList[1]);
     if (check_ignore(from, FromUserHost, tmp->channel, IGNORE_TOPICS | IGNORE_CRAP, NULL) != IGNORED) {
 	message_from(ArgList[0], LOG_CRAP);
@@ -646,7 +648,10 @@ static void p_channel(char *from, char **ArgList)
 
     user = m_strdup(FromUserHost);
     host = strchr(user, '@');
-    *host++ = '\0';
+    if (host)
+	*host++ = '\0';
+    else
+	host = empty_str;	/* prefix with no user@host part */
 
     if (check_ignore(from, FromUserHost, channel, IGNORE_JOINS | IGNORE_CRAP, NULL) != IGNORED && chan) {
 	irc_server *irc_serv = NULL;
@@ -799,7 +804,10 @@ static void p_nick(char *from, char **ArgList)
 
 	user = m_strdup(FromUserHost);
 	host = strchr(user, '@');
-	*host++ = '\0';
+	if (host)
+	    *host++ = '\0';
+	else
+	    host = empty_str;	/* prefix with no user@host part */
 
 	notify_mark(from, user, host, 0);
 	notify_mark(line, user, host, 1);
@@ -835,13 +843,13 @@ static void p_mode(char *from, char **ArgList)
 	if (is_channel(channel)) {
 #ifdef COMPRESS_MODES
 	    chan = (struct channel *) find_in_list((struct list **) &server_list[from_server].chan_list, channel, 0);
-	    if (get_int_var(COMPRESS_MODES_VAR)) {
-		tmpbuf = compress_modes(from_server, channel, line);
-		if (tmpbuf)
-		    strcpy(line, tmpbuf);
-		else
-		    goto end_p_mode;
-	    }
+		if (get_int_var(COMPRESS_MODES_VAR)) {
+		    tmpbuf = compress_modes(from_server, channel, line);
+		    if (tmpbuf)
+			line = tmpbuf;
+		    else
+			goto end_p_mode;
+		}
 #endif
 	    /* CDE handle mode protection here instead of later */
 	    update_channel_mode(from, channel, from_server, buffer, chan);

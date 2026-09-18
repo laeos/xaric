@@ -236,6 +236,9 @@ void funny_namreply(char *from, char **Args)
     channel = Args[1];
     line = Args[2];
 
+    if (!type || !channel || !line)
+	return;		/* malformed 353 from the server */
+
     if (in_join_list(channel, from_server)) {
 	char *lincopy, *p;
 	char *nick;
@@ -336,6 +339,8 @@ void funny_mode(char *from, char **ArgList)
 	return;
     channel = ArgList[0];
     mode = ArgList[1];
+    if (!mode)
+	mode = empty_str;	/* 324 with no mode string */
     PasteArgs(ArgList, 1);
     if ((channel && in_join_list(channel, from_server)) || get_chan_from_join_list(from_server)) {
 	if (!channel)

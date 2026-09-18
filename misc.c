@@ -687,16 +687,18 @@ static int cparse_recurse = -1;
 
 char *convert_output_format(const char *format, const char *str, ...)
 {
-    static char buffer[10 * BIG_BUFFER_SIZE + 1];
+    static char buffer[11 * BIG_BUFFER_SIZE + 1];
     char buffer2[2 * BIG_BUFFER_SIZE + 1];
     enum color_attributes this_color = BLACK;
     const char *t;
     char *s;
+    char *slot_end;
     char *copy = NULL;
     char *tmpc = NULL;
     int old_who_level = who_level;
     int bold = 0;
     int arg_flags;
+    int slot;
     int do_color = get_int_var(DISPLAY_ANSI_VAR);
 
     malloc_strcpy(&copy, format);
@@ -713,12 +715,22 @@ char *convert_output_format(const char *format, const char *str, ...)
 	va_end(args);
     }
 
-    s = buffer + (BIG_BUFFER_SIZE * cparse_recurse);
+    /* the recursion counter can drift outside [0, 10]; never let the
+       slot index follow it out of the static buffer */
+    slot = cparse_recurse;
+    if (slot < 0)
+	slot = 0;
+    else if (slot > 10)
+	slot = 10;
+    s = buffer + (BIG_BUFFER_SIZE * slot);
+    slot_end = buffer + (BIG_BUFFER_SIZE * (slot + 1)) - 1;
     memset(s, 0, BIG_BUFFER_SIZE / 4);
     tmpc = copy;
     if (!tmpc)
 	goto done;
     while (*tmpc) {
+	if (s >= slot_end)
+	    break;
 	if (*tmpc == '%') {
 	    tmpc++;
 	    switch (*tmpc) {
@@ -829,7 +841,7 @@ char *convert_output_format(const char *format, const char *str, ...)
 		continue;
 	    }
 	    if (do_color) {
-		for (t = color_str[(int) this_color]; *t; t++, s++)
+		for (t = color_str[(int) this_color]; *t && s < slot_end; t++, s++)
 		    *s = *t;
 	    }
 	    tmpc++;
@@ -842,7 +854,7 @@ char *convert_output_format(const char *format, const char *str, ...)
 	    tmpc = alias_special_char(&new_str, tmpc, buffer2, NULL, &arg_flags);
 	    in_cparse--;
 	    if (new_str)
-		strcat(s, new_str);
+		strmcat(s, new_str, slot_end - s);
 	    new_free(&new_str);
 	    while (*s) {
 		if (*s == -1)
@@ -859,9 +871,9 @@ char *convert_output_format(const char *format, const char *str, ...)
     }
     *s = 0;
   done:
-    s = buffer + (BIG_BUFFER_SIZE * cparse_recurse);
+    s = buffer + (BIG_BUFFER_SIZE * slot);
     if (*s)
-	strcat(s, color_str[NO_COLOR]);
+	strmcat(s, color_str[NO_COLOR], slot_end - s);
     who_level = old_who_level;
     new_free(&copy);
 

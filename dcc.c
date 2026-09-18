@@ -1027,6 +1027,15 @@ void register_dcc_offer(char *user, char *type, char *description, char *address
 	filesize = my_atol(size);
     else
 	filesize = 0;
+    /* the handshake field (and DCC_list.filesize) is 32 bit; a value that
+       does not fit must not silently truncate -- e.g. to 0, which would
+       disable the "file larger than announced" check */
+    if (filesize < 0 || filesize > (off_t) 0xffffffff) {
+	put_it("%s", convert_output_format("$G %RDCC%n DCC $0 offer from $1 has an invalid size [$2], ignoring it", "%s %s %s",
+					   type, user, size ? size : "(none)"));
+	message_from(NULL, LOG_CRAP);
+	return;
+    }
 
     if (!my_stricmp(type, "CHAT"))
 	CType = DCC_CHAT;
@@ -1084,7 +1093,10 @@ void register_dcc_offer(char *user, char *type, char *description, char *address
 
 	strmcpy(tmpbuf, FromUserHost, 127);
 	fromhost = strchr(tmpbuf, '@');
-	fromhost++;
+	if (fromhost)
+	    fromhost++;
+	else
+	    fromhost = tmpbuf + strlen(tmpbuf);	/* no user@host part */
 	alarm(1);		/* dont block too long... */
 	hostent_fromhost = gethostbyname(fromhost);
 	alarm(0);
@@ -1179,9 +1191,11 @@ static void process_incoming_chat(DCC_list * Client)
     bufptr = tmp;
     if (s && *s) {
 	len = strlen(s);
-	if (len > (MAX_DCC_BLOCK_SIZE / 2) - 1) {
+	if (len > dccBlockSize() - 1) {
 	    put_it("%s", convert_output_format("$G %RDCC buffer overrun. Data lost", NULL));
 	    new_free(&(Client->buffer));
+	    len = 0;
+	    tmp[0] = '\0';
 	} else {
 	    strmcpy(tmp, s, len);
 	    bufptr += len;
@@ -1305,9 +1319,11 @@ static void process_incoming_raw(DCC_list * Client)
     bufptr = tmp;
     if (s && *s) {
 	len = strlen(s);
-	if (len > MAX_DCC_BLOCK_SIZE - 1) {
+	if (len > dccBlockSize() - 1) {
 	    put_it("%s", convert_output_format("$G %RDCC raw buffer overrun. Data lost", NULL));
 	    new_free(&Client->buffer);
+	    len = 0;
+	    tmp[0] = '\0';
 	} else {
 	    strmcpy(tmp, s, len);
 	    bufptr += len;
@@ -1410,6 +1426,20 @@ static void process_outgoing_file(DCC_list * Client, int readwaiting)
 	    Client->read = Client->write = (-1);
 	    Client->flags |= DCC_DELETE;
 	    return;
+	}
+	/* byteoffset comes off the wire; never seek past the end of the file */
+	if (Client->transfer_orders.byteoffset) {
+	    off_t fsize = lseek(Client->file, 0, SEEK_END);
+
+	    if (fsize >= 0 && Client->transfer_orders.byteoffset > (u_32int_t) fsize) {
+		put_it("%s",
+		       convert_output_format("$G %RDCC%n reget offset $0 is past the end of $1, closing", "%u %s",
+					     Client->transfer_orders.byteoffset, Client->description));
+		close(Client->file);
+		Client->file = (-1);
+		Client->flags |= DCC_DELETE;
+		return;
+	    }
 	}
 	if ((Client->flags & DCC_RESENDOFFER) == DCC_RESENDOFFER) {
 	    lseek(Client->file, Client->transfer_orders.byteoffset, SEEK_SET);
@@ -1804,7 +1834,15 @@ void dcc_glist(const char *command, char *args)
 	    iperc = ((int) perc) / 10;
 	    barsize = ((double) (Client->filesize)) / (double) barlen;
 
-	    size = (int) ((double) bytes / (double) barsize);
+	    if (barsize > 0.0)
+		size = (int) ((double) bytes / (double) barsize);
+	    else
+		size = 0;
+	    /* byteoffset comes from the peer, so bytes/size can be anything */
+	    if (size < 0)
+		size = 0;
+	    else if (size > barlen)
+		size = barlen;
 
 	    if (Client->filesize == 0)
 		size = barlen;
@@ -1866,8 +1904,8 @@ void dcc_glist(const char *command, char *args)
 	put_it("%s", convert_output_format("$G %RDCC%n Nothing on DCC list.", NULL));
 }
 
-static char DCC_reject_type[12];
-static char DCC_reject_description[40];
+static char DCC_reject_type[40];
+static char DCC_reject_description[BIG_BUFFER_SIZE + 1];
 
 static void output_reject_ctcp(WhoisStuff *notused, char *nick, char *nicklist)
 {
@@ -2183,7 +2221,7 @@ static void dcc_close(const char *command, char *args)
 
 void dcc_reject_notify(char *description, char *user, const char *type)
 {
-    strcpy(DCC_reject_description, description ? description : "(null)");
+    strmcpy(DCC_reject_description, description ? description : "(null)", BIG_BUFFER_SIZE);
     if (!my_stricmp(type, "SEND"))
 	strcpy(DCC_reject_type, "GET");
     else if (!my_stricmp(type, "GET"))
@@ -2193,7 +2231,7 @@ void dcc_reject_notify(char *description, char *user, const char *type)
     else if (!my_stricmp(type, "REGET"))
 	strcpy(DCC_reject_type, "RESEND");
     else
-	strcpy(DCC_reject_type, type);
+	strmcpy(DCC_reject_type, type, sizeof(DCC_reject_type) - 1);
     if (*user == '=')
 	user++;
     add_ison_to_whois(user, output_reject_ctcp);

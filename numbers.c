@@ -323,7 +323,7 @@ static void cannot_join_channel(char *from, char **ArgList)
 	return;
 
     PasteArgs(ArgList, 0);
-    strcpy(buffer, ArgList[0]);
+    strmcpy(buffer, ArgList[0] ? ArgList[0] : empty_str, BIG_BUFFER_SIZE - 48);	/* leave room for the largest suffix */
     switch (-current_numeric) {
     case 437:
 	strcat(buffer, " (Channel is temporarily unavailable)");
@@ -585,9 +585,9 @@ void numbered_command(char *from, int comm, char **ArgList)
 
     case 320: {
 	char *zork = ArgList[1];
-	if ((strlen(zork) > 3) && (memcmp(zork, "is ", 3) == 0))
+	if (zork && (strlen(zork) > 3) && (memcmp(zork, "is ", 3) == 0))
 	    zork += 3;
-	put_it("%s", convert_output_format(get_format(FORMAT_WHOIS_SEC_FSET), "%s %s", ArgList[0], zork));
+	put_it("%s", convert_output_format(get_format(FORMAT_WHOIS_SEC_FSET), "%s %s", ArgList[0], zork ? zork : empty_str));
 	break;
     }
     case 321:			/* #define RPL_LISTSTART 321 */
@@ -650,6 +650,8 @@ void numbered_command(char *from, int comm, char **ArgList)
 	    message_from(NULL, LOG_CRAP);
 	    malloc_strcpy(&tmp, ArgList[0]);
 	    chan = strtok(tmp, " ");
+	    if (!chan)
+		chan = "";	/* 366 with an empty channel name */
 
 	    /* do we really need this check? -laeos */
 	    if (!in_join_list(chan, from_server)) {

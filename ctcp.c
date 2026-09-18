@@ -735,7 +735,7 @@ void send_ctcp(int type, char *to, int datatag, char *format, ...)
 	va_list args;
 
 	va_start(args, format);
-	vsprintf(putbuf, format, args);
+	vsnprintf(putbuf, sizeof(putbuf), format, args);
 	va_end(args);
 	snprintf(putbuf2, sizeof(putbuf2), "%c%s %.*s%c", CTCP_DELIM_CHAR, ctcp_cmd[datatag].name,
 		 (int) (sizeof(putbuf2) - strlen(ctcp_cmd[datatag].name) - 4), putbuf, CTCP_DELIM_CHAR);

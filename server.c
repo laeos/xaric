@@ -1283,10 +1283,13 @@ int get_server_ssl(int idx)
  */
 void set_server_nickname(int ssn_index, char *nick)
 {
+    char trunc_nick[NICKNAME_LEN + 1];
+
+    strmcpy(trunc_nick, nick ? nick : empty_str, NICKNAME_LEN);
     if (ssn_index != -1 && ssn_index < number_of_servers) {
-	malloc_strcpy(&(server_list[ssn_index].nickname), nick);
+	malloc_strcpy(&(server_list[ssn_index].nickname), trunc_nick);
 	if (ssn_index == primary_server)
-	    strmcpy(nickname, nick, NICKNAME_LEN);
+	    strmcpy(nickname, trunc_nick, NICKNAME_LEN);
     }
     update_all_status(curr_scr_win, NULL, 0);
 }
@@ -1430,13 +1433,17 @@ void change_server_nickname(struct server *s, char *nick)
 
 void accept_server_nickname(int ssn_index, char *nick)
 {
-    malloc_strcpy(&server_list[ssn_index].nickname, nick);
-    malloc_strcpy(&server_list[ssn_index].d_nickname, nick);
+    char trunc_nick[NICKNAME_LEN + 1];
+
+    /* the server sent us this nick -- never trust its length */
+    strmcpy(trunc_nick, nick, NICKNAME_LEN);
+    malloc_strcpy(&server_list[ssn_index].nickname, trunc_nick);
+    malloc_strcpy(&server_list[ssn_index].d_nickname, trunc_nick);
     new_free(&server_list[ssn_index].s_nickname);
     server_list[ssn_index].fudge_factor = 0;
 
     if (from_server == primary_server)
-	strmcpy(nickname, nick, NICKNAME_LEN);
+	strmcpy(nickname, trunc_nick, NICKNAME_LEN);
 
     update_all_status(curr_scr_win, NULL, 0);
     update_input(UPDATE_ALL);
@@ -1472,11 +1479,11 @@ void fudge_nickname(struct server *s)
      * if maybe we're doing some other type of NICK change.
      */
     if (s->s_nickname)
-	strcpy(l_nickname, s->s_nickname);
+	strmcpy(l_nickname, s->s_nickname, NICKNAME_LEN);
     else if (s->nickname)
-	strcpy(l_nickname, s->nickname);
+	strmcpy(l_nickname, s->nickname, NICKNAME_LEN);
     else
-	strcpy(l_nickname, nickname);
+	strmcpy(l_nickname, nickname, NICKNAME_LEN);
 
     if (s->fudge_factor < strlen(l_nickname))
 	s->fudge_factor = strlen(l_nickname);

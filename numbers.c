@@ -466,6 +466,15 @@ static int handle_server_stats(char *from, char **ArgList, int comm)
 	    }
 	    break;
 	}
+    case 265:
+    case 266:
+	/* "<current> <max> :Current local/global users <current>, max <max>" */
+	if (!ArgList[1])
+	    return 0;		/* no numeric params: show the raw text */
+	put_it("%s",
+	       convert_output_format("$G %K[%ncurrent %W$2%n users%K(%n\002$0\002%K) %K(%n\002max $1\002%K)]%n",
+				     "%s %s %s", ArgList[0], ArgList[1], (comm == 265) ? "local" : "global"));
+	break;
     default:
 	ret = 0;
 	break;
@@ -533,6 +542,8 @@ void numbered_command(char *from, int comm, char **ArgList)
     case 253:
     case 254:
     case 255:
+    case 265:			/* current local users */
+    case 266:			/* current global users */
 	if (do_hook(current_numeric, "%s %s", from, *ArgList)) {
 
 	    if (!handle_server_stats(from, ArgList, comm))

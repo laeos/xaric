@@ -552,14 +552,14 @@ void show_whowas_hashtable(struct whowas_list_head *cptr, char *list)
 
 int show_wholeft_hashtable(struct whowas_list_head *cptr, time_t ltime, int *total, int *hook, char *list)
 {
-    int count, count2;
+    int count;
     struct whowas_list *ptr;
 
     for (count = 0; count < WHOWASLIST_HASHSIZE; count++) {
 
 	if (cptr->NickListTable[count].links == 0)
 	    continue;
-	for (ptr = (struct whowas_list *) cptr->NickListTable[count].list, count2 = 1; ptr; count2++, ptr = ptr->next) {
+	for (ptr = (struct whowas_list *) cptr->NickListTable[count].list; ptr; ptr = ptr->next) {
 	    if (ptr->server1 && ptr->server2) {
 		if (!(*total)++
 		    && (*hook =

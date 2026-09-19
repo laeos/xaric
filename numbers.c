@@ -596,6 +596,7 @@ void numbered_command(char *from, int comm, char **ArgList)
 
     case 728:			/* RPL_WHOISACTUALLY (IRCv3) "<target> <ip> :actually using host" */
     case 338:			/* same, as sent by charybdis/solanum */
+    case 330:			/* RPL_WHOISACCOUNT "<target> <account> :is logged in as" */
 	if (ArgList[2]) {
 	    char *tmp = NULL;
 

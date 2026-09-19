@@ -594,7 +594,8 @@ void numbered_command(char *from, int comm, char **ArgList)
 	whois_channels(from, ArgList);
 	break;
 
-    case 728:			/* RPL_WHOISACTUALLY "<target> <ip> :actually using host" */
+    case 728:			/* RPL_WHOISACTUALLY (IRCv3) "<target> <ip> :actually using host" */
+    case 338:			/* same, as sent by charybdis/solanum */
 	if (ArgList[2]) {
 	    char *tmp = NULL;
 

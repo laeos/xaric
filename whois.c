@@ -464,7 +464,8 @@ void whois_oper(char *from, char **ArgList)
 	    message_from(NULL, LOG_CRAP);
 	    if (do_hook(current_numeric, "%s %s %s", from, nick, ArgList[1]))
 		put_it("%s",
-		       convert_output_format(get_fset_var(FORMAT_WHOIS_OPER_FSET), "%s %s", nick, " (is \002NOT\002 an IRC warrior)"));
+		       convert_output_format(get_fset_var(FORMAT_WHOIS_OPER_FSET), "%s %s", nick,
+					     ArgList[1] ? ArgList[1] : " (is \002NOT\002 an IRC warrior)"));
 	}
 
     }

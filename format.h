@@ -200,6 +200,9 @@
 #define DEF_FORMAT_WHOIS_OPER "%G| %Wo%nperator : $0 $1-"
 #define DEF_FORMAT_WHOIS_SERVER "%G| %Ws%nerver   : $0 ($1-)"
 #define DEF_FORMAT_WHOIS_SEC "%G| %Ws%ntatus   : %G$1-"
+#define DEF_FORMAT_WHOIS_SECURE "%G| %Ws%necure   : %G$1-"
+#define DEF_FORMAT_WHOIS_ACCOUNT "%G| %Wa%nccount  : %G$1-"
+#define DEF_FORMAT_WHOIS_ACTUAL "%G| %Wa%nctual   : %G$1-"
 
 #define DEF_FORMAT_WHOIS_FOOTER NULL
 #define DEF_FORMAT_WHOLEFT_HEADER "%G+------ %WWho %G---------------------- %WChannel%G--- %wServer %G------------- %wSeconds"

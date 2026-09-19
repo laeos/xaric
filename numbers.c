@@ -601,19 +601,33 @@ void numbered_command(char *from, int comm, char **ArgList)
 	    char *tmp = NULL;
 
 	    malloc_sprintf(&tmp, "%s (%s)", ArgList[2], ArgList[1] ? ArgList[1] : empty_str);
-	    put_it("%s", convert_output_format(get_format(FORMAT_WHOIS_SEC_FSET), "%s %s", ArgList[0], tmp));
+	    put_it("%s",
+		   convert_output_format(get_format(comm == 330 ? FORMAT_WHOIS_ACCOUNT_FSET : FORMAT_WHOIS_ACTUAL_FSET),
+					 "%s %s", ArgList[0], tmp));
 	    new_free(&tmp);
 	    break;
 	}
 	/* older ircds send the whole thing as one trailing argument */
 	/* FALLTHROUGH */
     case 307:			/* RPL_WHOISREGNICK "<target> :is a registered nick" (ircd-hybrid/ratbox) */
+	if (ArgList[1]) {
+	    char *zork = ArgList[1];
+
+	    if ((strlen(zork) > 3) && (memcmp(zork, "is ", 3) == 0))
+		zork += 3;
+	    put_it("%s", convert_output_format(get_format(FORMAT_WHOIS_ACCOUNT_FSET), "%s %s", ArgList[0], zork));
+	    break;
+	}
+	/* FALLTHROUGH */
     case 320:			/* RPL_WHOISSPECIAL "<target> :is ..." */
+	/* FALLTHROUGH */
     case 671:			/* RPL_WHOISSECURE "<target> :is using a secure connection ..." */ {
 	char *zork = ArgList[1];
 	if (zork && (strlen(zork) > 3) && (memcmp(zork, "is ", 3) == 0))
 	    zork += 3;
-	put_it("%s", convert_output_format(get_format(FORMAT_WHOIS_SEC_FSET), "%s %s", ArgList[0], zork ? zork : empty_str));
+	put_it("%s",
+	       convert_output_format(get_format(comm == 671 ? FORMAT_WHOIS_SECURE_FSET : FORMAT_WHOIS_SEC_FSET),
+				     "%s %s", ArgList[0], zork ? zork : empty_str));
 	break;
     }
     case 321:			/* #define RPL_LISTSTART 321 */

@@ -594,7 +594,19 @@ void numbered_command(char *from, int comm, char **ArgList)
 	whois_channels(from, ArgList);
 	break;
 
-    case 320: {
+    case 728:			/* RPL_WHOISACTUALLY "<target> <ip> :actually using host" */
+	if (ArgList[2]) {
+	    char *tmp = NULL;
+
+	    malloc_sprintf(&tmp, "%s (%s)", ArgList[2], ArgList[1] ? ArgList[1] : empty_str);
+	    put_it("%s", convert_output_format(get_format(FORMAT_WHOIS_SEC_FSET), "%s %s", ArgList[0], tmp));
+	    new_free(&tmp);
+	    break;
+	}
+	/* older ircds send the whole thing as one trailing argument */
+	/* FALLTHROUGH */
+    case 320:			/* RPL_WHOISSPECIAL "<target> :is ..." */
+    case 671:			/* RPL_WHOISSECURE "<target> :is using a secure connection ..." */ {
 	char *zork = ArgList[1];
 	if (zork && (strlen(zork) > 3) && (memcmp(zork, "is ", 3) == 0))
 	    zork += 3;
@@ -692,6 +704,13 @@ void numbered_command(char *from, int comm, char **ArgList)
     case 401:			/* #define ERR_NOSUCHNICK 401 */
 	if (ArgList[0] && !check_dcc_list(ArgList[0]))
 	    no_such_nickname(from, ArgList);
+	break;
+
+    case 501:			/* #define ERR_UMODEUNKNOWNFLAG 501 */
+	PasteArgs(ArgList, 0);
+	if (do_hook(current_numeric, "%s %s", from, *ArgList))
+	    put_it("%s",
+		   convert_output_format("$G %RUser mode flag not recognized by the server%n ($0)", "%s", *ArgList));
 	break;
 
     case 421:			/* #define ERR_UNKNOWNCOMMAND 421 */

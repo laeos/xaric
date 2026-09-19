@@ -193,7 +193,7 @@
 #define DEF_FORMAT_WHOIS_AWAY "%G| %Wa%nway     : $0 - $1-"
 #define DEF_FORMAT_WHOIS_CHANNELS "%G| %Wc%nhannels : $0-"
 #define DEF_FORMAT_WHOIS_HEADER "%G+-----------------------------------------------"
-#define DEF_FORMAT_WHOIS_IDLE "%G| %Wi%ndle     : $0 hours $1 mins $2 secs (signon: $stime($3))"
+#define DEF_FORMAT_WHOIS_IDLE "%G| %Wi%ndle     : $0 hours $1 mins $2 secs (signon: $3)"
 #define DEF_FORMAT_WHOIS_SIGNON "%K %Ws%nignon   : $0-"
 #define DEF_FORMAT_WHOIS_NAME "%G| %Wi%nrcname  : $0-"
 #define DEF_FORMAT_WHOIS_NICK "%G| %W$0 %K(%n$1@$2%K) %K(%W$3-%K)"

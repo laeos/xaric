@@ -32,6 +32,7 @@
 #include "output.h"
 #include "parse.h"
 #include "ctcp.h"
+#include "dcc.h"
 #include "misc.h"
 #include "status.h"
 #include "whowas.h"
@@ -474,21 +475,33 @@ void whois_lastcom(char *from, char **ArgList)
     if (!ignore_whois_crap) {
 	char *nick, *idle_str;
 
-	PasteArgs(ArgList, 2);
 	message_from(NULL, LOG_CRAP);
-	if ((nick = ArgList[0]) && (idle_str = ArgList[1]) &&
-	    do_hook(current_numeric, "%s %s %s %s", from, nick, idle_str, ArgList[2])) {
+	/* modern ircds send "<nick> <idle> <signon> :seconds idle..."; the
+	   signon epoch must be grabbed before PasteArgs merges it into the
+	   trailing text (old ircds have no signon parameter) */
+	if ((nick = ArgList[0]) && (idle_str = ArgList[1])) {
 	    int seconds = 0;
 	    int hours = 0;
 	    int minutes = 0;
 	    int secs = my_atol(idle_str);
+	    /* $stime() does not exist as a builtin, so format the signon time
+	       here and hand the string to the format as $3 */
+	    char *signon_str = empty_str;
 
-	    hours = secs / 3600;
-	    minutes = (secs - (hours * 3600)) / 60;
-	    seconds = secs % 60;
-	    put_it("%s",
-		   convert_output_format(get_fset_var(FORMAT_WHOIS_IDLE_FSET), "%d %d %d %s", hours, minutes, seconds,
-					 ArgList[2] ? ArgList[2] : empty_str));
+	    if (ArgList[2] && my_atol(ArgList[2]) > 0)
+		signon_str = dcc_time((time_t) my_atol(ArgList[2]));
+
+	    PasteArgs(ArgList, 2);
+	    if (do_hook(current_numeric, "%s %s %s %s", from, nick, idle_str, ArgList[2] ? ArgList[2] : empty_str)) {
+		hours = secs / 3600;
+		minutes = (secs - (hours * 3600)) / 60;
+		seconds = secs % 60;
+		put_it("%s",
+		       convert_output_format(get_fset_var(FORMAT_WHOIS_IDLE_FSET), "%d %d %d %s", hours, minutes, seconds,
+					     signon_str));
+	    }
+	    if (signon_str != empty_str)
+		new_free(&signon_str);
 	}
     }
 }

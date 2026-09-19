@@ -607,6 +607,7 @@ void numbered_command(char *from, int comm, char **ArgList)
 	}
 	/* older ircds send the whole thing as one trailing argument */
 	/* FALLTHROUGH */
+    case 307:			/* RPL_WHOISREGNICK "<target> :is a registered nick" (ircd-hybrid/ratbox) */
     case 320:			/* RPL_WHOISSPECIAL "<target> :is ..." */
     case 671:			/* RPL_WHOISSECURE "<target> :is using a secure connection ..." */ {
 	char *zork = ArgList[1];

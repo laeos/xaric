@@ -828,7 +828,7 @@ void recalculate_windows(void)
 	    if (tmp->absolute_size && tmp->next)
 		continue;
 
-	    if (pass && tmp->next)
+	    if (pass && tmp->next && old_display)
 		adj = (tmp->display_size * excess_li) / old_display;
 	    else
 		adj = excess_li;
@@ -1321,7 +1321,7 @@ void set_query_nick(char *nick, char *host, char *cmd)
 	/* next_in_comma_list() */
 	while (lnik) {
 	    if (!curr_scr_win->nicks)
-		continue;
+		break;		/* empty list: nothing left to remove */
 	    if ((ptr = (char *) strchr(lnik, ',')) != NULL)
 		*(ptr++) = 0;
 	    if ((tmp = (struct nick_list *) remove_from_list((struct list **) &(curr_scr_win->nicks), lnik)) != NULL) {

@@ -80,7 +80,6 @@ char *random_str(int, int);
 int check_serverlag(void *);
 void do_clones(fd_set *, fd_set *);
 struct channel *prepare_command(int *, char *, int);
-int rename_file(char *, char **);
 
 char *clear_server_flags(char *);
 

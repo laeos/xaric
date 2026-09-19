@@ -373,30 +373,6 @@ char *random_str(int min, int max)
     return str;
 }
 
-int rename_file(char *old_file, char **new_file)
-{
-    char *tmp = NULL, *new_f = NULL;
-    char c = 'a';
-    FILE *fp;
-
-    if (get_string_var(DCC_DLDIR_VAR))
-	malloc_sprintf(&tmp, "%s/%%c%s", get_string_var(DCC_DLDIR_VAR), *new_file);
-    else
-	malloc_sprintf(&tmp, "%%c%s", *new_file);
-    malloc_sprintf(&new_f, tmp, c);
-    while ((fp = fopen(new_f, "r")) != NULL) {
-	fclose(fp);
-	c++;
-	sprintf(new_f, tmp, c);
-    }
-    if (fp != NULL)
-	fclose(fp);
-    new_free(&tmp);
-    new_free(&new_f);
-    malloc_sprintf(new_file, "%c%s", c, *new_file);
-    return 0;
-}
-
 int isme(char *nick)
 {
     return ((my_stricmp(nick, get_server_nickname(from_server)) == 0) ? 1 : 0);

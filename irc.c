@@ -105,7 +105,8 @@ int irc_port = IRC_PORT,	/* port of ircd */
 
 static int
  load_ircrc = 1,		/* load ircrc file? */
-    load_ircservers = 1;	/* load servers file? */
+    load_ircservers = 1,	/* load servers file? */
+    port_set = 0;		/* port given explicitly (via -p or IRCPORT)? */
 
 struct in_addr MyHostAddr;	/* The local machine address */
 struct in_addr LocalHostAddr;
@@ -163,7 +164,7 @@ static void usage(void)
 	"   -h               this help text.\n"
 	"   -v               display xaric version and exit.\n"
 	"   -f               your terminal users flow control (^s/^q), so xaric shouldn't.\n"
-	"   -s               Use SSL.\n"
+	"   -s               Use SSL (default port " IRC_SSL_PORT_S ").\n"
 	"   -F               your terminal does not use flow control.\n"
 	"   -H <hostname>    uses the virtual hostname if possible.\n"
 	"   -d <string>      set debug options (see documentation).\n"
@@ -202,6 +203,7 @@ static void parse_args(int argc, char *argv[])
 
 	case 'p':		/* Default port to use */
 	    irc_port = my_atol(optarg);
+	    port_set = 1;
 	    break;
 
 	case 'f':		/* Use flow control */
@@ -251,6 +253,14 @@ static void parse_args(int argc, char *argv[])
 	    usage();		/* does not return */
 	}
     }
+
+#ifdef HAVE_SSL
+    /* -s with no explicit port lands on the de facto TLS port; applied
+       before any server list is built, since entries without their own
+       port inherit irc_port at parse time */
+    if (do_use_ssl && !port_set)
+	irc_port = IRC_SSL_PORT;
+#endif
 
     /* first non-option argument is a nickname */
     if (optind < argc)
@@ -330,8 +340,10 @@ static void load_xaric_environment(void)
     if ((ptr = getenv("IRCHOST")))
 	local_host_name = m_strdup(ptr);
 
-    if ((ptr = getenv("IRCPORT")))
+    if ((ptr = getenv("IRCPORT"))) {
 	irc_port = my_atol(ptr);
+	port_set = 1;
+    }
 
     if ((ptr = getenv ("IRCPATH"))) {
 	set_string_var(LOAD_PATH_VAR, ptr);

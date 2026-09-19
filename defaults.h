@@ -70,6 +70,9 @@
 
 /* And here is the port number for default client connections.  */
 #define IRC_PORT 6667
+/* de facto standard port for TLS connections (IRC over TLS, 6697) */
+#define IRC_SSL_PORT 6697
+#define IRC_SSL_PORT_S "6697"
 
 /*
  * Uncomment the following to make ircII read a list of irc servers from

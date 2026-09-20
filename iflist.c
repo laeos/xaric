@@ -41,7 +41,7 @@
 #include "ircaux.h"
 #include "iflist.h"
 #include "threads.h"
-#include "gai.h"
+#include <netdb.h>
 
 /* List of my interfaces */
 static struct iflist *iflist;

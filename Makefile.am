@@ -10,7 +10,7 @@ xaric_SOURCES = alist.c cmd_modes.c ctcp.c dcc.c exec.c expr.c flood.c	\
 		cmd_hostname.c cmd_who.c cmd_scan.c cmd_save.c		\
 		cmd_orignick.c xscandir.c sa.c sa.h alist.h commands.h	\
 		ctcp.h dcc.h defaults.h exec.h expr.h flood.h format.h	\
-		fset.h funny.h gai.h hash.h history.h hook.h iflist.h	\
+		fset.h funny.h hash.h history.h hook.h iflist.h	\
 		ignore.h input.h irc.h irc_std.h ircaux.h ircterm.h	\
 		keys.h lastlog.h linklist.h list.h lister.h log.h	\
 		misc.h names.h newio.h notice.h notify.h numbers.h	\
@@ -20,15 +20,12 @@ xaric_SOURCES = alist.c cmd_modes.c ctcp.c dcc.c exec.c expr.c flood.c	\
 
 nodist_xaric_SOURCES = fset_gen.h vars_gen.h build.h
 BUILT_SOURCES = fset_gen.h vars_gen.h build.h
-CLEANFILES = fset_gen.h build.h vars_gen.h config.log
-EXTRA_xaric_SOURCES = freeaddrinfo.c ga_aistruct.c ga_echeck.c		\
-		      ga_nsearch.c ga_port.c ga_serv.c gai_strerror.c	\
-		      getaddrinfo.c getnameinfo.c gn_ipv46.c		\
-		      inet_ntop.c inet_pton.c setenv.c strtoul.c
+CLEANFILES = fset_gen.h build.h vars_gen.h
 
 HELP_FILES= help/copying help/help help/warranty
-xaric_LDADD = @EXTRA_OBJS@  @OPENSSL_LIBS@
-xaric_CFLAGS = -Wall -ggdb3 @OPENSSL_INCLUDES@
+xaric_LDADD = @OPENSSL_LIBS@
+AM_CPPFLAGS = @OPENSSL_INCLUDES@
+xaric_CFLAGS = -Wall
 xaric_LDFLAGS = @OPENSSL_LDFLAGS@
 man_MANS = xaric.1
 EXTRA_DIST = $(man_MANS) $(HELP_FILES) xaric.xpm
@@ -44,15 +41,15 @@ vars_gen.h: vars.c
 
 # Supply some more information to the build
 build.h: Makefile
-	@echo \#define XARIC_DATA_PATH \"$(pkgdatadir)\" >> .ver
+	@echo \#define XARIC_DATA_PATH \"$(pkgdatadir)\" > .ver
 	@mv .ver $@
 
 
-helpdir = $(DESTDIR)$(pkgdatadir)/help
+helpdir = $(pkgdatadir)/help
 install-data-hook:
-	$(mkdir_p) $(helpdir)
+	$(MKDIR_P) $(DESTDIR)$(helpdir)
 	for i in $(HELP_FILES) ; do \
-		cp $(srcdir)/$$i $(helpdir) ; \
+		cp $(srcdir)/$$i $(DESTDIR)$(helpdir) ; \
 	done
 
 version:

@@ -26,7 +26,7 @@ dnl ---------------------------------------------------------------
 AC_INIT([Xaric],[0.13.9],[support@xaric.org],[xaric])
 AC_PREREQ([2.69])
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([1.9])
+AM_INIT_AUTOMAKE([1.10 -Wall])
 AC_CONFIG_SRCDIR([irc.c])
 AC_CONFIG_HEADERS([config.h])
 dnl must come before the first compiler test
@@ -43,6 +43,10 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_SEARCH_LIBS([strerror],[cposix])
+
+dnl 3rd arg: macro defined when debug disabled -- keep asserts on in
+dnl release builds instead of the default NDEBUG
+AX_CHECK_ENABLE_DEBUG([no], , [XARIC_RELEASE], [])
 
 dnl ----------------------------------------------------------
 dnl Stuff we need
@@ -213,30 +217,6 @@ AC_CHECK_FUNC(getenv,, AC_DEFINE(NEED_GETENV, 1, Defined if system has getenv().
 AC_MSG_CHECKING(for struct linger)
 AC_EGREP_HEADER([struct( |	)*linger], sys/socket.h, AC_MSG_RESULT(yes), AC_DEFINE(NO_STRUCT_LINGER, 1, Defined if struct linger is missing.) AC_MSG_RESULT(no, ugh.))
 
-
-dnl ----------------------------------------------------------
-dnl things we need that we have replacements for
-dnl ----------------------------------------------------------
-
-needaddr=0
-
-AC_CHECK_FUNC(inet_ntop,, EXTRA_OBJS="$EXTRA_OBJS inet_ntop.o")
-AC_CHECK_FUNC(inet_pton,, EXTRA_OBJS="$EXTRA_OBJS inet_pton.o")
-AC_CHECK_FUNC(strtoul,,   EXTRA_OBJS="$EXTRA_OBJS strtoul.o")
-AC_CHECK_FUNC(setenv,,    EXTRA_OBJS="$EXTRA_OBJS setenv.o")
-
-AC_CHECK_FUNC(freeaddrinfo, AC_DEFINE(HAVE_FREEADDRINFO, 1, Defined if system has freeaddrinfo().), EXTRA_OBJS="$EXTRA_OBJS freeaddrinfo.o")
-AC_CHECK_FUNC(gai_strerror, AC_DEFINE(HAVE_GAI_STRERROR, 1, Defined if system has gai_strerror().), EXTRA_OBJS="$EXTRA_OBJS gai_strerror.o")
-AC_CHECK_FUNC(getaddrinfo, AC_DEFINE(HAVE_GETADDRINFO, 1, Defined if system has getaddrinfo().),  needaddr=1)
-AC_CHECK_FUNC(getnameinfo, AC_DEFINE(HAVE_GETNAMEINFO, 1, Defined if system has getnameinfo().),  EXTRA_OBJS="$EXTRA_OBJS getnameinfo.c gn_ipv46.o")
-
-if test "$needaddr" -eq "1" ; then
-	EXTRA_OBJS="$EXTRA_OBJS ga_aistruct.o ga_echeck.o"
-	EXTRA_OBJS="$EXTRA_OBJS ga_nsearch.o ga_serv.o" 
-	EXTRA_OBJS="$EXTRA_OBJS getaddrinfo.o ga_port.o"
-fi
-
-AC_SUBST(EXTRA_OBJS)
 
 dnl ----------------------------------------------------------
 dnl check for sys_errlist declaration

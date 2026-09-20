@@ -251,64 +251,10 @@ struct sa_addr_st {
 #define SA_TVISZERO(tv) \
     ((tv).tv_sec == 0 && (tv).tv_usec == 0)
 
-/* convert Internet address from presentation to network format */
-#ifndef HAVE_GETADDRINFO
-static int sa_inet_pton(int family, const char *strptr, void *addrptr)
-{
-#ifdef HAVE_INET_PTON
-    return inet_pton(family, strptr, addrptr);
-#else
-    struct in_addr in_val;
-
-    if (family == AF_INET) {
-#if defined(HAVE_INET_ATON)
-	/* at least for IPv4 we can rely on the old inet_aton(3) and for IPv6 inet_pton(3) would exist anyway */
-	if (inet_aton(strptr, &in_val) == 0)
-	    return 0;
-	memcpy(addrptr, &in_val, sizeof(struct in_addr));
-	return 1;
-#elif defined(HAVE_INET_ADDR)
-	/* at least for IPv4 try to rely on the even older inet_addr(3) */
-	memset(&in_val, '\0', sizeof(in_val));
-	if ((in_val.s_addr = inet_addr(strptr)) == ((in_addr_t) - 1))
-	    return 0;
-	memcpy(addrptr, &in_val, sizeof(struct in_addr));
-	return 1;
-#endif
-    }
-    errno = EAFNOSUPPORT;
-    return 0;
-#endif
-}
-#endif				/* !HAVE_GETADDRINFO */
-
 /* convert Internet address from network to presentation format */
 static const char *sa_inet_ntop(int family, const void *src, char *dst, size_t size)
 {
-#ifdef HAVE_INET_NTOP
     return inet_ntop(family, src, dst, size);
-#else
-#ifdef HAVE_INET_NTOA
-    char *cp;
-    int n;
-#endif
-
-    if (family == AF_INET) {
-#ifdef HAVE_INET_NTOA
-	/* at least for IPv4 we can rely on the old inet_ntoa(3) and for IPv6 inet_ntop(3) would exist anyway */
-	if ((cp = inet_ntoa(*((struct in_addr *) src))) == NULL)
-	    return NULL;
-	n = strlen(cp);
-	if (n > size - 1)
-	    n = size - 1;
-	memcpy(dst, cp, n);
-	dst[n] = '\0';
-	return dst;
-#endif
-    }
-    errno = EAFNOSUPPORT;
-    return NULL;
-#endif
 }
 
 /* minimal output-independent vprintf(3) variant which supports %{c,s,d,%} only */
@@ -482,18 +428,9 @@ sa_rc_t sa_addr_u2a(sa_addr_t * saa, const char *uri, ...)
     struct sockaddr *sa;
     struct sockaddr_un un;
 
-#ifdef HAVE_GETADDRINFO
     struct addrinfo ai_hints;
     struct addrinfo *ai = NULL;
     int err;
-#else
-    struct sockaddr_in sa4;
-
-#ifdef AF_INET6
-    struct sockaddr_in6 sa6;
-#endif
-    struct hostent *he;
-#endif
     struct servent *se;
     int bIPv6;
     int bNumeric;
@@ -576,7 +513,7 @@ sa_rc_t sa_addr_u2a(sa_addr_t * saa, const char *uri, ...)
 		return SA_RC(SA_ERR_ARG);
 	    *cp++ = '\0';
 	}
-	/* bIPv6 is only consulted in the !HAVE_GETADDRINFO path below */
+	/* bIPv6 is parsed above but unused once the fallback resolution is gone */
 	(void) bIPv6;
 	cpPort = cp;
 	cpProto = "tcp";
@@ -602,7 +539,6 @@ sa_rc_t sa_addr_u2a(sa_addr_t * saa, const char *uri, ...)
 	    nPort = ntohs(se->s_port);
 	}
 
-#ifdef HAVE_GETADDRINFO
 	memset(&ai_hints, 0, sizeof(ai_hints));
 	ai_hints.ai_family = PF_UNSPEC;
 	if ((err = getaddrinfo(cpHost, NULL, &ai_hints, &ai)) != 0) {
@@ -622,56 +558,7 @@ sa_rc_t sa_addr_u2a(sa_addr_t * saa, const char *uri, ...)
 	    ((struct sockaddr_in6 *) sa)->sin6_port = htons(nPort);
 	else
 	    return SA_RC(SA_ERR_ARG);
-#else				/* !HAVE_GETADDRINFO */
 
-	/* mandatory(!) socket address structure initialization */
-	memset(&sa4, 0, sizeof(sa4));
-#ifdef AF_INET6
-	memset(&sa6, 0, sizeof(sa6));
-#endif
-
-	/* resolve host by trying to parse it as either directly an IPv4 or IPv6 address or by resolving it to either an IPv4 or IPv6
-	 * address */
-	if (!bIPv6 && sa_inet_pton(AF_INET, cpHost, &sa4.sin_addr.s_addr) == 1) {
-	    sa4.sin_family = AF_INET;
-	    sa4.sin_port = htons(nPort);
-	    sa = (struct sockaddr *) &sa4;
-	    sl = (socklen_t) sizeof(sa4);
-	    sf = AF_INET;
-	}
-#ifdef AF_INET6
-	else if (bIPv6 && sa_inet_pton(AF_INET6, cpHost, &sa6.sin6_addr.s6_addr) == 1) {
-	    sa6.sin6_family = AF_INET6;
-	    sa6.sin6_port = htons(nPort);
-	    sa = (struct sockaddr *) &sa6;
-	    sl = (socklen_t) sizeof(sa6);
-	    sf = AF_INET6;
-	}
-#endif
-	else if ((he = gethostbyname(cpHost)) != NULL) {
-	    if (he->h_addrtype == AF_INET) {
-		sa4.sin_family = AF_INET;
-		sa4.sin_port = htons(nPort);
-		memcpy(&sa4.sin_addr.s_addr, he->h_addr_list[0], sizeof(sa4.sin_addr.s_addr));
-		sa = (struct sockaddr *) &sa4;
-		sl = (socklen_t) sizeof(sa4);
-		sf = AF_INET;
-	    }
-#ifdef AF_INET6
-	    else if (he->h_addrtype == AF_INET6) {
-		sa6.sin6_family = AF_INET6;
-		sa6.sin6_port = htons(nPort);
-		memcpy(&sa6.sin6_addr.s6_addr, he->h_addr_list[0], sizeof(sa6.sin6_addr.s6_addr));
-		sa = (struct sockaddr *) &sa6;
-		sl = (socklen_t) sizeof(sa6);
-		sf = AF_INET6;
-	    }
-#endif
-	    else
-		return SA_RC(SA_ERR_ARG);
-	} else
-	    return SA_RC(SA_ERR_ARG);
-#endif				/* !HAVE_GETADDRINFO */
     } else
 	return SA_RC(SA_ERR_ARG);
 
@@ -684,10 +571,8 @@ sa_rc_t sa_addr_u2a(sa_addr_t * saa, const char *uri, ...)
     saa->slBuf = sl;
     saa->nFamily = (int) sf;
 
-#ifdef HAVE_GETADDRINFO
     if (ai != NULL)
 	freeaddrinfo(ai);
-#endif
 
     return SA_OK;
 }
